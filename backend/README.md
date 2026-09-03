@@ -49,5 +49,5 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Runs against the Dockerized MySQL instance from the repo root
+Runs against the Dockerized PostgreSQL instance from the repo root
 (`docker compose up -d` first) — see [`../README.md`](../README.md).

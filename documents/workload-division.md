@@ -1,6 +1,6 @@
 # MedSync CATMS — Workload Division & Tracking
 
-Team (Group 4): **Shavinda · kalana · Garusinghe E.H.C.I ·
+Team (Group 4): **Shavinda · kalana · Chenith ·
 Dilantha · Ashen**
 
 Work is split by module so each person owns their DB tables, API router, and frontend pages
@@ -14,7 +14,7 @@ by changing `[ ]` to `[x]` when the task is finished and merged.
 |---|---|
 | Shavinda | Auth & Branch/Staff Management |
 | kalana | Doctor/Specialty & Appointment Management |
-| Garusinghe E.H.C.I | Patient Management & Consultation/Treatment |
+| Chenith | Patient Management & Consultation/Treatment |
 | Dilantha | Billing & Insurance |
 | Ashen | Reporting, DB Integrity & Infra |
 
@@ -44,7 +44,7 @@ appointments are the FK targets everyone else depends on.
 - [ ] Seed 8–10 specialties and 6–10 doctors (1–2 specialties each) spread across branches, plus
       a week of availability slots per doctor.
 
-**Garusinghe E.H.C.I**
+**Chenith**
 - [ ] Write DDL for `PATIENT`, `ALLERGY`, `PATIENT_ALLERGY`, `ADMISSION`, `CONSULTATIONS`,
       `CONSULTATION_TREATMENTS`, `TREATMENT_CATALOGUE`.
 - [ ] Add `UNIQUE` constraint on `CONSULTATIONS.appointment_id` (one consultation per
@@ -90,7 +90,7 @@ returns the documented shape.
 - [ ] `POST /appointments`, `/appointments/walk-in`, `PUT /appointments/{id}/reschedule`,
       `PUT /appointments/{id}/cancel` — all call `sp_book_appointment` / re-validate slots.
 
-**Garusinghe E.H.C.I**
+**Chenith**
 - [ ] `/patients` CRUD + `GET /patients?search=` (NIC/name/contact).
 - [ ] `PUT /appointments/{id}/complete`, `POST /appointments/{id}/consultation`,
       `POST /appointments/{id}/treatments`.
@@ -128,7 +128,7 @@ the Phase 2 API.
       → Confirm), matching the reference screenshot.
 - [ ] Manage Appointments page (filters, reschedule, cancel, create walk-in).
 
-**Garusinghe E.H.C.I**
+**Chenith**
 - [ ] Register Patient, Patient Directory pages.
 - [ ] Doctor's Consultation page — notes/diagnosis form + treatment picker, "Complete
       Appointment" gated on saved notes (FR-CTM-07).
@@ -162,7 +162,7 @@ each person's own module in isolation.
       overlap-prevention rejects a genuinely conflicting booking.
 - [ ] Fix bugs found in Doctor/Appointment module during integration.
 
-**Garusinghe E.H.C.I**
+**Chenith**
 - [ ] End-to-end test: register a patient, complete an appointment, attach treatments, confirm
       an invoice is generated correctly from it.
 - [ ] Fix bugs found in Patient/Consultation module during integration.
@@ -194,7 +194,7 @@ Goal: a reliable one-command demo and a clean walkthrough for the presentation.
       runs smoothly live).
 - [ ] Polish copy on appointment pages against `docs/page-content.md`.
 
-**Garusinghe E.H.C.I**
+**Chenith**
 - [ ] Prepare the "complete an appointment → generate invoice" demo path.
 - [ ] Polish copy on patient/consultation pages against `docs/page-content.md`.
 

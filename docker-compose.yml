@@ -1,35 +1,32 @@
 services:
   db:
-    image: mysql:8.0
+    image: postgres:16
     container_name: medsync-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
-      MYSQL_DATABASE: ${DB_NAME:-medsync}
-      MYSQL_USER: ${DB_USER:-medsync_app}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-medsync_pass}
+      POSTGRES_USER: ${DB_USER:-medsync_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-medsync_pass}
+      POSTGRES_DB: ${DB_NAME:-medsync}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - medsync-db-data:/var/lib/mysql
+      - medsync-db-data:/var/lib/postgresql/data
       # auto-run schema + seed scripts on first container start, in filename order
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./db/seed/seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medsync_app} -d ${DB_NAME:-medsync}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: medsync-phpmyadmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: medsync-pgadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db
-      PMA_USER: root
-      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      PGADMIN_DEFAULT_EMAIL: admin@medsync.local
+      PGADMIN_DEFAULT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
     ports:
       - "8081:80"
     depends_on:
@@ -42,7 +39,7 @@ services:
   #   container_name: medsync-backend
   #   restart: unless-stopped
   #   environment:
-  #     DATABASE_URL: mysql+pymysql://${DB_USER:-medsync_app}:${DB_PASSWORD:-medsync_pass}@db:3306/${DB_NAME:-medsync}
+  #     DATABASE_URL: postgresql+psycopg2://${DB_USER:-medsync_app}:${DB_PASSWORD:-medsync_pass}@db:5432/${DB_NAME:-medsync}
   #   ports:
   #     - "8000:8000"
   #   depends_on:
