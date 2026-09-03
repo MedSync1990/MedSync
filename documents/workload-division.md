@@ -1,7 +1,7 @@
 # MedSync CATMS — Workload Division & Tracking
 
-Team (Group 4): **Shavinda · kalana · Chenith ·
-Dilantha · Ashen**
+Team (Group 4): **Shavinda · Kalana· Chenith ·
+Dilantha· Silva W.A.A.T**
 
 Work is split by module so each person owns their DB tables, API router, and frontend pages
 end-to-end. Below, that ownership is broken into **5 phases**, and inside each phase every
@@ -12,13 +12,12 @@ by changing `[ ]` to `[x]` when the task is finished and merged.
 
 | Member | Module |
 |---|---|
-| Shavinda | Auth & Branch/Staff Management |
-| kalana | Doctor/Specialty & Appointment Management |
+| Shavinda | Billing & Insurance |
+| Kalana| Doctor/Specialty & Appointment Management |
 | Chenith | Patient Management & Consultation/Treatment |
-| Dilantha | Billing & Insurance |
-| Ashen | Reporting, DB Integrity & Infra |
+| Dilantha| Auth & Branch/Staff Management |
+| Ashen| Reporting, DB Integrity & Infra |
 
----
 
 ## Phase 1 — Database Schema & Seed Skeleton
 
@@ -27,22 +26,25 @@ against. **Garusinghe's and Jayawardena's tables should land first** — patient
 appointments are the FK targets everyone else depends on.
 
 **Shavinda**
-- [ ] Write DDL for `ROLE`, `USER`, `STAFF`, `BRANCH` — correct PK/FK chain (`USER.role_id →
-      ROLE`, `STAFF.user_id → USER`), matching column types from the ERD.
-- [ ] Add the `BEFORE DELETE` trigger on `BRANCH` that blocks deletion while staff are assigned
-      (FR-DMI-08).
-- [ ] Add CHECK constraints for NIC format and phone number format on `USER`/`CONTACT`
-      (FR-DMI-10, FR-DMI-11).
-- [ ] Seed 3 branches (Colombo, Kandy, Galle), all roles, and one admin + one branch manager
-      per branch.
+- [ ] Write DDL for `INVOICES`, `PAYMENTS`, `PATIENT_INSURANCE`, `INSURANCE_POLICY_DETAILS`,
+      `POLICY_TREATMENT_COVERAGE`.
+- [ ] Write `fn_record_payment` — rejects amount greater than outstanding balance, flips
+      invoice status to `Paid` when balance hits zero (FR-BPM-06, FR-BPM-07).
+- [ ] Seed 2–3 insurance providers with policies and per-treatment coverage percentages —
+      document the assumed coverage rules.
 
-**kalana**
+**Kalana**
 - [ ] Write DDL for `DOCTOR`, `SPECIALTY`, `DOCTOR_SPECIALTY`, `DOCTOR_AVAILABILITY_SLOTS`,
       `APPOINTMENTS`.
-- [ ] Write `sp_book_appointment` stored procedure — checks doctor availability and rejects
-      overlapping time ranges inside the same transaction as the insert (FR-AM-03).
 - [ ] Seed 8–10 specialties and 6–10 doctors (1–2 specialties each) spread across branches, plus
       a week of availability slots per doctor.
+- [ ] **[Joint w/ Thilakarathna] Overlap-prevention deep-dive (FR-AM-03):**
+  - [ ] Add a `tstzrange`-generated column on `APPOINTMENTS` and a Postgres `EXCLUDE USING gist`
+        constraint (with the `btree_gist` extension) so the database itself refuses two
+        overlapping rows for the same `doctor_id` — no application-level check needed for
+        correctness, just for a clean error message.
+  - [ ] Document the constraint and the reasoning in `docs/database.md` §3 once it's proven
+        working (replace the current generic overlap-check row with the actual approach used).
 
 **Chenith**
 - [ ] Write DDL for `PATIENT`, `ALLERGY`, `PATIENT_ALLERGY`, `ADMISSION`, `CONSULTATIONS`,
@@ -53,19 +55,23 @@ appointments are the FK targets everyone else depends on.
 - [ ] Seed 30–50 patients (mixed insurance/allergy status) and 15–20 treatments in the catalogue
       with assumed prices and insurance-eligibility flags — document the assumed price list.
 
-**Dilantha**
-- [ ] Write DDL for `INVOICES`, `PAYMENTS`, `PATIENT_INSURANCE`, `INSURANCE_POLICY_DETAILS`,
-      `POLICY_TREATMENT_COVERAGE`.
-- [ ] Write `sp_record_payment` — rejects amount greater than outstanding balance, flips
-      invoice status to `Paid` when balance hits zero (FR-BPM-06, FR-BPM-07).
-- [ ] Seed 2–3 insurance providers with policies and per-treatment coverage percentages —
-      document the assumed coverage rules.
+**Thilakarathna D.D.D**
+- [ ] Write DDL for `ROLE`, `USER`, `STAFF`, `BRANCH` — correct PK/FK chain (`USER.role_id →
+      ROLE`, `STAFF.user_id → USER`), matching column types from the ERD.
+- [ ] Add the `BEFORE DELETE` trigger on `BRANCH` that blocks deletion while staff are assigned
+      (FR-DMI-08).
+- [ ] Add CHECK constraints for NIC format and phone number format on `USER`/`CONTACT`
+      (FR-DMI-10, FR-DMI-11).
+- [ ] Seed 3 branches (Colombo, Kandy, Galle), all roles, and one admin + one branch manager
+      per branch.
+- [ ] **[Joint w/ Jayawardena]** Learn and help design the `EXCLUDE` constraint approach for
+      overlap-prevention (see above) — pair on it rather than working solo.
 
-**Ashen**
+**Silva W.A.A.T**
 - [ ] Merge everyone's DDL into one `db/schema.sql`, applied in FK-safe order; resolve any
       naming/type conflicts against the ERD.
 - [ ] Apply the indexing plan from `docs/database.md` §5 across all tables.
-- [ ] Review every trigger/procedure written above for consistency (naming, error format).
+- [ ] Review every trigger/function written above for consistency (naming, error format).
 - [ ] Set up `docker-compose.yml`'s `db` service so `schema.sql` + everyone's seed files run
       automatically on first container start.
 - [ ] Combine individual seed files into `db/seed/seed_data.sql`, run it end-to-end once, and
@@ -79,16 +85,19 @@ Goal: every route in `docs/api-routes.md` exists, calls the Phase 1 procedures/t
 returns the documented shape.
 
 **Shavinda**
-- [ ] `POST /auth/login`, `/auth/logout`, `GET /auth/me` — JWT issue/validate, failed-login
-      tracking + temporary lockout (FR-UAC-06).
-- [ ] RBAC dependency/middleware used by every other router to restrict endpoints by role.
-- [ ] `/branches` CRUD, `/staff` CRUD (register, update, deactivate).
+- [ ] `GET /invoices/{id}`, `GET /patients/{id}/invoices`.
+- [ ] `POST /invoices/{id}/payments` — server-side amount ≤ outstanding check, independent of
+      any client-side check.
+- [ ] `GET /patients/{id}/balance`, `/patients/{id}/insurance`, `POST /insurance/verify`.
 
-**kalana**
+**KalanaW.K.I**
 - [ ] `/doctors`, `/specialties` CRUD + specialty assignment endpoint.
 - [ ] `GET /doctors/{id}/availability` — reads open slots.
-- [ ] `POST /appointments`, `/appointments/walk-in`, `PUT /appointments/{id}/reschedule`,
-      `PUT /appointments/{id}/cancel` — all call `sp_book_appointment` / re-validate slots.
+- [ ] `PUT /appointments/{id}/reschedule`, `PUT /appointments/{id}/cancel`.
+- [ ] **[Joint w/ Thilakarathna]** `POST /appointments`, `/appointments/walk-in` — the insert
+      relies on the Phase 1 `EXCLUDE` constraint; catch its `IntegrityError` and translate it
+      into a clean `409 Conflict` ("This doctor already has an appointment in that time range.")
+      instead of a raw 500 error.
 
 **Chenith**
 - [ ] `/patients` CRUD + `GET /patients?search=` (NIC/name/contact).
@@ -97,13 +106,17 @@ returns the documented shape.
 - [ ] `/treatments` CRUD (catalogue), soft-delete when linked to existing records
       (FR-TCM-05).
 
-**Dilantha**
-- [ ] `GET /invoices/{id}`, `GET /patients/{id}/invoices`.
-- [ ] `POST /invoices/{id}/payments` — server-side amount ≤ outstanding check, independent of
-      any client-side check.
-- [ ] `GET /patients/{id}/balance`, `/patients/{id}/insurance`, `POST /insurance/verify`.
+**Thilakarathna D.D.D**
+- [ ] `POST /auth/login`, `/auth/logout`, `GET /auth/me` — JWT issue/validate, failed-login
+      tracking + temporary lockout (FR-UAC-06).
+- [ ] RBAC dependency/middleware used by every other router to restrict endpoints by role.
+- [ ] `/branches` CRUD, `/staff` CRUD (register, update, deactivate).
+- [ ] **[Joint w/ Jayawardena]** Write the concurrent-booking test script (fires two booking
+      requests at the same instant, asserts exactly one `201` and one `409` come back — never
+      two `201`s). This is what actually proves the overlap-prevention works under real
+      concurrent use, not just in sequential manual testing.
 
-**Ashen**
+**Silva W.A.A.T**
 - [ ] FastAPI project scaffolding — app structure, DB session/connection handling, global error
       handler returning the `{field, message}` validation shape.
 - [ ] `/reports/*` — all 5 report endpoints.
@@ -118,11 +131,11 @@ Goal: every page in `docs/page-content.md` exists, follows `docs/ui-guidelines.m
 the Phase 2 API.
 
 **Shavinda**
-- [ ] Login page + JWT storage/route guards.
-- [ ] Sidebar + top bar shell, filtered by role (reused by every other page).
-- [ ] Manage Branches, Manage Staff & Users admin pages.
+- [ ] Invoices list + detail view (itemised lines, insurance breakdown).
+- [ ] Collect Payment page.
+- [ ] Insurance registration section on the patient profile.
 
-**kalana**
+**KalanaW.K.I**
 - [ ] Manage Doctors & Specialties admin page.
 - [ ] Book Appointment page — multi-step flow (Find Patient → Category → Specialty → Doctor/Slot
       → Confirm), matching the reference screenshot.
@@ -134,12 +147,12 @@ the Phase 2 API.
       Appointment" gated on saved notes (FR-CTM-07).
 - [ ] Treatment Catalogue admin page.
 
-**Dilantha**
-- [ ] Invoices list + detail view (itemised lines, insurance breakdown).
-- [ ] Collect Payment page.
-- [ ] Insurance registration section on the patient profile.
+**Thilakarathna D.D.D**
+- [ ] Login page + JWT storage/route guards.
+- [ ] Sidebar + top bar shell, filtered by role (reused by every other page).
+- [ ] Manage Branches, Manage Staff & Users admin pages.
 
-**Ashen**
+**Silva W.A.A.T**
 - [ ] Dashboard page (today's summary widgets, quick actions).
 - [ ] All 5 report pages (filters + table/chart + empty state per FR-RA-06).
 - [ ] Typed API client wrapper (`/frontend/src/api`) used by all pages above.
@@ -153,26 +166,30 @@ Goal: everything merged into `phase-1` works together against the full seed data
 each person's own module in isolation.
 
 **Shavinda**
-- [ ] End-to-end test: login as each role, confirm RBAC hides/shows the correct sidebar items
-      and blocks disallowed API calls.
-- [ ] Fix bugs found in Branch/Staff module during integration.
+- [ ] End-to-end test: partial payment, full payment, invoice status flip, insurance coverage
+      split on an eligible treatment.
+- [ ] Fix bugs found in Billing/Insurance module during integration.
 
-**kalana**
+**KalanaW.K.I**
 - [ ] End-to-end test: book, reschedule, cancel, and walk-in an appointment; confirm the
       overlap-prevention rejects a genuinely conflicting booking.
 - [ ] Fix bugs found in Doctor/Appointment module during integration.
+- [ ] **[Joint w/ Thilakarathna]** Run the concurrent-booking test script against the merged
+      `phase-1` branch (not just each other's local branches) to confirm the overlap-prevention
+      still holds after everyone's code is combined.
 
 **Chenith**
 - [ ] End-to-end test: register a patient, complete an appointment, attach treatments, confirm
       an invoice is generated correctly from it.
 - [ ] Fix bugs found in Patient/Consultation module during integration.
 
-**Dilantha**
-- [ ] End-to-end test: partial payment, full payment, invoice status flip, insurance coverage
-      split on an eligible treatment.
-- [ ] Fix bugs found in Billing/Insurance module during integration.
+**Thilakarathna D.D.D**
+- [ ] End-to-end test: login as each role, confirm RBAC hides/shows the correct sidebar items
+      and blocks disallowed API calls.
+- [ ] Fix bugs found in Branch/Staff module during integration.
+- [ ] **[Joint w/ Jayawardena]** See concurrent-booking test task above.
 
-**Ashen**
+**Silva W.A.A.T**
 - [ ] Expand seed data volume (more patients, appointments across several days/branches) so all
       5 reports return meaningful, non-trivial results.
 - [ ] Run all 5 reports against the expanded dataset and confirm numbers are correct by hand for
@@ -186,10 +203,10 @@ each person's own module in isolation.
 Goal: a reliable one-command demo and a clean walkthrough for the presentation.
 
 **Shavinda**
-- [ ] Prepare a demo login credentials sheet — one user per role, with password.
-- [ ] Polish copy/microcopy on auth + branch/staff pages against `docs/page-content.md`.
+- [ ] Prepare the "collect payment + insurance coverage" demo path.
+- [ ] Polish copy on billing/insurance pages against `docs/page-content.md`.
 
-**kalana**
+**KalanaW.K.I**
 - [ ] Prepare the "book an appointment" demo path (patient + doctor chosen ahead of time so it
       runs smoothly live).
 - [ ] Polish copy on appointment pages against `docs/page-content.md`.
@@ -198,11 +215,11 @@ Goal: a reliable one-command demo and a clean walkthrough for the presentation.
 - [ ] Prepare the "complete an appointment → generate invoice" demo path.
 - [ ] Polish copy on patient/consultation pages against `docs/page-content.md`.
 
-**Dilantha**
-- [ ] Prepare the "collect payment + insurance coverage" demo path.
-- [ ] Polish copy on billing/insurance pages against `docs/page-content.md`.
+**Thilakarathna D.D.D**
+- [ ] Prepare a demo login credentials sheet — one user per role, with password.
+- [ ] Polish copy/microcopy on auth + branch/staff pages against `docs/page-content.md`.
 
-**Ashen**
+**Silva W.A.A.T**
 - [ ] Write `backend/Dockerfile` and `frontend/Dockerfile` per `docs/docker.md`, uncomment the
       corresponding blocks in `docker-compose.yml`.
 - [ ] Confirm `docker compose up -d --build` brings up the full stack (DB + API + UI) from a
