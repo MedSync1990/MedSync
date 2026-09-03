@@ -1,0 +1,70 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: medsync-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-medsync}
+      MYSQL_USER: ${DB_USER:-medsync_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-medsync_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - medsync-db-data:/var/lib/mysql
+      # auto-run schema + seed scripts on first container start, in filename order
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./db/seed/seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: medsync-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+    ports:
+      - "8081:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Uncomment once /backend has a Dockerfile (see docs/architecture.md for the FastAPI layout)
+  # backend:
+  #   build: ./backend
+  #   container_name: medsync-backend
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: mysql+pymysql://${DB_USER:-medsync_app}:${DB_PASSWORD:-medsync_pass}@db:3306/${DB_NAME:-medsync}
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend:/app
+
+  # Uncomment once /frontend has a Dockerfile
+  # frontend:
+  #   build: ./frontend
+  #   container_name: medsync-frontend
+  #   restart: unless-stopped
+  #   environment:
+  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
+  #   ports:
+  #     - "5173:5173"
+  #   depends_on:
+  #     - backend
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+
+volumes:
+  medsync-db-data:
