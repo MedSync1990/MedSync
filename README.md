@@ -7,9 +7,6 @@ ACID-compliant database and a role-based web app.
 
 **Stack:** MySQL 8.x (InnoDB) · FastAPI · React + TypeScript
 
-> Group 4 — Jayarathne D.G.S.A · Jayawardena W.K.I · Garusinghe E.H.C.I ·
-> Thilakarathna D.D.D · Silva W.A.A.T
-
 ---
 
 ## Contents
