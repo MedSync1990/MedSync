@@ -21,8 +21,9 @@ source of truth once they exist.
 
 MedSync CATMS is a multi-branch clinic appointment/treatment/billing system.
 Stack (fixed by the SRS, do not substitute):
-- DB: MySQL 8.x, InnoDB only (ACID requirement — never suggest MyISAM)
-- Backend: FastAPI + SQLAlchemy (or raw driver), JWT auth
+- DB: PostgreSQL 16 (ACID-compliant by default via its WAL — no storage-engine choice needed,
+  unlike MySQL)
+- Backend: FastAPI + SQLAlchemy (or `psycopg2`/`asyncpg` directly), JWT auth
 - Frontend: React + TypeScript
 
 ## 2. Non-negotiable rules
@@ -61,7 +62,7 @@ Stack (fixed by the SRS, do not substitute):
 /backend     FastAPI app (routers per module, matching api-routes.md sections)
 /frontend    React app (pages per sidebar module, matching page-content.md)
 /docs        this documentation set
-docker-compose.yml   dockerizes MySQL (+ phpMyAdmin) now; backend/frontend get
+docker-compose.yml   dockerizes PostgreSQL (+ pgAdmin) now; backend/frontend get
                       Dockerfiles and get uncommented in the final phase — see
                       docs/architecture.md §5 and docs/workload-division.md
 ```

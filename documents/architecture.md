@@ -4,16 +4,18 @@
 
 ```
 ┌─────────────┐      HTTPS/JSON       ┌──────────────┐      SQL       ┌───────────────┐
-│  React + TS │  ───────────────────▶ │   FastAPI    │ ─────────────▶ │  MySQL 8.x    │
-│  (frontend) │ ◀─────────────────── │   backend     │ ◀───────────── │  InnoDB       │
+│  React + TS │  ───────────────────▶ │   FastAPI    │ ─────────────▶ │ PostgreSQL 16 │
+│  (frontend) │ ◀─────────────────── │   backend     │ ◀───────────── │               │
 └─────────────┘     REST + JWT        └──────────────┘   SQLAlchemy   └───────────────┘
 ```
 
 - Client-server, stateless REST API, JWT bearer auth on every request after login.
 - Single centralized DB shared across all three branches (Colombo, Kandy, Galle) — branch is a
   data attribute (`STAFF.branch_id`, `DOCTOR` via `STAFF`), not a separate deployment.
-- InnoDB is mandatory — it's the only engine that gives row-level locking + FK enforcement +
-  transactions, which the ACID requirement in the SRS (2.4.3, 5.4.1) depends on.
+- PostgreSQL is ACID-compliant by default (MVCC + WAL) — there's no storage-engine choice to
+  make the way there is in MySQL (InnoDB vs. MyISAM); every table gets transactional guarantees,
+  row-level locking, and FK enforcement out of the box, which is what the ACID requirement in
+  the SRS (2.4.3, 5.4.1) depends on.
 
 ## 2. Backend module boundaries
 
@@ -61,18 +63,18 @@ Doctor, Receptionist, Patient each see a different subset).
 
 ## 5. Environments
 
-- Dev: local MySQL 8 via Docker (see `docker-compose.yml` / README), one shared cloud MySQL
-  instance for integration testing once phase branches merge, `.env` per developer, seed
-  scripts in `/db/seed`.
-- The FastAPI app and MySQL must run independently restartable (SRS 2.4.3 "coexist... without
-  interrupting active clinic operations") — don't couple backend startup to DB migration runs;
-  migrations are a separate explicit step.
+- Dev: local PostgreSQL 16 via Docker (see `docker-compose.yml` / README), one shared cloud
+  PostgreSQL instance for integration testing once phase branches merge, `.env` per developer,
+  seed scripts in `/db/seed`.
+- The FastAPI app and PostgreSQL must run independently restartable (SRS 2.4.3 "coexist...
+  without interrupting active clinic operations") — don't couple backend startup to DB migration
+  runs; migrations are a separate explicit step.
 
 **Dockerization is phased, not all-at-once:**
 
 | Phase | What's dockerized |
 |---|---|
-| 1–4 (dev) | Only `db` (+ `phpmyadmin`) — MySQL 8/InnoDB, identical across every dev's machine. Backend runs via `uvicorn --reload`, frontend via `npm run dev`, both pointed at the containerized DB. |
+| 1–4 (dev) | Only `db` (+ `pgadmin`) — PostgreSQL 16, identical across every dev's machine. Backend runs via `uvicorn --reload`, frontend via `npm run dev`, both pointed at the containerized DB. |
 | 5 (final/presentation) | `backend` and `frontend` each get a `Dockerfile`; the commented-out blocks in `docker-compose.yml` are enabled so `docker compose up -d --build` brings up the entire stack (DB + API + UI) on any machine with one command — this is what should run for the demo. |
 
 Reasoning: dockerizing the DB early kills the "works on my machine" schema-drift problem
