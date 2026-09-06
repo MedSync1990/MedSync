@@ -7,19 +7,6 @@ ACID-compliant database and a role-based web app.
 
 **Stack:** PostgreSQL 16 · FastAPI · React + TypeScript
 
-
-## Contents
-
-```
-/db          schema migrations, stored procedures/triggers, seed data
-/backend     FastAPI application
-/frontend    React + TypeScript application
-/documents   architecture, database, API, UI, content, and workload docs
-AGENTS.md    read this before contributing code
-```
-
-Start with [`AGENTS.md`](./documents/AGENTS.md), then [`documents/architecture.md`](./documents/architecture.md).
-
 ## Getting started
 
 ### Option A — Docker (recommended, keeps everyone on the same PostgreSQL version)
