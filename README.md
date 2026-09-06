@@ -14,11 +14,11 @@ ACID-compliant database and a role-based web app.
 /db          schema migrations, stored procedures/triggers, seed data
 /backend     FastAPI application
 /frontend    React + TypeScript application
-/docs        architecture, database, API, UI, content, and workload docs
+/documents   architecture, database, API, UI, content, and workload docs
 AGENTS.md    read this before contributing code
 ```
 
-Start with [`AGENTS.md`](./AGENTS.md), then [`docs/architecture.md`](./docs/architecture.md).
+Start with [`AGENTS.md`](./documents/AGENTS.md), then [`documents/architecture.md`](./documents/architecture.md).
 
 ## Getting started
 
@@ -26,7 +26,7 @@ Start with [`AGENTS.md`](./AGENTS.md), then [`docs/architecture.md`](./docs/arch
 
 > **Current phase:** only the database (+ pgAdmin) is dockerized. Backend and frontend run
 > natively (see Option B) until the final phase. Full details, including the exact Dockerfiles
-> to add later, are in [`docs/docker.md`](./docs/docker.md).
+> to add later, are in [`documents/docker.md`](./documents/docker.md).
 
 Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
 
@@ -55,7 +55,7 @@ docker compose up -d        # starts PostgreSQL 16 + pgAdmin
   ```
 - The `backend` and `frontend` services in `docker-compose.yml` are commented out for now —
   they get `Dockerfile`s in the **final phase**. The exact Dockerfile contents and enable steps
-  are documented in [`docs/docker.md`](./docs/docker.md). Until then, run them natively per
+  are documented in [`documents/docker.md`](./documents/docker.md). Until then, run them natively per
   Option B below.
 
 ### Option B — Running everything natively (no Docker)
@@ -96,7 +96,7 @@ Rules:
 2. Each phase branch (`phase-1`, `phase-2`, ...) is created off `main` at the start of that
    phase, and is the integration point for that phase's member branches.
 3. Each member branches off the current phase branch using `phase-<n>-<lastname>`, works only
-   inside their owned module (see [`docs/workload-division.md`](./docs/workload-division.md)),
+   inside their owned module (see [`documents/workload-division.md`](./documents/workload-division.md)),
    and opens a PR back into the phase branch — not into `main`.
 4. At least one other team member reviews a PR before it merges into the phase branch.
 5. When every member branch for a phase is merged and the phase branch is stable, open a single
@@ -118,13 +118,13 @@ git push -u origin phase-1-garusinghe
 
 | Doc | Purpose |
 |---|---|
-| [`docs/architecture.md`](./docs/architecture.md) | system shape, module boundaries |
-| [`docs/database.md`](./docs/database.md) | schema, keys, procedures/triggers, indexing |
-| [`docs/docker.md`](./docs/docker.md) | Docker/Compose setup, current + final-phase Dockerfiles |
-| [`docs/api-routes.md`](./docs/api-routes.md) | REST API contract |
-| [`docs/ui-guidelines.md`](./docs/ui-guidelines.md) | UI/interaction rules |
-| [`docs/page-content.md`](./docs/page-content.md) | copy/labels per screen |
-| [`docs/workload-division.md`](./docs/workload-division.md) | module ownership + progress tracker |
+| [`documents/architecture.md`](./documents/architecture.md) | system shape, module boundaries |
+| [`documents/database.md`](./documents/database.md) | schema, keys, procedures/triggers, indexing |
+| [`documents/docker.md`](./documents/docker.md) | Docker/Compose setup, current + final-phase Dockerfiles |
+| [`documents/api-routes.md`](./documents/api-routes.md) | REST API contract |
+| [`documents/ui-guidelines.md`](./documents/ui-guidelines.md) | UI/interaction rules |
+| [`documents/page-content.md`](./documents/page-content.md) | copy/labels per screen |
+| [`documents/workload-division.md`](./documents/workload-division.md) | module ownership + progress tracker |
 
 ## License
 
