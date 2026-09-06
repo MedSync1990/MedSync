@@ -16,7 +16,7 @@ backend/
     ├── core/
     │   ├── config.py            # env/settings loading
     │   ├── security.py          # JWT issue/verify, password hashing
-    │   └── db.py                 # SQLAlchemy engine/session
+    │   └── database.py                 # SQLAlchemy engine/session
     ├── deps/
     │   └── auth.py               # RBAC dependency used by every router
     ├── routers/
