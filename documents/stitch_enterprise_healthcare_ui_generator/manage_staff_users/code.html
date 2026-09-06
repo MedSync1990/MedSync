@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "brand-navy-deep": "#0F172A", "on-error": "#ffffff", "surface-subtle": "#F1F5F9", "surface-container-low": "#eff4ff", "error": "#ba1a1a", "surface-container": "#e5eeff", "on-error-container": "#93000a", "surface-card": "#FFFFFF", "status-completed-bg": "#D1FAE5", "tertiary-fixed-dim": "#89ceff", "primary-fixed-dim": "#93ccff", "outline": "#707881", "on-secondary-fixed": "#131b2e", "primary": "#006194", "on-tertiary-fixed": "#001e2f", "surface-dim": "#cbdbf5", "on-secondary": "#ffffff", "status-pending-text": "#B45309", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#001d31", "inverse-surface": "#213145", "on-primary-fixed-variant": "#004b73", "surface-bright": "#f8f9ff", "surface": "#f8f9ff", "border-subtle": "#E2E8F0", "on-primary": "#ffffff", "primary-container": "#007bb9", "surface-container-highest": "#d3e4fe", "on-tertiary": "#ffffff", "surface-tint": "#006398", "canvas-bg": "#F8FAFC", "on-background": "#0b1c30", "border-focus": "#0284C7", "status-pending-bg": "#FEF3C7", "surface-container-high": "#dce9ff", "status-completed-text": "#047857", "tertiary": "#00628d", "inverse-on-surface": "#eaf1ff", "secondary-fixed": "#dae2fd", "tertiary-fixed": "#c9e6ff", "tertiary-container": "#007cb1", "on-secondary-container": "#5c647a", "secondary-fixed-dim": "#bec6e0", "brand-teal-light": "#38BDF8", "on-secondary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-surface": "#0b1c30", "on-tertiary-container": "#fcfcff", "on-tertiary-fixed-variant": "#004c6e", "secondary": "#565e74", "outline-variant": "#bfc7d2", "primary-fixed": "#cce5ff", "inverse-primary": "#93ccff", "on-primary-container": "#fdfcff", "on-surface-variant": "#3f4850", "surface-variant": "#d3e4fe", "status-scheduled-bg": "#E0F2FE", "background": "#f8f9ff", "secondary-container": "#dae2fd", "status-cancelled-text": "#BE123C", "status-cancelled-bg": "#FFE4E6", "status-scheduled-text": "#0369A1" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "sidebar-width": "260px", "sidebar-collapsed-width": "72px", "space-md": "1rem", "topbar-height": "68px", "space-2xl": "2.5rem", "space-lg": "1.5rem", "content-max-width": "1600px", "space-sm": "0.75rem", "space-2xs": "0.25rem", "gutter-mobile": "1rem", "space-3xl": "3rem", "gutter-desktop": "1.5rem", "space-xs": "0.5rem" }, "fontFamily": { "mono-data": [ "inter" ], "body-lg": [ "inter" ], "label-sm": [ "inter" ], "headline-md": [ "plusJakartaSans" ], "display-lg": [ "plusJakartaSans" ], "label-md": [ "inter" ], "body-md": [ "inter" ], "body-sm": [ "inter" ], "headline-lg": [ "plusJakartaSans" ], "display-lg-mobile": [ "plusJakartaSans" ], "label-lg": [ "inter" ], "headline-sm": [ "plusJakartaSans" ] }, "fontSize": { "mono-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "fontWeight": "600" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="flex flex-col"><div class="h-[68px] px-space-md flex items-center gap-space-sm bg-surface-card"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-[0_1px_3px_rgba(15,23,42,0.04)]">M</div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold">MedSync</span><span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Plus</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold truncate">Administrator Portal</span></div></div><nav class="flex flex-col px-space-sm pt-space-md gap-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Overview</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Reports</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Branch Appointments</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span>Treatment Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Insurance vs. Cash</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Management</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span>Manage Branches</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg transition-all bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full" data-path="manage-staff-users" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Manage Staff &amp; Users</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-doctors-specialties" href="#"><span class="material-symbols-outlined text-[20px]">stethoscope</span><span>Doctors &amp; Specialties</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-treatment-catalogue" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span>Treatment Catalogue</span></a></nav></div><div class="p-space-sm pt-space-lg flex flex-col gap-1 bg-surface-card"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">System</span></div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span>Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all font-body-md text-body-md" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px] min-h-screen flex flex-col"><header class="fixed top-0 left-[260px] right-0 h-[68px] z-40 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-[68px] px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><button aria-label="Collapse Sidebar" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">menu_open</span></button><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span><span class="font-label-md text-label-md text-primary font-semibold">All Branches (System Admin)</span></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-2xs px-space-sm py-1 rounded-full bg-surface-subtle text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span><span class="font-label-md text-label-md font-semibold">Scope: Nationwide / All Branches</span></div><button aria-label="Toggle theme" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="relative flex items-center"><img alt="Profile" class="w-9 h-9 rounded-full object-cover shadow-[0_1px_3px_rgba(15,23,42,0.04)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-card"><span class="material-symbols-outlined text-[10px]">verified</span></span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Good morning, Dr. Aritha</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal leading-tight">Administrator · All Branches</span></div></div></div></div></header><main class="w-full pt-[68px] px-gutter-desktop pb-space-2xl max-w-[1600px] mx-auto bg-canvas-bg"><div class="flex flex-col w-full">
+<!-- Interactive Toast Notification -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-space-sm px-space-md py-space-sm rounded-xl bg-brand-navy-deep text-surface-card shadow-xl" id="actionToast">
+<span class="material-symbols-outlined text-brand-teal-light text-[20px]" id="toastIcon">check_circle</span>
+<span class="font-body-sm text-body-sm font-medium" id="toastMessage">Action completed successfully</span>
+</div>
+<!-- Deactivation Warning Banner (Contextual alert per §3.4) -->
+<div class="relative overflow-hidden mb-space-lg rounded-xl bg-status-cancelled-bg/60 p-space-md shadow-sm transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-space-md" id="deactivateAlertBanner">
+<div class="flex items-start md:items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-status-cancelled-text font-bold">Pending Deactivation Confirmation</span>
+<span class="font-label-sm text-label-sm uppercase px-2 py-0.5 rounded-full bg-status-cancelled-text text-on-error font-bold">System Notice</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          Deactivate <span class="font-semibold text-on-surface">Anoma Silva</span> (Receptionist · Colombo Central)? Historical audit records, appointments, and billing ledgers are strictly kept intact.
+        </p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 pl-12 md:pl-0">
+<button class="px-space-sm py-2 rounded-lg bg-surface-card text-on-surface font-label-md text-label-md hover:bg-surface-subtle transition-colors shadow-sm" onclick="dismissBanner()" type="button">
+        Cancel
+      </button>
+<button class="px-space-md py-2 rounded-lg bg-error text-on-error font-label-md text-label-md font-semibold hover:bg-on-error-container transition-colors shadow-sm flex items-center gap-1.5" onclick="confirmDeactivate('Anoma Silva')" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+        Confirm Deactivation
+      </button>
+</div>
+</div>
+<!-- Page Header & Action Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md pb-space-lg">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Access Control &amp; Administration</span>
+<span class="text-outline text-[12px]">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Multi-Tenant Personnel Matrix</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Manage Staff &amp; Users</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Register and manage staff accounts across all branches.</p>
+</div>
+<!-- Action Toolbar -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="px-space-md py-2.5 rounded-xl bg-surface-card text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-subtle transition-all flex items-center gap-2" onclick="showNotification('Exporting encrypted staff audit ledger (CSV/JSON)...')" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">download</span>
+        Export Audit Log
+      </button>
+<button class="px-space-md py-2.5 rounded-xl bg-surface-card text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-subtle transition-all flex items-center gap-2" onclick="showNotification('Bulk CSV template wizard opened')" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">group_add</span>
+        Bulk User Invite
+      </button>
+<button class="px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg font-semibold shadow-md hover:bg-primary-container transition-all flex items-center gap-2" onclick="openDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+        + Add Staff
+      </button>
+</div>
+</div>
+<!-- Quick Operational Metrics Bento Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-lg">
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">badge</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm uppercase text-outline tracking-wider font-bold">Total Staff</p>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">148</span>
+<span class="font-label-sm text-label-sm text-status-completed-text font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +6 this mo
+          </span>
+</div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">stethoscope</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm uppercase text-outline tracking-wider font-bold">Active Doctors</p>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">42</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">across 4 branches</span>
+</div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-status-completed-bg text-status-completed-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">verified_user</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm uppercase text-outline tracking-wider font-bold">2FA Active Ratio</p>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">97.3%</span>
+<span class="font-label-sm text-label-sm text-status-completed-text font-semibold">144 / 148 Compliant</span>
+</div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-status-pending-bg text-status-pending-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">lock_reset</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm uppercase text-outline tracking-wider font-bold">First-Time Logins</p>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-status-pending-text">3</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">Pending pwd change</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter & Search Console Section -->
+<div class="p-space-md bg-surface-card rounded-2xl shadow-sm mb-space-md flex flex-col xl:flex-row gap-space-md xl:items-center justify-between">
+<!-- Search Bar -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full h-[42px] pl-10 pr-10 rounded-xl bg-surface-subtle text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="staffSearchInput" oninput="filterStaffTable()" placeholder="Search by staff name, NIC, email, or employee ID..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface" onclick="clearSearch()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Dropdown Filters Group -->
+<div class="flex flex-wrap sm:flex-nowrap items-center gap-space-sm">
+<!-- Branch Filter -->
+<div class="relative w-full sm:w-auto min-w-[170px]">
+<select class="w-full h-[42px] appearance-none pl-3 pr-9 rounded-xl bg-surface-subtle text-on-surface font-label-md text-label-md font-semibold cursor-pointer focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="branchFilter" onchange="filterStaffTable()">
+<option value="ALL">All Branches</option>
+<option value="Colombo Central">Colombo Central</option>
+<option value="Kandy">Kandy</option>
+<option value="Galle">Galle</option>
+<option value="All Branches">Nationwide / All</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Role Filter -->
+<div class="relative w-full sm:w-auto min-w-[170px]">
+<select class="w-full h-[42px] appearance-none pl-3 pr-9 rounded-xl bg-surface-subtle text-on-surface font-label-md text-label-md font-semibold cursor-pointer focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="roleFilter" onchange="filterStaffTable()">
+<option value="ALL">All Roles</option>
+<option value="Admin">Admin</option>
+<option value="Branch Manager">Branch Manager</option>
+<option value="Doctor">Doctor</option>
+<option value="Receptionist">Receptionist</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Status Filter -->
+<div class="relative w-full sm:w-auto min-w-[160px]">
+<select class="w-full h-[42px] appearance-none pl-3 pr-9 rounded-xl bg-surface-subtle text-on-surface font-label-md text-label-md font-semibold cursor-pointer focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="statusFilter" onchange="filterStaffTable()">
+<option value="ALL">All Statuses</option>
+<option value="Active">Active</option>
+<option value="Inactive">Inactive</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+</div>
+<!-- Reset Filters Button -->
+<button class="h-[42px] px-space-sm rounded-xl bg-surface-subtle hover:bg-surface-container-highest text-on-surface-variant transition-colors flex items-center justify-center shrink-0" onclick="resetFilters()" title="Reset Filters" type="button">
+<span class="material-symbols-outlined text-[20px]">restart_alt</span>
+</button>
+</div>
+</div>
+<!-- Staff Records Table Card -->
+<div class="rounded-2xl bg-surface-card shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse" id="staffDataTable">
+<thead>
+<tr class="bg-surface-subtle h-[46px] text-outline font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="px-space-md font-bold">Name &amp; Employee ID</th>
+<th class="px-space-md font-bold">Role</th>
+<th class="px-space-md font-bold">Assigned Branch</th>
+<th class="px-space-md font-bold">Email / Username &amp; Phone</th>
+<th class="px-space-md font-bold">Status</th>
+<th class="px-space-md font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-md text-body-md" id="staffTableBody">
+<!-- Row 1: Dr. K. Bandara (Doctor) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px]" data-branch="Colombo Central" data-email="k.bandara@medsync.lk" data-emp="EMP-MED-0104" data-name="Dr. K. Bandara" data-nic="198421401928" data-role="Doctor" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<img class="w-10 h-10 rounded-xl object-cover shadow-sm" data-alt="Professional portrait of a Sri Lankan male senior cardiologist wearing stethoscope and crisp white clinical coat, soft diffused studio light, navy and teal backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC11r5KaXRTkXEkho3uuBwGb0x_08cPhdYNwzslh0K_ktddrFsuJP2iaLe3Gl1JLbZzdJsYn3GE5XvMi1g1qR1zbaIFP-enwvq-wQ5Xlhgn0o0opLNeBhiwlDQd4l3RByZqQ0Sq8w7EwGU3uSnCDx0JEe4oSMGisMhssiGc5QagUxcngmxnhtZUH95zFsf31P60zI4jF1mefJ-B5CJm9lh2Av5AKvXLnWAjAWJKs60Jdc798NyVeCF92g"/>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Dr. K. Bandara</span>
+<div class="flex items-center gap-1.5 font-mono-data text-mono-data text-on-surface-variant">
+<span class="uppercase">ID: EMP-MED-0104</span>
+<span class="text-outline">•</span>
+<span class="text-primary font-semibold">Cardiology</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Doctor
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Colombo Central</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">k.bandara@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 77 124 8831</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Dr. K. Bandara', 'Doctor', 'Colombo Central', 'k.bandara@medsync.lk', '+94 77 124 8831', '198421401928', 'Cardiology')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Dr. K. Bandara')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Dr. K. Bandara', 'Doctor', 'Colombo Central')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Chaminda Rathnayake (Branch Manager) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px]" data-branch="Kandy" data-email="c.rathnayake@medsync.lk" data-emp="EMP-MGT-0042" data-name="Chaminda Rathnayake" data-nic="197814400192" data-role="Branch Manager" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<img class="w-10 h-10 rounded-xl object-cover shadow-sm" data-alt="Portrait of Chaminda, mid-40s Sri Lankan branch operations director with spectacles, wearing a formal executive blue shirt, professional clinic administration environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJgbw13gsNbd3Tve8Au-xd6lr-k23XcxNnTYN6b6qNE6-zPzmm9rIfnn6yEUpemZiZPxLj7iSonSbwPcICmdLLobK7Ov6EBFAxd_RBKRnK9z1KTOy_-Vb0eZN13ETY-oPHz_PYmipDqd23SJoxKJqbh4WD1n6iPJLBhnEmB3vcedFsw3aaRffnDSieFe0hvUmBvP608rf1_Hk_1x-oJ9HLq4N6JQ74jeurEN9eNYp83oESWc0SjpajkQ"/>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Chaminda Rathnayake</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant uppercase">ID: EMP-MGT-0042</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text"></span> Branch Manager
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Kandy</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">c.rathnayake@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 81 223 9011</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Chaminda Rathnayake', 'Branch Manager', 'Kandy', 'c.rathnayake@medsync.lk', '+94 81 223 9011', '197814400192', '')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Chaminda Rathnayake')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Chaminda Rathnayake', 'Branch Manager', 'Kandy')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Kumari Perera (Admin) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px]" data-branch="All Branches" data-email="k.perera@medsync.lk" data-emp="EMP-ADM-0012" data-name="Kumari Perera" data-nic="896541209V" data-role="Admin" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-fixed font-headline-sm text-headline-sm font-bold flex items-center justify-center">
+                    KP
+                  </div>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Kumari Perera</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant uppercase">ID: EMP-ADM-0012</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Admin
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">public</span>
+<span class="font-body-md text-body-md text-primary font-semibold">All Branches</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">k.perera@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 71 889 0044</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Kumari Perera', 'Admin', 'All Branches', 'k.perera@medsync.lk', '+94 71 889 0044', '896541209V', '')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Kumari Perera')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Kumari Perera', 'Admin', 'All Branches')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Anoma Silva (Receptionist - Subject of Banner) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px] bg-status-cancelled-bg/20" data-branch="Colombo Central" data-email="anoma.silva@medsync.lk" data-emp="EMP-REC-0210" data-name="Anoma Silva" data-nic="925430188V" data-role="Receptionist" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<img class="w-10 h-10 rounded-xl object-cover shadow-sm" data-alt="Portrait of Anoma Silva, professional Sri Lankan front-desk medical receptionist with welcoming expression, navy clinical polo uniform in modern clinic waiting hall." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKKFxQ-wwjmIwMkuJyZgzvA0UU4suQa_gUS7lFNLmhckfdfAFgb4YH3YLwAwTDjILY78gsPVCgAXcBzDerhPh64M3dWUMHbUh2lRC3Kp4L67E4tsYkWPm1tkTOkRdykRufmLH8NasmSwZluaWcA-yfHBd6eFo2kY0OEuJw3P3nCTep-rq1H4kne3PYnxiPuOb6jincYhNag67Qt6HRXLKoHA7-jPTdt62LFz77mCx82BzfL6URtmuZ5A"/>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-pending-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Anoma Silva</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant uppercase">ID: EMP-REC-0210</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-pending-bg text-status-pending-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span> Receptionist
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Colombo Central</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">anoma.silva@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 77 449 2038</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span> Pending Review
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Anoma Silva', 'Receptionist', 'Colombo Central', 'anoma.silva@medsync.lk', '+94 77 449 2038', '925430188V', '')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Anoma Silva')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-error bg-status-cancelled-bg/70 hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Anoma Silva', 'Receptionist', 'Colombo Central')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Nuwan Pradeep (Inactive Branch Manager) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px] opacity-75" data-branch="Galle" data-email="n.pradeep@medsync.lk" data-emp="EMP-MGT-0029" data-name="Nuwan Pradeep" data-nic="810931201V" data-role="Branch Manager" data-status="Inactive">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-xl bg-surface-subtle text-outline font-headline-sm text-headline-sm font-bold flex items-center justify-center">
+                    NP
+                  </div>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-outline ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Nuwan Pradeep</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant uppercase">ID: EMP-MGT-0029</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-subtle text-outline font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Branch Manager
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">Galle</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface-variant">n.pradeep@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-outline">+94 91 445 1092</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Inactive
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Nuwan Pradeep', 'Branch Manager', 'Galle', 'n.pradeep@medsync.lk', '+94 91 445 1092', '810931201V', '')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-status-completed-text hover:bg-status-completed-bg transition-colors" onclick="reactivateUser('Nuwan Pradeep')" title="Reactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Dr. Sarah Jayasinghe (Doctor - Pediatrics) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px]" data-branch="Kandy" data-email="s.jayasinghe@medsync.lk" data-emp="EMP-MED-0221" data-name="Dr. Sarah Jayasinghe" data-nic="199071400234" data-role="Doctor" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<img class="w-10 h-10 rounded-xl object-cover shadow-sm" data-alt="Warm friendly Sri Lankan female pediatrician Dr Sarah with clinical coat and pediatric stethoscope, sterile cheerful clinic office, soft bright cinematic lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA129Dg0iXqXasWEGCb5khxnmUCqs8LjxPm1auXzRbYBnVCg7KTqO1yXAE1JyybK8Nn-Ie9fZ4PBqhfzgPoO2DR9iMAX9WlqqtZPHuTcAcOnnpUxk_JY1kJOV_fv9Uxp_gOE1lardUGrAdXQPmxLupq-mtTzlsoEsZVJwRJSZJyXahA79yEwjg3K1ANhbaOoYAnyxBp8w21CJRutR1xGMwQqXFNhQwKRWF0frNty8vy1oBNGRaCOvazBg"/>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Dr. Sarah Jayasinghe</span>
+<div class="flex items-center gap-1.5 font-mono-data text-mono-data text-on-surface-variant">
+<span class="uppercase">ID: EMP-MED-0221</span>
+<span class="text-outline">•</span>
+<span class="text-primary font-semibold">Pediatrics</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Doctor
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Kandy</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">s.jayasinghe@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 81 992 4431</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Dr. Sarah Jayasinghe', 'Doctor', 'Kandy', 's.jayasinghe@medsync.lk', '+94 81 992 4431', '199071400234', 'Pediatrics')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Dr. Sarah Jayasinghe')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Dr. Sarah Jayasinghe', 'Doctor', 'Kandy')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 7: Dr. Priyantha Alwis (Doctor - General OPD) -->
+<tr class="staff-row hover:bg-surface-subtle/80 transition-colors h-[64px]" data-branch="Galle" data-email="p.alwis@medsync.lk" data-emp="EMP-MED-0349" data-name="Dr. Priyantha Alwis" data-nic="197509188204" data-role="Doctor" data-status="Active">
+<td class="px-space-md py-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative shrink-0">
+<img class="w-10 h-10 rounded-xl object-cover shadow-sm" data-alt="Portrait of senior physician Dr Priyantha Alwis, confident smiling Sri Lankan doctor in modern diagnostic room, ambient medical lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBiw-PdRxatYMwPDFf8qj41k4qmlEgYRFn03zo94wioppACZ4fFI0CsaPo_o6IUGCfNOJO8PFfiHKBHtyGwi76ubbM4YQUTIdd59X3AFVk6Y9XtI-RD5yQVax4X45qk4DyIl5ygNIojIDDYkUkx04Vhaj0jeqNtlIwDb_eWT6az2271s43k6PptsdVsANQ4aa5hwHZ09plcHZIYGO19fTWomLejkOIqLnnR3G5LSDqBiEtoZbiuXvzVg"/>
+<span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">Dr. Priyantha Alwis</span>
+<div class="flex items-center gap-1.5 font-mono-data text-mono-data text-on-surface-variant">
+<span class="uppercase">ID: EMP-MED-0349</span>
+<span class="text-outline">•</span>
+<span class="text-primary font-semibold">General OPD</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Doctor
+              </span>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Galle</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-on-surface">p.alwis@medsync.lk</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">+94 91 334 8190</span>
+</div>
+</td>
+<td class="px-space-md py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-space-sm text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-subtle transition-colors" onclick="editStaff('Dr. Priyantha Alwis', 'Doctor', 'Galle', 'p.alwis@medsync.lk', '+94 91 334 8190', '197509188204', 'General OPD')" title="Edit Staff Member" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-status-pending-text hover:bg-status-pending-bg/50 transition-colors" onclick="promptResetPassword('Dr. Priyantha Alwis')" title="Reset Password" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_reset</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-status-cancelled-bg transition-colors" onclick="stageDeactivation('Dr. Priyantha Alwis', 'Doctor', 'Galle')" title="Deactivate Account" type="button">
+<span class="material-symbols-outlined text-[18px]">person_off</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State for Table filtering -->
+<div class="hidden p-space-2xl flex-col items-center justify-center text-center" id="noStaffResults">
+<div class="w-14 h-14 rounded-full bg-surface-subtle flex items-center justify-center text-outline mb-space-sm">
+<span class="material-symbols-outlined text-[28px]">search_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">No matching personnel discovered</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm mt-1">Check for spelling discrepancies or clear applied branch and role filter constraints.</p>
+<button class="mt-space-md px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors" onclick="resetFilters()" type="button">
+        Clear All Filters
+      </button>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-space-md bg-surface-subtle/50 flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+        Showing <span class="font-semibold text-on-surface" id="visibleRowCount">7</span> of <span class="font-semibold text-on-surface">148</span> registered personnel accounts
+      </div>
+<div class="flex items-center gap-space-xs">
+<button class="w-9 h-9 rounded-lg bg-surface-card text-outline flex items-center justify-center hover:text-on-surface disabled:opacity-40 transition-colors shadow-sm" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold shadow-sm">1</span>
+<span class="px-3 py-1.5 rounded-lg bg-surface-card text-on-surface font-label-md text-label-md hover:bg-surface-subtle cursor-pointer transition-colors">2</span>
+<span class="px-3 py-1.5 rounded-lg bg-surface-card text-on-surface font-label-md text-label-md hover:bg-surface-subtle cursor-pointer transition-colors">3</span>
+<span class="font-body-sm text-outline px-1">...</span>
+<span class="px-3 py-1.5 rounded-lg bg-surface-card text-on-surface font-label-md text-label-md hover:bg-surface-subtle cursor-pointer transition-colors">15</span>
+<button class="w-9 h-9 rounded-lg bg-surface-card text-on-surface flex items-center justify-center hover:bg-surface-subtle transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Slide-Over Drawer: Add / Edit Staff (§3.4 Specifications) -->
+<div class="fixed inset-0 bg-brand-navy-deep/40 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="fixed right-0 top-0 h-full w-full max-w-[560px] bg-surface-card shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between overflow-hidden" id="staffDrawer">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-card flex items-center justify-between shrink-0">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]" id="drawerIcon">person_add</span>
+</div>
+<div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface" id="drawerTitle">Add New Staff Member</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Configure identity, roles, and branch credentials.</p>
+</div>
+</div>
+<button class="w-9 h-9 rounded-xl bg-surface-subtle text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest flex items-center justify-center transition-colors" onclick="closeDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Form Body (Scrollable) -->
+<form class="flex-1 overflow-y-auto p-space-lg space-y-space-md" id="staffForm" onsubmit="handleFormSubmit(event)">
+<!-- Full Name -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface flex items-center justify-between" for="formStaffName">
+<span>Full Name <span class="text-error">*</span></span>
+<span class="font-label-sm text-label-sm text-outline font-normal">Official Medical / Civil Name</span>
+</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface-subtle text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffName" placeholder="e.g. Dr. Sarah Jayasinghe" required="" type="text"/>
+</div>
+<!-- NIC Field & Validation Helper -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface flex items-center justify-between" for="formStaffNic">
+<span>National Identity Card (NIC) <span class="text-error">*</span></span>
+<span class="font-mono-data text-mono-data text-outline">Sri Lanka Identity Dept</span>
+</label>
+<div class="relative">
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface-subtle text-on-surface font-mono-data text-mono-data placeholder:text-outline focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffNic" oninput="validateNicInput(this)" placeholder="e.g. 199071400234 or 925430188V" required="" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px]" id="nicStatusIcon">verified</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span>
+          Enter a valid NIC (9 digits + letter, or 12 digits)
+        </p>
+</div>
+<!-- Grid: Phone & Email -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Phone -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="formStaffPhone">
+            Phone Number <span class="text-error">*</span>
+</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface-subtle text-on-surface font-mono-data text-mono-data placeholder:text-outline focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffPhone" oninput="validatePhoneInput(this)" placeholder="0771234567" required="" type="tel"/>
+<p class="font-body-sm text-body-sm text-outline">Enter a 10-digit phone number</p>
+</div>
+<!-- Email -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="formStaffEmail">
+            Email / Username <span class="text-error">*</span>
+</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface-subtle text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffEmail" placeholder="username@medsync.lk" required="" type="email"/>
+</div>
+</div>
+<!-- Role Selection Dropdown -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="formStaffRole">
+          System Role <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-[42px] appearance-none pl-3.5 pr-10 rounded-xl bg-surface-subtle text-on-surface font-body-md text-body-md font-semibold cursor-pointer focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffRole" onchange="handleRoleSelectionChange(this.value)" required="">
+<option disabled="" selected="" value="">Select an operational role</option>
+<option value="Admin">Admin (Full System Privileges)</option>
+<option value="Branch Manager">Branch Manager (Branch Operations)</option>
+<option value="Doctor">Doctor (Clinical Diagnostics &amp; EMR)</option>
+<option value="Receptionist">Receptionist (Appointments &amp; Intake)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">badge</span>
+</div>
+</div>
+<!-- Branch Assignment Dropdown -->
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="formStaffBranch">
+          Assigned Branch <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-[42px] appearance-none pl-3.5 pr-10 rounded-xl bg-surface-subtle text-on-surface font-body-md text-body-md cursor-pointer focus:outline-none focus:bg-surface-card focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffBranch" required="">
+<option disabled="" selected="" value="">Select clinic branch</option>
+<option value="Colombo Central">Colombo Central</option>
+<option value="Kandy">Kandy</option>
+<option value="Galle">Galle</option>
+<option value="All Branches">All Branches (Global Admin Only)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">apartment</span>
+</div>
+</div>
+<!-- Conditional Specialty Field (Only shown if Role == Doctor) -->
+<div class="hidden space-y-1.5 p-space-sm rounded-xl bg-surface-container-low transition-all" id="doctorSpecialtyField">
+<label class="font-label-md text-label-md font-semibold text-primary flex items-center gap-1.5" for="formStaffSpecialty">
+<span class="material-symbols-outlined text-[18px]">stethoscope</span>
+          Clinical Specialty <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-[42px] appearance-none pl-3.5 pr-10 rounded-xl bg-surface-card text-on-surface font-body-md text-body-md cursor-pointer focus:outline-none focus:shadow-[0_0_0_2px_#0284C7] transition-all" id="formStaffSpecialty">
+<option disabled="" selected="" value="">Select Medical Specialty</option>
+<option value="Cardiology">Cardiology</option>
+<option value="Pediatrics">Pediatrics</option>
+<option value="General OPD">General OPD</option>
+<option value="Dermatology">Dermatology</option>
+<option value="Orthopedics">Orthopedics</option>
+<option value="Gynecology &amp; Obstetrics">Gynecology &amp; Obstetrics</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none text-[20px]">expand_more</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline">Doctors will be categorized in the appointment booking catalogue by this specialty.</p>
+</div>
+<!-- Temporary Password Auto-Generated Card (§3.4 specific) -->
+<div class="p-space-md rounded-xl bg-surface-subtle space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">vpn_key</span>
+            Temporary Generated Password
+          </span>
+<span class="font-label-sm text-label-sm text-status-pending-text uppercase font-bold bg-status-pending-bg px-2 py-0.5 rounded-full">Shown Once</span>
+</div>
+<div class="flex items-center justify-between p-space-sm bg-surface-card rounded-lg shadow-sm">
+<span class="font-mono-data text-mono-data font-bold text-on-surface tracking-wider" id="tempPasswordDisplay">MedSync#2026!xK9</span>
+<button class="px-3 py-1 rounded-lg bg-surface-subtle hover:bg-surface-container-highest text-primary font-label-md text-label-md font-semibold flex items-center gap-1 transition-colors" onclick="copyPassword()" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+            Copy
+          </button>
+</div>
+<p class="font-body-sm text-body-sm text-outline leading-tight">
+          System mandates an immediate password update upon the staff member's initial portal login session.
+        </p>
+</div>
+</form>
+<!-- Drawer Footer Actions -->
+<div class="p-space-lg bg-surface-card flex items-center justify-end gap-space-sm shrink-0">
+<button class="px-space-md py-2.5 rounded-xl bg-surface-subtle text-on-surface font-label-lg text-label-lg hover:bg-surface-container-highest transition-colors" onclick="closeDrawer()" type="button">
+        Cancel
+      </button>
+<button class="px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg font-semibold shadow-md hover:bg-primary-container transition-all flex items-center gap-2" onclick="document.getElementById('staffForm').requestSubmit()" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+        Create Account
+      </button>
+</div>
+</div>
+</div>
+<script>
+  // UI Interactive States & Behavior
+  let currentStaffCount = 7;
+
+  function showNotification(text, icon = 'check_circle') {
+    const toast = document.getElementById('actionToast');
+    const msg = document.getElementById('toastMessage');
+    const ico = document.getElementById('toastIcon');
+    if (!toast || !msg) return;
+
+    msg.textContent = text;
+    if (ico) ico.textContent = icon;
+    toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+
+    setTimeout(() => {
+      toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+    }, 3500);
+  }
+
+  function dismissBanner() {
+    const banner = document.getElementById('deactivateAlertBanner');
+    if (banner) {
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(-10px)';
+      setTimeout(() => banner.remove(), 250);
+    }
+  }
+
+  function confirmDeactivate(name) {
+    dismissBanner();
+    const rows = document.querySelectorAll('.staff-row');
+    rows.forEach(r => {
+      if (r.getAttribute('data-name') === name) {
+        r.setAttribute('data-status', 'Inactive');
+        r.classList.add('opacity-75');
+        const badge = r.querySelector('td:nth-child(5) span');
+        if (badge) {
+          badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-md text-label-md font-semibold';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Inactive';
+        }
+      }
+    });
+    showNotification(`${name} has been marked inactive. Audit records preserved.`);
+  }
+
+  function stageDeactivation(name, role, branch) {
+    const banner = document.getElementById('deactivateAlertBanner');
+    if (banner) {
+      banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      banner.classList.add('shadow-lg');
+      setTimeout(() => banner.classList.remove('shadow-lg'), 600);
+    } else {
+      if (confirm(`Deactivate ${name} (${role} · ${branch})? Historical records are kept.`)) {
+        showNotification(`${name} account deactivated successfully`, 'person_off');
+      }
+    }
+  }
+
+  function reactivateUser(name) {
+    showNotification(`${name} has been reactivated successfully.`);
+  }
+
+  function promptResetPassword(name) {
+    showNotification(`Password reset token sent to official inbox for ${name}`, 'send');
+  }
+
+  function openDrawer() {
+    const drawer = document.getElementById('staffDrawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    const form = document.getElementById('staffForm');
+    const title = document.getElementById('drawerTitle');
+
+    if (form) form.reset();
+    if (title) title.textContent = 'Add New Staff Member';
+    handleRoleSelectionChange('');
+
+    if (backdrop && drawer) {
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      drawer.classList.remove('translate-x-full');
+    }
+  }
+
+  function closeDrawer() {
+    const drawer = document.getElementById('staffDrawer');
+    const backdrop = document.getElementById('drawerBackdrop');
+    if (backdrop && drawer) {
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      drawer.classList.add('translate-x-full');
+    }
+  }
+
+  function editStaff(name, role, branch, email, phone, nic, specialty) {
+    openDrawer();
+    document.getElementById('drawerTitle').textContent = `Edit Profile: ${name}`;
+    document.getElementById('formStaffName').value = name;
+    document.getElementById('formStaffNic').value = nic || '';
+    document.getElementById('formStaffPhone').value = phone || '';
+    document.getElementById('formStaffEmail').value = email || '';
+    document.getElementById('formStaffRole').value = role;
+    document.getElementById('formStaffBranch').value = branch;
+    
+    handleRoleSelectionChange(role);
+    if (role === 'Doctor' && specialty) {
+      document.getElementById('formStaffSpecialty').value = specialty;
+    }
+  }
+
+  function handleRoleSelectionChange(role) {
+    const specField = document.getElementById('doctorSpecialtyField');
+    const specSelect = document.getElementById('formStaffSpecialty');
+    if (!specField) return;
+
+    if (role === 'Doctor') {
+      specField.classList.remove('hidden');
+      if (specSelect) specSelect.required = true;
+    } else {
+      specField.classList.add('hidden');
+      if (specSelect) {
+        specSelect.required = false;
+        specSelect.value = '';
+      }
+    }
+  }
+
+  function validateNicInput(input) {
+    const val = input.value.trim().toUpperCase();
+    const oldNic = /^[0-9]{9}[VX]$/;
+    const newNic = /^[0-9]{12}$/;
+    const icon = document.getElementById('nicStatusIcon');
+
+    if (oldNic.test(val) || newNic.test(val)) {
+      input.classList.remove('focus:shadow-[0_0_0_2px_#ba1a1a]');
+      if (icon) {
+        icon.className = 'material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-status-completed-text text-[18px]';
+        icon.textContent = 'check_circle';
+      }
+    } else {
+      if (icon) {
+        icon.className = 'material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline text-[18px]';
+        icon.textContent = 'verified';
+      }
+    }
+  }
+
+  function validatePhoneInput(input) {
+    const clean = input.value.replace(/[^0-9]/g, '');
+    input.value = clean;
+  }
+
+  function copyPassword() {
+    const pwd = document.getElementById('tempPasswordDisplay').textContent;
+    navigator.clipboard.writeText(pwd).then(() => {
+      showNotification('Temporary credentials copied to clipboard');
+    }).catch(() => {
+      showNotification('Password ready to share: ' + pwd);
+    });
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('formStaffName').value;
+    const role = document.getElementById('formStaffRole').value;
+    const branch = document.getElementById('formStaffBranch').value;
+
+    closeDrawer();
+    showNotification(`New credentials provisioned for ${name} (${role})`);
+  }
+
+  function filterStaffTable() {
+    const query = (document.getElementById('staffSearchInput').value || '').toLowerCase().trim();
+    const branch = document.getElementById('branchFilter').value;
+    const role = document.getElementById('roleFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    const rows = document.querySelectorAll('#staffTableBody .staff-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const rowName = (row.getAttribute('data-name') || '').toLowerCase();
+      const rowEmp = (row.getAttribute('data-emp') || '').toLowerCase();
+      const rowNic = (row.getAttribute('data-nic') || '').toLowerCase();
+      const rowEmail = (row.getAttribute('data-email') || '').toLowerCase();
+      const rowRole = row.getAttribute('data-role') || '';
+      const rowBranch = row.getAttribute('data-branch') || '';
+      const rowStatus = row.getAttribute('data-status') || '';
+
+      const matchesSearch = !query || rowName.includes(query) || rowEmp.includes(query) || rowNic.includes(query) || rowEmail.includes(query);
+      const matchesBranch = (branch === 'ALL') || (rowBranch === branch) || (rowBranch === 'All Branches');
+      const matchesRole = (role === 'ALL') || (rowRole === role);
+      const matchesStatus = (status === 'ALL') || (rowStatus === status);
+
+      if (matchesSearch && matchesBranch && matchesRole && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const noRes = document.getElementById('noStaffResults');
+    const countDisplay = document.getElementById('visibleRowCount');
+    if (countDisplay) countDisplay.textContent = visibleCount;
+
+    if (visibleCount === 0) {
+      if (noRes) noRes.classList.remove('hidden');
+    } else {
+      if (noRes) noRes.classList.add('hidden');
+    }
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('staffSearchInput');
+    if (input) {
+      input.value = '';
+      filterStaffTable();
+    }
+  }
+
+  function resetFilters() {
+    document.getElementById('staffSearchInput').value = '';
+    document.getElementById('branchFilter').value = 'ALL';
+    document.getElementById('roleFilter').value = 'ALL';
+    document.getElementById('statusFilter').value = 'ALL';
+    filterStaffTable();
+    showNotification('Staff filters reset to default view');
+  }
+</script></main></div></body></html>

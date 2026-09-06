@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#00628d","secondary":"#565e74","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-secondary":"#ffffff","tertiary-fixed-dim":"#89ceff","primary":"#006194","background":"#f8f9ff","tertiary-container":"#007cb1","status-pending-text":"#B45309","surface-container-low":"#eff4ff","error":"#ba1a1a","primary-fixed-dim":"#93ccff","inverse-primary":"#93ccff","on-tertiary-fixed":"#001e2f","surface":"#f8f9ff","on-primary":"#ffffff","error-container":"#ffdad6","on-primary-fixed-variant":"#004b73","on-background":"#0b1c30","status-cancelled-bg":"#FFE4E6","secondary-fixed":"#dae2fd","surface-container-highest":"#d3e4fe","tertiary-fixed":"#c9e6ff","secondary-fixed-dim":"#bec6e0","outline-variant":"#bfc7d2","surface-variant":"#d3e4fe","status-completed-text":"#047857","status-scheduled-text":"#0369A1","status-pending-bg":"#FEF3C7","surface-subtle":"#F1F5F9","status-completed-bg":"#D1FAE5","inverse-surface":"#213145","inverse-on-surface":"#eaf1ff","on-tertiary":"#ffffff","on-error":"#ffffff","on-surface-variant":"#3f4850","status-cancelled-text":"#BE123C","surface-container-lowest":"#ffffff","surface-tint":"#006398","brand-teal-light":"#38BDF8","surface-container-high":"#dce9ff","surface-card":"#FFFFFF","on-primary-fixed":"#001d31","outline":"#707881","on-primary-container":"#fdfcff","on-secondary-fixed":"#131b2e","on-secondary-container":"#5c647a","canvas-bg":"#F8FAFC","surface-bright":"#f8f9ff","status-scheduled-bg":"#E0F2FE","brand-navy-deep":"#0F172A","primary-fixed":"#cce5ff","secondary-container":"#dae2fd","surface-container":"#e5eeff","border-focus":"#0284C7","on-error-container":"#93000a","on-tertiary-fixed-variant":"#004c6e","on-secondary-fixed-variant":"#3f465c","border-subtle":"#E2E8F0","primary-container":"#007bb9","on-surface":"#0b1c30"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"content-max-width":"1600px","sidebar-collapsed-width":"72px","space-2xs":"0.25rem","space-md":"1rem","space-xs":"0.5rem","space-lg":"1.5rem","sidebar-width":"260px","gutter-desktop":"1.5rem","space-xl":"2rem","topbar-height":"68px","space-3xl":"3rem","space-2xl":"2.5rem","gutter-mobile":"1rem","space-sm":"0.75rem"},fontFamily:{"label-md":["inter"],"body-md":["inter"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-lg":["inter"],"headline-md":["plusJakartaSans"],"display-lg-mobile":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"headline-lg":["plusJakartaSans"],"body-lg":["inter"],"mono-data":["inter"],"label-sm":["inter"]},fontSize:{"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-lg":["14px",{lineHeight:"20px",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"mono-data":["13px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"500"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.05em",fontWeight:"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-lg"><div class="px-space-lg flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Healthcare System</div></div></div><nav class="flex flex-col px-space-sm gap-space-2xs" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r"><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Dashboard</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Reports</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Appointment Summary</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-label-lg text-label-lg">Doctor Revenue</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 transition-all bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="font-label-lg text-label-lg">Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span class="font-label-lg text-label-lg">Category Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">verified_user</span><span class="font-label-lg text-label-lg">Insurance vs. OOP</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Branch</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span class="font-label-lg text-label-lg">Manage Branches</span></a></nav></div><div class="px-space-sm flex flex-col gap-space-2xs"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-lg text-label-lg">Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span class="font-label-lg text-label-lg">Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="font-label-lg text-label-lg">Logout</span></a></div></aside><div class="pl-sidebar-width"><header class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Branch Manager Portal</div></div></div><div class="flex items-center gap-space-lg"><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-sm text-label-sm font-semibold">Colombo Central Branch (Locked)</span></div><div class="flex items-center gap-space-xs"><button aria-label="Toggle Theme" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Good morning, Chaminda</div><div class="font-label-sm text-label-sm text-on-surface-variant">Branch Manager · Colombo Central Branch</div></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-highest" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/></div></div></header><main class="relative pt-topbar-height bg-surface min-h-screen w-full px-gutter-desktop py-space-xl max-w-content-max-width mx-auto"><div class="flex flex-col w-full gap-space-xl">
+<!-- Header & Context Area -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Financial Reports</span>
+<span class="text-outline-variant">•</span>
+<div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-primary">lock</span>
+          Colombo Central Branch
+        </div>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface">Outstanding Balances</h1>
+<p class="font-body-md text-body-md text-secondary max-w-2xl">
+        Patients with unpaid or partially paid invoices. Monitor collection risks and view invoice recovery statuses.
+      </p>
+</div>
+<!-- Quick Ledger Meta Actions -->
+<div class="flex items-center gap-space-sm self-start lg:self-auto">
+<button class="inline-flex items-center gap-space-xs h-[42px] px-4 rounded-xl bg-surface-card text-on-surface shadow-sm hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
+<span class="font-label-lg text-label-lg">Export CSV</span>
+</button>
+<button class="inline-flex items-center gap-space-xs h-[42px] px-4 rounded-xl bg-surface-card text-on-surface shadow-sm hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">print</span>
+<span class="font-label-lg text-label-lg">Print Summary</span>
+</button>
+</div>
+</div>
+<!-- KPI Bento Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Card 1: Total Outstanding -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-5 shadow-sm flex flex-col justify-between gap-space-sm">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-primary-fixed/30 pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Total Outstanding</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">LKR 425,000</div>
+<div class="mt-1 flex items-center gap-1.5 font-mono-data text-mono-data text-status-pending-text">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>Requires prompt reconciliation</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 72%"></div>
+</div>
+</div>
+<!-- Card 2: Overdue Invoices Count -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-5 shadow-sm flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Overdue Invoices</span>
+<div class="w-8 h-8 rounded-lg bg-status-cancelled-bg flex items-center justify-center text-status-cancelled-text">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">38 <span class="font-body-md text-body-md text-secondary font-normal">invoices</span></div>
+<div class="mt-1 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
+<span class="material-symbols-outlined text-[14px] text-error">schedule</span>
+<span>Across all patient aging brackets</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 100%"></div>
+</div>
+</div>
+<!-- Card 3: Partially Paid -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-5 shadow-sm flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Partially Paid</span>
+<div class="w-8 h-8 rounded-lg bg-status-pending-bg flex items-center justify-center text-status-pending-text">
+<span class="material-symbols-outlined text-[18px]">pie_chart</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">22</div>
+<div class="mt-1 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
+<span class="font-mono-data text-mono-data text-primary font-semibold">58%</span>
+<span>of overdue records partially cleared</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-status-pending-text h-full rounded-full" style="width: 58%"></div>
+</div>
+</div>
+<!-- Card 4: Fully Unpaid -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-5 shadow-sm flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Fully Unpaid</span>
+<div class="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">block</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">16</div>
+<div class="mt-1 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
+<span class="font-mono-data text-mono-data text-error font-semibold">42%</span>
+<span>zero prior recovery recorded</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 42%"></div>
+</div>
+</div>
+</div>
+<!-- Filtration Panel & Interactive Controls -->
+<div class="rounded-xl bg-surface-card p-5 shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Search Field -->
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full h-[42px] pl-10 pr-4 bg-surface rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" id="patient-search" placeholder="Search by Patient Name, ID, or Invoice #" type="text"/>
+<button class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface" id="clear-search" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Aging Range and Action Button -->
+<div class="flex flex-wrap sm:flex-nowrap items-center gap-space-sm">
+<div class="relative min-w-[170px] w-full sm:w-auto">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[18px]">date_range</span>
+<select class="w-full h-[42px] pl-9 pr-8 bg-surface rounded-xl font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-low cursor-pointer" id="aging-filter">
+<option value="all">All Overdue</option>
+<option value="0-30">0-30 Days</option>
+<option value="31-60">31-60 Days</option>
+<option value="60+">60+ Days</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-[18px]">expand_more</span>
+</div>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs h-[42px] px-5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container shadow-sm transition-all active:scale-[0.98]" id="apply-filters-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+<span>Apply Filters</span>
+</button>
+<button class="w-full sm:w-auto inline-flex items-center justify-center h-[42px] px-3.5 rounded-xl bg-surface hover:bg-surface-container text-secondary font-label-md text-label-md transition-colors" id="reset-filters-btn" title="Reset Filters" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+</div>
+</div>
+<!-- Active Tags Row -->
+<div class="flex flex-wrap items-center gap-space-xs pt-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Active Filtering:</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container font-body-sm text-body-sm text-on-surface">
+<span>Branch: <strong>Colombo Central</strong></span>
+<span class="material-symbols-outlined text-[12px] text-outline">lock</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-status-scheduled-bg text-status-scheduled-text font-body-sm text-body-sm" id="active-aging-tag">
+<span>Range: <strong id="aging-tag-text">All Overdue</strong></span>
+</span>
+<span class="ml-auto font-mono-data text-mono-data text-secondary" id="results-count-badge">Showing 5 of 38 invoices</span>
+</div>
+</div>
+<!-- Primary Ledger Data Table -->
+<div class="rounded-xl bg-surface-card shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="invoices-table">
+<thead>
+<tr class="bg-surface-subtle text-secondary uppercase font-label-sm text-label-sm tracking-wider h-11">
+<th class="px-5 font-semibold">Patient</th>
+<th class="px-5 font-semibold">Invoice #</th>
+<th class="px-5 font-semibold text-right">Total</th>
+<th class="px-5 font-semibold text-right">Paid</th>
+<th class="px-5 font-semibold text-right">Outstanding</th>
+<th class="px-5 font-semibold">Last Payment</th>
+<th class="px-5 font-semibold text-center">Status</th>
+<th class="px-5 font-semibold text-right">Action</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y divide-surface-subtle" id="ledger-table-body">
+<!-- Row 1 -->
+<tr class="hover:bg-surface/80 transition-colors group cursor-default" data-aging="31-60" data-inv="INV-2026-0864" data-patient="Sarath Jayasinghe" data-pid="PT-001882" data-status="partially-paid">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center font-headline-sm text-headline-sm text-on-primary-fixed font-bold">
+                  SJ
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate group-hover:text-primary transition-colors">Sarath Jayasinghe</span>
+<span class="font-mono-data text-mono-data text-secondary">PT-001882</span>
+</div>
+</div>
+</td>
+<td class="px-5 py-4 font-mono-data text-mono-data font-semibold text-primary">
+              INV-2026-0864
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-on-surface">
+              LKR 24,000
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-secondary">
+              LKR 9,000
+            </td>
+<td class="px-5 py-4 text-right">
+<span class="inline-flex items-center justify-end px-2.5 py-1 rounded-md bg-status-pending-bg text-status-pending-text font-mono-data text-mono-data font-bold">
+                LKR 15,000
+              </span>
+</td>
+<td class="px-5 py-4 text-secondary font-mono-data text-mono-data">
+              Aug 30, 2026
+            </td>
+<td class="px-5 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span>
+                Partially Paid
+              </span>
+</td>
+<td class="px-5 py-4 text-right">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all" onclick="openInvoiceModal('INV-2026-0864', 'Sarath Jayasinghe', 'LKR 24,000', 'LKR 9,000', 'LKR 15,000', 'Aug 30, 2026', 'Partially Paid')" type="button">
+<span>View Invoice</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface/80 transition-colors group cursor-default" data-aging="60+" data-inv="INV-2026-0870" data-patient="Kumari Perera" data-pid="PT-002914" data-status="unpaid">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-error-container flex items-center justify-center font-headline-sm text-headline-sm text-on-error-container font-bold">
+                  KP
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate group-hover:text-primary transition-colors">Kumari Perera</span>
+<span class="font-mono-data text-mono-data text-secondary">PT-002914</span>
+</div>
+</div>
+</td>
+<td class="px-5 py-4 font-mono-data text-mono-data font-semibold text-primary">
+              INV-2026-0870
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-on-surface">
+              LKR 18,500
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-secondary">
+              LKR 0
+            </td>
+<td class="px-5 py-4 text-right">
+<span class="inline-flex items-center justify-end px-2.5 py-1 rounded-md bg-status-cancelled-bg text-status-cancelled-text font-mono-data text-mono-data font-bold">
+                LKR 18,500
+              </span>
+</td>
+<td class="px-5 py-4 text-secondary font-mono-data text-mono-data">
+              —
+            </td>
+<td class="px-5 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-cancelled-bg text-status-cancelled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-cancelled-text"></span>
+                Unpaid
+              </span>
+</td>
+<td class="px-5 py-4 text-right">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all" onclick="openInvoiceModal('INV-2026-0870', 'Kumari Perera', 'LKR 18,500', 'LKR 0', 'LKR 18,500', 'None recorded', 'Unpaid')" type="button">
+<span>View Invoice</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface/80 transition-colors group cursor-default" data-aging="0-30" data-inv="INV-2026-0875" data-patient="Malini De Silva" data-pid="PT-003112" data-status="partially-paid">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center font-headline-sm text-headline-sm text-on-tertiary-fixed font-bold">
+                  MD
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate group-hover:text-primary transition-colors">Malini De Silva</span>
+<span class="font-mono-data text-mono-data text-secondary">PT-003112</span>
+</div>
+</div>
+</td>
+<td class="px-5 py-4 font-mono-data text-mono-data font-semibold text-primary">
+              INV-2026-0875
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-on-surface">
+              LKR 32,000
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-secondary">
+              LKR 12,000
+            </td>
+<td class="px-5 py-4 text-right">
+<span class="inline-flex items-center justify-end px-2.5 py-1 rounded-md bg-status-pending-bg text-status-pending-text font-mono-data text-mono-data font-bold">
+                LKR 20,000
+              </span>
+</td>
+<td class="px-5 py-4 text-secondary font-mono-data text-mono-data">
+              Aug 24, 2026
+            </td>
+<td class="px-5 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span>
+                Partially Paid
+              </span>
+</td>
+<td class="px-5 py-4 text-right">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all" onclick="openInvoiceModal('INV-2026-0875', 'Malini De Silva', 'LKR 32,000', 'LKR 12,000', 'LKR 20,000', 'Aug 24, 2026', 'Partially Paid')" type="button">
+<span>View Invoice</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface/80 transition-colors group cursor-default" data-aging="0-30" data-inv="INV-2026-0881" data-patient="Dinesh Fernando" data-pid="PT-002450" data-status="partially-paid">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center font-headline-sm text-headline-sm text-on-secondary-fixed font-bold">
+                  DF
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate group-hover:text-primary transition-colors">Dinesh Fernando</span>
+<span class="font-mono-data text-mono-data text-secondary">PT-002450</span>
+</div>
+</div>
+</td>
+<td class="px-5 py-4 font-mono-data text-mono-data font-semibold text-primary">
+              INV-2026-0881
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-on-surface">
+              LKR 15,000
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-secondary">
+              LKR 5,000
+            </td>
+<td class="px-5 py-4 text-right">
+<span class="inline-flex items-center justify-end px-2.5 py-1 rounded-md bg-status-pending-bg text-status-pending-text font-mono-data text-mono-data font-bold">
+                LKR 10,000
+              </span>
+</td>
+<td class="px-5 py-4 text-secondary font-mono-data text-mono-data">
+              Sep 01, 2026
+            </td>
+<td class="px-5 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span>
+                Partially Paid
+              </span>
+</td>
+<td class="px-5 py-4 text-right">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all" onclick="openInvoiceModal('INV-2026-0881', 'Dinesh Fernando', 'LKR 15,000', 'LKR 5,000', 'LKR 10,000', 'Sep 01, 2026', 'Partially Paid')" type="button">
+<span>View Invoice</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface/80 transition-colors group cursor-default" data-aging="31-60" data-inv="INV-2026-0890" data-patient="Anula Wickramasinghe" data-pid="PT-004521" data-status="unpaid">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-error-container flex items-center justify-center font-headline-sm text-headline-sm text-on-error-container font-bold">
+                  AW
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate group-hover:text-primary transition-colors">Anula Wickramasinghe</span>
+<span class="font-mono-data text-mono-data text-secondary">PT-004521</span>
+</div>
+</div>
+</td>
+<td class="px-5 py-4 font-mono-data text-mono-data font-semibold text-primary">
+              INV-2026-0890
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-on-surface">
+              LKR 45,000
+            </td>
+<td class="px-5 py-4 text-right font-mono-data text-mono-data text-secondary">
+              LKR 0
+            </td>
+<td class="px-5 py-4 text-right">
+<span class="inline-flex items-center justify-end px-2.5 py-1 rounded-md bg-status-cancelled-bg text-status-cancelled-text font-mono-data text-mono-data font-bold">
+                LKR 45,000
+              </span>
+</td>
+<td class="px-5 py-4 text-secondary font-mono-data text-mono-data">
+              —
+            </td>
+<td class="px-5 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-cancelled-bg text-status-cancelled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-cancelled-text"></span>
+                Unpaid
+              </span>
+</td>
+<td class="px-5 py-4 text-right">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all" onclick="openInvoiceModal('INV-2026-0890', 'Anula Wickramasinghe', 'LKR 45,000', 'LKR 0', 'LKR 45,000', 'None recorded', 'Unpaid')" type="button">
+<span>View Invoice</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Dynamic Empty State (Initially Hidden unless filtered with 0 matches) -->
+<div class="hidden flex flex-col items-center justify-center py-16 px-6 text-center" id="empty-state">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-secondary mb-3">
+<span class="material-symbols-outlined text-[32px]">folder_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h3>
+<p class="font-body-md text-body-md text-secondary mt-1 max-w-sm">
+        Please adjust your aging range or try searching for another patient identifier or invoice number.
+      </p>
+<button class="mt-4 px-4 py-2 rounded-xl bg-surface-container text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors" id="reset-empty-btn" type="button">
+        Clear Filter Parameters
+      </button>
+</div>
+<!-- Table Pagination / Summary Footer -->
+<div class="px-5 py-3.5 bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+<span>Reconciliation sync active • Showing latest Colombo Central branch ledgers</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-outline cursor-not-allowed" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-3 py-1 rounded-md bg-surface-card text-on-surface font-semibold shadow-xs">Page 1 of 8</span>
+<button class="p-1.5 rounded-lg text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Medical Center Support & Contact Section -->
+<div class="rounded-xl bg-surface-container-low p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-on-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">contact_phone</span>
+</div>
+<div class="flex flex-col">
+<div class="font-headline-sm text-headline-sm text-on-surface">Need help with invoice escalation?</div>
+<div class="font-body-sm text-body-sm text-secondary">Directly notify patient liaison desk or dispatch SMS reminders from central billing.</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm w-full md:w-auto">
+<button class="w-full md:w-auto px-4 py-2.5 rounded-xl bg-surface-card text-on-surface font-label-md text-label-md hover:bg-surface-subtle shadow-sm transition-colors" type="button">
+        Send Payment Links
+      </button>
+<button class="w-full md:w-auto px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container shadow-sm transition-colors" type="button">
+        Billing Help Desk
+      </button>
+</div>
+</div>
+<!-- Interactive Modal Dialog (Level 3 Elevation) -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-inverse-surface/40 backdrop-blur-sm transition-opacity" id="invoice-modal">
+<div class="w-full max-w-lg rounded-2xl bg-surface-card shadow-2xl p-6 flex flex-col gap-5 transform transition-all scale-100">
+<div class="flex items-center justify-between pb-3 border-b border-surface-subtle">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">receipt</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface" id="modal-invoice-num">INV-2026-0864</h3>
+<span class="font-label-sm text-label-sm text-secondary">Colombo Central Branch Registry</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-secondary transition-colors" onclick="closeInvoiceModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 py-1">
+<div class="p-3.5 rounded-xl bg-surface flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Patient Details</span>
+<span class="font-label-lg text-label-lg text-on-surface" id="modal-patient-name">Sarath Jayasinghe</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3.5 rounded-xl bg-surface flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-secondary">Total Invoiced</span>
+<span class="font-mono-data text-mono-data text-on-surface font-bold text-base mt-1" id="modal-total">LKR 24,000</span>
+</div>
+<div class="p-3.5 rounded-xl bg-surface flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-secondary">Paid Amount</span>
+<span class="font-mono-data text-mono-data text-secondary font-bold text-base mt-1" id="modal-paid">LKR 9,000</span>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Balance Due</span>
+<div class="font-headline-lg text-headline-lg text-primary font-bold" id="modal-outstanding">LKR 15,000</div>
+</div>
+<span class="px-3 py-1 rounded-full font-label-md text-label-md bg-status-pending-bg text-status-pending-text" id="modal-status-badge">
+            Partially Paid
+          </span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-secondary px-1">
+<span>Last Recorded Payment:</span>
+<strong class="font-mono-data text-on-surface" id="modal-last-payment">Aug 30, 2026</strong>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-3 border-t border-surface-subtle">
+<button class="px-4 py-2 rounded-xl bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" onclick="closeInvoiceModal()" type="button">
+          Close
+        </button>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+<span>Record Payment</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // DOM Elements
+  const searchInput = document.getElementById('patient-search');
+  const clearSearchBtn = document.getElementById('clear-search');
+  const agingSelect = document.getElementById('aging-filter');
+  const applyBtn = document.getElementById('apply-filters-btn');
+  const resetBtn = document.getElementById('reset-filters-btn');
+  const resetEmptyBtn = document.getElementById('reset-empty-btn');
+  const agingTagText = document.getElementById('aging-tag-text');
+  const resultsCountBadge = document.getElementById('results-count-badge');
+  const tableBody = document.getElementById('ledger-table-body');
+  const emptyState = document.getElementById('empty-state');
+  const tableElement = document.getElementById('invoices-table');
+
+  // Modal handlers
+  function openInvoiceModal(inv, patient, total, paid, balance, lastPay, status) {
+    document.getElementById('modal-invoice-num').textContent = inv;
+    document.getElementById('modal-patient-name').textContent = patient;
+    document.getElementById('modal-total').textContent = total;
+    document.getElementById('modal-paid').textContent = paid;
+    document.getElementById('modal-outstanding').textContent = balance;
+    document.getElementById('modal-last-payment').textContent = lastPay;
+    
+    const statusBadge = document.getElementById('modal-status-badge');
+    statusBadge.textContent = status;
+    if (status.toLowerCase().includes('unpaid')) {
+      statusBadge.className = 'px-3 py-1 rounded-full font-label-md text-label-md bg-status-cancelled-bg text-status-cancelled-text';
+    } else {
+      statusBadge.className = 'px-3 py-1 rounded-full font-label-md text-label-md bg-status-pending-bg text-status-pending-text';
+    }
+
+    const modal = document.getElementById('invoice-modal');
+    modal.classList.remove('hidden');
+  }
+
+  function closeInvoiceModal() {
+    document.getElementById('invoice-modal').classList.add('hidden');
+  }
+
+  // Live filter evaluation
+  function executeFiltering() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const selectedAging = agingSelect.value;
+    const rows = tableBody.querySelectorAll('tr');
+    let visibleCount = 0;
+
+    // Toggle clear search icon
+    if (searchTerm.length > 0) {
+      clearSearchBtn.classList.remove('hidden');
+    } else {
+      clearSearchBtn.classList.add('hidden');
+    }
+
+    // Update aging label indicator
+    agingTagText.textContent = agingSelect.options[agingSelect.selectedIndex].text;
+
+    rows.forEach(row => {
+      const patient = (row.getAttribute('data-patient') || '').toLowerCase();
+      const pid = (row.getAttribute('data-pid') || '').toLowerCase();
+      const inv = (row.getAttribute('data-inv') || '').toLowerCase();
+      const aging = row.getAttribute('data-aging');
+
+      const matchesSearch = !searchTerm || patient.includes(searchTerm) || pid.includes(searchTerm) || inv.includes(searchTerm);
+      const matchesAging = (selectedAging === 'all') || (aging === selectedAging);
+
+      if (matchesSearch && matchesAging) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    resultsCountBadge.textContent = `Showing ${visibleCount} of 38 invoices`;
+
+    if (visibleCount === 0) {
+      tableElement.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    } else {
+      tableElement.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+    }
+  }
+
+  // Reset Filters Function
+  function resetAllFilters() {
+    searchInput.value = '';
+    agingSelect.value = 'all';
+    executeFiltering();
+  }
+
+  // Event Listeners
+  applyBtn.addEventListener('click', executeFiltering);
+  resetBtn.addEventListener('click', resetAllFilters);
+  resetEmptyBtn.addEventListener('click', resetAllFilters);
+  searchInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+      executeFiltering();
+    } else {
+      if (searchInput.value.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+    }
+  });
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearchBtn.classList.add('hidden');
+    executeFiltering();
+  });
+  agingSelect.addEventListener('change', executeFiltering);
+
+  // Close modal with Escape or outside backdrop
+  document.getElementById('invoice-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('invoice-modal')) {
+      closeInvoiceModal();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeInvoiceModal();
+  });
+</script></main></div></body></html>

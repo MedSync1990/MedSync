@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#00628d","secondary":"#565e74","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-secondary":"#ffffff","tertiary-fixed-dim":"#89ceff","primary":"#006194","background":"#f8f9ff","tertiary-container":"#007cb1","status-pending-text":"#B45309","surface-container-low":"#eff4ff","error":"#ba1a1a","primary-fixed-dim":"#93ccff","inverse-primary":"#93ccff","on-tertiary-fixed":"#001e2f","surface":"#f8f9ff","on-primary":"#ffffff","error-container":"#ffdad6","on-primary-fixed-variant":"#004b73","on-background":"#0b1c30","status-cancelled-bg":"#FFE4E6","secondary-fixed":"#dae2fd","surface-container-highest":"#d3e4fe","tertiary-fixed":"#c9e6ff","secondary-fixed-dim":"#bec6e0","outline-variant":"#bfc7d2","surface-variant":"#d3e4fe","status-completed-text":"#047857","status-scheduled-text":"#0369A1","status-pending-bg":"#FEF3C7","surface-subtle":"#F1F5F9","status-completed-bg":"#D1FAE5","inverse-surface":"#213145","inverse-on-surface":"#eaf1ff","on-tertiary":"#ffffff","on-error":"#ffffff","on-surface-variant":"#3f4850","status-cancelled-text":"#BE123C","surface-container-lowest":"#ffffff","surface-tint":"#006398","brand-teal-light":"#38BDF8","surface-container-high":"#dce9ff","surface-card":"#FFFFFF","on-primary-fixed":"#001d31","outline":"#707881","on-primary-container":"#fdfcff","on-secondary-fixed":"#131b2e","on-secondary-container":"#5c647a","canvas-bg":"#F8FAFC","surface-bright":"#f8f9ff","status-scheduled-bg":"#E0F2FE","brand-navy-deep":"#0F172A","primary-fixed":"#cce5ff","secondary-container":"#dae2fd","surface-container":"#e5eeff","border-focus":"#0284C7","on-error-container":"#93000a","on-tertiary-fixed-variant":"#004c6e","on-secondary-fixed-variant":"#3f465c","border-subtle":"#E2E8F0","primary-container":"#007bb9","on-surface":"#0b1c30"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"content-max-width":"1600px","sidebar-collapsed-width":"72px","space-2xs":"0.25rem","space-md":"1rem","space-xs":"0.5rem","space-lg":"1.5rem","sidebar-width":"260px","gutter-desktop":"1.5rem","space-xl":"2rem","topbar-height":"68px","space-3xl":"3rem","space-2xl":"2.5rem","gutter-mobile":"1rem","space-sm":"0.75rem"},fontFamily:{"label-md":["inter"],"body-md":["inter"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-lg":["inter"],"headline-md":["plusJakartaSans"],"display-lg-mobile":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"headline-lg":["plusJakartaSans"],"body-lg":["inter"],"mono-data":["inter"],"label-sm":["inter"]},fontSize:{"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-lg":["14px",{lineHeight:"20px",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"mono-data":["13px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"500"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.05em",fontWeight:"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-lg"><div class="px-space-lg flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Healthcare System</div></div></div><nav class="flex flex-col px-space-sm gap-space-2xs" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r"><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 transition-all bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Dashboard</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Reports</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Appointment Summary</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-label-lg text-label-lg">Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="font-label-lg text-label-lg">Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span class="font-label-lg text-label-lg">Category Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">verified_user</span><span class="font-label-lg text-label-lg">Insurance vs. OOP</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Branch</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span class="font-label-lg text-label-lg">Manage Branches</span></a></nav></div><div class="px-space-sm flex flex-col gap-space-2xs"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-lg text-label-lg">Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span class="font-label-lg text-label-lg">Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="font-label-lg text-label-lg">Logout</span></a></div></aside><div class="pl-sidebar-width"><header class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Branch Manager Portal</div></div></div><div class="flex items-center gap-space-lg"><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-sm text-label-sm font-semibold">Colombo Central Branch (Locked)</span></div><div class="flex items-center gap-space-xs"><button aria-label="Toggle Theme" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Good morning, Chaminda</div><div class="font-label-sm text-label-sm text-on-surface-variant">Branch Manager · Colombo Central Branch</div></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-highest" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/></div></div></header><main class="relative pt-topbar-height bg-surface min-h-screen w-full px-gutter-desktop py-space-xl max-w-content-max-width mx-auto"><div class="flex flex-col w-full gap-space-xl">
+<!-- Top Welcome & Operational Command Strip -->
+<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg bg-surface-container-lowest rounded-xl p-space-xl shadow-sm relative overflow-hidden">
+<div class="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-surface-container-low opacity-60 pointer-events-none"></div>
+<div class="flex flex-col gap-space-xs relative z-10">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm uppercase bg-status-scheduled-bg text-status-scheduled-text">
+          Operational Live
+        </span>
+<span class="text-secondary text-body-sm font-body-sm">· Shift A (07:00 - 15:30)</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">Good morning, Chaminda</h1>
+<p class="font-body-md text-body-md text-secondary">
+        Colombo Central Branch · Branch Manager Overview
+      </p>
+</div>
+<!-- Quick Action Launch Bar -->
+<div class="flex flex-wrap items-center gap-space-sm relative z-10">
+<a class="inline-flex items-center gap-space-xs h-[42px] px-space-md rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-tertiary transition-all" data-path="branch-appointment-summary" href="#">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+        View Branch Appointments
+      </a>
+<a class="inline-flex items-center gap-space-xs h-[42px] px-space-md rounded-lg bg-surface-container-high text-on-surface font-label-lg text-label-lg hover:bg-surface-variant transition-all" data-path="doctor-revenue" href="#">
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+        Doctor Revenue
+      </a>
+<a class="inline-flex items-center gap-space-xs h-[42px] px-space-md rounded-lg bg-surface-container text-on-surface font-label-lg text-label-lg hover:bg-surface-dim transition-all" data-path="manage-branches" href="#">
+<span class="material-symbols-outlined text-[18px]">domain</span>
+        Branch Details &amp; Staff
+      </a>
+</div>
+</section>
+<!-- 4 Core Branch Stat Tiles -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Tile 1: Active Patients -->
+<div class="flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase text-secondary tracking-wider">Scope · Central</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">Active Patients</h2>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">groups</span>
+</div>
+</div>
+<div class="mt-4 flex items-baseline justify-between">
+<span class="font-display-lg text-display-lg text-on-surface">1,420</span>
+<span class="inline-flex items-center gap-1 text-label-sm font-label-sm px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +12%
+        </span>
+</div>
+<span class="text-body-sm font-body-sm text-secondary mt-1">Vs. previous calendar month</span>
+</div>
+<!-- Tile 2: Active Doctors -->
+<div class="flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase text-secondary tracking-wider">Medical Roster</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">Active Doctors</h2>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">stethoscope</span>
+</div>
+</div>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">18</span>
+<span class="text-body-sm font-body-sm text-secondary">on duty today</span>
+</div>
+<div class="text-body-sm font-body-sm text-secondary truncate mt-1">
+        Cardiology, OPD, Pediatrics, ENT, Ortho
+      </div>
+</div>
+<!-- Tile 3: Branch Staff -->
+<div class="flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase text-secondary tracking-wider">Workforce Headcount</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">Branch Staff</h2>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">badge</span>
+</div>
+</div>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">34</span>
+<span class="text-body-sm font-body-sm text-secondary">verified profiles</span>
+</div>
+<div class="text-body-sm font-body-sm text-secondary truncate mt-1">
+        Reception, Nursing, Pharmacy, Admin
+      </div>
+</div>
+<!-- Tile 4: Operational Rooms -->
+<div class="flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase text-secondary tracking-wider">Facility Capacity</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">Clinical Rooms</h2>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-status-completed-text">
+<span class="material-symbols-outlined text-[22px]">meeting_room</span>
+</div>
+</div>
+<div class="mt-4 flex items-baseline justify-between">
+<div class="flex items-baseline gap-1">
+<span class="font-display-lg text-display-lg text-on-surface">8</span>
+<span class="text-body-sm font-body-sm text-secondary">/ 8 Rooms</span>
+</div>
+<span class="inline-flex items-center gap-1 text-label-sm font-label-sm px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text">
+          100% Active
+        </span>
+</div>
+<span class="text-body-sm font-body-sm text-secondary mt-1">All suites sterilized &amp; assigned</span>
+</div>
+</section>
+<!-- Middle Bento: Appointment Progress Dashboard & Distribution -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Today's Appointment Command Widget -->
+<div class="lg:col-span-8 flex flex-col justify-between p-space-xl rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase text-primary tracking-wider">Today's Schedule Progress</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">Branch Appointments Flow</h3>
+</div>
+<div class="flex items-baseline gap-2 bg-surface-container-low px-space-md py-2 rounded-lg">
+<span class="font-headline-lg text-headline-lg text-on-surface">84</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Total Today</span>
+</div>
+</div>
+<!-- Segmented Multi-status Progress Bar -->
+<div class="mt-space-lg flex flex-col gap-space-xs">
+<div class="h-4 w-full rounded-full bg-surface-container flex overflow-hidden p-0.5">
+<!-- Completed (28 / 84 = 33.3%) -->
+<div class="h-full bg-status-completed-text rounded-l-full" style="width: 33.3%" title="Completed: 28"></div>
+<!-- In Progress (11 / 84 = 13.1%) -->
+<div class="h-full bg-status-pending-text" style="width: 13.1%" title="In Progress: 11"></div>
+<!-- Scheduled (42 / 84 = 50.0%) -->
+<div class="h-full bg-primary" style="width: 50.0%" title="Scheduled: 42"></div>
+<!-- Cancelled (3 / 84 = 3.6%) -->
+<div class="h-full bg-error rounded-r-full" style="width: 3.6%" title="Cancelled: 3"></div>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-secondary">
+<span class="">08:00 AM</span>
+<span class="">Midday Shift Checkpoint</span>
+<span class="">20:00 PM</span>
+</div>
+</div>
+<!-- Detailed Breakdown Stat Pills -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm mt-space-lg pt-space-md bg-surface rounded-xl p-space-md">
+<!-- Scheduled -->
+<div class="flex flex-col p-space-sm rounded-lg bg-status-scheduled-bg">
+<div class="flex items-center gap-1.5 text-status-scheduled-text">
+<span class="w-2 h-2 rounded-full bg-status-scheduled-text"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Scheduled</span>
+</div>
+<span class="font-headline-lg text-headline-lg text-status-scheduled-text mt-1">42</span>
+<span class="font-body-sm text-body-sm text-secondary">50.0% remaining</span>
+</div>
+<!-- In Progress -->
+<div class="flex flex-col p-space-sm rounded-lg bg-status-pending-bg">
+<div class="flex items-center gap-1.5 text-status-pending-text">
+<span class="w-2 h-2 rounded-full bg-status-pending-text"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">In Progress</span>
+</div>
+<span class="font-headline-lg text-headline-lg text-status-pending-text mt-1">11</span>
+<span class="font-body-sm text-body-sm text-secondary">Currently consulting</span>
+</div>
+<!-- Completed -->
+<div class="flex flex-col p-space-sm rounded-lg bg-status-completed-bg">
+<div class="flex items-center gap-1.5 text-status-completed-text">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Completed</span>
+</div>
+<span class="font-headline-lg text-headline-lg text-status-completed-text mt-1">28</span>
+<span class="font-body-sm text-body-sm text-secondary">Checked out</span>
+</div>
+<!-- Cancelled -->
+<div class="flex flex-col p-space-sm rounded-lg bg-status-cancelled-bg">
+<div class="flex items-center gap-1.5 text-status-cancelled-text">
+<span class="w-2 h-2 rounded-full bg-status-cancelled-text"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Cancelled</span>
+</div>
+<span class="font-headline-lg text-headline-lg text-status-cancelled-text mt-1">3</span>
+<span class="font-body-sm text-body-sm text-secondary">3.5% attrition</span>
+</div>
+</div>
+</div>
+<!-- Mini Visual Wing: Branch Clinic Snapshot -->
+</section>
+<!-- Bottom Layout: Recent Branch Activity Feed & Staff Quick Reference -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Live Branch Activity Feed -->
+<div class="lg:col-span-8 flex flex-col p-space-xl rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between mb-space-lg">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Recent Branch Activity</h3>
+<p class="font-body-sm text-body-sm text-secondary">Real-time clinical, front-desk, and billing transactions</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span> Live Sync
+        </span>
+</div>
+<!-- Feed List -->
+<div class="flex flex-col gap-space-sm">
+<!-- Event 1 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-status-completed-bg text-status-completed-text flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">clinical_notes</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Consultation Completed</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">10 mins ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+<span class="font-label-md text-label-md text-on-surface">Dr. Bandara</span> completed consultation for <span class="font-medium text-on-surface">Priyantha Dharmasena</span>
+</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-mono-data bg-surface-container-high text-primary">
+                INV-2026-0891
+              </span>
+<span class="text-body-sm font-body-sm text-secondary">Cardiology Suite 2</span>
+</div>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Payment Received</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">15 mins ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+              Payment of <span class="font-semibold text-on-surface font-mono-data">LKR 12,500</span> recorded against Invoice #INV-2026-0891 by <span class="font-medium text-on-surface">Receptionist Anoma</span>
+</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-label-sm bg-status-completed-bg text-status-completed-text">
+                Counter Settlement · Cash
+              </span>
+</div>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-surface-container-high text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Patient Onboarded</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">25 mins ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+              New patient registered: <span class="font-medium text-on-surface">Chamari Senanayake</span>
+</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-mono-data bg-surface-container text-secondary">
+                PT-003429
+              </span>
+<span class="text-body-sm font-body-sm text-secondary">Registered via Front Desk 01</span>
+</div>
+</div>
+</div>
+<!-- Event 4 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">notification_important</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Emergency Appointment</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">40 mins ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+              Emergency appointment scheduled for <span class="font-label-md text-label-md text-on-surface">Dr. Nimal Fonseka</span>
+</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-label-sm bg-status-cancelled-bg text-status-cancelled-text font-semibold">
+                Priority: Urgent
+              </span>
+<span class="text-body-sm font-body-sm text-secondary">OPD Emergency Bay</span>
+</div>
+</div>
+</div>
+<!-- Event 5 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-status-scheduled-bg text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Insurance Settlement</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">1 hr ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+              Invoice <span class="font-mono-data text-primary font-medium">#INV-2026-0885</span> settled via Insurance (<span class="font-semibold text-on-surface font-mono-data">LKR 8,000</span>)
+            </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-secondary">
+                AIA Insurance Claim
+              </span>
+<span class="text-body-sm font-body-sm text-secondary">Automatic Reconciliation</span>
+</div>
+</div>
+</div>
+<!-- Event 6 -->
+<div class="flex items-start gap-space-md p-space-md rounded-xl bg-surface hover:bg-surface-container-low transition-colors">
+<div class="w-9 h-9 rounded-full bg-surface-container-high text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">medical_services</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-space-xs">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Pharmacy Dispensation</span>
+<span class="font-mono-data text-mono-data text-secondary shrink-0">1 hr 15 mins ago</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">
+              Prescription batch dispensed for <span class="font-medium text-on-surface">Kavinda Perera</span> by Pharmacist Dilini
+            </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-block px-2 py-0.5 rounded text-label-sm font-label-sm bg-status-completed-bg text-status-completed-text">
+                Dispensed &amp; Logged
+              </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Branch Roster & Operational Health -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Quick Staff Overview Card -->
+<div class="flex flex-col p-space-xl rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Physician Allocation</h3>
+<span class="font-label-sm text-label-sm text-primary font-semibold">18 Scheduled</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Specialty 1 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">cardiology</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Cardiology</div>
+<div class="font-body-sm text-body-sm text-secondary">Dr. Bandara + 1</div>
+</div>
+</div>
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">14 Patients</span>
+</div>
+<!-- Specialty 2 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">medical_services</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">General OPD</div>
+<div class="font-body-sm text-body-sm text-secondary">Dr. Fonseka + 5</div>
+</div>
+</div>
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">36 Patients</span>
+</div>
+<!-- Specialty 3 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">child_care</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Pediatrics</div>
+<div class="font-body-sm text-body-sm text-secondary">Dr. Jayawardena + 2</div>
+</div>
+</div>
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">18 Patients</span>
+</div>
+<!-- Specialty 4 -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">hearing</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">ENT &amp; Ortho</div>
+<div class="font-body-sm text-body-sm text-secondary">Dr. Alwis + 4</div>
+</div>
+</div>
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">16 Patients</span>
+</div>
+</div>
+<a class="mt-space-md text-center py-2 rounded-lg bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container transition-colors" data-path="doctor-revenue" href="#">
+          Doctor Rosters &amp; Revenue Details
+        </a>
+</div>
+<!-- Facility Operational Integrity Checklist -->
+<div class="flex flex-col p-space-xl rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-space-xs mb-space-md">
+<span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Facility Readiness</h3>
+</div>
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Pharmacy Stock Audit</span>
+<span class="font-label-sm text-label-sm text-status-completed-text flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done</span> Checked 06:45 AM
+            </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Lab Specimen Dispatch</span>
+<span class="font-label-sm text-label-sm text-status-completed-text flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done</span> On Schedule
+            </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Billing Counter Terminals</span>
+<span class="font-label-sm text-label-sm text-status-completed-text flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done</span> 4/4 Online
+            </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Emergency Response Room</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">emergency</span> Standby Clear
+            </span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container-high flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-secondary uppercase tracking-wider">Branch ID</span>
+<span class="font-mono-data text-mono-data text-on-surface font-semibold">LK-COL-001</span>
+</div>
+</div>
+</div>
+</section>
+</div></main></div>
+</body></html>

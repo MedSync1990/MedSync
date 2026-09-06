@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#00628d","secondary":"#565e74","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-secondary":"#ffffff","tertiary-fixed-dim":"#89ceff","primary":"#006194","background":"#f8f9ff","tertiary-container":"#007cb1","status-pending-text":"#B45309","surface-container-low":"#eff4ff","error":"#ba1a1a","primary-fixed-dim":"#93ccff","inverse-primary":"#93ccff","on-tertiary-fixed":"#001e2f","surface":"#f8f9ff","on-primary":"#ffffff","error-container":"#ffdad6","on-primary-fixed-variant":"#004b73","on-background":"#0b1c30","status-cancelled-bg":"#FFE4E6","secondary-fixed":"#dae2fd","surface-container-highest":"#d3e4fe","tertiary-fixed":"#c9e6ff","secondary-fixed-dim":"#bec6e0","outline-variant":"#bfc7d2","surface-variant":"#d3e4fe","status-completed-text":"#047857","status-scheduled-text":"#0369A1","status-pending-bg":"#FEF3C7","surface-subtle":"#F1F5F9","status-completed-bg":"#D1FAE5","inverse-surface":"#213145","inverse-on-surface":"#eaf1ff","on-tertiary":"#ffffff","on-error":"#ffffff","on-surface-variant":"#3f4850","status-cancelled-text":"#BE123C","surface-container-lowest":"#ffffff","surface-tint":"#006398","brand-teal-light":"#38BDF8","surface-container-high":"#dce9ff","surface-card":"#FFFFFF","on-primary-fixed":"#001d31","outline":"#707881","on-primary-container":"#fdfcff","on-secondary-fixed":"#131b2e","on-secondary-container":"#5c647a","canvas-bg":"#F8FAFC","surface-bright":"#f8f9ff","status-scheduled-bg":"#E0F2FE","brand-navy-deep":"#0F172A","primary-fixed":"#cce5ff","secondary-container":"#dae2fd","surface-container":"#e5eeff","border-focus":"#0284C7","on-error-container":"#93000a","on-tertiary-fixed-variant":"#004c6e","on-secondary-fixed-variant":"#3f465c","border-subtle":"#E2E8F0","primary-container":"#007bb9","on-surface":"#0b1c30"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"content-max-width":"1600px","sidebar-collapsed-width":"72px","space-2xs":"0.25rem","space-md":"1rem","space-xs":"0.5rem","space-lg":"1.5rem","sidebar-width":"260px","gutter-desktop":"1.5rem","space-xl":"2rem","topbar-height":"68px","space-3xl":"3rem","space-2xl":"2.5rem","gutter-mobile":"1rem","space-sm":"0.75rem"},fontFamily:{"label-md":["inter"],"body-md":["inter"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-lg":["inter"],"headline-md":["plusJakartaSans"],"display-lg-mobile":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"headline-lg":["plusJakartaSans"],"body-lg":["inter"],"mono-data":["inter"],"label-sm":["inter"]},fontSize:{"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-lg":["14px",{lineHeight:"20px",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"mono-data":["13px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"500"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.05em",fontWeight:"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-lg"><div class="px-space-lg flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Healthcare System</div></div></div><nav class="flex flex-col px-space-sm gap-space-2xs" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r"><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Dashboard</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Reports</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Appointment Summary</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 transition-all bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-label-lg text-label-lg">Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="font-label-lg text-label-lg">Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span class="font-label-lg text-label-lg">Category Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">verified_user</span><span class="font-label-lg text-label-lg">Insurance vs. OOP</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Branch</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span class="font-label-lg text-label-lg">Manage Branches</span></a></nav></div><div class="px-space-sm flex flex-col gap-space-2xs"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-lg text-label-lg">Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span class="font-label-lg text-label-lg">Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="font-label-lg text-label-lg">Logout</span></a></div></aside><div class="pl-sidebar-width"><header class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Branch Manager Portal</div></div></div><div class="flex items-center gap-space-lg"><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-sm text-label-sm font-semibold">Colombo Central Branch (Locked)</span></div><div class="flex items-center gap-space-xs"><button aria-label="Toggle Theme" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Good morning, Chaminda</div><div class="font-label-sm text-label-sm text-on-surface-variant">Branch Manager · Colombo Central Branch</div></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-highest" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/></div></div></header><main class="relative pt-topbar-height bg-surface min-h-screen w-full px-gutter-desktop py-space-xl max-w-content-max-width mx-auto"><div class="flex flex-col w-full gap-space-xl">
+<!-- Locked Context & Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Financial Operations</span>
+<span class="text-outline">/</span>
+<span class="text-secondary font-medium">Branch Performance</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">Doctor Revenue</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Revenue generated per doctor over a date range.</p>
+</div>
+<!-- Locked Branch Badge Indicator -->
+<div class="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+<span class="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span>
+</div>
+</div>
+</div>
+<!-- Operational Filter Toolbar -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<!-- Date Range Filter -->
+<div class="flex flex-col gap-1 min-w-[240px]">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="date-range-input">Date Range</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer" id="date-range-input" type="text" value="Sep 01, 2026 – Sep 30, 2026"/>
+</div>
+</div>
+<!-- Specialty Filter -->
+<div class="flex flex-col gap-1 min-w-[200px]">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="specialty-filter">Specialty</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">medical_services</span>
+<select class="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer" id="specialty-filter">
+<option value="All Specialties">All Specialties</option>
+<option value="Cardiology">Cardiology</option>
+<option value="General OPD">General OPD</option>
+<option value="Pediatrics">Pediatrics</option>
+<option value="Orthopedics">Orthopedics</option>
+<option value="Dermatology">Dermatology</option>
+<option value="ENT">ENT</option>
+</select>
+<span class="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Search Doctor -->
+<div class="flex flex-col gap-1 min-w-[220px]">
+<label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="search-doctor-input">Search Physician</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" id="search-doctor-input" placeholder="Filter by doctor name..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs self-end lg:self-center">
+<button class="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5" id="reset-filters-btn">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+        Reset
+      </button>
+<button class="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5" id="apply-filters-btn">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+        Apply Filters
+      </button>
+</div>
+</div>
+<!-- Summary KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- KPI 1 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Clinical Revenue</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">LKR 1,845,000</div>
+<div class="flex items-center gap-1 mt-1 text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+14.2% vs previous period</span>
+</div>
+</div>
+<div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[90px]">payments</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Completed Consults</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">event_available</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">342</div>
+<div class="flex items-center gap-1 mt-1 text-status-scheduled-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>98.6% completion rate</span>
+</div>
+</div>
+<div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[90px]">calendar_today</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Top Earning Specialty</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">cardiology</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Cardiology</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-on-surface-variant font-mono-data text-mono-data">LKR 680,000</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">36.8% share</span>
+</div>
+</div>
+<div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[90px]">ecg_heart</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Avg Revenue / Doctor</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">LKR 102,500</div>
+<div class="flex items-center gap-1 mt-1 text-secondary font-label-sm text-label-sm">
+<span>Active doctors: 6 on duty</span>
+</div>
+</div>
+<div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[90px]">stacked_bar_chart</span>
+</div>
+</div>
+</div>
+<!-- Visual Bar Comparison & Doctor Ranking Section -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Physician Revenue Contribution</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Comparative performance against branch target (LKR 500,000 max benchmark)</p>
+</div>
+<div class="flex items-center gap-space-sm text-label-sm font-label-sm">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-primary"></div>
+<span class="text-on-surface-variant">Consultations</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded bg-brand-teal-light"></div>
+<span class="text-on-surface-variant">Procedures &amp; Labs</span>
+</div>
+</div>
+</div>
+<!-- Horizontal Ranking Bars -->
+<div class="flex flex-col gap-space-md">
+<!-- Bandara -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-primary flex items-center justify-center text-[12px] font-bold">1</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. K. Bandara</span>
+<span class="text-secondary">· Cardiology Specialist</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 485,000</span>
+<span class="text-label-sm font-label-sm text-status-completed-text font-bold">(26.3%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 65%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 32%;"></div>
+</div>
+</div>
+<!-- Jayasinghe -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container text-secondary flex items-center justify-center text-[12px] font-bold">2</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. Sarah Jayasinghe</span>
+<span class="text-secondary">· General Physician</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 328,000</span>
+<span class="text-label-sm font-label-sm text-secondary">(17.8%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 52%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 13.6%;"></div>
+</div>
+</div>
+<!-- Alwis -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container text-secondary flex items-center justify-center text-[12px] font-bold">3</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. Priyantha Alwis</span>
+<span class="text-secondary">· Pediatrician</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 290,000</span>
+<span class="text-label-sm font-label-sm text-secondary">(15.7%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 44%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 14%;"></div>
+</div>
+</div>
+<!-- Fonseka -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container text-secondary flex items-center justify-center text-[12px] font-bold">4</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. Nimal Fonseka</span>
+<span class="text-secondary">· Orthopedic Surgeon</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 275,000</span>
+<span class="text-label-sm font-label-sm text-secondary">(14.9%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 32%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 23%;"></div>
+</div>
+</div>
+<!-- Silva -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container text-secondary flex items-center justify-center text-[12px] font-bold">5</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. Anoma Silva</span>
+<span class="text-secondary">· Dermatologist</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 245,000</span>
+<span class="text-label-sm font-label-sm text-secondary">(13.3%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 35%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 14%;"></div>
+</div>
+</div>
+<!-- Perera -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-surface-container text-secondary flex items-center justify-center text-[12px] font-bold">6</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Dr. Ruwan Perera</span>
+<span class="text-secondary">· ENT Specialist</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data font-semibold text-on-surface">LKR 222,000</span>
+<span class="text-label-sm font-label-sm text-secondary">(12.0%)</span>
+</div>
+</div>
+<div class="h-3 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full transition-all duration-500" style="width: 30%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full transition-all duration-500" style="width: 14.4%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Doctor Revenue Table -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Header of the Table card -->
+<div class="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-lowest">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">table_chart</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Physician Financial Summary</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">6 practicing physicians documented for this period</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1" id="export-csv-btn">
+<span class="material-symbols-outlined text-[16px]">download</span>
+          Export CSV
+        </button>
+<button class="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1" id="print-report-btn">
+<span class="material-symbols-outlined text-[16px]">print</span>
+          Print
+        </button>
+</div>
+</div>
+<!-- Responsive Table Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11">
+<th class="px-space-md py-2.5 font-semibold">Doctor</th>
+<th class="px-space-md py-2.5 font-semibold">Specialty</th>
+<th class="px-space-md py-2.5 font-semibold">Branch</th>
+<th class="px-space-md py-2.5 font-semibold text-right">Appointments Completed</th>
+<th class="px-space-md py-2.5 font-semibold text-right">Revenue (LKR)</th>
+<th class="px-space-md py-2.5 font-semibold text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-subtle font-body-md text-body-md text-on-surface" id="doctors-table-body">
+<!-- Row 1: Dr. K. Bandara -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="310,000" data-consults="64" data-doctor="Dr. K. Bandara" data-procedure-rev="175,000" data-revenue="485,000" data-specialty="Cardiology">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  KB
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. K. Bandara</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-48201</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                Cardiology Specialist
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">64</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 485,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="64" data-consult-rev="310,000" data-doctor-name="Dr. K. Bandara" data-procedure-rev="175,000" data-specialty="Cardiology Specialist" data-total="485,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+<!-- Row 2: Dr. Sarah Jayasinghe -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="260,000" data-consults="82" data-doctor="Dr. Sarah Jayasinghe" data-procedure-rev="68,000" data-revenue="328,000" data-specialty="General OPD">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  SJ
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. Sarah Jayasinghe</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-51922</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                General Physician
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">82</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 328,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="82" data-consult-rev="260,000" data-doctor-name="Dr. Sarah Jayasinghe" data-procedure-rev="68,000" data-specialty="General Physician" data-total="328,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+<!-- Row 3: Dr. Priyantha Alwis -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="220,000" data-consults="58" data-doctor="Dr. Priyantha Alwis" data-procedure-rev="70,000" data-revenue="290,000" data-specialty="Pediatrics">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  PA
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. Priyantha Alwis</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-39180</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                Pediatrician
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">58</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 290,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="58" data-consult-rev="220,000" data-doctor-name="Dr. Priyantha Alwis" data-procedure-rev="70,000" data-specialty="Pediatrician" data-total="290,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+<!-- Row 4: Dr. Nimal Fonseka -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="160,000" data-consults="45" data-doctor="Dr. Nimal Fonseka" data-procedure-rev="115,000" data-revenue="275,000" data-specialty="Orthopedics">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  NF
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. Nimal Fonseka</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-41299</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                Orthopedic Surgeon
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">45</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 275,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="45" data-consult-rev="160,000" data-doctor-name="Dr. Nimal Fonseka" data-procedure-rev="115,000" data-specialty="Orthopedic Surgeon" data-total="275,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+<!-- Row 5: Dr. Anoma Silva -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="175,000" data-consults="52" data-doctor="Dr. Anoma Silva" data-procedure-rev="70,000" data-revenue="245,000" data-specialty="Dermatology">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  AS
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. Anoma Silva</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-46733</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                Dermatologist
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">52</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 245,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="52" data-consult-rev="175,000" data-doctor-name="Dr. Anoma Silva" data-procedure-rev="70,000" data-specialty="Dermatologist" data-total="245,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+<!-- Row 6: Dr. Ruwan Perera -->
+<tr class="doctor-row hover:bg-surface-subtle/70 transition-colors" data-consult-rev="150,000" data-consults="41" data-doctor="Dr. Ruwan Perera" data-procedure-rev="72,000" data-revenue="222,000" data-specialty="ENT">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">
+                  RP
+                </div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">Dr. Ruwan Perera</div>
+<div class="font-body-sm text-body-sm text-secondary">Reg ID: SLMC-35619</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">
+                ENT Specialist
+              </span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span>Colombo Central Branch</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-semibold">41</span>
+</td>
+<td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">
+              LKR 222,000
+            </td>
+<td class="px-space-md py-3.5 text-center">
+<button class="view-breakdown-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1 mx-auto" data-completed="41" data-consult-rev="150,000" data-doctor-name="Dr. Ruwan Perera" data-procedure-rev="72,000" data-specialty="ENT Specialist" data-total="222,000">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                View Breakdown
+              </button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Empty State Container (Hidden by default) -->
+<div class="hidden py-space-3xl px-space-md flex flex-col items-center justify-center text-center" id="empty-state-view">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm">
+<span class="material-symbols-outlined text-[32px]">folder_off</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">
+          Try expanding your date range, resetting specialty filters, or searching for another physician name.
+        </p>
+<button class="mt-space-md px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors" id="empty-state-reset-btn">
+          Clear Filters
+        </button>
+</div>
+</div>
+<!-- Table Footer / Totals Bar -->
+<div class="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="text-body-sm font-body-sm text-secondary">
+        Showing 6 of 6 active branch doctors · Period locked: Sep 01 – Sep 30, 2026
+      </div>
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Appts:</span>
+<span class="font-mono-data text-mono-data font-bold text-on-surface">342</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Aggregate:</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">LKR 1,845,000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Breakdown Drawer / Modal Backdrop -->
+<div class="fixed inset-0 z-50 bg-brand-navy-deep/40 backdrop-blur-sm hidden items-center justify-center p-space-md transition-opacity" id="breakdown-modal">
+<div class="bg-surface-card rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col transform transition-transform">
+<!-- Modal Header -->
+<div class="p-space-lg bg-surface-container-low flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">analytics</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface" id="modal-doctor-name">Dr. K. Bandara</div>
+<div class="font-body-sm text-body-sm text-primary font-medium" id="modal-doctor-specialty">Cardiology Specialist</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-secondary hover:text-on-surface flex items-center justify-center transition-colors" id="modal-close-btn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-subtle">
+<span class="font-label-md text-label-md text-secondary">Location &amp; Branch</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Colombo Central Branch</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-space-sm rounded-lg bg-surface-subtle flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-secondary">Completed Sessions</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface" id="modal-doctor-completed">64</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-subtle flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-secondary">Gross Revenue</span>
+<span class="font-headline-md text-headline-md font-bold text-primary" id="modal-doctor-total">LKR 485,000</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs mt-space-2xs">
+<div class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Service Breakdown</div>
+<!-- Consultation Split Card -->
+<div class="p-space-sm rounded-xl bg-surface-subtle flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">stethoscope</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Consultation Charges</div>
+<div class="font-body-sm text-body-sm text-secondary">Regular clinic visit fees</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data font-bold text-on-surface" id="modal-consult-rev">LKR 310,000</div>
+<div class="font-label-sm text-label-sm text-secondary" id="modal-consult-percent">63.9%</div>
+</div>
+</div>
+<!-- Procedures Split Card -->
+<div class="p-space-sm rounded-xl bg-surface-subtle flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">biotech</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Procedures &amp; Diagnostics</div>
+<div class="font-body-sm text-body-sm text-secondary">In-clinic testing &amp; minor surgery</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data font-bold text-on-surface" id="modal-procedure-rev">LKR 175,000</div>
+<div class="font-label-sm text-label-sm text-secondary" id="modal-procedure-percent">36.1%</div>
+</div>
+</div>
+</div>
+<!-- Visual Distribution Bar in Modal -->
+<div class="flex flex-col gap-1.5 mt-space-2xs">
+<div class="flex justify-between text-label-sm font-label-sm text-secondary">
+<span>Consultations Split</span>
+<span>Procedures Split</span>
+</div>
+<div class="h-2.5 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary h-full rounded-l-full" id="modal-bar-consult" style="width: 63.9%;"></div>
+<div class="bg-brand-teal-light h-full rounded-r-full" id="modal-bar-proc" style="width: 36.1%;"></div>
+</div>
+</div>
+</div>
+<!-- Modal Actions -->
+<div class="p-space-md bg-surface-container-low flex justify-end gap-space-sm">
+<button class="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors" id="modal-dismiss-btn">
+          Done
+        </button>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    (function() {
+      // Elements
+      const specialtyFilter = document.getElementById('specialty-filter');
+      const searchInput = document.getElementById('search-doctor-input');
+      const applyBtn = document.getElementById('apply-filters-btn');
+      const resetBtn = document.getElementById('reset-filters-btn');
+      const emptyResetBtn = document.getElementById('empty-state-reset-btn');
+      const rows = document.querySelectorAll('.doctor-row');
+      const emptyState = document.getElementById('empty-state-view');
+      const modal = document.getElementById('breakdown-modal');
+      const modalClose = document.getElementById('modal-close-btn');
+      const modalDismiss = document.getElementById('modal-dismiss-btn');
+
+      // Breakdown elements
+      const mDoc = document.getElementById('modal-doctor-name');
+      const mSpec = document.getElementById('modal-doctor-specialty');
+      const mCompleted = document.getElementById('modal-doctor-completed');
+      const mTotal = document.getElementById('modal-doctor-total');
+      const mConsult = document.getElementById('modal-consult-rev');
+      const mProc = document.getElementById('modal-procedure-rev');
+      const mConsultPct = document.getElementById('modal-consult-percent');
+      const mProcPct = document.getElementById('modal-procedure-percent');
+      const mBarConsult = document.getElementById('modal-bar-consult');
+      const mBarProc = document.getElementById('modal-bar-proc');
+
+      // Filter Logic
+      function applyFiltering() {
+        const selectedSpecialty = specialtyFilter.value.toLowerCase();
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+          const docName = (row.dataset.doctor || '').toLowerCase();
+          const docSpecialty = (row.dataset.specialty || '').toLowerCase();
+
+          const matchesSpecialty = (selectedSpecialty === 'all specialties') || 
+                                   docSpecialty.includes(selectedSpecialty) || 
+                                   selectedSpecialty.includes(docSpecialty);
+
+          const matchesSearch = !query || docName.includes(query);
+
+          if (matchesSpecialty && matchesSearch) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+
+      function resetAllFilters() {
+        specialtyFilter.value = 'All Specialties';
+        searchInput.value = '';
+        applyFiltering();
+      }
+
+      applyBtn.addEventListener('click', applyFiltering);
+      resetBtn.addEventListener('click', resetAllFilters);
+      if (emptyResetBtn) {
+        emptyResetBtn.addEventListener('click', resetAllFilters);
+      }
+      searchInput.addEventListener('input', applyFiltering);
+      specialtyFilter.addEventListener('change', applyFiltering);
+
+      // Modal Drawer Handlers
+      document.querySelectorAll('.view-breakdown-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const doc = btn.dataset.doctorName;
+          const spec = btn.dataset.specialty;
+          const comp = btn.dataset.completed;
+          const totalStr = btn.dataset.total;
+          const consultStr = btn.dataset.consultRev;
+          const procStr = btn.dataset.procedureRev;
+
+          const totalNum = parseInt(totalStr.replace(/,/g, ''), 10);
+          const consultNum = parseInt(consultStr.replace(/,/g, ''), 10);
+          const procNum = parseInt(procStr.replace(/,/g, ''), 10);
+
+          const consultPct = Math.round((consultNum / totalNum) * 100);
+          const procPct = 100 - consultPct;
+
+          mDoc.textContent = doc;
+          mSpec.textContent = spec;
+          mCompleted.textContent = comp;
+          mTotal.textContent = 'LKR ' + totalStr;
+          mConsult.textContent = 'LKR ' + consultStr;
+          mProc.textContent = 'LKR ' + procStr;
+          mConsultPct.textContent = consultPct + '%';
+          mProcPct.textContent = procPct + '%';
+
+          mBarConsult.style.width = consultPct + '%';
+          mBarProc.style.width = procPct + '%';
+
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+      });
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      modalClose.addEventListener('click', closeModal);
+      modalDismiss.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      // Simple print mock
+      const printBtn = document.getElementById('print-report-btn');
+      if (printBtn) {
+        printBtn.addEventListener('click', () => {
+          window.print();
+        });
+      }
+
+      // Simple CSV export feedback
+      const exportBtn = document.getElementById('export-csv-btn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          exportBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Exporting...';
+          setTimeout(() => {
+            exportBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span> Downloaded';
+            setTimeout(() => {
+              exportBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">download</span> Export CSV';
+            }, 2000);
+          }, 600);
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

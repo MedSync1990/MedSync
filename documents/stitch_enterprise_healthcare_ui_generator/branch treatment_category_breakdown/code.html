@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#00628d","secondary":"#565e74","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-secondary":"#ffffff","tertiary-fixed-dim":"#89ceff","primary":"#006194","background":"#f8f9ff","tertiary-container":"#007cb1","status-pending-text":"#B45309","surface-container-low":"#eff4ff","error":"#ba1a1a","primary-fixed-dim":"#93ccff","inverse-primary":"#93ccff","on-tertiary-fixed":"#001e2f","surface":"#f8f9ff","on-primary":"#ffffff","error-container":"#ffdad6","on-primary-fixed-variant":"#004b73","on-background":"#0b1c30","status-cancelled-bg":"#FFE4E6","secondary-fixed":"#dae2fd","surface-container-highest":"#d3e4fe","tertiary-fixed":"#c9e6ff","secondary-fixed-dim":"#bec6e0","outline-variant":"#bfc7d2","surface-variant":"#d3e4fe","status-completed-text":"#047857","status-scheduled-text":"#0369A1","status-pending-bg":"#FEF3C7","surface-subtle":"#F1F5F9","status-completed-bg":"#D1FAE5","inverse-surface":"#213145","inverse-on-surface":"#eaf1ff","on-tertiary":"#ffffff","on-error":"#ffffff","on-surface-variant":"#3f4850","status-cancelled-text":"#BE123C","surface-container-lowest":"#ffffff","surface-tint":"#006398","brand-teal-light":"#38BDF8","surface-container-high":"#dce9ff","surface-card":"#FFFFFF","on-primary-fixed":"#001d31","outline":"#707881","on-primary-container":"#fdfcff","on-secondary-fixed":"#131b2e","on-secondary-container":"#5c647a","canvas-bg":"#F8FAFC","surface-bright":"#f8f9ff","status-scheduled-bg":"#E0F2FE","brand-navy-deep":"#0F172A","primary-fixed":"#cce5ff","secondary-container":"#dae2fd","surface-container":"#e5eeff","border-focus":"#0284C7","on-error-container":"#93000a","on-tertiary-fixed-variant":"#004c6e","on-secondary-fixed-variant":"#3f465c","border-subtle":"#E2E8F0","primary-container":"#007bb9","on-surface":"#0b1c30"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"content-max-width":"1600px","sidebar-collapsed-width":"72px","space-2xs":"0.25rem","space-md":"1rem","space-xs":"0.5rem","space-lg":"1.5rem","sidebar-width":"260px","gutter-desktop":"1.5rem","space-xl":"2rem","topbar-height":"68px","space-3xl":"3rem","space-2xl":"2.5rem","gutter-mobile":"1rem","space-sm":"0.75rem"},fontFamily:{"label-md":["inter"],"body-md":["inter"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-lg":["inter"],"headline-md":["plusJakartaSans"],"display-lg-mobile":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"headline-lg":["plusJakartaSans"],"body-lg":["inter"],"mono-data":["inter"],"label-sm":["inter"]},fontSize:{"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-lg":["14px",{lineHeight:"20px",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"mono-data":["13px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"500"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.05em",fontWeight:"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-lg"><div class="px-space-lg flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Healthcare System</div></div></div><nav class="flex flex-col px-space-sm gap-space-2xs" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r"><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-lg text-label-lg">Dashboard</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Reports</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-label-lg text-label-lg">Appointment Summary</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-label-lg text-label-lg">Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">pending_actions</span><span class="font-label-lg text-label-lg">Outstanding Balances</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 transition-all bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg shadow-sm before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span class="font-label-lg text-label-lg">Category Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">verified_user</span><span class="font-label-lg text-label-lg">Insurance vs. OOP</span></a><div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-outline uppercase tracking-wider">Branch</div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span class="font-label-lg text-label-lg">Manage Branches</span></a></nav></div><div class="px-space-sm flex flex-col gap-space-2xs"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-lg text-label-lg">Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span class="font-label-lg text-label-lg">Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="font-label-lg text-label-lg">Logout</span></a></div></aside><div class="pl-sidebar-width"><header class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Branch Manager Portal</div></div></div><div class="flex items-center gap-space-lg"><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-sm text-label-sm font-semibold">Colombo Central Branch (Locked)</span></div><div class="flex items-center gap-space-xs"><button aria-label="Toggle Theme" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Good morning, Chaminda</div><div class="font-label-sm text-label-sm text-on-surface-variant">Branch Manager · Colombo Central Branch</div></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-highest" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/></div></div></header><main class="relative pt-topbar-height bg-surface min-h-screen w-full px-gutter-desktop py-space-xl max-w-content-max-width mx-auto"><div class="flex flex-col w-full gap-space-xl">
+<!-- Top Header & locked context panel -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">pie_chart</span>
+<span>CLINICAL REPORTING &amp; UTILIZATION</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">Treatment Category Breakdown</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Number of treatments performed per category over a period. Analysis encompasses operational frequency, clinical demand distribution, and branch procedure revenue.
+      </p>
+</div>
+<!-- Period Selector Filter Form -->
+<div class="flex flex-wrap items-center gap-space-sm bg-surface-container-low p-space-xs rounded-xl">
+<div class="flex items-center gap-space-xs px-space-sm py-1.5 bg-surface-card rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">calendar_today</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline leading-none">Reporting Period</span>
+<select class="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer pr-space-xs" id="periodSelector">
+<option selected="" value="current">Current Month — Sep 2026</option>
+<option value="last_month">Last Month — Aug 2026</option>
+<option value="last_quarter">Last Quarter — Q2 2026</option>
+<option value="empty_test">Previous Year — 2025 (Empty)</option>
+</select>
+</div>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-2 text-on-surface-variant bg-surface-card/60 rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+<span class="font-mono-data text-mono-data">Colombo Central Branch</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-lg h-[42px] bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg rounded-lg shadow-sm transition-all active:scale-[0.98]" id="applyFiltersBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+<span>Apply Filters</span>
+</button>
+</div>
+</div>
+<!-- KPI Summaries (4 Column Grid) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Total Treatments</span>
+<div class="font-display-lg text-display-lg text-on-surface mt-1 font-bold">642</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">medical_services</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs mt-space-md pt-space-xs text-status-completed-text font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+14.2% vs previous period</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Top Category</span>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-1 font-bold truncate max-w-[180px]" title="Diagnostics &amp; Laboratory">Diagnostics &amp; Lab</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[24px]">biotech</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-md text-label-md text-primary font-bold">42% of volume</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">270 procedures</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-tertiary/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Total Treatment Value</span>
+<div class="font-headline-lg text-headline-lg text-on-surface mt-1 font-bold tracking-tight">LKR 2,450,000</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">payments</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs mt-space-md pt-space-xs text-status-completed-text font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Avg LKR 3,816 / patient visit</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Catalog Active Items</span>
+<div class="font-display-lg text-display-lg text-on-surface mt-1 font-bold">38 <span class="text-body-md font-body-md text-outline font-normal">/ 54 items</span></div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">fact_check</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs mt-space-md pt-space-xs text-on-surface-variant font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span>70.3% catalog utilization</span>
+</div>
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-secondary/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+</div>
+<!-- Visual Analytics & Category Share Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg" id="analyticsSection">
+<!-- Donut Visualization Panel (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Category Share</h2>
+<span class="font-label-sm text-label-sm px-space-xs py-1 rounded-full bg-surface-container-high text-on-surface-variant">By Volume</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Relative frequency of treatments delivered at Colombo Central.</p>
+</div>
+<!-- Donut Chart SVG Container -->
+<div class="relative flex items-center justify-center my-space-lg">
+<svg class="w-48 h-48 -rotate-90 transform" viewbox="0 0 200 200">
+<!-- Diagnostics 42% (circumference: ~502.65, stroke-dasharray = 211.1 502.65) -->
+<circle class="transition-all duration-700 hover:opacity-90" cx="100" cy="100" fill="none" r="80" stroke="#006194" stroke-dasharray="211.1 502.65" stroke-dashoffset="0" stroke-width="26"></circle>
+<!-- Consultations 28% (stroke-dasharray = 140.7 502.65) offset = -211.1 -->
+<circle class="transition-all duration-700 hover:opacity-90" cx="100" cy="100" fill="none" r="80" stroke="#007cb1" stroke-dasharray="140.7 502.65" stroke-dashoffset="-211.1" stroke-width="26"></circle>
+<!-- Cardiology Procedures 18% (stroke-dasharray = 90.5 502.65) offset = -351.8 -->
+<circle class="transition-all duration-700 hover:opacity-90" cx="100" cy="100" fill="none" r="80" stroke="#38BDF8" stroke-dasharray="90.5 502.65" stroke-dashoffset="-351.8" stroke-width="26"></circle>
+<!-- Minor Procedures 8% (stroke-dasharray = 40.2 502.65) offset = -442.3 -->
+<circle class="transition-all duration-700 hover:opacity-90" cx="100" cy="100" fill="none" r="80" stroke="#565e74" stroke-dasharray="40.2 502.65" stroke-dashoffset="-442.3" stroke-width="26"></circle>
+<!-- Pharmacy Items 4% (stroke-dasharray = 20.1 502.65) offset = -482.5 -->
+<circle class="transition-all duration-700 hover:opacity-90" cx="100" cy="100" fill="none" r="80" stroke="#93ccff" stroke-dasharray="20.1 502.65" stroke-dashoffset="-482.5" stroke-width="26"></circle>
+</svg>
+<!-- Center Label -->
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+<span class="font-display-lg text-display-lg text-on-surface font-bold leading-none">642</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline mt-1">Procedures</span>
+</div>
+</div>
+<!-- Donut Legend Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-y-space-xs gap-x-space-md pt-space-xs bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center gap-space-2xs">
+<span class="w-3 h-3 rounded-full bg-primary flex-shrink-0"></span>
+<div class="truncate">
+<div class="font-label-sm text-label-sm text-on-surface truncate">Diagnostics</div>
+<div class="font-mono-data text-[11px] text-primary font-bold">42%</div>
+</div>
+</div>
+<div class="flex items-center gap-space-2xs">
+<span class="w-3 h-3 rounded-full bg-tertiary-container flex-shrink-0"></span>
+<div class="truncate">
+<div class="font-label-sm text-label-sm text-on-surface truncate">Consultations</div>
+<div class="font-mono-data text-[11px] text-tertiary-container font-bold">28%</div>
+</div>
+</div>
+<div class="flex items-center gap-space-2xs">
+<span class="w-3 h-3 rounded-full bg-brand-teal-light flex-shrink-0"></span>
+<div class="truncate">
+<div class="font-label-sm text-label-sm text-on-surface truncate">Cardiology</div>
+<div class="font-mono-data text-[11px] text-primary-container font-bold">18%</div>
+</div>
+</div>
+<div class="flex items-center gap-space-2xs">
+<span class="w-3 h-3 rounded-full bg-secondary flex-shrink-0"></span>
+<div class="truncate">
+<div class="font-label-sm text-label-sm text-on-surface truncate">Minor Proc.</div>
+<div class="font-mono-data text-[11px] text-secondary font-bold">8%</div>
+</div>
+</div>
+<div class="flex items-center gap-space-2xs">
+<span class="w-3 h-3 rounded-full bg-primary-fixed-dim flex-shrink-0"></span>
+<div class="truncate">
+<div class="font-label-sm text-label-sm text-on-surface truncate">Pharmacy Items</div>
+<div class="font-mono-data text-[11px] text-primary font-bold">4%</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Category Progress Distribution Bars & Clinical Context (7 cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Volume &amp; Capacity Impact</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Breakdown metrics detailing operational delivery load per clinical specialty.</p>
+</div>
+<span class="material-symbols-outlined text-outline">bar_chart</span>
+</div>
+<div class="space-y-space-md mt-space-md">
+<!-- Item 1: Diagnostics & Lab -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-lg text-label-lg text-on-surface font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                Diagnostics &amp; Laboratory
+              </span>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface-variant">270 ops</span>
+<span class="font-label-md text-label-md text-primary font-bold">42%</span>
+</div>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-700" style="width: 42%;"></div>
+</div>
+</div>
+<!-- Item 2: Consultations -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-lg text-label-lg text-on-surface font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+                Specialist &amp; OPD Consultations
+              </span>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface-variant">180 ops</span>
+<span class="font-label-md text-label-md text-tertiary font-bold">28%</span>
+</div>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full transition-all duration-700" style="width: 28%;"></div>
+</div>
+</div>
+<!-- Item 3: Cardiology Procedures -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-lg text-label-lg text-on-surface font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-brand-teal-light"></span>
+                Cardiology Procedures (ECG/Echo)
+              </span>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface-variant">115 ops</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">18%</span>
+</div>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-brand-teal-light rounded-full transition-all duration-700" style="width: 18%;"></div>
+</div>
+</div>
+<!-- Item 4: Minor Surgical -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-lg text-label-lg text-on-surface font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                Minor Procedures &amp; Suturing
+              </span>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface-variant">51 ops</span>
+<span class="font-label-md text-label-md text-secondary font-bold">8%</span>
+</div>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full transition-all duration-700" style="width: 8%;"></div>
+</div>
+</div>
+<!-- Item 5: Pharmacy Items -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-lg text-label-lg text-on-surface font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span>
+                Pharmacy Injections &amp; Direct Admin
+              </span>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface-variant">26 ops</span>
+<span class="font-label-md text-label-md text-primary font-bold">4%</span>
+</div>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim rounded-full transition-all duration-700" style="width: 4%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Efficiency Note / Clinical Summary Footnote -->
+<div class="mt-space-lg p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">info</span>
+<span class="font-body-sm text-body-sm text-on-surface">Diagnostic turnover rate matches operational target for Q3 (94.2% within standard turnaround).</span>
+</div>
+<button class="font-label-sm text-label-sm text-primary font-semibold hover:underline" type="button">Download Audit PDF</button>
+</div>
+</div>
+</div>
+<!-- Detailed Table Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header Toolbar -->
+<div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-md bg-surface-container-lowest">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Treatment Item Performance Ledger</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-primary font-mono-data text-[12px] font-bold" id="activeCountBadge">6 Key Catalog Lines</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Granular breakdown of procedure frequency, market demand proportion, and monetary volume.</p>
+</div>
+<!-- Quick Search & Actions inside Table -->
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="pl-9 pr-space-sm h-[38px] bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm outline-none w-64 placeholder:text-outline focus:bg-surface-card focus:shadow-sm transition-all" id="tableSearchInput" placeholder="Filter treatment or category..." type="text"/>
+</div>
+<button aria-label="Export Data" class="h-[38px] px-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span class="hidden sm:inline">Export CSV</span>
+</button>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low h-11 text-outline font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="px-space-lg font-bold">Category</th>
+<th class="px-space-md font-bold">Treatment Item</th>
+<th class="px-space-md font-bold text-right">Count</th>
+<th class="px-space-md font-bold text-right">% of Total</th>
+<th class="px-space-lg font-bold text-right">Subtotal Revenue (LKR)</th>
+<th class="px-space-md font-bold text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-md text-body-md text-on-surface" id="treatmentTableBody">
+<!-- Row 1 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed/50 text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                Diagnostics &amp; Lab
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">12-Lead ECG</div>
+<div class="font-body-sm text-body-sm text-outline">Code: MED-DX-102 · General Electrocardiogram</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">142</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-primary font-bold">22.1%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-primary h-full rounded-full" style="width: 22.1%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 284,000</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> In Stock
+              </span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed/50 text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                Diagnostics &amp; Lab
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">Lipid Profile Panel</div>
+<div class="font-body-sm text-body-sm text-outline">Code: LAB-BL-409 · Fasting Serum Profile</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">118</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-primary font-bold">18.4%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-primary h-full rounded-full" style="width: 18.4%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 354,000</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> In Stock
+              </span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
+                Specialist Consultations
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">Specialist Consultation</div>
+<div class="font-body-sm text-body-sm text-outline">Code: CNS-SP-001 · Senior Consultant Session</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">96</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-tertiary font-bold">15.0%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-tertiary h-full rounded-full" style="width: 15.0%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 480,000</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Standard
+              </span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-teal-light"></span>
+                Cardiology Procedures
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">2D Echo (Echocardiogram)</div>
+<div class="font-body-sm text-body-sm text-outline">Code: CRD-US-204 · Transthoracic Ultrasound</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">74</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-primary font-bold">11.5%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-brand-teal-light h-full rounded-full" style="width: 11.5%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 518,000</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Available
+              </span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed/50 text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                Diagnostics &amp; Lab
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">RBS Blood Glucose</div>
+<div class="font-body-sm text-body-sm text-outline">Code: LAB-GL-011 · Rapid Capillary Test</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">65</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-primary font-bold">10.1%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-primary h-full rounded-full" style="width: 10.1%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 32,500</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> High Stock
+              </span>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="h-14 hover:bg-surface-container-low/70 transition-colors group">
+<td class="px-space-lg py-space-sm whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Minor Surgical
+              </span>
+</td>
+<td class="px-space-md py-space-sm">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">Suturing &amp; Wound Dressing</div>
+<div class="font-body-sm text-body-sm text-outline">Code: SUR-MN-303 · Laceration Repair</div>
+</td>
+<td class="px-space-md py-space-sm text-right font-mono-data text-mono-data font-semibold text-on-surface">42</td>
+<td class="px-space-md py-space-sm text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-mono-data text-mono-data text-secondary font-bold">6.5%</span>
+<div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden hidden md:block">
+<div class="bg-secondary h-full rounded-full" style="width: 6.5%"></div>
+</div>
+</div>
+</td>
+<td class="px-space-lg py-space-sm text-right font-mono-data text-mono-data font-bold text-on-surface">LKR 168,000</td>
+<td class="px-space-md py-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">medical_services</span> OT Ready
+              </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State Container (Hidden by default, shown if no results) -->
+<div class="hidden flex-col items-center justify-center p-space-3xl text-center" id="emptyState">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-outline mb-space-md">
+<span class="material-symbols-outlined text-[32px]">folder_off</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold">No data available for the selected criteria.</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">
+        There are no treatment records matching this date scope or search filter for the Colombo Central Branch.
+      </p>
+<button class="mt-space-lg px-space-lg h-[40px] bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:bg-primary-container transition-colors" id="resetFiltersBtn" type="button">
+        Reset Criteria
+      </button>
+</div>
+<!-- Footer Summary of the Table -->
+<div class="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm text-on-surface-variant" id="tableFooter">
+<div class="font-mono-data text-mono-data flex items-center gap-1">
+<span>Showing</span>
+<span class="font-bold text-on-surface">6</span>
+<span>of</span>
+<span class="font-bold text-on-surface">38</span>
+<span>utilized catalog treatments</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-outline">Branch Ledger Code: CCB-2026-TREAT</span>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<span class="font-label-sm text-label-sm text-status-completed-text font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+          Audit Synced
+        </span>
+</div>
+</div>
+</div>
+<!-- Operational Insights & Contextual Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">vaccines</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Consumable Utilization</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        Diagnostic assays and ECG conductive gel restock request was auto-triggered due to high September volume (142 ECGs).
+      </p>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-label-md text-label-md">
+<span class="text-status-completed-text font-semibold">Inventory Normal</span>
+<span class="font-mono-data text-mono-data text-outline">Reorder in 8 days</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[20px]">schedule_send</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Peak Day Demand</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        Mondays and Thursdays accounted for 48% of all laboratory tests and cardiac screenings at this facility.
+      </p>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-label-md text-label-md">
+<span class="text-primary font-semibold">Colombo Central Hub</span>
+<span class="font-mono-data text-mono-data text-outline">Peak: 09:00 - 11:30 AM</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">shield_with_heart</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Quality Standards</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+        100% of performed wound care and surgical dressing procedures followed sterile field verification protocols.
+      </p>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-label-md text-label-md">
+<span class="text-status-completed-text font-semibold">0 Adverse Incidents</span>
+<span class="font-mono-data text-mono-data text-outline">Grade A Audit</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const periodSelector = document.getElementById('periodSelector');
+    const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const tableSearchInput = document.getElementById('tableSearchInput');
+    const tableBody = document.getElementById('treatmentTableBody');
+    const emptyState = document.getElementById('emptyState');
+    const tableFooter = document.getElementById('tableFooter');
+    const activeCountBadge = document.getElementById('activeCountBadge');
+    const analyticsSection = document.getElementById('analyticsSection');
+
+    // Filter Trigger
+    function handlePeriodChange() {
+      const val = periodSelector.value;
+      if (val === 'empty_test') {
+        // Trigger empty state
+        tableBody.classList.add('hidden');
+        tableFooter.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        activeCountBadge.textContent = '0 Treatments';
+      } else {
+        tableBody.classList.remove('hidden');
+        tableFooter.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+        activeCountBadge.textContent = '6 Key Catalog Lines';
+        filterTable();
+      }
+    }
+
+    // Interactive Search
+    function filterTable() {
+      if (periodSelector.value === 'empty_test') return;
+      const query = tableSearchInput.value.toLowerCase().trim();
+      const rows = tableBody.querySelectorAll('tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(query)) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      if (visibleCount === 0) {
+        tableBody.classList.add('hidden');
+        tableFooter.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        activeCountBadge.textContent = '0 Treatments';
+      } else {
+        tableBody.classList.remove('hidden');
+        tableFooter.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+        activeCountBadge.textContent = visibleCount + ' Treatments Shown';
+      }
+    }
+
+    applyFiltersBtn.addEventListener('click', handlePeriodChange);
+    periodSelector.addEventListener('change', handlePeriodChange);
+    tableSearchInput.addEventListener('input', filterTable);
+
+    resetFiltersBtn.addEventListener('click', function() {
+      periodSelector.value = 'current';
+      tableSearchInput.value = '';
+      handlePeriodChange();
+    });
+  })();
+</script></main></div></body></html>

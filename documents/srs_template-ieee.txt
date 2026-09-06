@@ -1,0 +1,960 @@
+﻿Software Requirements Specification
+for
+MedSync
+Version 1.0 annotated Version
+Prepared by 
+
+Jayarathne D.G.S.A 240268R
+Jayawardena W.K.I 240296B
+Garusinghe E.H.C.I 240187R
+Thilakarathna D.D.D 240663A
+Silva W.A.A.T 240625K
+Group 4
+2026.07.27
+Table of Contents
+1. Introduction        1
+1.1 Purpose        1
+1.2 Document Conventions        1
+1.3 Intended Audience and Reading Suggestions        1
+1.4 Product Scope        2
+1.5 References        3
+2. Overall Description        3
+2.1 Product Perspective        3
+2.2 Product Functions        4
+2.3 User Classes and Characteristics        4
+2.4 Operating Environment        5
+2.5 Design and Implementation Constraints        6
+2.6 User Documentation        6
+2.7 Assumptions and Dependencies        7
+3. External Interface Requirements        7
+3.1 User Interfaces        7
+3.2 Hardware Interfaces        9
+3.3 Software Interfaces        9
+3.4 Communications Interfaces        11
+4. System Features        11
+4.1 User Authentication and Access Control        11
+4.2 Branch and Staff Management        13
+4.3 Doctor and Specialty Management        15
+4.4 Patient Management        17
+4.5 Appointment Management        18
+4.6 Consultation and Treatment Management        20
+4.7 Treatment Catalogue Management        22
+4.8 Billing and Payment Management        24
+4.9 Insurance Management        25
+4.10 Reporting and Analytics        27
+4.11 Database Management and Integrity        29
+5. Other Nonfunctional Requirements        31
+5.1 Performance Requirements        31
+5.2 Safety Requirement        32
+5.3 Security Requirements        33
+5.4 Software Quality Attributes        33
+5.5 Business Rules        34
+6. Other Requirements………………………………………………………………………………...35
+Appendix A:Glossary……………………………………………………………………………...35     
+Appendix B: Analysis Models…………………………………………………………………. 36
+Appendix C: To Be Determined List……………………………………………………………37
+
+
+Revision History
+Name
+	Date
+	Reason For Changes
+	Version
+	Group 4
+	2026.07.27
+	Initial Draft Creation
+	1.0
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+1. Introduction
+   1. Purpose 
+This Software Requirements Specification (SRS) document describes the requirements for the Clinic Appointment and Treatment Management System (CATMS) developed for MedSync, a multi-specialty clinic operating across multiple branches.
+The purpose of this system is to design and implement a scalable database-driven solution to replace the existing paper-based and Excel-based processes used for managing clinic operations. The system aims to improve data consistency, accessibility, and efficiency by maintaining centralized patient, appointment, treatment, and billing information.
+The scope of this SRS covers the first phase of the CATMS development, which focuses on digitizing appointment booking, treatment recording, and billing processes. This phase includes database design, data management, transaction handling, and supporting user interfaces required for testing key functionalities.
+   2. Document Conventions
+This Software Requirements Specification (SRS) follows the IEEE 29148 Software Requirements Specification standard. The following conventions are used throughout the document:
+
+* Headings and subheadings are numbered hierarchically (e.g., 1, 1.1, 1.1.1) for clarity and organization.
+* The keyword "shall" indicates a mandatory system requirement.
+* The keyword "should" indicates a recommended requirement.
+* The keyword "may" indicates an optional or future enhancement.
+* Functional requirements are identified using the prefix FR (e.g., FR-01), while non-functional requirements are identified using the prefix NFR (e.g., NFR-01).
+* Database entities, table names, attributes, and SQL keywords are written in a monospace font where appropriate (e.g Patient, Appointment, Invoice, PRIMARY KEY)
+* Acronyms and technical terms used in this document are defined in Appendix A: Glossary.
+   1. Intended Audience and Reading Suggestions
+This Software Requirements Specification (SRS) is intended for the following stakeholders:
+* Project Supervisor/Lecturer – To review the project objectives, scope, requirements, and overall system design.
+* Developers – To understand the functional and non-functional requirements, database design, and system interfaces for implementation.
+* Database Designers – To design and implement the database schema, relationships, constraints, procedures, triggers, and indexes.
+* Quality Assurance (QA) Testers – To verify that the implemented system satisfies the specified functional requirements and supports the required workflows.
+* Project Team Members – To ensure a common understanding of the system requirements, responsibilities, and project objectives.
+This document is organized as follows:
+* Section 1 – Introduction: Provides the purpose, scope, definitions, document conventions, intended audience, and references.
+* Section 2 – Overall Description: Describes the system perspective, product functions, user classes, operating environment, constraints, assumptions, and dependencies.
+* Section 3 – External Interface Requirements: Defines the user, hardware, software, and communication interfaces.
+* Section 4 – System Features: Specifies the functional requirements of the system.
+* Section 5 – Non-functional Requirements: Describes performance, security, reliability, usability, and other quality attributes.
+* Appendices: Contain the glossary and analysis models, including the Entity-Relationship Diagram (ERD), Use Case Diagram, and other supporting models.
+Readers are encouraged to begin with Section 1 (Introduction) to understand the project objectives, continue with Section 2 (Overall Description) for the system context, and then refer to the remaining sections based on their roles. Developers and database designers should pay particular attention to Sections 3–6, while QA testers should focus on the System Features and External Interface Requirements to develop test cases.
+   2. Product Scope
+The MedSync Clinic Appointment and Treatment Management System (CATMS) is designed to provide an integrated and scalable solution for managing the clinic's appointment booking, treatment recording, and billing processes across multiple branches. The system replaces the existing paper-based records and spreadsheet-based workflows with a centralized database, improving data consistency, accessibility, and operational efficiency.
+The primary objective of the first phase is to design a robust and scalable database system that supports accurate appointment scheduling, treatment management, invoice generation, payment tracking, and insurance claim processing. The system also provides a web-based user interface to enable quality assurance testing of the core functionalities.
+The proposed solution aims to improve data integrity, reduce manual errors, streamline clinic operations, and provide reliable reporting to support management decision-making. Its scalable design allows future enhancements, such as additional clinic branches, new medical specialties, expanded reporting capabilities, and integration with other healthcare systems.
+
+
+   3. References
+[1] World Health Organization, “Digital health,” World Health Organization, Geneva, Switzerland. Accessed: Jul. 23, 2026. Available: https://www.who.int/health-topics/digital-health
+Use for: Digital transformation in healthcare, benefits of healthcare information system.
+[2] International Organization for Standardization, “ISO 27799:2016 Health informatics Information security management in health using ISO/IEC 27002,” ISO, Geneva, Switzerland, 2016.
+Use for: Healthcare information security, patient data protection.
+[3] OpenEMR Project, “OpenEMR: Open Source Electronic Health Records and Medical Practice Management,” OpenEMR. Accessed: Jul. 23, 2026. Available: https://www.open-emr.org/
+Use for: Appointment scheduling, patient management, billing workflows.
+[4] World Health Organization, Health Financing: Health Insurance. World Health Organization. Accessed: Jul. 23, 2026. Available: https://www.who.int/health-topics/health-financing
+Use for: Understanding healthcare financing models and insurance-based healthcare systems.
+[5] International Organization for Standardization, “ISO 9241-210:2019 Ergonomics of human-system interaction - Part 210: Human-centred design for interactive systems,” ISO, Geneva, Switzerland, 2019.
+Use for: User interface usability requirements for doctors, staff, and patients.
+Use for: Architectural constraints regarding ACID-compliant transaction processing and relational data integrity.
+2. Overall Description
+   1. Product Perspective
+The Clinic Appointment and Treatment Management System (CATMS) is a new, integrated software solution developed for MedSync. It serves as a direct replacement for the clinic's legacy, fragmented management system that relied on paper records and Excel sheets. CATMS is a self-contained, centralized web application designed to unify and streamline operations across MedSync's multiple branches located in Colombo, Kandy, and Galle. While a user interface will be built to facilitate testing, the primary architectural focus of this development phase is on establishing a robust, ACID-compliant database foundation. 
+   2. Product Functions
+The system will perform the following primary functions:
+* Patient Record Management: Register new patients at any branch and maintain unified records (personal details, emergency contacts, health insurance) accessible across all locations.
+* Appointment Scheduling: Book, reschedule, and cancel time slots between patients and doctors. The system will also support emergency walk-ins and explicitly prevent overlapping appointments for any single doctor.
+* Treatment and Consultation Tracking: Allow doctors to record consultation notes and prescribe one or multiple treatments from a pre-defined catalogue once an appointment is marked as 'Completed'.
+* Billing and Payments: Generate invoices based on completed treatments and consultation fees, process full or partial payments, and track outstanding patient dues.
+* Insurance Management: Calculate and apply full or partial reimbursements for treatments based on a patient's insurance policy terms.
+* Reporting: Generate daily branch summaries, doctor revenue reports, outstanding balance lists, treatment category statistics, and insurance versus out-of-pocket payment metrics.
+   1. User Classes and Characteristics
+The Clinic Appointment and Treatment Management System (CATMS) is designed to serve several distinct user classes, differentiated by their roles, required system functions, and security privilege levels.
+* System Administrator (Clinic Administrator)
+   * Characteristics: These users act as top-level operational management, sitting above the branch managers. They possess basic to moderate technical expertise and hold the highest business-level privileges within the system.
+   * System Usage: They are responsible for overarching clinic configuration and scaling. Their primary workflows include adding or updating clinic branches, assigning branch managers to specific locations (e.g., Colombo, Kandy, and Galle), and centrally registering new doctors and non-medical staff. 
+
+   * Branch Manager
+   * Characteristics: Branch managers oversee the operations of a specific clinic branch (Colombo, Kandy, or Galle). They have moderate technical expertise and elevated privileges compared to standard staff.
+   * System Usage: Their primary interaction with the system is analytical. They frequently access the reporting modules to generate branch-wise appointment summaries, monitor doctor-wise revenue, track treatment category metrics, and review outstanding patient balances.
+
+      * Doctor (Medical Staff)
+      * Characteristics: Doctors are a high-priority user class with moderate technical expertise. They are assigned to specific branches but may serve in more than one medical specialty (e.g., General Medicine, ENT, Paediatrics).
+      * System Usage: They require frequent access to the system to view their daily time slots, record consultation notes, and prescribe treatments from the pre-defined catalogue for completed appointments. The system must ensure their interface strictly prevents overlapping appointments.
+
+         * Receptionist (Non-Medical Staff)
+         * Characteristics: Receptionists are high-frequency, daily users with basic to moderate technical expertise. They act as the primary operational operators at the front desk of each branch.
+         * System Usage: They require a highly usable, fast-responding interface to register patients, update health insurance and emergency contact information, and manage the appointment calendar. Their workflows include booking, canceling, rescheduling, and processing emergency walk-ins.
+         * Patient
+         * Characteristics: Patients represent the largest volume of potential users but hold the lowest security privileges. Their technical expertise varies widely.
+         * System Usage: While their unified records are managed by clinic staff, patients interacting directly with the system (e.g., through a web portal) do so to view scheduled time slots, check outstanding partial or full billing dues, and review their treatment invoices.
+         2. Operating Environment
+The Clinic Appointment and Treatment Management System (CATMS) is a centralized web-based application designed to operate securely and concurrently across MedSync's multiple geographic branches (Colombo, Kandy, and Galle). The system utilizes a distributed client-server architecture.
+2.4.1.    Client-Side Environment:
+         * Hardware: Standard desktop computers, laptops, or tablet devices located at clinic reception desks, manager offices, and consultation rooms.
+         * Operating System: Platform-agnostic (Windows, macOS, or Linux).
+         * Web Browsers: Modern, standards-compliant web browsers including Google Chrome, Mozilla Firefox, Microsoft Edge, and Apple Safari.
+         * Frontend Framework: React with TypeScript.
+2.4.2.    Server-Side Environment:
+         * Hardware: A centralized cloud-based or on-premises server capable of handling concurrent network requests from all clinic branches.
+         * Operating System: A stable server operating system such as Linux (e.g., Ubuntu Server, Arch Linux, CentOS) or Windows Server.
+         * Backend Framework: FastAPI.
+2.4.3.    Database Environment:
+         * Database Management System: postgrace version 8.x.
+         * Storage Engine: The InnoDB storage engine is strictly required to enforce the mandated ACID (Atomicity, Consistency, Isolation, Durability) transaction properties for all appointment and billing records.
+         * Coexistence: The database must peacefully coexist with the FastAPI backend service, allowing seamless programmatic access via a python SQL driver or ORM (e.g., SQLAlchemy), and support secure backups without interrupting active clinic operations.
+         1. Design and Implementation Constraints
+         * Data Integrity Enforcement: The system must strictly enforce data consistency using primary keys and foreign keys.
+         * Procedural Logic: Complex business constraints and ACID properties must be guaranteed at the database level by employing stored procedures, functions, and triggers where appropriate.
+         * Performance Optimization: Database indexing must be implemented when necessary to ensure optimal query performance for searching and reporting.
+         * Data Population Method: While standard user interfaces shall be developed for core operational workflows (e.g., patient registration, appointment booking, and billing), the initial bulk seeding of test and historical data shall be executed via automated SQL scripts. The system does not require the development of custom administrative UI tools specifically for bulk data generation or import.
+         * Technology Stack: The backend development is constrained to Fast API, and the database must utilize postgrace 8.x with the InnoDB engine to support the required transactional integrity.
+
+
+         2. User Documentation
+         * Database Design Document: A comprehensive technical document containing the Entity-Relationship (ER) diagram, schema definitions, indexing strategies, and a data dictionary mapping the required entities.
+         * System Deployment Guide: Instructions for setting up the backend server environment and initializing the postgrace database.
+         * Data Population Scripts: A collection of executable .sql files containing the queries required to manually input the dummy data for presentation purposes.
+
+
+         3. Assumptions and Dependencies
+         * Missing Domain Data: Because specific details regarding treatment prices and detailed insurance terms were not explicitly provided in the project brief, it is assumed that the development team will determine reasonable domain values when creating the dummy data.
+         * Network Infrastructure: The system's ability to maintain a unified patient record accessible across the Colombo, Kandy, and Galle branches depends heavily on stable, continuous internet connectivity between these locations and the centralized database.
+         3. External Interface Requirements
+         1. User Interfaces
+The MedSync Clinic Appointment and Treatment Management System (CATMS) provides a responsive, web-based user interface that is accessible through modern web browsers such as Google Chrome, Mozilla Firefox, Microsoft Edge, and Safari. The interface is designed to provide a consistent, user-friendly experience for all users while supporting the efficient management of appointments, patient records, treatments, and billing processes.
+The system provides role-based interfaces for the following users:
+         * System Administrator (Clinic Administrator)
+The Administrator interface provides high-level business privileges for the overarching clinic configuration and scaling. This user class shall perform the following workflows:
+         * Adding, updating, and deactivating branch locations (e.g., Colombo, Kandy, and Galle).
+         * Centrally registering and managing medical specialists and non-medical staff.
+         * Assigning personnel to specific branches and defining security privilege levels.
+         * Managing overarching system-level configurations and clinic scaling.
+
+         * Branch Manager
+The Branch Manager interface is designed for analytical interaction, overseeing the operations of a specific geographic location. Functional capabilities include:
+            * Accessing branch-wise appointment summaries and daily activities.
+            * Monitoring revenue generated by specific doctors within the branch.
+            * Reviewing metrics and statistics for different treatment categories.
+            * Tracking outstanding balances and patient dues across the location.
+            * Generating comprehensive branch performance reports for management review.
+
+            * Receptionist (Non-Medical Staff)
+The Receptionist interface provides a fast-responding environment for daily front-desk operations. Primary workflows shall include:
+               * Registering new patients and updating unified records across the clinic network.
+               * Maintaining emergency contacts and health insurance policy details.
+               * Searching for and retrieving centralized patient profile information.
+               * Auditing clinician availability to manage the appointment calendar.
+               * Booking, rescheduling, and formal termination of appointment time slots.
+               * Facilitating immediate registration for emergency walk-in visits.
+               * Generating invoices derived from completed consultation and treatment data.
+               * Processing and recording full or incremental patient payment transactions.
+               * Reviewing outstanding patient liabilities and billing dues.
+
+               * Doctor (Medical Staff)
+The Doctor interface supports high-priority clinical activities and workflow management. The clinician may perform the following:
+                  * Viewing assigned time slots and daily clinical schedules.
+                  * Accessing demographic and medical information within the patient profile.
+                  * Archiving clinical consultation notes for any encounter marked as completed.
+                  * Prescribing services and medical treatments from the pre-defined catalogue.
+                  * Updating treatment records and diagnostic findings linked to clinical encounters.
+
+                  * Patient
+The Patient interface provides restricted access for the review of personal and financial records. Authorized actions include:
+                     * Reviewing stored personal profile and health insurance information.
+                     * Checking historical patient-doctor interaction logs and appointment dates.
+                     * Viewing generated invoices associated with rendered medical services.
+                     * Auditing payment transaction history and remaining outstanding liabilities.
+The system follows a consistent enterprise-style interface design across all modules. A collapsible sidebar provides navigation between major system modules, including Dashboard, Patients, Appointments, Treatments, Billing, Insurance, and Reports.
+A top navigation bar displays the current user information, notifications, and logout functionality. Breadcrumb navigation is provided where appropriate to help users understand their current location within the system.
+The application supports responsive layouts for desktop and tablet devices. Tables, forms, and dashboards are designed to remain readable and usable across different screen sizes.
+Standard interface components such as Save, Edit, Delete, Cancel, Search, Filter, Confirm, and Back buttons are used consistently throughout the application.
+All data entry forms provide validation to ensure accurate information. The system displays meaningful validation messages when users enter incomplete or invalid information. Success notifications are displayed after successful operations such as patient registration, appointment creation, invoice generation, and payment recording.
+Confirmation dialogs are displayed before critical actions such as deleting records, cancelling appointments, or modifying payment details to prevent accidental data changes.
+                     2. Hardware Interfaces
+The MedSync Clinic Appointment and Treatment Management System (CATMS) is a web-based application that does not require direct interaction with specialized hardware. The system is designed to operate on standard computing devices connected to a network.
+The application can be accessed through desktop computers, laptops, and tablets equipped with a modern web browser and a stable internet connection. These client devices communicate with the application server to perform operations such as patient registration, appointment scheduling, treatment recording, billing, and report generation.
+The backend application is hosted on a server that processes user requests, executes business logic, and communicates with the postgrace database server to store and retrieve clinic information. Communication between the client devices and the server is performed over a secure network using standard TCP/IP protocols.
+The system also supports standard peripheral devices commonly used in clinical environments, including printers for generating invoices, prescriptions, appointment slips, and management reports. These peripherals interact with the operating system through standard device drivers and do not require custom hardware interfaces.
+The minimum hardware requirements are as follows:
+                     * Client Devices: Desktop computer, laptop, or tablet with a keyboard, mouse or touch input, and a modern web browser.
+                     * Server: Application server capable of running the FAST API backend and hosting the postgrace database.
+                     * Peripheral Devices (Optional): Standard printer for printing invoices, prescriptions, and reports.
+                     * Network: Local Area Network (LAN) or Internet connection supporting secure communication between clients and the server.
+                     1. Software Interfaces
+The Clinic Appointment and Treatment Management System (CATMS) will interact with the following software components and environments:
+                     * Database Management System (DBMS):
+Version: postgrace 8.x.
+The system relies on the InnoDB engine to support ACID (Atomicity, Consistency, Isolation, Durability) properties for database transactions and to enforce data integrity through foreign key constraints and transaction management.
+Communication: 
+The FastAPI backend will connect to the postgrace database using a suitable Python SQL driver or ORM (such as SQLAlchemy or equivalent).
+Data Exchanged: 
+The backend application will send SQL queries, execute database transactions, and interact with stored procedures or triggers when required. The database will return data records (patient information, appointment schedules, treatment details, invoice records, payment information) and operation results (e.g., successful commits, constraint violations, validation errors).
+                     * Backend Framework:
+Framework: FastAPI
+Communication: 
+The FastAPI backend will handle incoming HTTPS requests from the React frontend, process business logic, perform validation, manage authentication, and communicate with the postgrace database.
+Data Exchanged:
+JSON-formatted data representing patient profiles, appointment details, doctor schedules, treatment records, billing information, payment details, and generated reports.
+                     * Client-Side Framework:
+Name/Version: React with TypeScript
+Communication: 
+The React-based frontend will communicate with the FastAPI backend through RESTful APIs using secure HTTP/HTTPS requests.
+Data Exchanged: 
+The system will send user interface resources, JSON API responses, and user inputs such as patient registration details, appointment information, treatment records, and payment details between the browser and backend server.
+                     * Client Web Browsers:
+Name/Version: Modern browsers including Google Chrome, Mozilla Firefox, Microsoft Edge, and Apple Safari
+Communication: 
+The browser will render the React-based frontend components and communicate with the FastAPI backend through secure HTTP requests.
+Data Exchanged: 
+The system will exchange HTML, CSS, client-side JavaScript, JSON responses, and user-submitted information such as patient records, appointment details, and billing information.
+                     2. Communications Interfaces
+The MedSync Clinic Appointment and Treatment Management System (CATMS) is a web-based application that communicates through standard Internet protocols. Users access the system through modern web browsers, which exchange data with the backend application through RESTful APIs.
+Communication between the React frontend and FastAPI backend is performed using HTTP/HTTPS protocols. Data is exchanged using JSON format to enable platform-independent communication. The backend communicates with the postgrace database server to store and retrieve application data.
+The system supports access from multiple clinic branches through a network connection. Secure communication is provided using HTTPS, and user authentication is handled using JSON Web Tokens (JWT) to ensure authorized access to system resources.
+The communication standards used by the system include:
+                     * HTTP/HTTPS for client-server communication.
+                     * TCP/IP for network communication.
+                     * RESTful APIs for frontend-backend data exchange.
+                     * JSON for API request and response messages.
+                     * JWT for user authentication and authorization.
+The system supports concurrent users while maintaining data consistency through backend transaction management and postgrace database constraints.
+                     4. System Features
+                     1. User Authentication and Access Control
+4.1.1        Description and Priority
+The User Authentication and Access Control feature ensures that only authorized users can access the Clinic Appointment and Treatment Management System (CATMS). Each user must log in using valid credentials. Based on their assigned role (Administrator, Doctor, Receptionist, or Branch Manager), users will be granted access only to the functions and data they are authorized to use.
+  Priority: High
+4.1.2        Stimulus/Response Sequences
+                     1. User Login
+
+
+User Action
+	System Response
+	The user enters a valid username and password and clicks the Login button.
+	The system validates the credentials and grants access to the dashboard based on the user’s assigned role.
+	The user enters an invalid username or password.
+	The system displays an error message indicating that the login credentials are invalid and prompts the user to try again.
+	
+
+                     2. Role-Based Access Control
+
+
+User Action
+	System Response
+	The authenticated user attempts to access a system feature.
+	The system verifies the user’s role and permissions for the requested feature.
+	The user has sufficient privileges.
+	The system grants access to the requested feature. If the user lacks the required privileges, the system displays an “Access Denied” message.
+	
+
+                     3. User Logout
+
+
+User Action
+	System Response
+	The authenticated user selects the Logout option.
+	The system terminates the current session and redirects the user to the login page.
+	The user attempts to access a protected page after logging out.
+	The system redirects the user to the login page and requests authentication before allowing access.
+	                     4. Failed Login Attempts
+
+
+User Action
+	System Response
+	The user enters incorrect login credentials multiple consecutive times.
+	The system tracks the failed attempts and temporarily locks the account after the maximum allowed limit is reached.
+	The user attempts to log in while the account is locked.
+	The system denies access and displays a message indicating that the account is temporarily locked.
+	
+
+4.1.3        Functional Requirements
+FR-UAC-01: The system shall require authenticated  users to authenticate using a unique username and password before accessing the system.
+FR-UAC-02: The system shall validate entered user credentials against the registered user database.
+FR-UAC-03: The system shall allow system access only when valid authentication credentials are provided.
+FR-UAC-04: The system shall assign user permissions based on predefined roles, including Administrator, Doctor, Receptionist, and Branch Manager.
+FR-UAC-05: The system shall prevent users from accessing functions or data outside their assigned role permissions.
+FR-UAC-06: The system shall record the date and time of each successful user login for auditing purposes.
+                     2. Branch and Staff Management 
+4.2.1        Description and Priority
+The Branch and Staff Management feature enables the Administrator to manage clinic branches and staff information. The system allows the creation, modification, and deletion of branch records, as well as the registration and management of staff members including Doctors, Receptionists, and Branch Managers. Each staff member is assigned to a specific branch and granted system access according to their role. This feature ensures that branch operations and staff assignments are maintained accurately.
+Priority: High
+4.2.2        Stimulus/Response Sequences
+                     1. Add a New Branch
+        
+User Action
+	System Response
+	The Administrator selects the Add Branch.
+	The system displays the branch registration form.
+	The Administrator enters the branch details and submits the form.
+	The system validates the information, creates the new branch record, and displays a confirmation message.
+	
+
+                     2. Register a Staff Member
+
+
+User Action
+	System Response
+	The Administrator selects Register Staff.
+	The system displays the staff registration form.
+	The Administrator enters the staff details, selects the role (Doctor, Receptionist, or Branch Manager), assigns a branch, and submits the form.
+	The system validates the information, creates the staff record, assigns the selected role and branch, and displays a success message.
+	
+
+                     3. Update Staff Information
+
+
+User Action
+	System Response
+	The Administrator selects a staff member to edit.
+	The system displays the staff member’s current information.
+	The Administrator updates the required details and submits the changes.
+	The system validates the updated information, saves the changes, and displays a confirmation message.
+	
+
+                     4. Remove a Staff Member
+
+
+User Action
+	System Response
+	The Administrator selects a staff member and chooses Remove Staff.
+	The system requests confirmation before deleting the staff record.
+	The Administrator confirms the deletion.
+	The system removes or deactivates the staff record and displays a success message.
+	
+
+4.2.3        Functional Requirements
+FR-BSM-01: The system shall allow the Administrator to create, view, update, and delete clinic branch records.
+FR-BSM-02: The system shall allow the Administrator to register new staff members and maintain their staff information.
+FR-BSM-03: The system shall require each staff member to be assigned to one valid branch and allow the Administrator to update the assigned branch.
+FR-BSM-04: The system shall allow the Administrator to assign predefined roles to staff members, including Doctor, Receptionist, and Branch Manager.
+FR-BSM-05: The system shall prevent duplicate staff records by enforcing unique staff identifiers and shall validate mandatory staff and branch information before saving records.
+FR-BSM-06: The system shall allow the Administrator to deactivate or remove staff records and shall display appropriate error messages when invalid or incomplete information is submitted.
+                     3. Doctor and Specialty Management
+4.3.1        Description and Priority
+The Doctor and Specialty Management feature enables administrators to maintain doctor profiles and their associated medical specialties within the Clinic Appointment and Treatment Management System (CATMS). Each doctor is assigned to a specific clinic branch and may be associated with one or more specialties (e.g., General Medicine, ENT, Paediatrics). The feature allows administrators to create, update, view, and manage doctor information while ensuring that specialty assignments are valid and consistent. This information is used throughout the system for appointment scheduling, treatment recording, and reporting.
+ Priority: High
+4.3.2         Stimulus/Response Sequences
+
+User Action  
+	System Response
+	Administrator selects the Doctor Management module. 
+	The system displays the list of registered doctors and available management options. 
+	The administrator chooses to add a new doctor. 
+	The system displays a doctor registration form. 
+	Administrator enters doctor details and assigns one or more specialties. 
+	The system validates the entered information and checks for duplicate records. 
+	Administrator submits the form. 
+	The system stores the doctor information, creates the specialty associations, and displays a success message. 
+	Administrator edits an existing doctor's information. 
+	The system updates the selected doctor's details and confirms the changes. 
+	Administrator assigns or removes specialties from a doctor. 
+	The system updates the doctor-specialty relationships accordingly. 
+	Administrator enters invalid or incomplete information. 
+	The system displays appropriate validation messages and prevents the data from being saved until the errors are corrected. 
+	4.3.3    Functional Requirements
+
+FR-DSM-01: The system shall allow the Administrator to register new doctors and maintain doctor information.
+
+FR-DSM-02: The system shall allow each doctor to be assigned to one valid clinic branch.
+
+FR-DSM-03: The system shall allow doctors to be associated with one or more medical specialties.
+
+FR-DSM-04: The system shall prevent duplicate doctor records by enforcing unique doctor identifiers.
+
+FR-DSM-05: The system shall validate all mandatory doctor information before creating or updating doctor records
+
+FR-DSM-06: The system shall allow the Administrator to update doctor details and specialty assignments, and deactivate doctors without deleting historical appointment and treatment records.
+                     4. Patient Management 
+4.4.1        Description and Priority 
+The Patient Management feature enables the system to register, maintain, and manage patient records across all clinic branches. It stores essential patient information, including personal details, contact information, emergency contact details, and health insurance information. The feature allows authorized staff to create, update, search, and view patient records while ensuring that patient information is securely maintained and accessible across all branches. It also provides a centralized patient profile that supports appointment scheduling, treatment recording, billing, and insurance claim processing.
+Priority: High
+  4.4.2        Stimulus/Response Sequences
+User Action 
+	System Response 
+	The receptionist selects the Patient Management module. 
+	The system displays the patient management dashboard with options to register, search, edit, and view patient records. 
+	Receptionist clicks Register Patient. 
+	The system displays the patient registration form. 
+	The receptionist enters the patient's personal details, emergency contact, and insurance information. 
+	The system validates the entered data and checks that all mandatory fields are completed. 
+	The receptionist submits the registration form. 
+	The system creates a new patient record, assigns a unique patient ID, and displays a confirmation message. 
+	The receptionist searches for a patient using the patient ID, name, or contact number.  
+	The system retrieves and displays the matching patient records. 
+	The receptionist updates a patient's information. 
+	The system validates the updated data, saves the changes, and confirms the successful update. 
+	The doctor opens a patient's profile. 
+	The system displays the patient's personal details, appointment history, treatment history, and insurance information. 
+	The user enters invalid or incomplete information. 
+	The system displays appropriate validation messages and prevents the record from being saved until the errors are corrected. 
+	
+
+4.4.3        Functional Requirements
+FR-PM-01: The system shall allow authorized staff to register new patients.
+
+FR-PM-02: The system shall store patient personal details, including name, date of birth, gender, address, contact number, and email address.
+
+FR-PM-03: The system shall store emergency contact information and health insurance information for each patient where applicable.
+
+FR-PM-04: The system shall allow authorized users to search for patient records using the patient ID, name, or contact number.
+
+FR-PM-05: The system shall allow authorized users to update patient information while preserving historical appointment, treatment, and billing records.
+FR-PM-06: The system shall make patient records accessible from all clinic branches.
+
+FR-PM-07: The system shall validate mandatory fields before saving or updating patient records and display appropriate error messages when invalid, incomplete, or duplicate information is entered.
+                     5. Appointment Management
+4.5.1        Description and Priority
+The Appointment Management feature facilitates the end-to-end lifecycle of patient-doctor interactions, enabling clinic staff to schedule, modify, and terminate time slots across all geographic branches. It enforces rigorous validation to ensure doctor availability and explicitly prohibits conflicting bookings. Additionally, the system accommodates urgent medical needs by facilitating emergency walk-in registrations without necessitating prior reservations.
+
+
+Priority: High
+4.5.2        Stimulus/Response Sequences
+                     1. Book Appointment
+User Action
+	System Response
+	An authorized staff member selects a patient, clinician, date, and specific time interval.
+	The system audits the clinician's schedule and presents valid openings.
+	Staff submits the booking details for processing.
+	The system verifies the parameters, generates a "Scheduled" record, and displays a success notification.
+	                     2. Reschedule Appointment
+User Action
+	System Response
+	Staff identifies an active record and proposes a new date and time.
+	The system evaluates the clinician's availability for the revised slot.
+	Staff confirms the adjustment request.
+	The system modifies the record while preserving the "Scheduled" status and issues a confirmation.
+	                     3. Cancel Appointment
+User Action
+	System Response
+	Staff selects a scheduled slot and initiates a cancellation.
+	The system triggers a confirmation dialog to prevent accidental data loss.
+	The operator confirms the intent to cancel.
+	The system transitions the status to "Cancelled," logs the event, and notifies the user.
+	                     4. Emergency Walk-In Appointment
+User Action
+	System Response
+	Staff creates a real-time record for a patient arriving without a prior booking.
+	The system designates the entry as an emergency walk-in and assigns an available clinician.
+	The operator saves the urgent record.
+	The system archives the data with relevant branch metadata and confirms successful creation.
+	                     5. Invalid Appointment Slot
+User Action
+	System Response
+	Staff attempts to finalize a booking for a clinician in a pre-occupied time segment.
+	The system denies the transaction and issues an error message citing clinician unavailability.
+	4.5.3        Functional Requirements
+FR-AM-01: The system shall provide authorized personnel the capability to establish new scheduling records linking patients with specific clinicians.
+FR-AM-02: The system shall support a state-transition model including "Scheduled," "Completed," and "Cancelled" designations.
+FR-AM-03: The system shall enforce a strict non-overlap constraint to prevent concurrent bookings for any individual doctor.
+FR-AM-04: The system shall dynamically expose clinician availability to the operator prior to the finalization of any booking transaction.
+FR-AM-05: The system shall facilitate the relocation of existing records to alternative time intervals by authorized staff.
+FR-AM-06: The system shall enable the formal termination of active records through an authorized cancellation workflow.
+FR-AM-07: The system shall accommodate spontaneous clinical visits by supporting immediate emergency walk-in registration.
+FR-AM-08: The system shall maintain a persistent audit log of all modifications, including rescheduling events and cancellation records.
+FR-AM-09: The system shall issue descriptive error alerts when a transaction conflicts with existing clinician commitments.
+FR-AM-10: The system shall restrict all scheduling management operations exclusively to users with verified authorization levels.
+                     6. Consultation and Treatment Management 
+4.6.1        Description and Priority
+The Consultation and Treatment Management feature empowers medical practitioners to archive detailed clinical notes, allocate specific services from the centralized treatment catalogue, and finalize the status of medical encounters. It ensures that clinical data is accurately mapped to the relevant appointment record, facilitating seamless downstream billing operations once clinical services are rendered.
+Priority: High
+4.6.2        Stimulus/Response Sequences
+                     1. Record Consultation Notes
+User Action
+	System Response
+	A doctor accesses a finished appointment record.
+	The system retrieves patient encounter history and relevant demographic data.
+	The clinician archives detailed consultation notes and diagnostic findings.
+	The system validates the parameters and persists the clinical data against the record.
+	Staff submits the clinical form.
+	The system issues a success notification confirming the data entry.
+	2.        Assign Treatments
+User Action
+	System Response
+	A doctor allocates multiple treatments from the catalogue to a completed encounter.
+	The system displays the treatment menu with corresponding service codes and pricing.
+	The clinician confirms the selection of medical services.
+	The system archives the selected services and establishes a link to the appointment.
+	The operator submits the treatment form.
+	The system confirms successful recording of all medical treatments.
+	
+
+3.   Complete Appointment
+User Action
+	System Response
+	A doctor updates a scheduled encounter to finalized status after documenting clinical data.
+	The system audits the record for the presence of mandatory consultation and treatment details.
+	The clinician confirms the completion intent.
+	The system transitions the encounter status to "Completed" and triggers the billing workflow.
+	4.   Invalid Treatment Entry
+User Action
+	System Response
+	A doctor attempts to document clinical services for a record not yet marked as finalized.
+	The system denies the request and issues an error alert citing the requirement for encounter completion.
+	4.6.3        Functional Requirements
+FR-CTM-01: The system shall provide doctors the capability to archive clinical consultation notes for any finalized appointment record.
+FR-CTM-02: The system shall enable the entry of diagnostic findings associated with a specific patient encounter.
+FR-CTM-03: The system shall allow clinicians to allocate multiple services from the pre-defined treatment catalogue to an encounter record.
+FR-CTM-04: The system shall persist the service identifier, treatment nomenclature, and base price for all selected medical services.
+FR-CTM-05: The system shall maintain a relational link between clinical notes, treatment data, and the parent appointment record.
+FR-CTM-06: The system shall restrict the recording of medical treatments exclusively to records holding a "Completed" status.
+FR-CTM-07: The system shall enforce a validation rule requiring saved consultation data before allowing an encounter to be transitioned to "Completed."
+FR-CTM-08: The system shall automatically flag finalized encounters as eligible for invoice generation and financial processing.
+FR-CTM-09: The system shall issue descriptive error alerts when an operator attempts to add clinical data to an invalid or unfinalized appointment.
+FR-CTM-10: The system shall restrict clinical documentation and treatment allocation privileges solely to verified medical personnel.
+                     7. Treatment Catalogue Management
+4.7.1        Description and Priority
+This feature allows administrators to maintain a centralized and pre-defined treatment catalogue used by doctors to prescribe treatments and by the billing system to generate invoices. Authorized users can add, update, or remove treatments from the catalogue. Each entry in the catalogue must include the treatment name (e.g., Consultation, X-Ray, ECG, Injection), a unique service code, the base price, and an indicator of whether the treatment is eligible for insurance reimbursement.
+
+
+Priority: High
+4.7.2        Stimulus/Response Sequences
+                     1. Add New Treatment to Catalogue
+User Action
+	System Response
+	The authorized user selects the option to add a new treatment.
+	The system presents a form requesting the treatment name, unique service code, base price, and insurance eligibility.
+	The authorized user enters the required details.
+	The system validates the information and stores the treatment details.
+	An authorized user submits the form.
+	The system saves the new treatment to the database and displays a success confirmation.
+	                     2. Update Existing Treatment
+User Action
+	System Response
+	Authorized users search for and select an existing treatment from the catalogue.
+	The system displays the current details of the selected treatment (name, service code, price, insurance status).
+	Authorized user modifies the necessary fields (e.g., updating the base price) 
+	The system validates the input.
+	An authorized user submits the form.
+	The system displays a confirmation that the treatment was successfully updated. 
+	                     3. Remove Treatment from Catalogue
+User Action
+	System Response
+	Authorized users select a treatment to remove from the catalogue.
+	The system prompts the user for confirmation to prevent accidental deletion.
+	The authorized user confirms the removal.
+	The system verifies if the treatment is linked to existing billing or appointment records and deactivates or removes it accordingly. The system confirms that the treatment has been successfully removed.
+	
+
+4.7.3        Functional Requirements
+FR-TCM-01: The system shall allow authorized users to add new treatments to the treatment catalogue by entering the treatment name, unique service code, base price, and insurance eligibility status.
+FR-TCM-02: The system shall enforce a unique constraint on the service code for each treatment in the catalogue.
+FR-TCM-03: The system shall allow authorized users to update existing treatment details, including treatment name, base price, and insurance eligibility status.
+FR-TCM-04: The system shall allow authorized users to remove treatments from the active treatment catalogue.
+FR-TCM-05: The system shall prevent permanent deletion of treatments linked to existing billing records or completed appointments and shall mark such treatments as inactive instead.
+FR-TCM-06: The system shall validate that all mandatory treatment fields, including treatment name, service code, base price, and insurance eligibility status, are provided before saving a treatment record.
+FR-TCM-07: The system shall display an error message when a user attempts to add or update a treatment using an existing service code.
+FR-TCM-08: The system shall display a confirmation message after successful creation, modification, or deactivation of a treatment record.
+
+
+                     8. Billing and Payment Management 
+  4.8.1        Description and Priority
+This feature manages the financial operations of the clinic regarding patient charges and payments. It enables the billing system to generate invoices based on completed treatments and consultation notes associated with an appointment. The system automatically calculates total treatment charges, allows for the recording of full or partial payments, tracks outstanding balances for each patient, and provides access to payment histories. 
+
+
+Priority: High
+ 4.8.2        Stimulus/Response Sequences
+                     1. Generate Invoice and Calculate Charges
+User Action
+	System Response
+	Authorized staff marks the appointment status as "Completed" and saves the prescribed treatments.
+	The system retrieves the base prices for each prescribed treatment from the treatment catalogue.
+
+
+The system automatically calculates the total treatment charges and generates the invoice record in the background. 
+	                     2. Record Payment (Full or Partial)
+User Action
+	System Response
+	Authorized Staff selects an unpaid or partially paid invoice
+	The system retrieves the associated bill and displays details.
+	Authorized Staff enters the received payment amount (full or partial)
+	The system validates that the entered payment amount is greater than zero and does not exceed the remaining outstanding balance.
+	Authorized Staff confirms the payment
+	The system records the payment transaction, recalculates the outstanding due amount, and updates the invoice status. 
+	                     3. View Payment History and Outstanding Balances
+User Action
+	System Response
+	Authorized staff / Patient navigates to a patient's billing profile.
+	The system queries the database to retrieve all past invoices and payment transactions associated with the patient and displays them.
+	Authorized staff requests to view outstanding balances.
+	The system calculates and displays the total outstanding dues across all active invoices for that patient.
+	
+
+4.8.3        Functional Requirements
+FR-BPM-01: The system shall automatically generate invoices based on completed appointments, consultation notes, and prescribed treatments.
+FR-BPM-02: The system shall calculate invoice charges by retrieving the current prices of treatments from the centralized treatment catalogue.
+FR-BPM-03: The system shall allow authorized users to record full or partial payments against outstanding invoice records.
+FR-BPM-04: The system shall update the outstanding balance of an invoice immediately after each successful payment transaction.
+FR-BPM-05: The system shall allow authorized users to view a patient's invoice history and previous payment transactions.
+FR-BPM-06: The system shall prevent users from entering payment amounts that exceed the outstanding invoice balance.
+FR-BPM-07: The system shall automatically update the invoice status to "Paid" when the outstanding balance is fully settled.
+FR-BPM-08: The system shall maintain data integrity during billing and payment transactions by ensuring ACID properties and preventing inconsistencies during concurrent access.
+                     9. Insurance Management 
+4.9.1        Description and Priority
+The Insurance Management feature enables the system to maintain patient insurance information and process insurance claims for eligible treatments. It calculates the amount  covered by the insurance provider and the remaining amount payable by the patient during invoice generation.
+
+
+
+Priority - High
+
+
+4.9.2        Stimulus/Response Sequence
+                     1. Register Patient Insurance
+User Action
+	System Response
+	Authorized staff selects a registered patient.
+	The system displays the patient's profile.
+	Authorized staff enters the insurance provider, policy number, and policy validity details.
+	The system validates the information and stores the insurance details.
+	Authorized staff submits the form.
+	The system confirms that the insurance information has been successfully saved.
+	                     2. Process Insurance During the Billing
+User Action
+	System Response
+	Authorized staff generates an invoice for a completed appointment.
+	The system retrieves the patient's insurance information.
+The system identifies treatments eligible for insurance coverage.
+The system calculates the insurance reimbursement amount.
+The system calculates the patient's remaining payable amount and generates the final invoice.
+	                     3. Invalid Insurance Policy
+User Action
+	System Response
+	Authorized staff attempts to process an insurance claim using an expired or invalid policy.
+	The system rejects the claim and displays an appropriate error message.
+	4.9.3        Functional Requirements
+FR-IM-01: The system shall allow authorized staff to record insurance information for a registered patient.
+FR-IM-02: The system shall verify whether a patient's insurance policy is active before processing an insurance claim.
+FR-IM-03: The system shall determine whether a treatment is eligible for insurance reimbursement.
+FR-IM-04: The system shall calculate the patient's remaining payable amount after applying the applicable insurance coverage.
+FR-IM-05: The system shall generate invoices displaying the total treatment cost, insurance-covered amount, and patient payable amount.
+FR-IM-06: The system shall display an appropriate error message when an insurance policy is expired, invalid, or unavailable.
+                     10. Reporting and Analytics 
+4.10.1        Description and Priority
+The Reporting and Analytics feature enables authorized users to generate operational and financial reports using data stored in the Clinic Appointment and Treatment Management System (CATMS). These reports support monitoring clinic activities, evaluating doctor performance, tracking patient payments, and analyzing insurance coverage.
+
+Priority : High
+4.10.2        Stimulus/Response Sequences
+                     1. Generate Branch wise Appointment Summary
+                
+User Action
+	System Response
+	The authorized user selects the Branch Appointment Summary report.
+	The system prompts for the branch and date.
+	The authorized user enters the required criteria and submits the request.
+	The system retrieves appointment records and generates a summary showing scheduled, completed, and cancelled appointments for the selected branch and date.
+	                     2. Generate Doctor Revenue Report
+User Action
+	System Response
+	The Authorized user selects the Doctor Revenue Report.
+	The system prompts for the reporting period.
+	The authorized user specifies the date range.
+	The system calculates and displays the revenue generated by each doctor during the selected period.
+	                     3. Generate Outstanding Balances Report
+User Action
+	System Response
+	The authorized user selects the Outstanding Balance Report.
+	The system retrieves invoices with unpaid balances and displays the list of patients with outstanding amounts.
+	                     4. Generate Treatment Category Report
+User Action
+	System Response
+	The authorized user selects the Insurance Coverage Report.
+	The system prompts the user to enter a reporting period.
+	An authorized user submits the request.
+	The system displays the number of treatments performed for each treatment category during the selected period.
+	                     5. Generate Insurance Coverage Report
+User Action
+	System Response
+	The authorized user selects the Insurance Coverage Report.
+	The system prompts the user to enter a reporting period.
+	An authorized user submits the request.
+	The system displays insurance-covered payments and patient out-of-pocket payments for the selected period.
+	
+
+4.10.3        Functional Requirements
+FR-RA-01: The system shall generate branch-wise appointment summary reports showing the number of scheduled, completed, and cancelled appointments for a specified branch and date.
+FR-RA-02: The system shall generate doctor-wise revenue reports based on completed consultations and treatments for a specified period.
+FR-RA-03: The system shall generate reports listing patients with outstanding invoice balances.
+FR-RA-04: The system shall generate reports showing the number of treatments performed in each treatment category for a specified period.
+FR-RA-05: The system shall generate reports comparing insurance-covered payments and patient out-of-pocket payments for a specified period.
+FR-RA-06: The system shall display a notification when no data is available for the selected report criteria.
+                     11. Database Management and Integrity 
+4.11.1        Description and Priority
+The Database Management and Integrity feature ensures that all data stored in the Clinic Appointment and Treatment Management System (CATMS) is accurate, consistent, reliable, and secure. It maintains relationships between database entities, prevents invalid or duplicate data, and guarantees transaction consistency during operations such as appointment booking, treatment recording, billing, and payment processing.
+        
+Priority: High
+
+
+4.11.2        Stimulus/Response Sequences
+                     1. Register new Patient
+
+
+User Action
+	System Response
+	The authorized staff enters patient information and submits the registration form.
+	The system validates the entered data and checks for required fields and duplicate records.
+
+If the data is valid, the system stores the patient record successfully. Otherwise, an appropriate error message is displayed.
+	                     2. Create an Appointment
+User Action
+	System Response
+	The authorized staff creates an appointment for a patient.
+	The system verifies that the patient and doctor exist and checks that the doctor does not have another appointment during the requested time slot.
+
+If validation succeeds, the appointment is stored. Otherwise, the system rejects the request and displays an error message.
+	                     3. Record Payment
+User Action
+	System Response
+	Authorized staff records a patient payment.
+	The system updates the payment and invoice records as a single transaction.
+
+If an error occurs during processing, the transaction is cancelled and no partial updates are saved.
+	
+
+4.11.3        Functional Requirements
+FR-DMI-01: The system shall maintain unique identifiers for all primary entities, including patients, doctors, appointments, treatments, invoices, and payments.
+FR-DMI-02: The system shall preserve relationships between related records and prevent invalid references.
+FR-DMI-03: The system shall validate mandatory data before storing or updating records and shall prevent duplicate records where uniqueness is required.
+FR-DMI-04: The system shall prevent a doctor from having overlapping appointments for the same date and time.
+FR-DMI-05: The system shall maintain transaction consistency when processing appointment bookings, treatment records, invoice generation, and payment records.
+FR-DMI-06: The system shall prevent incomplete transactions from being permanently stored if an error occurs during processing.
+FR-DMI-07: The system shall maintain data consistency when patient records are accessed from different clinic branches.
+FR-DMI-08: The system shall prevent the deletion of a clinic branch record if there are doctors or staff members currently assigned to that branch.
+FR-DMI-09: The system shall not permanently delete patient or doctor records; instead, it shall allow authorized users to mark these records as inactive to ensure historical appointment, treatment, and financial data remains intact.
+FR-DMI-10: The system shall validate National Identity Card (NIC) inputs to ensure they match standard formats (either 9 digits followed by a letter, or a 12-digit numeric format) before saving the record.
+FR-DMI-11: The system shall validate all contact phone numbers to ensure they consist of exactly 10 digits, rejecting any inputs containing alphabetic characters or invalid lengths.
+                     5. Other Nonfunctional Requirements
+                     1. Performance Requirements
+5.1.1 Response Time
+The system shall authenticate user login requests within 2 seconds under normal operating conditions. Patient records, appointment details, doctor schedules, and billing information shall be retrieved within 3 seconds for at least 95% of user requests.
+5.1.2 Concurrent Users
+The system shall support at least 100 concurrent users across all clinic branches without significant degradation in response time, data consistency, or system availability.
+5.1.3 Report Generation
+The system shall generate standard reports, including branch-wise appointment summaries, doctor revenue reports, outstanding balance reports, treatment statistics, and insurance payment reports, within 10 seconds under normal operating conditions.
+5.1.4 Transaction Processing
+The system shall complete appointment booking, treatment recording, invoice generation, payment processing, and appointment rescheduling transactions within 5 seconds while maintaining database consistency and integrity.
+5.1.5 Database Performance
+The database shall utilize appropriate indexing, query optimization, and efficient relational database design to ensure fast retrieval of frequently accessed records and maintain acceptable performance as the number of patients, appointments, treatments, and billing records increases.
+5.1.6 System Availability
+The system shall maintain an availability of at least 99% during scheduled clinic operating hours, excluding planned maintenance periods, to ensure uninterrupted access for authorized users.
+                     2. Safety Requirement 
+5.2.1 Data Protection
+The system shall prevent unauthorized access to patient medical records, billing information, and personal data by enforcing secure authentication, role-based access control, and encrypted data transmission.
+5.2.2 Data Backup and Recovery
+The system shall perform automatic daily backups of all patient records, appointments, billing information, and treatment history. In the event of a system failure, data shall be recoverable with minimal loss to ensure continuity of clinic operations.
+5.2.3 Input Validation
+The system shall validate all user inputs to prevent invalid, incomplete, or malicious data from being stored. Mandatory fields shall be enforced, and incorrect data formats shall be rejected with appropriate error messages.
+5.2.4 Transaction Integrity
+The system shall ensure that appointment bookings, treatment records, invoice generation, insurance claims, and payment transactions are completed atomically. In the event of a failure, incomplete transactions shall be rolled back to maintain database consistency.
+5.2.5 Audit Logging
+The system shall maintain audit logs for critical operations, including patient record modifications, appointment changes, billing updates, insurance claim processing, and user login activities. Audit logs shall record the user, date, time, and action performed to support accountability and incident investigation.
+5.2.6 System Failure Handling
+The system shall detect unexpected failures and provide appropriate error messages without exposing sensitive system information. Critical errors shall be logged, and users shall be able to safely resume operations after system recovery.
+5.2.7 Compliance with Regulations
+The system shall be designed to comply with applicable healthcare data protection regulations and organizational security policies governing the storage, processing, and sharing of patient information.
+5.2.8 Secure Session Management
+The system shall automatically terminate inactive user sessions after a predefined period of inactivity to reduce the risk of unauthorized access to sensitive patient and financial information.
+                     3. Security Requirements 
+5.3.1 User Authentication
+
+
+All system users shall be required to authenticate using a unique username and secure password before accessing the Clinic Appointment and Treatment Management System. All user passwords must be securely hashed and salted before being stored in the database.  
+
+
+5.3.2 Role-Based Access Control (RBAC)
+
+
+The system shall enforce role-based access control to restrict functionality and data visibility based on the user's assigned job role. For example, only doctors shall have the authority to prescribe treatments and record consultation notes, while  receptionists shall manage invoices and payments.  
+
+
+5.3.3 Patient Data Privacy
+
+
+The system must ensure the strict confidentiality of patient records, which include personal details, emergency contacts, and health insurance information. Access to these records shall be granted only to authorized medical and administrative staff to prevent unauthorized viewing, modification, or data breaches.  
+
+
+5.3.4 Data Encryption in Transit
+
+
+All data transmitted between the web client and the backend server—especially sensitive health and billing information—shall be encrypted using standard HTTPS/TLS protocols to protect against interception or man-in-the-middle attacks.
+
+
+5.3.5 Database Security and Injection Prevention
+
+
+The system shall protect the database against SQL injection and malicious manipulation. All database queries, particularly those handling user input for patient searches or appointment bookings, shall utilize parameterized queries or secure stored procedures. Direct access to the database layer shall be restricted exclusively to authorized database administrators and the backend application itself.
+                     4. Software Quality Attributes 
+5.4.1 Reliability
+
+The system shall maintain accurate and consistent patient, appointment, treatment, and billing records. Database transactions shall satisfy the ACID properties to prevent data loss and ensure consistency. In the event of a transaction failure, the system shall roll back the transaction without leaving the database in an inconsistent state.
+
+
+5.4.2 Performance
+
+The system shall retrieve patient records, appointment details, and billing information within 3 seconds under normal operating conditions. Frequently accessed database fields shall be indexed to improve query performance and support efficient report generation.
+5.4.3 Maintainability
+The system shall be designed using a modular architecture to facilitate future maintenance and enhancements. The source code, database schema, and API documentation shall follow consistent standards and be adequately documented to simplify debugging and future development.
+5.4.4 Scalability
+The system shall support the addition of new clinic branches, doctors, specialties, patients, and treatments without requiring significant modifications to the database structure or application architecture. The database shall accommodate increasing volumes of records while maintaining acceptable performance.
+5.4.5 Usability
+The system shall provide a consistent and intuitive user interface for all authorized users. Input validation, meaningful error messages, and confirmation messages shall be provided to minimize user errors and improve operational efficiency.
+
+
+5.5        Business Rules 
+5.5.1 General Principles
+Medical practitioners are assigned to a primary clinic branch and may have multiple specialties. Patients can register at any branch, with records accessible across all facilities. Role-based access controls protect sensitive health and financial data, while critical operations ensure transactional integrity and database consistency.
+5.5.2 Scheduling Rules
+The system shall allow appointments only for valid patients and available doctors, prevent scheduling conflicts, maintain predefined appointment statuses, and allow authorized staff to create emergency walk-in appointments and reschedule appointments to available time slots.
+5.5.3 Financial and Billing Rules
+The system shall allow treatment records and consultation notes only for completed appointments, generate invoices based on recorded treatments, support partial or full payments with outstanding balance tracking, and apply insurance coverage only for valid active policies.
+
+
+6.        Other Requirements
+
+Appendix A: Glossary
+Term
+	Definition
+	CATMS
+	Clinic Appointment and Treatment Management System.
+	MedSync
+	The multi-specialty clinic for which the system is being developed.
+	Appointment
+	A scheduled consultation between a patient and a doctor
+	Walk-in Appointment
+	An appointment created by clinic staff without prior booking.
+	Patient Record
+	The complete record contains a patient's personal, medical, and insurance information.
+	Treatment
+	A medical service or procedure provided to a patient during an appointment.
+	Treatment Catalogue
+	A predefined list of treatments and services offered by the clinic, each with a service code and price.
+	Invoice
+	A bill generated for completed consultations and treatments.
+	Outstanding Balance
+	The unpaid amount remaining after one or more payments have been made toward an invoice.
+	Insurance Claim
+	A request submitted to an insurance provider for reimbursement of eligible treatment costs.
+	Branch
+	A physical clinic location (e.g., Colombo, Kandy etc)
+	Specialty
+	A medical field in which a doctor is qualified to practice (e.g., ENT, General Medicine, Paediatrics).
+	ACID
+	Atomicity, Consistency, Isolation, and Durability properties that ensure reliable database transactions.
+	Primary Key
+	A unique identifier for each record in the database table.
+	Foreign Key
+	A field that established a relationship between two database tables.
+	RDBMS
+	Relational Database Management System.
+	CRUD`
+	Create, Read, Update, and Delete operations performed on data.
+	API
+	Application Programming Interface used for communication between the frontend client and the backend server
+	JWT
+	JSON Web Token, a method used to authenticate users in web applications.
+	UAC
+	User Authentication and Access Control
+	BSM
+	Branch and Staff Management
+	DSM
+	Doctor and Specialty Management 
+	AM
+	Appointment Management 
+	PM
+	Patient Management 
+	CTM
+	Consultation and Treatment Management 
+	TCM
+	Treatment Catalogue Management
+	BPM
+	Billing and Payment Management 
+	IM
+	Insurance Management
+	RA
+	Reporting and Analytics
+	DMI
+	Database Management and Integrity 
+	
+
+
+
+Appendix B: Analysis Models
+Use case Diagram
+  
+
+
+
+Appendix C: To Be Determined List
+The following items remain to be determined and will be finalized during the development process:
+                     * Exact treatment prices and service charges.
+                     * Insurance coverage percentages and reimbursement rules.
+                     * Final system deployment environment.
+                     * Detailed user permission levels for each role.
+                     * Expected system workload and maximum number of concurrent users.
+                     * Additional reporting requirements requested by clinic management.
+Copyright © 1999 by Karl E. Wiegers. Permission is granted to use, modify, and distribute this document.

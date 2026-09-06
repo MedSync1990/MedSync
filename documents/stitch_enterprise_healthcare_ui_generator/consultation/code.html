@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;font-family:'Inter',sans-serif;}h1,h2,h3,h4,h5,h6{font-family:'Plus Jakarta Sans',sans-serif;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-card":"#FFFFFF","surface-container-lowest":"#ffffff","surface-container":"#e5eeff","on-error-container":"#93000a","error":"#ba1a1a","on-tertiary-fixed":"#001e2f","status-completed-bg":"#D1FAE5","on-secondary-container":"#5c647a","brand-navy-deep":"#0F172A","secondary-container":"#dae2fd","surface-container-low":"#eff4ff","surface-container-high":"#dce9ff","tertiary":"#00628d","status-pending-text":"#B45309","primary-fixed-dim":"#93ccff","surface":"#f8f9ff","status-cancelled-text":"#BE123C","on-primary":"#ffffff","error-container":"#ffdad6","on-secondary-fixed":"#131b2e","surface-dim":"#cbdbf5","on-tertiary-container":"#fcfcff","tertiary-fixed":"#c9e6ff","on-secondary-fixed-variant":"#3f465c","surface-tint":"#006398","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#bec6e0","on-primary-fixed-variant":"#004b73","status-scheduled-bg":"#E0F2FE","on-secondary":"#ffffff","secondary":"#565e74","on-background":"#0b1c30","surface-subtle":"#F1F5F9","border-subtle":"#E2E8F0","primary":"#006194","status-pending-bg":"#FEF3C7","on-error":"#ffffff","status-completed-text":"#047857","outline":"#707881","status-cancelled-bg":"#FFE4E6","primary-container":"#007bb9","tertiary-container":"#007cb1","canvas-bg":"#F8FAFC","outline-variant":"#bfc7d2","on-primary-fixed":"#001d31","inverse-surface":"#213145","background":"#f8f9ff","on-surface-variant":"#3f4850","tertiary-fixed-dim":"#89ceff","on-tertiary":"#ffffff","border-focus":"#0284C7","on-surface":"#0b1c30","brand-teal-light":"#38BDF8","on-tertiary-fixed-variant":"#004c6e","surface-bright":"#f8f9ff","inverse-primary":"#93ccff","primary-fixed":"#cce5ff","on-primary-container":"#fdfcff","surface-container-highest":"#d3e4fe","secondary-fixed":"#dae2fd","status-scheduled-text":"#0369A1","surface-variant":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"sidebar-collapsed-width":"72px","space-xs":"0.5rem","gutter-desktop":"1.5rem","space-sm":"0.75rem","space-lg":"1.5rem","space-xl":"2rem","space-2xs":"0.25rem","content-max-width":"1600px","space-md":"1rem","gutter-mobile":"1rem","sidebar-width":"260px","topbar-height":"68px","space-2xl":"2.5rem","space-3xl":"3rem"}}}}</script></head><body class="bg-canvas-bg text-on-surface antialiased">
+<!-- Sidebar -->
+<aside class="fixed left-0 w-sidebar-width bg-surface-card z-40 flex flex-col justify-between border-r border-border-subtle shadow-sm top-0 h-full">
+<div class="flex flex-col flex-1 min-h-0 pt-2"><div class="px-space-md py-space-sm border-b border-border-subtle/80 mb-1"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm flex-shrink-0"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div class="flex flex-col min-w-0"><span class="font-bold text-base text-brand-navy-deep leading-tight">MedSync</span><span class="text-[10px] font-bold text-primary tracking-wider uppercase">Doctor Portal</span></div></div></div>
+<div class="px-space-md py-space-sm">
+<div class="flex items-center gap-2 px-space-sm py-2 rounded-lg bg-surface-subtle border border-border-subtle/60">
+<span class="material-symbols-outlined text-[16px] text-primary flex-shrink-0">location_on</span>
+<span class="text-xs font-medium text-secondary truncate">Colombo Central Branch</span>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto px-space-md py-space-xs space-y-4">
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 h-10 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="dashboard" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="">Dashboard</span>
+</a>
+</div>
+<div>
+<div class="px-3 pb-2 text-[11px] font-bold text-secondary uppercase tracking-wider">MY WORK</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 h-10 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="my-schedule" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span class="">My Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-3 h-10 rounded-lg bg-status-scheduled-bg text-status-scheduled-text font-semibold relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-border-focus before:rounded-r text-sm transition-all" data-path="consultation" href="#">
+<span class="material-symbols-outlined text-[20px] text-border-focus">stethoscope</span>
+<span class="">Consultation</span>
+</a>
+</div>
+</div>
+<div>
+<div class="px-3 pb-2 text-[11px] font-bold text-secondary uppercase tracking-wider">EARNINGS</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 h-10 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="my-earnings" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="">My Earnings</span>
+</a>
+</div>
+</div>
+<div>
+<div class="px-3 pb-2 text-[11px] font-bold text-secondary uppercase tracking-wider">REFERENCE</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 h-10 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="treatment-catalogue" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="">Treatment Catalogue</span>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<div class="p-space-md border-t border-border-subtle bg-surface-card">
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 h-9 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="settings" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span class="">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 h-9 rounded-lg text-secondary hover:bg-surface-subtle hover:text-brand-navy-deep transition-all text-sm font-medium" data-path="help-center" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span class="">Help Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 h-9 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all text-sm font-semibold" data-path="logout" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Wrapper -->
+<div class="pl-sidebar-width min-h-screen flex flex-col">
+<!-- Top Bar -->
+<!-- Main Content Body -->
+<main class="relative w-full px-space-xl py-space-lg flex-1 bg-canvas-bg">
+<div class="max-w-content-max-width mx-auto flex flex-col gap-6 pb-12">
+<!-- Breadcrumb & Patient Context Header -->
+<div class="flex flex-col gap-3">
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-1.5 text-xs text-secondary font-medium">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[15px]">home</span>
+<span class="">Home</span>
+</a>
+<span class="material-symbols-outlined text-[14px] text-slate-400">chevron_right</span>
+<span class="">My Work</span>
+<span class="material-symbols-outlined text-[14px] text-slate-400">chevron_right</span>
+<span class="text-brand-navy-deep font-semibold">Consultation</span>
+</nav>
+<!-- Patient Header Card -->
+<div class="bg-surface-card rounded-xl p-5 border border-border-subtle shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex flex-wrap items-center gap-3">
+<h1 class="text-xl md:text-2xl font-bold text-brand-navy-deep tracking-tight">
+                Consultation — Priyantha Dharmasena
+              </h1>
+<!-- Clinical Alert Penicillin -->
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-cancelled-bg text-status-cancelled-text text-xs font-bold uppercase tracking-wide border border-rose-200">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+                Allergy: Penicillin
+              </span>
+<!-- Queue Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-border-focus"></span>
+                In Consultation Room 04
+              </span>
+</div>
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-secondary">
+<span class="font-semibold text-brand-navy-deep">Patient ID: PT-003420</span>
+<span class="text-slate-300">|</span>
+<span class="">Age: 48 yrs · Male</span>
+<span class="text-slate-300">|</span>
+<span class="">NIC: 782410928V</span>
+<span class="text-slate-300">|</span>
+<span class="text-primary font-medium">Follow-up Consultation</span>
+</div>
+</div>
+<div class="flex items-center gap-2 self-start md:self-auto">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-card border border-border-subtle text-brand-navy-deep text-xs font-semibold shadow-xs hover:bg-surface-subtle transition-all" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">history</span>
+<span class="">Medical History</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-card border border-border-subtle text-brand-navy-deep text-xs font-semibold shadow-xs hover:bg-surface-subtle transition-all" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">print</span>
+<span class="">Print Summary</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 1: Notes & Diagnosis -->
+<section class="bg-surface-card rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-subtle/80 pb-4">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-xs">1</div>
+<div>
+<h2 class="text-base font-bold text-brand-navy-deep leading-snug">Notes &amp; Diagnosis</h2>
+<p class="text-xs text-secondary leading-normal">Record clinical examination findings, symptoms, and primary ICD-10 diagnosis</p>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-status-completed-text text-xs font-medium self-start sm:self-auto">
+<span class="material-symbols-outlined text-[16px]">cloud_done</span>
+<span class="">Autosaved 1 min ago</span>
+</div>
+</div>
+<!-- Diagnosis Search Field -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold text-brand-navy-deep uppercase tracking-wider" for="diagnosis-input">
+              Primary Clinical Diagnosis <span class="text-status-cancelled-text">*</span>
+</label>
+<span class="text-[11px] font-semibold text-secondary uppercase tracking-wider">ICD-10 Categorized</span>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</div>
+<input class="w-full h-11 pl-10 pr-24 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep text-sm font-medium focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-transparent transition-all" id="diagnosis-input" placeholder="Search ICD-10 code or enter diagnosis..." type="text" value="Essential (primary) hypertension - Grade 1 / Post-Stent follow-up monitoring"/>
+<div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text text-xs font-mono font-bold">I10.9</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2 pt-1">
+<span class="text-[11px] font-semibold text-secondary uppercase tracking-wider">Quick Suggestions:</span>
+<button class="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">I10 (Essential HTN)</button>
+<button class="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">Z95.55 (Coronary Stent)</button>
+<button class="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">E78.5 (Dyslipidemia)</button>
+</div>
+</div>
+<!-- Notes Area -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold text-brand-navy-deep uppercase tracking-wider" for="consultation-notes">
+              Doctor's Examination &amp; Clinical Notes <span class="text-status-cancelled-text">*</span>
+</label>
+<span class="text-xs text-secondary">Markdown &amp; Speech-to-text enabled</span>
+</div>
+<div class="rounded-lg border border-border-subtle overflow-hidden bg-surface-subtle focus-within:ring-2 focus-within:ring-border-focus focus-within:bg-surface-card transition-all">
+<!-- Toolbar -->
+<div class="flex items-center justify-between px-3 py-2 bg-surface-subtle border-b border-border-subtle">
+<div class="flex items-center gap-1 text-secondary">
+<button class="p-1 rounded hover:bg-surface-card hover:text-brand-navy-deep transition-colors" title="Bold" type="button">
+<span class="material-symbols-outlined text-[18px]">format_bold</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-card hover:text-brand-navy-deep transition-colors" title="Italic" type="button">
+<span class="material-symbols-outlined text-[18px]">format_italic</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-card hover:text-brand-navy-deep transition-colors" title="Bullet List" type="button">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+</button>
+<div class="h-4 w-[1px] bg-border-subtle mx-1"></div>
+<button class="p-1 rounded hover:bg-surface-card hover:text-brand-navy-deep transition-colors" title="Insert Template" type="button">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</button>
+</div>
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-primary text-xs font-semibold hover:bg-status-scheduled-bg transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">mic</span>
+<span class="">Voice Dictate</span>
+</button>
+</div>
+<textarea class="w-full p-3.5 bg-transparent text-sm text-brand-navy-deep focus:outline-none resize-y leading-relaxed" id="consultation-notes" placeholder="Enter clinical observations, vitals assessment, progression, and directives..." rows="4">Patient reports mild exertion-related fatigue. Blood pressure stabilized on current ACE inhibitor regimen (128/82 mmHg). 12-lead ECG confirms normal sinus rhythm with no ST-T segment anomalies. Advised low sodium dietary intake, 30-minute daily walking routine, and continuation of prescribed therapy.</textarea>
+</div>
+<div class="flex items-center justify-between text-xs text-secondary pt-1">
+<span class="inline-flex items-center gap-1.5 text-status-completed-text font-medium">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+              Autosaved · Valid clinical documentation requirements satisfied
+            </span>
+<span class="text-slate-400" id="char-count">307 characters</span>
+</div>
+</div>
+</section>
+<!-- Section 2: Treatments & Clinical Orders -->
+<section class="bg-surface-card rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-subtle/80 pb-4">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-xs">2</div>
+<div>
+<h2 class="text-base font-bold text-brand-navy-deep leading-snug">Treatments &amp; Clinical Orders</h2>
+<p class="text-xs text-secondary leading-normal">Prescribe investigations, procedural diagnostics, and orders from Treatment Catalogue</p>
+</div>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-status-scheduled-bg text-status-scheduled-text text-xs font-semibold hover:bg-sky-100 transition-colors self-start sm:self-auto" type="button">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span class="">Browse Full Catalogue</span>
+</button>
+</div>
+<!-- Search & Quick Add -->
+<div class="flex flex-col gap-3">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary">
+<span class="material-symbols-outlined text-[18px]">add_circle_outline</span>
+</div>
+<input class="w-full h-11 pl-10 pr-4 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep text-sm font-medium focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-transparent transition-all" placeholder="Search clinical order by name, code, or department..." type="text"/>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-[11px] font-bold text-secondary uppercase tracking-wider">Quick-Add Orders:</span>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span class="">2D Echo (Transthoracic)</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span class="">Lipid Profile Full Panel</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep text-xs font-medium border border-border-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span class="">Serum Electrolytes</span>
+</button>
+</div>
+</div>
+<!-- Clinical Orders Table (NO financial/billing columns) -->
+<div class="overflow-x-auto rounded-lg border border-border-subtle">
+<table class="w-full text-left border-collapse min-w-[700px]">
+<thead>
+<tr class="bg-surface-subtle text-secondary text-[11px] font-bold uppercase tracking-wider border-b border-border-subtle h-10">
+<th class="pl-4 pr-3">Treatment / Procedure Name</th>
+<th class="px-3">Department</th>
+<th class="px-3">Clinical Indication / Notes</th>
+<th class="px-3 text-center">Quantity / Frequency</th>
+<th class="px-3 text-center">Status</th>
+<th class="pr-4 pl-2 text-center w-16">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle bg-surface-card text-sm font-normal">
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3 pl-4 pr-3">
+<div class="font-semibold text-brand-navy-deep leading-tight">Cardiology Specialist Consultation</div>
+<div class="text-xs font-mono text-secondary mt-0.5">Code: SRV-CRD-01</div>
+</td>
+<td class="px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">OPD Unit</span>
+</td>
+<td class="px-3 text-xs text-secondary">
+                  Routine follow-up post-stent placement
+                </td>
+<td class="px-3 text-center font-medium text-brand-navy-deep text-xs">
+                  1 Session
+                </td>
+<td class="px-3 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-scheduled-bg text-status-scheduled-text">
+                    In Progress
+                  </span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3 pl-4 pr-3">
+<div class="font-semibold text-brand-navy-deep leading-tight">12-Lead Electrocardiogram (ECG)</div>
+<div class="text-xs font-mono text-secondary mt-0.5">Code: SRV-DIA-04</div>
+</td>
+<td class="px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-50 text-primary">Cardiology Diagnostics</span>
+</td>
+<td class="px-3 text-xs text-secondary">
+                  Evaluate baseline rhythm and conduction
+                </td>
+<td class="px-3 text-center font-medium text-brand-navy-deep text-xs">
+                  1 Test
+                </td>
+<td class="px-3 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-completed-bg text-status-completed-text">
+                    Completed
+                  </span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/50 transition-colors">
+<td class="py-3 pl-4 pr-3">
+<div class="font-semibold text-brand-navy-deep leading-tight">Blood Glucose Random (RBS)</div>
+<div class="text-xs font-mono text-secondary mt-0.5">Code: SRV-LAB-12</div>
+</td>
+<td class="px-3">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">Central Lab</span>
+</td>
+<td class="px-3 text-xs text-secondary">
+                  Check glycemic control on existing medication
+                </td>
+<td class="px-3 text-center font-medium text-brand-navy-deep text-xs">
+                  1 Stat Test
+                </td>
+<td class="px-3 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-pending-bg text-status-pending-text">
+                    Sample Collected
+                  </span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section 3: Prescription Directives -->
+<section class="bg-surface-card rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-border-subtle/80 pb-3">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[22px]">prescriptions</span>
+<h3 class="text-base font-bold text-brand-navy-deep">Prescription &amp; Medication Directives</h3>
+</div>
+<span class="text-xs font-medium text-secondary">Integrated In-house Dispensary</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1 -->
+<div class="p-4 bg-surface-subtle border border-border-subtle rounded-lg flex items-start gap-3.5">
+<div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">medication</span>
+</div>
+<div class="flex-1 flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-2">
+<span class="text-sm font-bold text-brand-navy-deep truncate">Ramipril 5mg (Capsule)</span>
+<span class="text-xs font-medium text-secondary flex-shrink-0">30 Days (30 Qty)</span>
+</div>
+<p class="text-xs text-secondary mt-1">Dosage: 1 capsule orally once daily in the morning.</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-4 bg-surface-subtle border border-border-subtle rounded-lg flex items-start gap-3.5">
+<div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">medication</span>
+</div>
+<div class="flex-1 flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-2">
+<span class="text-sm font-bold text-brand-navy-deep truncate">Atorvastatin 20mg (Tablet)</span>
+<span class="text-xs font-medium text-secondary flex-shrink-0">30 Days (30 Qty)</span>
+</div>
+<p class="text-xs text-secondary mt-1">Dosage: 1 tablet at bedtime. Monitor lipid profile in 8 weeks (30 Days / 30 Qty).</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Action Bar / Consultation Finalization -->
+<section class="bg-surface-card rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col gap-5">
+<!-- Follow-up row -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-brand-navy-deep">Recommended Next Follow-Up</h4>
+<p class="text-xs text-secondary">Clinical review schedule with Dr. Bandara</p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-subtle hover:bg-slate-200 text-brand-navy-deep text-xs font-semibold border border-border-subtle transition-colors" type="button">2 Weeks</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-border-focus text-on-primary text-xs font-bold shadow-xs transition-colors" type="button">4 Weeks</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-subtle hover:bg-slate-200 text-brand-navy-deep text-xs font-semibold border border-border-subtle transition-colors" type="button">8 Weeks</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-subtle hover:bg-slate-200 text-brand-navy-deep text-xs font-semibold border border-border-subtle transition-colors" type="button">Custom Date</button>
+</div>
+</div>
+<!-- Finalization Footer -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-completed-text text-[20px]">verified</span>
+<span class="text-xs text-brand-navy-deep font-semibold">Consultation notes saved · Automatically generates billing invoice for Reception desk</span>
+</div>
+<div class="flex items-center gap-1.5 text-secondary text-xs pl-7">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span class="">SLMC Compliant Electronic Health Record</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-3 self-end lg:self-auto">
+<button class="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">print</span>
+<span class="">Print Clinical Summary</span>
+</button>
+<button class="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">save</span>
+<span class="">Save Draft</span>
+</button>
+<button class="h-10 px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-sm font-bold inline-flex items-center gap-2 shadow-sm transition-all transform active:scale-[0.99]" id="complete-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<span class="">Complete Consultation</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<script>
+  // Simple interactive updates
+  const notesArea = document.getElementById('consultation-notes');
+  const charCounter = document.getElementById('char-count');
+  if (notesArea && charCounter) {
+    notesArea.addEventListener('input', () => {
+      charCounter.textContent = `${notesArea.value.length} characters`;
+    });
+  }
+
+  const completeBtn = document.getElementById('complete-btn');
+  if (completeBtn) {
+    completeBtn.addEventListener('click', () => {
+      completeBtn.disabled = true;
+      completeBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+        <span>Finalizing Encounter...</span>
+      `;
+      setTimeout(() => {
+        completeBtn.classList.remove('bg-primary', 'hover:bg-primary-container');
+        completeBtn.classList.add('bg-status-completed-bg', 'text-status-completed-text', 'border', 'border-emerald-300');
+        completeBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">task_alt</span>
+          <span>Consultation Completed!</span>
+        `;
+      }, 700);
+    });
+  }
+</script>
+</body></html>

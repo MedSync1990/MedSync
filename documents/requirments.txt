@@ -1,0 +1,52 @@
+Project 1 - Clinic Appointment and Treatment Management System
+MedSync is a medium-scale multi-specialty clinic with branches in Colombo, Kandy, and
+Galle. The clinic management has been using a mixture of paper records and Excel
+sheets to manage patient appointments, doctor schedules, and billing. With the
+increasing number of patients and specialists, the management has decided to develop
+an integrated Clinic Appointment and Treatment Management System (CATMS) to
+streamline operations.
+Your team has been hired to design the database for this system. The objective of the first
+phase is to digitise appointment booking, treatment recording, and billing processes. A
+UI must be built to allow the QA team to test key features, but the primary focus is on
+database correctness.
+The system requirements are as follows:
+• The clinic operates several branches, each with a branch manager and multiple
+medical and non-medical staff. Each doctor works at a specific branch but can
+serve in more than one specialty (e.g., General Medicine, ENT, Paediatrics).
+• Patients can be registered at any branch, and their patient record should be
+accessible across branches. Records include personal details, emergency
+contact, and health insurance information.
+• Appointments are made between a patient and a doctor for a given time slot. The
+same doctor cannot have two overlapping appointments. Each appointment can
+either be Scheduled, Completed, or Cancelled.
+• Once an appointment is marked Completed, a set of treatments and/or
+consultation notes are recorded against it. Doctors may prescribe one or more
+treatments from a pre-defined treatment catalogue (e.g., Consultation, X-Ray,
+ECG, Injection).
+• Each treatment has a price and a service code. The billing system generates
+invoices based on the completed treatments and consultation.
+• Patients may make full or partial payments for a bill. The system must track
+outstanding dues.
+• The clinic also wants to support insurance claims for certain treatments. If a
+patient is insured, some treatments may be reimbursed partly or fully based on
+policy terms.
+• The system must allow rescheduling of appointments and also support
+emergency walk-ins, which are appointments created directly by staff without
+prior booking.
+The management needs the following reports from the system:
+1. Branch-wise appointment summary per day (scheduled, completed, cancelled)
+2. Doctor-wise revenue report
+3. List of patients with outstanding balances
+4. Number of treatments per category over a given period
+5. Insurance coverage vs. out-of-pocket payments
+Task
+Your task is to model the database design to encapsulate these requirements. It should
+consider all entities and relationships mentioned in the description. Moreover, you need
+to identify the places where procedures, functions, and triggers can be employed to
+guarantee ACID properties. Foreign keys and primary keys must be set to maintain
+consistency. Indexing should be done when necessary.
+Additionally, you must gain a domain understanding by reviewing related material and
+take assumptions when not explicitly provided (e.g., treatment prices, insurance terms).
+The database must be populated with dummy data before presentation. There is no need
+to implement UI control to specifically input data—SQL queries can be used to manually
+input the dummy data.
