@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "brand-navy-deep": "#0F172A", "on-error": "#ffffff", "surface-subtle": "#F1F5F9", "surface-container-low": "#eff4ff", "error": "#ba1a1a", "surface-container": "#e5eeff", "on-error-container": "#93000a", "surface-card": "#FFFFFF", "status-completed-bg": "#D1FAE5", "tertiary-fixed-dim": "#89ceff", "primary-fixed-dim": "#93ccff", "outline": "#707881", "on-secondary-fixed": "#131b2e", "primary": "#006194", "on-tertiary-fixed": "#001e2f", "surface-dim": "#cbdbf5", "on-secondary": "#ffffff", "status-pending-text": "#B45309", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#001d31", "inverse-surface": "#213145", "on-primary-fixed-variant": "#004b73", "surface-bright": "#f8f9ff", "surface": "#f8f9ff", "border-subtle": "#E2E8F0", "on-primary": "#ffffff", "primary-container": "#007bb9", "surface-container-highest": "#d3e4fe", "on-tertiary": "#ffffff", "surface-tint": "#006398", "canvas-bg": "#F8FAFC", "on-background": "#0b1c30", "border-focus": "#0284C7", "status-pending-bg": "#FEF3C7", "surface-container-high": "#dce9ff", "status-completed-text": "#047857", "tertiary": "#00628d", "inverse-on-surface": "#eaf1ff", "secondary-fixed": "#dae2fd", "tertiary-fixed": "#c9e6ff", "tertiary-container": "#007cb1", "on-secondary-container": "#5c647a", "secondary-fixed-dim": "#bec6e0", "brand-teal-light": "#38BDF8", "on-secondary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-surface": "#0b1c30", "on-tertiary-container": "#fcfcff", "on-tertiary-fixed-variant": "#004c6e", "secondary": "#565e74", "outline-variant": "#bfc7d2", "primary-fixed": "#cce5ff", "inverse-primary": "#93ccff", "on-primary-container": "#fdfcff", "on-surface-variant": "#3f4850", "surface-variant": "#d3e4fe", "status-scheduled-bg": "#E0F2FE", "background": "#f8f9ff", "secondary-container": "#dae2fd", "status-cancelled-text": "#BE123C", "status-cancelled-bg": "#FFE4E6", "status-scheduled-text": "#0369A1" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "sidebar-width": "260px", "sidebar-collapsed-width": "72px", "space-md": "1rem", "topbar-height": "68px", "space-2xl": "2.5rem", "space-lg": "1.5rem", "content-max-width": "1600px", "space-sm": "0.75rem", "space-2xs": "0.25rem", "gutter-mobile": "1rem", "space-3xl": "3rem", "gutter-desktop": "1.5rem", "space-xs": "0.5rem" }, "fontFamily": { "mono-data": [ "inter" ], "body-lg": [ "inter" ], "label-sm": [ "inter" ], "headline-md": [ "plusJakartaSans" ], "display-lg": [ "plusJakartaSans" ], "label-md": [ "inter" ], "body-md": [ "inter" ], "body-sm": [ "inter" ], "headline-lg": [ "plusJakartaSans" ], "display-lg-mobile": [ "plusJakartaSans" ], "label-lg": [ "inter" ], "headline-sm": [ "plusJakartaSans" ] }, "fontSize": { "mono-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "fontWeight": "600" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="flex flex-col"><div class="h-[68px] px-space-md flex items-center gap-space-sm bg-surface-card"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-[0_1px_3px_rgba(15,23,42,0.04)]">M</div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold">MedSync</span><span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Plus</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold truncate">Administrator Portal</span></div></div><nav class="flex flex-col px-space-sm pt-space-md gap-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Overview</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Reports</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Branch Appointments</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span>Treatment Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Insurance vs. Cash</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Management</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span>Manage Branches</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-staff-users" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Manage Staff &amp; Users</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-doctors-specialties" href="#"><span class="material-symbols-outlined text-[20px]">stethoscope</span><span>Doctors &amp; Specialties</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg transition-all bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full" data-path="manage-treatment-catalogue" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span>Treatment Catalogue</span></a></nav></div><div class="p-space-sm pt-space-lg flex flex-col gap-1 bg-surface-card"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">System</span></div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span>Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all font-body-md text-body-md" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px] min-h-screen flex flex-col"><header class="fixed top-0 left-[260px] right-0 h-[68px] z-40 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-[68px] px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><button aria-label="Collapse Sidebar" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">menu_open</span></button><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span><span class="font-label-md text-label-md text-primary font-semibold">All Branches (System Admin)</span></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-2xs px-space-sm py-1 rounded-full bg-surface-subtle text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span><span class="font-label-md text-label-md font-semibold">Scope: Nationwide / All Branches</span></div><button aria-label="Toggle theme" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="relative flex items-center"><img alt="Profile" class="w-9 h-9 rounded-full object-cover shadow-[0_1px_3px_rgba(15,23,42,0.04)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-card"><span class="material-symbols-outlined text-[10px]">verified</span></span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Good morning, Dr. Aritha</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal leading-tight">Administrator · All Branches</span></div></div></div></div></header><main class="w-full pt-[68px] px-gutter-desktop pb-space-2xl max-w-[1600px] mx-auto bg-canvas-bg"><div class="flex flex-col w-full">
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Clinical Operations &amp; Pricing</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">FR-TCM-05 Protocol</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Manage Treatment Catalogue</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Add or update treatments, prices, and insurance eligibility.</p>
+</div>
+<div class="flex items-center flex-wrap gap-space-sm">
+<button class="inline-flex items-center gap-space-xs px-space-md h-[42px] rounded-lg bg-surface-card text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">upload_file</span>
+<span>Import Procedures</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md h-[42px] rounded-lg bg-surface-card text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">file_download</span>
+<span>Export Catalogue (CSV)</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-lg h-[42px] rounded-lg bg-border-focus text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary transition-all active:scale-[0.99]" id="openDrawerBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>+ Add Treatment</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md mb-space-lg">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Total Catalogued</span>
+<span class="font-display-lg text-display-lg font-bold text-brand-navy-deep mt-1">148</span>
+<span class="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> 6 main clinical branches
+        </span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">clinical_notes</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Insurance Eligible</span>
+<span class="font-display-lg text-display-lg font-bold text-primary mt-1">112</span>
+<span class="font-body-sm text-body-sm text-primary font-medium mt-0.5">75.7% of full catalogue</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-status-scheduled-bg flex items-center justify-center text-status-scheduled-text">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Out-of-Pocket Only</span>
+<span class="font-display-lg text-display-lg font-bold text-status-pending-text mt-1">36</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Elective &amp; OTC items</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-status-pending-bg flex items-center justify-center text-status-pending-text">
+<span class="material-symbols-outlined text-[24px]">payments</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Audit Retention</span>
+<span class="font-display-lg text-display-lg font-bold text-on-surface mt-1">100%</span>
+<span class="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">shield</span> FR-TCM-05 Compliant
+        </span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-subtle flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]">inventory_2</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm mb-space-md">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+<input class="w-full h-[42px] pl-10 pr-space-md bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-card shadow-inner" id="catalogueSearch" placeholder="Search by treatment name, code (e.g. MED-DX-102), or category..." type="text"/>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Category:</span>
+<select class="h-[42px] px-space-sm bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none cursor-pointer" id="categorySelect">
+<option value="All">All Categories</option>
+<option value="Diagnostics &amp; Lab">Diagnostics &amp; Lab</option>
+<option value="Specialist Consultations">Specialist Consultations</option>
+<option value="Cardiology Procedures">Cardiology Procedures</option>
+<option value="Minor Surgery">Minor Surgery</option>
+<option value="Pharmacy Injections">Pharmacy Injections</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Insurance:</span>
+<select class="h-[42px] px-space-sm bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none cursor-pointer" id="insuranceSelect">
+<option value="All">All Tiers</option>
+<option value="Eligible">Insurance Eligible</option>
+<option value="Out-of-Pocket">Patient Out-of-Pocket</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Status:</span>
+<select class="h-[42px] px-space-sm bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none cursor-pointer" id="statusSelect">
+<option value="All">All Statuses</option>
+<option value="Active">Active</option>
+<option value="Deactivated">Deactivated</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-subtle h-[44px]">
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Code</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Treatment / Procedure Name</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Category</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Standard Price (LKR)</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Insurance Eligibility</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Status</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0" id="treatmentTableBody">
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">MED-DX-102</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">12-Lead ECG</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Standard resting electrocardiogram with rhythm analysis</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-secondary-container text-on-secondary-container">Diagnostics &amp; Lab</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 2,500</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-primary p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-4 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-scheduled-bg text-status-scheduled-text font-semibold">Yes - 80% Covered</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Diagnostics &amp; Lab" data-code="MED-DX-102" data-insurance="yes" data-name="12-Lead ECG" data-price="2500" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="MED-DX-102" data-name="12-Lead ECG" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">LAB-BL-409</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Lipid Profile Panel</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Cholesterol, HDL, LDL, VLDL, Triglycerides automated panel</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-secondary-container text-on-secondary-container">Diagnostics &amp; Lab</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 3,000</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-primary p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-4 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-scheduled-bg text-status-scheduled-text font-semibold">Yes - 80% Covered</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Diagnostics &amp; Lab" data-code="LAB-BL-409" data-insurance="yes" data-name="Lipid Profile Panel" data-price="3000" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="LAB-BL-409" data-name="Lipid Profile Panel" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">CNS-SP-001</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Specialist Consultation</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Standard in-branch Senior Consultant specialist intake session</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-tertiary-fixed text-on-tertiary-fixed-variant">Specialist Consultations</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 5,000</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-primary p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-4 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-scheduled-bg text-status-scheduled-text font-semibold">Yes - 80% Covered</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Specialist Consultations" data-code="CNS-SP-001" data-insurance="yes" data-name="Specialist Consultation" data-price="5000" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="CNS-SP-001" data-name="Specialist Consultation" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">CRD-US-204</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">2D Echo Transthoracic</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Colour Doppler cardiac imaging with ejection fraction calc</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-primary-fixed text-on-primary-fixed-variant">Cardiology Procedures</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 7,500</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-primary p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-4 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-scheduled-bg text-status-scheduled-text font-semibold">Yes - 80% Covered</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Cardiology Procedures" data-code="CRD-US-204" data-insurance="yes" data-name="2D Echo Transthoracic" data-price="7500" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="CRD-US-204" data-name="2D Echo Transthoracic" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">LAB-GL-011</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">RBS Blood Glucose</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rapid blood sugar strip test with instant reading</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-secondary-container text-on-secondary-container">Diagnostics &amp; Lab</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 650</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-outline-variant p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-0 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-pending-bg text-status-pending-text font-semibold">No - Out-of-Pocket</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Diagnostics &amp; Lab" data-code="LAB-GL-011" data-insurance="no" data-name="RBS Blood Glucose" data-price="650" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="LAB-GL-011" data-name="RBS Blood Glucose" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-primary font-bold px-2 py-1 rounded bg-surface-container-low">SUR-MN-303</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Suturing &amp; Wound Dressing</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sterile minor laceration repair with local anaesthetic</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-surface-container-high text-on-surface-variant">Minor Surgery</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface font-bold">LKR 4,000</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full bg-primary p-0.5 transition-colors focus:outline-none" type="button">
+<span class="translate-x-4 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-status-scheduled-bg text-status-scheduled-text font-semibold">Yes - 80% Covered</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span> Active
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Minor Surgery" data-code="SUR-MN-303" data-insurance="yes" data-name="Suturing &amp; Wound Dressing" data-price="4000" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors deactivate-btn" data-code="SUR-MN-303" data-name="Suturing &amp; Wound Dressing" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors group bg-surface-subtle/40">
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-outline font-bold px-2 py-1 rounded bg-surface-subtle">PHA-IN-105</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface-variant line-through">Tetanus Toxoid Injection</span>
+<span class="font-body-sm text-body-sm text-outline">0.5 mL intramuscular injection procedure &amp; batch log</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-surface-subtle text-outline">Pharmacy Injections</span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-outline font-bold">LKR 950</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<button aria-label="Toggle Insurance" class="relative inline-flex h-5 w-9 shrink-0 cursor-not-allowed rounded-full bg-outline-variant p-0.5 transition-colors focus:outline-none opacity-60" disabled="" type="button">
+<span class="translate-x-0 inline-block h-4 w-4 rounded-full bg-surface-card transition-transform"></span>
+</button>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-subtle text-outline font-semibold">No - Out-of-Pocket</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-md font-label-md bg-surface-subtle text-outline font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Deactivated
+              </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded-lg text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors edit-btn" data-cat="Pharmacy Injections" data-code="PHA-IN-105" data-insurance="no" data-name="Tetanus Toxoid Injection" data-price="950" type="button">Edit</button>
+<button class="px-2.5 py-1 rounded-lg text-status-scheduled-text hover:bg-status-scheduled-bg font-label-md text-label-md transition-colors" type="button">Reactivate</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-space-md bg-surface-subtle/70 flex flex-col md:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-primary">info</span>
+<p class="font-body-sm text-body-sm">
+<strong class="text-on-surface font-semibold">148 total procedures catalogued</strong> · 112 Insurance-eligible · Soft-delete policy enforced for linked medical records.
+        </p>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-subtle disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<span class="font-label-md text-label-md px-2 text-on-surface-variant font-medium">Page 1 of 12</span>
+<button class="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-on-surface shadow-sm hover:bg-surface-subtle" type="button">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 bg-brand-navy-deep/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300" id="drawerBackdrop"></div>
+<div class="fixed right-0 top-0 bottom-0 w-full max-w-[540px] bg-surface-card shadow-2xl z-50 translate-x-full transition-transform duration-300 ease-out flex flex-col" id="treatmentDrawer">
+<div class="h-[68px] px-space-lg flex items-center justify-between bg-surface-subtle">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" id="drawerIcon">note_add</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="drawerTitle">Add Treatment Procedure</h2>
+<span class="font-label-sm text-label-sm text-outline">Clinical Pricing &amp; Billing Master</span>
+</div>
+</div>
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-card transition-colors" id="closeDrawerBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="flex-1 overflow-y-auto p-space-lg flex flex-col gap-space-md" id="treatmentForm">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="formServiceCode">Service Code <span class="text-error">*</span></label>
+<div class="relative">
+<input class="w-full h-[42px] px-3.5 bg-surface-subtle rounded-lg text-body-md font-mono-data text-on-surface focus:outline-none focus:bg-surface-card" id="formServiceCode" required="" type="text" value="MED-DX-103"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-label-sm font-label-sm text-primary font-bold">Auto-Prefix</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Code generated according to category schema (e.g. MED, LAB, SUR, PHA).</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="formTreatmentName">Procedure / Treatment Name <span class="text-error">*</span></label>
+<input class="w-full h-[42px] px-3.5 bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none focus:bg-surface-card" id="formTreatmentName" placeholder="e.g. Holter Monitoring 24hr" required="" type="text"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="formCategory">Category <span class="text-error">*</span></label>
+<select class="w-full h-[42px] px-3.5 bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none focus:bg-surface-card cursor-pointer" id="formCategory" required="">
+<option value="">Select Treatment Category...</option>
+<option value="Diagnostics &amp; Lab">Diagnostics &amp; Lab</option>
+<option value="Specialist Consultations">Specialist Consultations</option>
+<option value="Cardiology Procedures">Cardiology Procedures</option>
+<option value="Minor Surgery">Minor Surgery</option>
+<option value="Pharmacy Injections">Pharmacy Injections</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="formPrice">Standard Unit Price (LKR) <span class="text-error">*</span></label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-label-md text-label-md font-bold text-outline">LKR</span>
+<input class="w-full h-[42px] pl-12 pr-3.5 bg-surface-subtle rounded-lg text-body-md font-mono-data text-on-surface focus:outline-none focus:bg-surface-card" id="formPrice" min="0" placeholder="3500" required="" step="50" type="number"/>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-subtle flex items-start justify-between gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Insurance Eligibility</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Enables claim generation and direct-billing coverage for partner insurers.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer mt-1">
+<input checked="" class="sr-only peer" id="formInsuranceToggle" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-card after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-border-focus"></div>
+</label>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="formNotes">Description / Clinical Notes</label>
+<textarea class="w-full p-3.5 bg-surface-subtle rounded-lg text-body-md font-body-md text-on-surface focus:outline-none focus:bg-surface-card resize-none" id="formNotes" placeholder="Specify requirements, consumables included, or clinical guidelines..." rows="4"></textarea>
+</div>
+<div class="p-space-md rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[20px] shrink-0">verified</span>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-label-md font-bold">Standard Synchronisation</span>
+<span class="font-body-sm text-body-sm">Saving updates the pricing directory across Colombo Central, Kandy, Galle, and Jaffna branches immediately.</span>
+</div>
+</div>
+</form>
+<div class="p-space-md bg-surface-subtle flex items-center justify-end gap-space-sm">
+<button class="px-space-md h-[42px] rounded-lg bg-surface-card text-on-surface font-label-lg text-label-lg shadow-sm hover:bg-surface-card/70 transition-colors" id="cancelDrawerBtn" type="button">
+        Cancel
+      </button>
+<button class="px-space-lg h-[42px] rounded-lg bg-border-focus text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary transition-all" form="treatmentForm" type="submit">
+        Save Treatment
+      </button>
+</div>
+</div>
+<div class="fixed inset-0 bg-brand-navy-deep/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-space-md" id="deactivateModalBackdrop">
+<div class="bg-surface-card rounded-2xl max-w-[460px] w-full p-space-lg shadow-2xl flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center mb-space-md">
+<span class="material-symbols-outlined text-[26px]">warning</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Deactivate Treatment Procedure?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+        Are you sure you want to deactivate <span class="font-bold text-on-surface" id="deactivateItemName">12-Lead ECG</span> (<span class="font-mono-data font-bold" id="deactivateItemCode">MED-DX-102</span>)?
+      </p>
+<div class="mt-space-md p-space-sm rounded-lg bg-surface-subtle flex items-start gap-2 text-outline">
+<span class="material-symbols-outlined text-[18px] shrink-0 text-primary">policy</span>
+<span class="font-body-sm text-body-sm">Historical records are kept per FR-TCM-05. Existing invoices and clinical encounters remain fully intact.</span>
+</div>
+<div class="mt-space-lg flex items-center justify-end gap-space-sm">
+<button class="px-space-md h-[40px] rounded-lg bg-surface-subtle text-on-surface font-label-md text-label-md hover:bg-surface-subtle/80 transition-colors" id="cancelDeactivateBtn" type="button">
+          Cancel
+        </button>
+<button class="px-space-md h-[40px] rounded-lg bg-error text-on-error font-label-md text-label-md hover:bg-on-error-container transition-colors shadow-sm" id="confirmDeactivateBtn" type="button">
+          Deactivate Procedure
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const drawer = document.getElementById('treatmentDrawer');
+    const openDrawerBtn = document.getElementById('openDrawerBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const cancelDrawerBtn = document.getElementById('cancelDrawerBtn');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const formServiceCode = document.getElementById('formServiceCode');
+    const formTreatmentName = document.getElementById('formTreatmentName');
+    const formCategory = document.getElementById('formCategory');
+    const formPrice = document.getElementById('formPrice');
+    const formInsuranceToggle = document.getElementById('formInsuranceToggle');
+    const treatmentForm = document.getElementById('treatmentForm');
+
+    const deactivateModal = document.getElementById('deactivateModalBackdrop');
+    const deactivateItemName = document.getElementById('deactivateItemName');
+    const deactivateItemCode = document.getElementById('deactivateItemCode');
+    const cancelDeactivateBtn = document.getElementById('cancelDeactivateBtn');
+    const confirmDeactivateBtn = document.getElementById('confirmDeactivateBtn');
+
+    function openDrawer(mode = 'add', data = {}) {
+      if (mode === 'edit') {
+        drawerTitle.textContent = 'Edit Treatment Procedure';
+        formServiceCode.value = data.code || '';
+        formTreatmentName.value = data.name || '';
+        formCategory.value = data.cat || '';
+        formPrice.value = data.price || '';
+        formInsuranceToggle.checked = data.insurance === 'yes';
+      } else {
+        drawerTitle.textContent = 'Add Treatment Procedure';
+        treatmentForm.reset();
+        formServiceCode.value = 'MED-DX-108';
+        formInsuranceToggle.checked = true;
+      }
+      drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      drawerBackdrop.classList.add('opacity-100');
+      drawer.classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      drawerBackdrop.classList.remove('opacity-100');
+      drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      drawer.classList.add('translate-x-full');
+    }
+
+    openDrawerBtn.addEventListener('click', () => openDrawer('add'));
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    cancelDrawerBtn.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        openDrawer('edit', {
+          code: target.dataset.code,
+          name: target.dataset.name,
+          cat: target.dataset.cat,
+          price: target.dataset.price,
+          insurance: target.dataset.insurance
+        });
+      });
+    });
+
+    document.querySelectorAll('.deactivate-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        deactivateItemCode.textContent = target.dataset.code;
+        deactivateItemName.textContent = target.dataset.name;
+        deactivateModal.classList.remove('hidden');
+      });
+    });
+
+    cancelDeactivateBtn.addEventListener('click', () => {
+      deactivateModal.classList.add('hidden');
+    });
+
+    confirmDeactivateBtn.addEventListener('click', () => {
+      deactivateModal.classList.add('hidden');
+    });
+
+    treatmentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      closeDrawer();
+    });
+
+    const searchInput = document.getElementById('catalogueSearch');
+    const categorySelect = document.getElementById('categorySelect');
+    const insuranceSelect = document.getElementById('insuranceSelect');
+    const statusSelect = document.getElementById('statusSelect');
+    const rows = document.querySelectorAll('#treatmentTableBody tr');
+
+    function filterTable() {
+      const q = searchInput.value.toLowerCase().trim();
+      const cat = categorySelect.value;
+      const ins = insuranceSelect.value;
+      const st = statusSelect.value;
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const matchesQuery = !q || text.includes(q);
+        const matchesCat = cat === 'All' || text.includes(cat.toLowerCase());
+        
+        let matchesIns = true;
+        if (ins === 'Eligible') {
+          matchesIns = text.includes('yes -') || text.includes('covered');
+        } else if (ins === 'Out-of-Pocket') {
+          matchesIns = text.includes('out-of-pocket');
+        }
+
+        let matchesStatus = true;
+        if (st === 'Active') {
+          matchesStatus = text.includes('active') && !text.includes('deactivated');
+        } else if (st === 'Deactivated') {
+          matchesStatus = text.includes('deactivated');
+        }
+
+        if (matchesQuery && matchesCat && matchesIns && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    categorySelect.addEventListener('change', filterTable);
+    insuranceSelect.addEventListener('change', filterTable);
+    statusSelect.addEventListener('change', filterTable);
+  })();
+</script></main></div></body></html>
