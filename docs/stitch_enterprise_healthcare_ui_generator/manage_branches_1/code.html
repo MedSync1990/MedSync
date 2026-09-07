@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "brand-navy-deep": "#0F172A", "on-error": "#ffffff", "surface-subtle": "#F1F5F9", "surface-container-low": "#eff4ff", "error": "#ba1a1a", "surface-container": "#e5eeff", "on-error-container": "#93000a", "surface-card": "#FFFFFF", "status-completed-bg": "#D1FAE5", "tertiary-fixed-dim": "#89ceff", "primary-fixed-dim": "#93ccff", "outline": "#707881", "on-secondary-fixed": "#131b2e", "primary": "#006194", "on-tertiary-fixed": "#001e2f", "surface-dim": "#cbdbf5", "on-secondary": "#ffffff", "status-pending-text": "#B45309", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#001d31", "inverse-surface": "#213145", "on-primary-fixed-variant": "#004b73", "surface-bright": "#f8f9ff", "surface": "#f8f9ff", "border-subtle": "#E2E8F0", "on-primary": "#ffffff", "primary-container": "#007bb9", "surface-container-highest": "#d3e4fe", "on-tertiary": "#ffffff", "surface-tint": "#006398", "canvas-bg": "#F8FAFC", "on-background": "#0b1c30", "border-focus": "#0284C7", "status-pending-bg": "#FEF3C7", "surface-container-high": "#dce9ff", "status-completed-text": "#047857", "tertiary": "#00628d", "inverse-on-surface": "#eaf1ff", "secondary-fixed": "#dae2fd", "tertiary-fixed": "#c9e6ff", "tertiary-container": "#007cb1", "on-secondary-container": "#5c647a", "secondary-fixed-dim": "#bec6e0", "brand-teal-light": "#38BDF8", "on-secondary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-surface": "#0b1c30", "on-tertiary-container": "#fcfcff", "on-tertiary-fixed-variant": "#004c6e", "secondary": "#565e74", "outline-variant": "#bfc7d2", "primary-fixed": "#cce5ff", "inverse-primary": "#93ccff", "on-primary-container": "#fdfcff", "on-surface-variant": "#3f4850", "surface-variant": "#d3e4fe", "status-scheduled-bg": "#E0F2FE", "background": "#f8f9ff", "secondary-container": "#dae2fd", "status-cancelled-text": "#BE123C", "status-cancelled-bg": "#FFE4E6", "status-scheduled-text": "#0369A1" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "sidebar-width": "260px", "sidebar-collapsed-width": "72px", "space-md": "1rem", "topbar-height": "68px", "space-2xl": "2.5rem", "space-lg": "1.5rem", "content-max-width": "1600px", "space-sm": "0.75rem", "space-2xs": "0.25rem", "gutter-mobile": "1rem", "space-3xl": "3rem", "gutter-desktop": "1.5rem", "space-xs": "0.5rem" }, "fontFamily": { "mono-data": [ "inter" ], "body-lg": [ "inter" ], "label-sm": [ "inter" ], "headline-md": [ "plusJakartaSans" ], "display-lg": [ "plusJakartaSans" ], "label-md": [ "inter" ], "body-md": [ "inter" ], "body-sm": [ "inter" ], "headline-lg": [ "plusJakartaSans" ], "display-lg-mobile": [ "plusJakartaSans" ], "label-lg": [ "inter" ], "headline-sm": [ "plusJakartaSans" ] }, "fontSize": { "mono-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "fontWeight": "600" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="flex flex-col"><div class="h-[68px] px-space-md flex items-center gap-space-sm bg-surface-card"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-[0_1px_3px_rgba(15,23,42,0.04)]">M</div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold">MedSync</span><span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Plus</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold truncate">Administrator Portal</span></div></div><nav class="flex flex-col px-space-sm pt-space-md gap-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Overview</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Reports</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Branch Appointments</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span>Treatment Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Insurance vs. Cash</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Management</span></div><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg transition-all bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span>Manage Branches</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-staff-users" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Manage Staff &amp; Users</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-doctors-specialties" href="#"><span class="material-symbols-outlined text-[20px]">stethoscope</span><span>Doctors &amp; Specialties</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-treatment-catalogue" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span>Treatment Catalogue</span></a></nav></div><div class="p-space-sm pt-space-lg flex flex-col gap-1 bg-surface-card"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">System</span></div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span>Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all font-body-md text-body-md" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px] min-h-screen flex flex-col"><header class="fixed top-0 left-[260px] right-0 h-[68px] z-40 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-[68px] px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><button aria-label="Collapse Sidebar" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">menu_open</span></button><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span><span class="font-label-md text-label-md text-primary font-semibold">All Branches (System Admin)</span></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-2xs px-space-sm py-1 rounded-full bg-surface-subtle text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span><span class="font-label-md text-label-md font-semibold">Scope: Nationwide / All Branches</span></div><button aria-label="Toggle theme" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="relative flex items-center"><img alt="Profile" class="w-9 h-9 rounded-full object-cover shadow-[0_1px_3px_rgba(15,23,42,0.04)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-card"><span class="material-symbols-outlined text-[10px]">verified</span></span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Good morning, Dr. Aritha</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal leading-tight">Administrator · All Branches</span></div></div></div></div></header><main class="w-full pt-[68px] px-gutter-desktop pb-space-2xl max-w-[1600px] mx-auto bg-canvas-bg"><div class="flex flex-col w-full">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-lg text-headline-lg text-brand-navy-deep font-bold tracking-tight">Manage Branches</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">Live System</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Add or update clinic branch locations across the island network.</p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="inline-flex items-center gap-space-xs px-space-md h-[42px] rounded-xl bg-surface-card text-brand-navy-deep font-label-lg text-label-lg shadow-sm hover:bg-surface-subtle transition-all duration-200" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">file_download</span>
+<span>Export Branch Roster</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md h-[42px] rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary-container hover:-translate-y-0.5 transition-all duration-200" onclick="document.getElementById('branchDrawer').classList.remove('translate-x-full'); document.getElementById('drawerBackdrop').classList.remove('hidden');" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Add Branch</span>
+</button>
+</div>
+</div>
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Network Footprint</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">apartment</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-lg text-display-lg text-brand-navy-deep font-bold">6</span>
+<span class="font-label-md text-label-md text-status-completed-text font-bold">Active</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span>100% telemetry online</span>
+</div>
+</div>
+<div class="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-primary/5 pointer-events-none"></div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Clinical Infrastructure</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">meeting_room</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-lg text-display-lg text-brand-navy-deep font-bold">38</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Suites</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-1">
+<span>Utilization index: 87.4%</span>
+<span class="font-mono-data text-mono-data text-primary font-semibold">+3 pending</span>
+</div>
+</div>
+<div class="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-primary/5 pointer-events-none"></div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Aggregate Staff</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-lg text-display-lg text-brand-navy-deep font-bold">186</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Personnel</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm mt-1">
+<span class="material-symbols-outlined text-[14px] text-status-completed-text">verified</span>
+<span>Fully credentialed healthcare staff</span>
+</div>
+</div>
+<div class="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-primary/5 pointer-events-none"></div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Island Coverage</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">public</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display-lg text-display-lg text-brand-navy-deep font-bold">5</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Provinces</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm mt-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Western, Central, Southern, NW, Northern</span>
+</div>
+</div>
+<div class="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-primary/5 pointer-events-none"></div>
+</div>
+</section>
+<div class="hidden mb-space-lg rounded-xl bg-status-pending-bg p-space-md shadow-sm transition-all duration-300" id="deactivationBanner">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-xl bg-status-pending-text/15 text-status-pending-text flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep">Notice of Branch Deactivation Pre-conditions</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider px-2 py-0.5 rounded bg-surface-card text-status-pending-text font-bold">Policy §3.3 &amp; FR-DMI-08</span>
+</div>
+<p class="font-body-md text-body-md text-brand-navy-deep mt-1 leading-relaxed">
+            Deactivate <strong id="deactivationTargetName">Colombo Central Hub</strong>? Historical clinical records are retained under permanent audit archive.
+            <span class="text-status-cancelled-text font-medium block sm:inline">Note: Branches with active assigned staff cannot be deactivated without reassigning personnel first.</span>
+</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0 self-end lg:self-center">
+<button class="px-space-md h-9 rounded-lg bg-surface-card text-brand-navy-deep font-label-md text-label-md hover:bg-surface-subtle transition-colors shadow-sm" onclick="document.getElementById('deactivationBanner').classList.add('hidden')" type="button">Dismiss</button>
+<button class="px-space-md h-9 rounded-lg bg-error text-on-error font-label-md text-label-md shadow-sm hover:opacity-95 transition-opacity" type="button">Proceed to Reassignment Wizard</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-card flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-outline">search</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface text-brand-navy-deep font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" placeholder="Search branch code, address, manager..." type="text"/>
+</div>
+<div class="hidden sm:flex items-center gap-1 bg-surface rounded-lg p-1">
+<button class="px-3 py-1 rounded-md bg-surface-card text-primary font-label-sm text-label-sm shadow-sm font-semibold" type="button">All (6)</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-brand-navy-deep font-label-sm text-label-sm font-semibold" type="button">Active (6)</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-brand-navy-deep font-label-sm text-label-sm font-semibold" type="button">Archived (0)</button>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">hub</span>
+<span>Sync state: Enterprise Master Active</span>
+</div>
+</div>
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface h-11">
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Branch Name &amp; Code</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Address</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Branch Manager</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Staff Count</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Status</th>
+<th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<tr class="h-16 hover:bg-surface transition-colors">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  CMB
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Colombo Central Hub</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">CMB-01</span>
+<span class="text-outline font-body-sm text-body-sm">· 12 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 482, Galle Road</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Colombo 03, Western Province</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">Chaminda Rathnayake</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">c.rathnayake@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 11 258 9901</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">34 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Colombo Central Hub', 'CMB-01', 'No. 482, Galle Road, Colombo 03', 'Chaminda Rathnayake', '+94 11 258 9901', '07:00 - 22:00')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Colombo Central Hub')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="h-16 hover:bg-surface transition-colors bg-surface-card">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  KDY
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Kandy Hill Capital Clinic</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">KDY-02</span>
+<span class="text-outline font-body-sm text-body-sm">· 8 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 74, Peradeniya Rd</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Kandy, Central Province</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">Dr. Rohan Wickramasinghe</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">r.wickrama@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 81 220 4410</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">28 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Kandy Hill Capital Clinic', 'KDY-02', 'No. 74, Peradeniya Rd, Kandy', 'Dr. Rohan Wickramasinghe', '+94 81 220 4410', '08:00 - 20:00')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Kandy Hill Capital Clinic')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="h-16 hover:bg-surface transition-colors">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  GLE
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Galle Fort Medical Center</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">GLE-03</span>
+<span class="text-outline font-body-sm text-body-sm">· 6 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 12, Rampart St</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Galle Fort, Southern Province</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">Nelum Bandara</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">n.bandara@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 91 224 8122</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">22 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Galle Fort Medical Center', 'GLE-03', 'No. 12, Rampart St, Galle Fort', 'Nelum Bandara', '+94 91 224 8122', '08:00 - 19:00')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Galle Fort Medical Center')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="h-16 hover:bg-surface transition-colors bg-surface-card">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  NGB
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Negombo Coastal Clinic</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">NGB-04</span>
+<span class="text-outline font-body-sm text-body-sm">· 5 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 204, Sea Street</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Negombo, Western Province</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">Dilshan Fernando</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">d.fernando@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 31 222 1780</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">19 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Negombo Coastal Clinic', 'NGB-04', 'No. 204, Sea Street, Negombo', 'Dilshan Fernando', '+94 31 222 1780', '08:00 - 20:00')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Negombo Coastal Clinic')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="h-16 hover:bg-surface transition-colors">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  KRN
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Kurunegala City Clinic</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">KRN-05</span>
+<span class="text-outline font-body-sm text-body-sm">· 4 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 58, Colombo Rd</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Kurunegala, North Western</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">Sureka Alahakoon</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">s.alahakoon@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 37 223 9100</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">16 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Kurunegala City Clinic', 'KRN-05', 'No. 58, Colombo Rd, Kurunegala', 'Sureka Alahakoon', '+94 37 223 9100', '08:30 - 18:30')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Kurunegala City Clinic')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+<tr class="h-16 hover:bg-surface transition-colors bg-surface-card">
+<td class="px-space-md py-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-label-lg font-bold flex-shrink-0">
+                  JFN
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep truncate">Jaffna Regional Branch</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="font-mono-data text-mono-data px-1.5 py-0.2 rounded bg-surface-container font-semibold text-primary">JFN-06</span>
+<span class="text-outline font-body-sm text-body-sm">· 3 Suites</span>
+</div>
+</div>
+</div>
+</td>
+<td class="px-space-md py-space-xs max-w-xs">
+<span class="font-body-md text-body-md text-brand-navy-deep block">No. 180, Hospital Road</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Jaffna, Northern Province</span>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep">K. Sathananthan</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono-data">k.sathananthan@medsync.lk</span>
+<span class="font-body-sm text-body-sm text-outline">+94 21 222 5590</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+<span class="font-label-md text-label-md font-bold">14 Staff</span>
+</div>
+</td>
+<td class="px-space-md py-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                Active
+              </span>
+</td>
+<td class="px-space-md py-space-xs text-right">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-space-sm h-8 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" onclick="editBranch('Jaffna Regional Branch', 'JFN-06', 'No. 180, Hospital Road, Jaffna', 'K. Sathananthan', '+94 21 222 5590', '08:00 - 18:00')" type="button">Edit</button>
+<button class="px-space-sm h-8 rounded-lg bg-surface text-status-cancelled-text hover:bg-status-cancelled-bg font-label-md text-label-md font-semibold transition-colors" onclick="triggerDeactivate('Jaffna Regional Branch')" type="button">Deactivate</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-space-md bg-surface flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 6 of 6 designated island clinical branches</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1.5 rounded-lg bg-surface-card text-outline opacity-60 font-label-md text-label-md cursor-not-allowed" disabled="" type="button">Previous</button>
+<span class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold">1</span>
+<button class="px-3 py-1.5 rounded-lg bg-surface-card text-outline opacity-60 font-label-md text-label-md cursor-not-allowed" disabled="" type="button">Next</button>
+</div>
+</div>
+</div>
+<div class="mt-space-xl grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep">Regional Distribution</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">Western Heavy</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Staff allocation concentration by territory.</p>
+<div class="mt-space-md flex flex-col gap-2.5">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-brand-navy-deep font-semibold">Western Province (CMB &amp; NGB)</span>
+<span class="font-mono-data text-on-surface-variant">53 Staff (28.5%)</span>
+</div>
+<div class="h-2 rounded-full bg-surface-subtle overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 28.5%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-brand-navy-deep font-semibold">Central Province (KDY)</span>
+<span class="font-mono-data text-on-surface-variant">28 Staff (15.0%)</span>
+</div>
+<div class="h-2 rounded-full bg-surface-subtle overflow-hidden">
+<div class="h-full bg-brand-teal-light rounded-full" style="width: 15%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-brand-navy-deep font-semibold">Southern Province (GLE)</span>
+<span class="font-mono-data text-on-surface-variant">22 Staff (11.8%)</span>
+</div>
+<div class="h-2 rounded-full bg-surface-subtle overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 11.8%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-brand-navy-deep font-semibold">North Western &amp; Northern</span>
+<span class="font-mono-data text-on-surface-variant">30 Staff (16.1%)</span>
+</div>
+<div class="h-2 rounded-full bg-surface-subtle overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 16.1%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Aggregated automatically via Human Resources and Rostering Modules.</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep">Facility Telemetry</span>
+<span class="font-label-sm text-label-sm text-status-completed-text font-bold">Normal</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Real-time gateway connectivity status.</p>
+<div class="mt-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-completed-text"></span>
+<span class="font-body-sm text-body-sm font-semibold text-brand-navy-deep">CMB-01 Gateway</span>
+</div>
+<span class="font-mono-data text-mono-data text-primary">12ms · 99.98%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-completed-text"></span>
+<span class="font-body-sm text-body-sm font-semibold text-brand-navy-deep">KDY-02 Gateway</span>
+</div>
+<span class="font-mono-data text-mono-data text-primary">24ms · 99.91%</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-completed-text"></span>
+<span class="font-body-sm text-body-sm font-semibold text-brand-navy-deep">GLE-03 Gateway</span>
+</div>
+<span class="font-mono-data text-mono-data text-primary">19ms · 100.0%</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Network Protocol: TLS 1.3 / ISO 27001</span>
+<button class="text-primary font-label-sm text-label-sm font-bold hover:underline" type="button">Ping All</button>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm font-bold text-brand-navy-deep">Compliance &amp; Licensing</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-low text-primary font-bold">PHSRC</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Private Health Services Regulatory Council status.</p>
+<div class="mt-space-md p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-bold">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+<span>All 6 Hubs Certified</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Annual Ministry of Health certification valid until December 2025 across all clinical premises and consultation suites.</p>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm">
+<button class="w-full h-9 rounded-lg bg-surface text-brand-navy-deep hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors" type="button">Download PHSRC Certificates Bundle</button>
+</div>
+</div>
+</div>
+<div class="hidden fixed inset-0 bg-brand-navy-deep/40 backdrop-blur-sm z-50 transition-opacity duration-300" id="drawerBackdrop"></div>
+<div class="fixed right-0 top-0 h-full w-full max-w-[480px] bg-surface-card shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between overflow-y-auto" id="branchDrawer">
+<div>
+<div class="h-[68px] px-space-lg flex items-center justify-between bg-surface">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-headline-md text-headline-md font-bold text-brand-navy-deep" id="drawerTitle">Add New Branch</span>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-subtle hover:text-brand-navy-deep transition-colors" onclick="closeDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="p-space-lg flex flex-col gap-space-md" id="branchForm">
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="branchNameInput">Branch Name *</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface text-brand-navy-deep font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" id="branchNameInput" placeholder="e.g. Colombo Central Hub" required="" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="facilityCodeInput">Facility Code *</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface font-mono-data text-mono-data text-brand-navy-deep uppercase placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" id="facilityCodeInput" placeholder="e.g. CMB-01" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="contactPhoneInput">Contact Phone *</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface text-brand-navy-deep font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" id="contactPhoneInput" placeholder="+94 11 000 0000" required="" type="tel"/>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="addressInput">Address *</label>
+<textarea class="w-full p-3.5 rounded-xl bg-surface text-brand-navy-deep font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-low resize-none transition-all" id="addressInput" placeholder="Street Address, City, Province" required="" rows="3"></textarea>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="managerSelect">Branch Manager</label>
+<div class="relative">
+<select class="w-full h-[42px] px-3.5 rounded-xl bg-surface text-brand-navy-deep font-body-md text-body-md focus:outline-none focus:bg-surface-container-low appearance-none transition-all pr-10" id="managerSelect">
+<option value="">Select an eligible registered manager...</option>
+<option value="Chaminda Rathnayake">Chaminda Rathnayake (Colombo Master Pool)</option>
+<option value="Dr. Rohan Wickramasinghe">Dr. Rohan Wickramasinghe (Central Specialist)</option>
+<option value="Nelum Bandara">Nelum Bandara (Southern Regional Lead)</option>
+<option value="Dilshan Fernando">Dilshan Fernando (Coastal Hub Supervisor)</option>
+<option value="Sureka Alahakoon">Sureka Alahakoon (NW Operational Manager)</option>
+<option value="K. Sathananthan">K. Sathananthan (Northern Lead)</option>
+<option value="Dr. Anoja Perera">Dr. Anoja Perera (Unassigned / Senior Executive)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-[20px] text-outline pointer-events-none">expand_more</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-1">Only users with 'Clinic Administrator' or 'Medical Director' role.</p>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold mb-1.5" for="opHoursInput">Operational Hours *</label>
+<input class="w-full h-[42px] px-3.5 rounded-xl bg-surface text-brand-navy-deep font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-all" id="opHoursInput" placeholder="e.g. 08:00 - 20:00 (Mon-Sat)" required="" type="text"/>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[18px]">info</span>
+<span class="font-label-md text-label-md font-semibold">Appointment Capacity Allocation</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Branch creation automatically binds emergency queues, automated SMS routing, and doctor specialty schedule templates.</p>
+</div>
+</form>
+</div>
+<div class="p-space-lg bg-surface flex items-center justify-end gap-space-sm">
+<button class="px-space-md h-[42px] rounded-xl bg-surface-card text-brand-navy-deep font-label-lg text-label-lg hover:bg-surface-subtle transition-colors shadow-sm" onclick="closeDrawer()" type="button">Cancel</button>
+<button class="px-space-lg h-[42px] rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary-container transition-all" onclick="saveBranchMock()" type="button">Save Branch</button>
+</div>
+</div>
+<script>
+    function closeDrawer() {
+      document.getElementById('branchDrawer').classList.add('translate-x-full');
+      document.getElementById('drawerBackdrop').classList.add('hidden');
+      document.getElementById('branchForm').reset();
+      document.getElementById('drawerTitle').innerText = 'Add New Branch';
+    }
+
+    function editBranch(name, code, address, manager, phone, hours) {
+      document.getElementById('drawerTitle').innerText = 'Update Branch: ' + code;
+      document.getElementById('branchNameInput').value = name;
+      document.getElementById('facilityCodeInput').value = code;
+      document.getElementById('addressInput').value = address;
+      document.getElementById('contactPhoneInput').value = phone;
+      document.getElementById('opHoursInput').value = hours;
+      
+      const select = document.getElementById('managerSelect');
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].text.includes(manager)) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+      
+      document.getElementById('branchDrawer').classList.remove('translate-x-full');
+      document.getElementById('drawerBackdrop').classList.remove('hidden');
+    }
+
+    function triggerDeactivate(branchName) {
+      document.getElementById('deactivationTargetName').innerText = branchName;
+      const banner = document.getElementById('deactivationBanner');
+      banner.classList.remove('hidden');
+      banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function saveBranchMock() {
+      const name = document.getElementById('branchNameInput').value;
+      if (!name) {
+        alert('Please fill out the branch name');
+        return;
+      }
+      closeDrawer();
+    }
+
+    document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
+  </script>
+</div></main></div></body></html>
