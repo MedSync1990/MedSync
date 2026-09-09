@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=inter:wght@100..900&amp;family=plusJakartaSans:wght@100..900&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed":"#cce5ff","status-scheduled-text":"#0369A1","secondary-container":"#dae2fd","on-error":"#ffffff","surface-container-high":"#dce9ff","on-tertiary":"#ffffff","tertiary-fixed-dim":"#89ceff","on-tertiary-fixed-variant":"#004c6e","on-secondary-container":"#5c647a","status-pending-bg":"#FEF3C7","tertiary":"#00628d","error":"#ba1a1a","status-cancelled-text":"#BE123C","status-cancelled-bg":"#FFE4E6","error-container":"#ffdad6","surface-subtle":"#F1F5F9","inverse-surface":"#213145","border-subtle":"#E2E8F0","on-error-container":"#93000a","surface-container":"#e5eeff","surface":"#f8f9ff","outline-variant":"#bfc7d2","background":"#f8f9ff","surface-container-lowest":"#ffffff","on-surface-variant":"#3f4850","secondary-fixed":"#dae2fd","inverse-on-surface":"#eaf1ff","primary-container":"#007bb9","secondary":"#565e74","status-completed-text":"#047857","tertiary-fixed":"#c9e6ff","primary-fixed-dim":"#93ccff","surface-container-low":"#eff4ff","outline":"#707881","on-primary-fixed-variant":"#004b73","on-primary":"#ffffff","on-primary-container":"#fdfcff","brand-teal-light":"#38BDF8","surface-dim":"#cbdbf5","tertiary-container":"#007cb1","on-background":"#0b1c30","status-pending-text":"#B45309","border-focus":"#0284C7","surface-bright":"#f8f9ff","on-primary-fixed":"#001d31","on-tertiary-fixed":"#001e2f","canvas-bg":"#F8FAFC","surface-tint":"#006398","brand-navy-deep":"#0F172A","on-tertiary-container":"#fcfcff","secondary-fixed-dim":"#bec6e0","inverse-primary":"#93ccff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","on-secondary-fixed-variant":"#3f465c","on-secondary":"#ffffff","surface-container-highest":"#d3e4fe","surface-card":"#FFFFFF","on-secondary-fixed":"#131b2e","primary":"#006194","status-completed-bg":"#D1FAE5","status-scheduled-bg":"#E0F2FE"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-2xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","space-xl":"2rem","sidebar-width":"260px","space-sm":"0.75rem","gutter-desktop":"1.5rem","content-max-width":"1600px","space-3xl":"3rem","sidebar-collapsed-width":"72px","space-2xl":"2.5rem","topbar-height":"68px","space-md":"1rem","space-xs":"0.5rem"},"fontFamily":{"label-sm":["inter"],"display-lg-mobile":["plusJakartaSans"],"headline-md":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-md":["inter"],"body-md":["inter"],"body-lg":["inter"],"mono-data":["inter"],"label-lg":["inter"],"headline-lg":["plusJakartaSans"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.05em","fontWeight":"700"}],"display-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"mono-data":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"500"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card z-50 flex flex-col justify-between border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="h-[68px] px-space-lg flex items-center gap-space-sm border-b border-border-subtle"><div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-brand-navy-deep leading-none">MedSync</span><span class="font-label-sm text-[10px] text-outline tracking-wider uppercase mt-1">Healthcare System</span></div></div><div class="p-space-md flex-1"><div class="mb-space-lg"><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a aria-current="page" class="flex items-center gap-space-sm px-space-md h-10 transition-all group bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">dashboard</span><span class="">Dashboard</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Patients</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="register-patient" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">person_add</span><span class="">Register Patient</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="patient-directory" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">contact_page</span><span class="">Patient Directory</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Appointments</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="book-appointment" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">event_available</span><span class="">Book Appointment</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg bg-status-scheduled-bg text-status-scheduled-text" data-path="manage-appointments" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">calendar_month</span><span class="">Manage Appointments</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Billing &amp; Payments</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="invoices" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">receipt_long</span><span class="">Invoices</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="collect-payment" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">payments</span><span class="">Collect Payment</span></a></nav></div></div></div><div class="p-space-md border-t border-border-subtle bg-surface-card"><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg"><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">settings</span><span class="">Settings</span></a><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">help</span><span class="">Help Center</span></a><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all group font-body-md text-body-md" data-path="login" href="#"><span class="material-symbols-outlined text-[18px] text-error group-hover:text-on-error-container">logout</span><span class="">Logout</span></a></nav></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-[68px] bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-space-lg flex items-center justify-between shadow-[0_1px_4px_rgba(15,23,42,0.02)]"><div class="flex items-center gap-space-md"><button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">menu_open</span></button><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="text-brand-navy-deep font-headline-sm text-headline-sm">MedSync</span><span class="text-outline">/</span><span class="">Reception Desk</span></div></div><div class="flex items-center gap-space-md"><div class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg border border-brand-teal-light/30 text-status-scheduled-text font-label-sm text-label-sm"><span class="material-symbols-outlined text-[14px]">apartment</span><span class="">Colombo Central Branch</span></div><div class="h-5 w-px bg-border-subtle hidden lg:block"></div><div class="flex items-center gap-1"><button class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button></div><div class="h-5 w-px bg-border-subtle"></div><div class="flex items-center gap-space-sm pl-1 cursor-pointer group"><div class="hidden sm:flex flex-col text-right"><span class="font-label-md text-label-md text-brand-navy-deep leading-tight group-hover:text-primary transition-colors">Good morning, Sarah</span><span class="font-body-sm text-body-sm text-outline leading-tight mt-0.5">Receptionist · Colombo Central Branch</span></div><div class="relative flex items-center gap-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface transition-colors">expand_more</span></div></div></div></header><main class="relative pt-[68px] min-h-screen bg-canvas-bg w-full"><div class="flex flex-col w-full">
+<!-- Content Canvas Area with High-Precision Clinical Styling -->
+<div class="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+<!-- Section 1: Header, Breadcrumbs & Global Quick Actions -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="space-y-1">
+<!-- Breadcrumb Navigation -->
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+<a class="hover:text-primary transition-colors" data-path="dashboard" href="#">Home</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="">Appointments</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Manage Appointments</span>
+</div>
+<div class="flex items-center gap-3">
+<h1 class="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Manage Appointments</h1>
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">Live Queue Active</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">View, track patient arrivals, reschedule, or cancel OPD consultations across facility wings.</p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-space-sm">
+</div>
+</div>
+<!-- Section 2: Clinical Metrics & Operational Status Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Metric 1: Total Appointments -->
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Today</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-brand-navy-deep">24</span>
+<span class="font-label-sm text-label-sm text-status-completed-text flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12%
+            </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">4 slots remaining open</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">calendar_today</span>
+</div>
+</div>
+<!-- Metric 2: Scheduled / In-Queue -->
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-status-scheduled-text uppercase tracking-wider">Scheduled · Pending</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-status-scheduled-text">16</span>
+<span class="font-label-sm text-label-sm text-outline">in queue</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Avg. wait time: 12 mins</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-status-scheduled-bg flex items-center justify-center text-status-scheduled-text">
+<span class="material-symbols-outlined text-[24px]">hourglass_top</span>
+</div>
+</div>
+<!-- Metric 3: Consultations Completed -->
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-status-completed-text uppercase tracking-wider">Completed Consultations</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-status-completed-text">06</span>
+<span class="font-label-sm text-label-sm text-status-completed-text">Checked Out</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Prescriptions filed</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-status-completed-bg flex items-center justify-center text-status-completed-text">
+<span class="material-symbols-outlined text-[24px]">check_circle</span>
+</div>
+</div>
+<!-- Metric 4: Cancelled / No-shows -->
+<div class="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-status-cancelled-text uppercase tracking-wider">Cancelled / No-show</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-status-cancelled-text">02</span>
+<span class="font-label-sm text-label-sm text-outline">8.3% rate</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1 patient notified</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-status-cancelled-bg flex items-center justify-center text-status-cancelled-text">
+<span class="material-symbols-outlined text-[24px]">event_busy</span>
+</div>
+</div>
+</div>
+<!-- Section 3: Comprehensive Multi-Criteria Filter Console -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md space-y-space-md">
+<!-- Search and Quick Category Selectors -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+<!-- Patient / NIC / ID Search -->
+<div class="lg:col-span-5 relative">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+<input class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card text-brand-navy-deep placeholder-outline font-body-md text-body-md focus:outline-none transition-all shadow-inner" id="searchInput" oninput="handleSearchFilter(this.value)" placeholder="Search patient name, NIC, or Appointment ID (e.g. APT-001924)..." type="text"/>
+</div>
+<!-- Branch Selector -->
+<div class="lg:col-span-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">apartment</span>
+<select class="w-full h-11 pl-9 pr-8 rounded-xl bg-surface-subtle font-body-md text-body-md text-brand-navy-deep appearance-none focus:outline-none cursor-pointer">
+<option value="colombo">Colombo Central Branch (Current)</option>
+<option value="kandy">Kandy General Hospital Branch</option>
+<option value="galle">Galle Maritime OPD Wing</option>
+<option value="all">All Linked Branches</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Doctor Selector -->
+<div class="lg:col-span-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">stethoscope</span>
+<select class="w-full h-11 pl-9 pr-8 rounded-xl bg-surface-subtle font-body-md text-body-md text-brand-navy-deep appearance-none focus:outline-none cursor-pointer" id="doctorFilter" onchange="filterAppointments()">
+<option value="all">All Doctors</option>
+<option value="Dr. Anura Bandara">Dr. Anura Bandara (Cardiology)</option>
+<option value="Dr. Malini Senanayake">Dr. Malini Senanayake (Cardiology)</option>
+<option value="Dr. Kavinga Perera">Dr. Kavinga Perera (Cardiology)</option>
+<option value="Dr. Jayani Ratnayake">Dr. Jayani Ratnayake (Pediatrics)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Reset Button -->
+<div class="lg:col-span-1 flex justify-end">
+<button class="h-11 px-3 w-full rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center justify-center gap-1 transition-colors" onclick="resetFilters()" title="Clear all filters" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+<span class="lg:hidden">Reset</span>
+</button>
+</div>
+</div>
+<!-- Secondary Filter Row: Date Presets & Status Chips -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<!-- Status Tabs / Filter Chips -->
+<!-- Date Range Quick Selector -->
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-subtle font-label-md text-label-md text-brand-navy-deep">
+<span class="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
+<span class="">Today · Sep 3, 2026</span>
+</div>
+<div class="flex bg-surface-subtle rounded-xl p-0.5">
+<button class="px-2.5 py-1 rounded-lg bg-surface-card text-brand-navy-deep shadow-xs font-label-sm text-label-sm">Today</button>
+<button class="px-2.5 py-1 rounded-lg text-outline hover:text-brand-navy-deep font-label-sm text-label-sm transition-colors">Tomorrow</button>
+<button class="px-2.5 py-1 rounded-lg text-outline hover:text-brand-navy-deep font-label-sm text-label-sm transition-colors">This Week</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 4: Main Clinical Appointments Data Table Card -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header & Utility Toolbar -->
+<div class="px-space-md py-space-sm bg-surface-subtle flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-brand-navy-deep">Scheduled Queue</span>
+<span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-surface-card" id="recordCount">Showing 1 of 24 records</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-2.5 py-1.5 rounded-lg hover:bg-surface-card transition-colors">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span class="">Export CSV</span>
+</button>
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-2.5 py-1.5 rounded-lg hover:bg-surface-card transition-colors">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span class="">Print Sheet</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Data Grid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="appointmentsTable">
+<thead>
+<tr class="bg-surface-subtle h-11 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+<th class="px-space-md w-[260px]">Patient Information</th>
+<th class="px-space-md w-[220px]">Consultant</th>
+<th class="px-space-md w-[130px]">Specialty</th>
+<th class="px-space-md w-[200px]">Date / Time Slot</th>
+<th class="px-space-md w-[130px]">Status</th>
+<th class="px-space-md w-[160px] text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-subtle font-body-md text-body-md" id="appointmentRows">
+<!-- Record 1 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Anura Bandara" data-patient="Priyantha Dharmasena APT-001924 PT-003420" data-status="Scheduled" style="display: none;">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold">Priyantha Dharmasena</span>
+<span class="font-mono-data text-mono-data text-outline text-[11px]">APT-001924</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="px-1.5 py-0.2 rounded bg-surface-subtle text-outline font-medium">PT-003420</span>
+<span class="">48 yrs · Male</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 77 123 4567</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover ring-1 ring-border-subtle" data-alt="Portrait photo of Dr. Anura Bandara, senior cardiologist in clinical attire, soft studio lighting, medical confidence" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWi_sIVsXiklPRixErYw03lB9D53XfZqmCEtLhhBzIvnI8tPNNJe2xebpQlNv3N3ShuC8cjRM8FurGzW7m7BrZpT4oEaxG1cgwp0QfgkNqDgUhdK7qMJ26XQg9uEmxIqV3B3XhbZvCQnMz9ZW6p3Jls66yyxpEboHLonRWaZjwt7A7GCcN0srobcgexVtnOISYLwt0sqg7EB8pIA3kZZrnkpMOw3I_YuEzWrASL9kou4jY8NQo-qeS7w"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Anura Bandara</span>
+<span class="font-body-sm text-body-sm text-outline">Consultant Senior</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                    09:30 AM
+                    <span class="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold">Slot #03</span>
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text animate-pulse"></span>
+                  Scheduled
+                </span>
+</td>
+<td class="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Colombo Central</span>
+<span class="text-outline">OPD Wing - Rm 104</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-primary hover:bg-status-scheduled-bg transition-colors" onclick="openRescheduleModal('APT-001924', 'Priyantha Dharmasena', 'Dr. Anura Bandara', 'Sep 3, 2026', '09:30 AM')" title="Reschedule Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_calendar</span>
+</button>
+<button class="p-1.5 rounded-lg text-error hover:bg-error-container transition-colors" onclick="openCancelModal('APT-001924', 'Priyantha Dharmasena')" title="Cancel Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001924')" title="View Patient Encounter Card" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Record 2 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Malini Senanayake" data-patient="Sarah Jenkins APT-001925 PT-002819" data-status="Scheduled" style="display: none;">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold">Sarah Jenkins</span>
+<span class="font-mono-data text-mono-data text-outline text-[11px]">APT-001925</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="px-1.5 py-0.2 rounded bg-surface-subtle text-outline font-medium">PT-002819</span>
+<span class="">34 yrs · Female</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 71 992 0182</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover ring-1 ring-border-subtle" data-alt="Professional clinical headshot of Dr. Malini Senanayake, female cardiologist smiling softly in clinical office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7gEo7y87n5hklaTgro-Mut0IG3GhTh_kW-gdb6SLD3TObxjq_YVFVW700BZJxjieV7OthlwyYt2VkaegB2ZbaOA4_zzB5hpKDWamry9AugSACv6DGYcg7IijLhKnQAJdqmJeK6-4a8M5Up-ZnjdSmIqb5l_Ancx-MdpOF5NVgvDwHsvZ1pT5Idw8bxF4HLEz_8MeuIifUZTGOV3Mho0bf4o8cqj-9tNRb3GXQMjp11GPKCLl_Xdv0Dg"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Malini Senanayake</span>
+<span class="font-body-sm text-body-sm text-outline">Interventional</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                    10:30 AM
+                    <span class="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold">Slot #05</span>
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text"></span>
+                  Scheduled
+                </span>
+</td>
+<td class="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Colombo Central</span>
+<span class="text-outline">OPD Wing - Rm 106</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-primary hover:bg-status-scheduled-bg transition-colors" onclick="openRescheduleModal('APT-001925', 'Sarah Jenkins', 'Dr. Malini Senanayake', 'Sep 3, 2026', '10:30 AM')" title="Reschedule Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_calendar</span>
+</button>
+<button class="p-1.5 rounded-lg text-error hover:bg-error-container transition-colors" onclick="openCancelModal('APT-001925', 'Sarah Jenkins')" title="Cancel Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001925')" title="View Patient Encounter Card" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Record 3 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Anura Bandara" data-patient="Kasun Perera APT-001918 PT-001452" data-status="Completed" style="display: none;">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold">Kasun Perera</span>
+<span class="font-mono-data text-mono-data text-outline text-[11px]">APT-001918</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="px-1.5 py-0.2 rounded bg-surface-subtle text-outline font-medium">PT-001452</span>
+<span class="">52 yrs · Male</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 77 449 2011</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-primary font-bold">AB</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Anura Bandara</span>
+<span class="font-body-sm text-body-sm text-outline">Consultant Senior</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-status-completed-text">check_circle</span>
+                    08:30 AM
+                    <span class="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold">Slot #01</span>
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                  Completed
+                </span>
+</td>
+<td class="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Colombo Central</span>
+<span class="text-outline">OPD Wing - Rm 104</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<span class="px-2 py-1 rounded bg-surface-subtle font-label-sm text-label-sm text-outline cursor-not-allowed">Consulted</span>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001918')" title="View Medical Record" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Record 4 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Kavinga Perera" data-patient="Nimali Alwis APT-001920 PT-004102" data-status="Completed" style="display: none;">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold">Nimali Alwis</span>
+<span class="font-mono-data text-mono-data text-outline text-[11px]">APT-001920</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="px-1.5 py-0.2 rounded bg-surface-subtle text-outline font-medium">PT-004102</span>
+<span class="">29 yrs · Female</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 76 831 4402</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center font-label-sm text-on-secondary-fixed font-bold">KP</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Kavinga Perera</span>
+<span class="font-body-sm text-body-sm text-outline">Electrophysiology</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-status-completed-text">check_circle</span>
+                    09:00 AM
+                    <span class="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold">Slot #02</span>
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                  Completed
+                </span>
+</td>
+<td class="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Colombo Central</span>
+<span class="text-outline">OPD Wing - Rm 102</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<span class="px-2 py-1 rounded bg-surface-subtle font-label-sm text-label-sm text-outline cursor-not-allowed">Consulted</span>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001920')" title="View Medical Record" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Record 5 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Anura Bandara" data-patient="Rohan Fernando APT-001926 PT-005128" data-status="Cancelled">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col opacity-75">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold line-through">Rohan Fernando</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="">41 yrs · Male</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 77 551 2289</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5 opacity-75">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-primary font-bold">AB</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Anura Bandara</span>
+<span class="font-body-sm text-body-sm text-outline">Consultant Senior</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5 opacity-75">
+<span class="px-2 py-0.5 rounded-md bg-surface-subtle text-outline font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5 opacity-75">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1.5 line-through">
+<span class="material-symbols-outlined text-[16px] text-status-cancelled-text">cancel</span>
+                    11:15 AM
+                    
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-cancelled-bg text-status-cancelled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-cancelled-text"></span>
+                  Cancelled
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="h-7 px-2.5 rounded-lg bg-surface-subtle hover:bg-status-scheduled-bg text-primary font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="openRebookModal('APT-001926')" type="button">
+<span class="">Rebook</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001926')" title="View Audit Logs" type="button">
+</button>
+</div>
+</td>
+</tr>
+<!-- Record 6 -->
+<tr class="hover:bg-surface-subtle/70 transition-colors group" data-doctor="Dr. Kavinga Perera" data-patient="Dilani Jayawardena APT-001927 PT-003890" data-status="Scheduled" style="display: none;">
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold">Dilani Jayawardena</span>
+<span class="font-mono-data text-mono-data text-outline text-[11px]">APT-001927</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="px-1.5 py-0.2 rounded bg-surface-subtle text-outline font-medium">PT-003890</span>
+<span class="">61 yrs · Female</span>
+<span class="text-outline">·</span>
+<span class="font-mono-data text-mono-data text-outline">+94 72 319 8812</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center font-label-sm text-on-secondary-fixed font-bold">KP</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Dr. Kavinga Perera</span>
+<span class="font-body-sm text-body-sm text-outline">Electrophysiology</span>
+</div>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="px-2 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold">Cardiology</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                    01:30 PM
+                    <span class="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold">Slot #08</span>
+</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Sep 3, 2026</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text"></span>
+                  Scheduled
+                </span>
+</td>
+<td class="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-brand-navy-deep">Colombo Central</span>
+<span class="text-outline">OPD Wing - Rm 102</span>
+</div>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 rounded-lg text-primary hover:bg-status-scheduled-bg transition-colors" onclick="openRescheduleModal('APT-001927', 'Dilani Jayawardena', 'Dr. Kavinga Perera', 'Sep 3, 2026', '01:30 PM')" title="Reschedule Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_calendar</span>
+</button>
+<button class="p-1.5 rounded-lg text-error hover:bg-error-container transition-colors" onclick="openCancelModal('APT-001927', 'Dilani Jayawardena')" title="Cancel Appointment" type="button">
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" onclick="openDetailsDrawer('APT-001927')" title="View Patient Encounter Card" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-subtle/40">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-outline">
+<span class="">Rows per page:</span>
+<select class="bg-surface-card rounded-lg px-2 py-1 text-brand-navy-deep font-medium focus:outline-none">
+<option>10</option>
+<option>25</option>
+<option>50</option>
+</select>
+<span class="ml-2">1–6 of 24 appointments</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-brand-navy-deep shadow-xs disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-border-focus text-on-primary font-label-sm text-label-sm shadow-xs flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-sm text-label-sm shadow-xs flex items-center justify-center">2</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-sm text-label-sm shadow-xs flex items-center justify-center">3</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-sm text-label-sm shadow-xs flex items-center justify-center">4</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-brand-navy-deep shadow-xs">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 5: Doctor Consultation Schedule Snapshot (Visual Richness Widget) -->
+</div>
+<!-- Interactive Modal 1: Cancel Appointment Confirmation Dialogue -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-brand-navy-deep/50 backdrop-blur-sm transition-opacity" id="cancelModal">
+<div class="bg-surface-card rounded-2xl shadow-xl max-w-md w-full p-space-lg space-y-space-md animate-in fade-in zoom-in-95 duration-150">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[28px]">warning</span>
+</div>
+<div class="space-y-1">
+<h3 class="font-headline-md text-headline-md text-brand-navy-deep">Cancel this appointment?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            You are about to cancel <strong class="text-brand-navy-deep" id="cancelModalAptId">APT-000000</strong> for <strong class="text-brand-navy-deep" id="cancelModalPatient">Patient</strong>. This action will release their time slot immediately.
+          </p>
+</div>
+</div>
+<!-- Cancellation Reason Field -->
+<div class="space-y-1.5">
+<label class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reason for Cancellation</label>
+<select class="w-full h-11 px-3 rounded-xl bg-surface-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none">
+<option>Patient Requested · Change of plans</option>
+<option>Patient Reported Illness / Inability to travel</option>
+<option>Consultant Emergency Leave</option>
+<option>Insurance / Pre-authorization Issue</option>
+<option>No-show past grace window</option>
+</select>
+</div>
+<!-- Action Confirmation Buttons -->
+<div class="flex items-center justify-end gap-3 pt-2">
+<button class="h-10 px-4 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-label-md transition-colors" onclick="closeCancelModal()" type="button">
+          Dismiss
+        </button>
+<button class="h-10 px-5 rounded-xl bg-error hover:bg-error/90 text-on-error font-label-md text-label-md shadow-sm transition-colors flex items-center gap-1.5" onclick="confirmCancellation()" type="button">
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+<span class="">Confirm Cancellation</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 2: Reschedule Slot Selector Modal -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-brand-navy-deep/50 backdrop-blur-sm transition-opacity" id="rescheduleModal">
+<div class="bg-surface-card rounded-2xl shadow-xl max-w-lg w-full p-space-lg space-y-space-md">
+<div class="flex items-center justify-between pb-2 border-b border-surface-subtle">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">calendar_clock</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-brand-navy-deep">Reschedule Consultation</h3>
+<span class="font-body-sm text-body-sm text-outline" id="reschedulePatientHeader">Priyantha Dharmasena · APT-001924</span>
+</div>
+</div>
+<button class="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle" onclick="closeRescheduleModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="space-y-3">
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">Assigned Doctor</label>
+<div class="p-2.5 rounded-xl bg-surface-subtle font-label-md text-label-md text-brand-navy-deep flex items-center gap-2" id="rescheduleDoctorName">
+<span class="material-symbols-outlined text-primary text-[18px]">stethoscope</span>
+<span class="">Dr. Anura Bandara (Cardiology)</span>
+</div>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">New Consultation Date</label>
+<input class="w-full h-11 px-3 rounded-xl bg-surface-subtle text-brand-navy-deep font-body-md text-body-md focus:outline-none" type="date" value="2026-09-04"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1">Select Available Time Slot</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-border-focus text-on-primary font-label-sm text-label-sm shadow-xs" type="button">08:45 AM (Slot 2)</button>
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-sm text-label-sm" type="button">09:15 AM (Slot 3)</button>
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-sm text-label-sm" type="button">11:00 AM (Slot 7)</button>
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-sm text-label-sm" type="button">02:30 PM (Slot 9)</button>
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-sm text-label-sm" type="button">03:15 PM (Slot 11)</button>
+<button class="slot-btn py-2 px-3 rounded-xl text-center bg-surface-subtle opacity-40 text-outline font-label-sm text-label-sm cursor-not-allowed" disabled="" type="button">04:00 PM (Full)</button>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 pt-3 border-t border-surface-subtle">
+<button class="h-10 px-4 rounded-xl bg-surface-subtle text-brand-navy-deep font-label-md text-label-md" onclick="closeRescheduleModal()" type="button">
+          Cancel
+        </button>
+<button class="h-10 px-5 rounded-xl bg-border-focus text-on-primary font-label-md text-label-md shadow-sm" onclick="confirmReschedule()" type="button">
+          Confirm Reschedule
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Flyout Drawer: Quick Details Panel -->
+<div class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-card shadow-2xl z-50 flex-col transition-all duration-300 hidden" id="detailsDrawer">
+<div class="p-space-lg border-b border-surface-subtle flex items-center justify-between bg-surface-subtle">
+<div class="space-y-0.5">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Patient Card</span>
+<h3 class="font-headline-md text-headline-md text-brand-navy-deep" id="drawerAptId">APT-001926</h3>
+</div>
+<button class="p-2 rounded-xl text-outline hover:text-brand-navy-deep hover:bg-surface-card transition-colors" onclick="closeDetailsDrawer()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-lg flex-1 overflow-y-auto space-y-6">
+<!-- Patient Identity Details -->
+<div class="p-4 rounded-xl bg-surface-subtle space-y-3">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-headline-sm">
+            PD
+          </div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-brand-navy-deep">Priyantha Dharmasena</h4>
+<span class="font-body-sm text-body-sm text-outline">NIC: 782410982V · Colombo 05</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm pt-2 border-t border-border-subtle/50">
+<div>
+<span class="font-label-sm text-outline block">Age / Gender</span>
+<span class="text-brand-navy-deep font-medium">48 Years · Male</span>
+</div>
+<div>
+<span class="font-label-sm text-outline block">Contact Phone</span>
+<span class="text-brand-navy-deep font-medium">+94 77 123 4567</span>
+</div>
+</div>
+</div>
+<!-- Doctor & Appointment Specifics -->
+<div class="space-y-3">
+<h5 class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Consultation Particulars</h5>
+<div class="space-y-2">
+<div class="flex justify-between py-2 border-b border-surface-subtle">
+<span class="font-body-sm text-outline">Attending Specialist</span>
+<span class="font-label-md text-brand-navy-deep">Dr. Anura Bandara</span>
+</div>
+<div class="flex justify-between py-2 border-b border-surface-subtle">
+<span class="font-body-sm text-outline">Department</span>
+<span class="font-label-md text-brand-navy-deep">Cardiology Consultation</span>
+</div>
+<div class="flex justify-between py-2 border-b border-surface-subtle">
+<span class="font-body-sm text-outline">Room / Wing</span>
+<span class="font-label-md text-brand-navy-deep">OPD Wing - Room 104</span>
+</div>
+<div class="flex justify-between py-2 border-b border-surface-subtle">
+<span class="font-body-sm text-outline">Scheduled Slot</span>
+<span class="font-label-md text-brand-navy-deep">09:30 AM · Slot #03</span>
+</div>
+<div class="flex justify-between py-2 border-b border-surface-subtle">
+<span class="font-body-sm text-outline">Billing Status</span>
+<span class="px-2 py-0.5 rounded bg-status-completed-bg text-status-completed-text font-label-sm">Paid (Invoice #INV-4921)</span>
+</div>
+</div>
+</div>
+<!-- Medical Safety Notes -->
+<div class="p-3.5 rounded-xl bg-status-cancelled-bg/40 space-y-1">
+<div class="flex items-center gap-1.5 text-status-cancelled-text font-label-sm uppercase font-bold">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span class="">Allergy &amp; Pre-existing Flag</span>
+</div>
+<p class="font-body-sm text-body-sm text-brand-navy-deep">
+          Penicillin sensitive. Hypertensive follow-up. Current Medication: Amlodipine 5mg.
+        </p>
+</div>
+</div>
+<div class="p-space-md border-t border-surface-subtle flex gap-2">
+<a class="flex-1 h-10 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors" data-path="collect-payment" href="#">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span class="">View Invoice</span>
+</a>
+<button class="flex-1 h-10 rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md transition-colors" onclick="closeDetailsDrawer()">
+        Done
+      </button>
+</div>
+</div>
+<!-- Inline Dynamic JavaScript to Power Micro-interactions and Filtering -->
+<script>
+    // Ensure the navigation highlights 'Manage Appointments'
+    document.addEventListener('DOMContentLoaded', () => {
+      const activeItem = document.querySelector('a[data-path="manage-appointments"]');
+      if (activeItem) {
+        activeItem.classList.add('bg-status-scheduled-bg', 'text-status-scheduled-text', 'font-label-lg');
+      }
+    });
+
+    // Filtering State
+    let currentStatus = 'all';
+    let currentDoctor = 'all';
+    let searchQuery = '';
+
+    function filterAppointments() {
+      const rows = document.querySelectorAll('#appointmentRows tr');
+      const doctorVal = document.getElementById('doctorFilter').value;
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const rowDoctor = row.getAttribute('data-doctor');
+        const rowStatus = row.getAttribute('data-status');
+        const rowPatient = (row.getAttribute('data-patient') || '').toLowerCase();
+
+        const matchesStatus = (currentStatus === 'all' || rowStatus === currentStatus);
+        const matchesDoctor = (doctorVal === 'all' || rowDoctor === doctorVal);
+        const matchesSearch = (!searchQuery || rowPatient.includes(searchQuery.toLowerCase()));
+
+        if (matchesStatus && matchesDoctor && matchesSearch) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      const recordCountElem = document.getElementById('recordCount');
+      if (recordCountElem) {
+        recordCountElem.innerText = `Showing ${visibleCount} of 24 records`;
+      }
+    }
+
+    function setStatusFilter(status, btn) {
+      currentStatus = status;
+      document.querySelectorAll('.status-tab').forEach(el => {
+        el.classList.remove('bg-border-focus', 'text-on-primary', 'shadow-sm');
+        el.classList.add('bg-surface-subtle', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-border-focus', 'text-on-primary', 'shadow-sm');
+      btn.classList.remove('bg-surface-subtle', 'text-on-surface-variant');
+      filterAppointments();
+    }
+
+    function handleSearchFilter(query) {
+      searchQuery = query.trim();
+      filterAppointments();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('doctorFilter').value = 'all';
+      searchQuery = '';
+      currentStatus = 'all';
+      const firstTab = document.querySelector('.status-tab');
+      if (firstTab) setStatusFilter('all', firstTab);
+      filterAppointments();
+    }
+
+    // Cancellation Modal Actions
+    function openCancelModal(aptId, patientName) {
+      document.getElementById('cancelModalAptId').innerText = aptId;
+      document.getElementById('cancelModalPatient').innerText = patientName;
+      document.getElementById('cancelModal').classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+      document.getElementById('cancelModal').classList.add('hidden');
+    }
+
+    function confirmCancellation() {
+      closeCancelModal();
+      alert('Appointment has been safely cancelled. Patient has been notified via SMS.');
+    }
+
+    // Rescheduling Modal Actions
+    function openRescheduleModal(aptId, patientName, docName, date, time) {
+      document.getElementById('reschedulePatientHeader').innerText = `${patientName} · ${aptId}`;
+      document.getElementById('rescheduleDoctorName').querySelector('span:last-child').innerText = docName;
+      document.getElementById('rescheduleModal').classList.remove('hidden');
+    }
+
+    function closeRescheduleModal() {
+      document.getElementById('rescheduleModal').classList.add('hidden');
+    }
+
+    function confirmReschedule() {
+      closeRescheduleModal();
+      alert('Consultation slot successfully rescheduled and SMS notification dispatched.');
+    }
+
+    // Quick Patient Details Drawer
+    function openDetailsDrawer(aptId) {
+      document.getElementById('drawerAptId').innerText = aptId;
+      document.getElementById('detailsDrawer').classList.remove('hidden');
+      document.getElementById('detailsDrawer').classList.add('flex');
+    }
+
+    function closeDetailsDrawer() {
+      document.getElementById('detailsDrawer').classList.add('hidden');
+      document.getElementById('detailsDrawer').classList.remove('flex');
+    }
+
+    function openWalkInModal() {
+      alert('Routing to Walk-in Triaging registration workflow (§1.4 / §1.5)...');
+    }
+
+    function openRebookModal(aptId) {
+      alert(`Opening expedited booking for appointment ${aptId}`);
+    }
+  </script>
+</div></main></div>
+</body></html>

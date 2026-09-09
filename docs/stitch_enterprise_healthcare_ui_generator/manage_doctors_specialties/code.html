@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "brand-navy-deep": "#0F172A", "on-error": "#ffffff", "surface-subtle": "#F1F5F9", "surface-container-low": "#eff4ff", "error": "#ba1a1a", "surface-container": "#e5eeff", "on-error-container": "#93000a", "surface-card": "#FFFFFF", "status-completed-bg": "#D1FAE5", "tertiary-fixed-dim": "#89ceff", "primary-fixed-dim": "#93ccff", "outline": "#707881", "on-secondary-fixed": "#131b2e", "primary": "#006194", "on-tertiary-fixed": "#001e2f", "surface-dim": "#cbdbf5", "on-secondary": "#ffffff", "status-pending-text": "#B45309", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#001d31", "inverse-surface": "#213145", "on-primary-fixed-variant": "#004b73", "surface-bright": "#f8f9ff", "surface": "#f8f9ff", "border-subtle": "#E2E8F0", "on-primary": "#ffffff", "primary-container": "#007bb9", "surface-container-highest": "#d3e4fe", "on-tertiary": "#ffffff", "surface-tint": "#006398", "canvas-bg": "#F8FAFC", "on-background": "#0b1c30", "border-focus": "#0284C7", "status-pending-bg": "#FEF3C7", "surface-container-high": "#dce9ff", "status-completed-text": "#047857", "tertiary": "#00628d", "inverse-on-surface": "#eaf1ff", "secondary-fixed": "#dae2fd", "tertiary-fixed": "#c9e6ff", "tertiary-container": "#007cb1", "on-secondary-container": "#5c647a", "secondary-fixed-dim": "#bec6e0", "brand-teal-light": "#38BDF8", "on-secondary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-surface": "#0b1c30", "on-tertiary-container": "#fcfcff", "on-tertiary-fixed-variant": "#004c6e", "secondary": "#565e74", "outline-variant": "#bfc7d2", "primary-fixed": "#cce5ff", "inverse-primary": "#93ccff", "on-primary-container": "#fdfcff", "on-surface-variant": "#3f4850", "surface-variant": "#d3e4fe", "status-scheduled-bg": "#E0F2FE", "background": "#f8f9ff", "secondary-container": "#dae2fd", "status-cancelled-text": "#BE123C", "status-cancelled-bg": "#FFE4E6", "status-scheduled-text": "#0369A1" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "sidebar-width": "260px", "sidebar-collapsed-width": "72px", "space-md": "1rem", "topbar-height": "68px", "space-2xl": "2.5rem", "space-lg": "1.5rem", "content-max-width": "1600px", "space-sm": "0.75rem", "space-2xs": "0.25rem", "gutter-mobile": "1rem", "space-3xl": "3rem", "gutter-desktop": "1.5rem", "space-xs": "0.5rem" }, "fontFamily": { "mono-data": [ "inter" ], "body-lg": [ "inter" ], "label-sm": [ "inter" ], "headline-md": [ "plusJakartaSans" ], "display-lg": [ "plusJakartaSans" ], "label-md": [ "inter" ], "body-md": [ "inter" ], "body-sm": [ "inter" ], "headline-lg": [ "plusJakartaSans" ], "display-lg-mobile": [ "plusJakartaSans" ], "label-lg": [ "inter" ], "headline-sm": [ "plusJakartaSans" ] }, "fontSize": { "mono-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "fontWeight": "600" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="flex flex-col"><div class="h-[68px] px-space-md flex items-center gap-space-sm bg-surface-card"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-[0_1px_3px_rgba(15,23,42,0.04)]">M</div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold">MedSync</span><span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Plus</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold truncate">Administrator Portal</span></div></div><nav class="flex flex-col px-space-sm pt-space-md gap-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Overview</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Reports</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Branch Appointments</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span>Treatment Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Insurance vs. Cash</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Management</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span>Manage Branches</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-staff-users" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Manage Staff &amp; Users</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg transition-all bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full" data-path="manage-doctors-specialties" href="#"><span class="material-symbols-outlined text-[20px]">stethoscope</span><span>Doctors &amp; Specialties</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-treatment-catalogue" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span>Treatment Catalogue</span></a></nav></div><div class="p-space-sm pt-space-lg flex flex-col gap-1 bg-surface-card"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">System</span></div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span>Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all font-body-md text-body-md" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px] min-h-screen flex flex-col"><header class="fixed top-0 left-[260px] right-0 h-[68px] z-40 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-[68px] px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><button aria-label="Collapse Sidebar" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">menu_open</span></button><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span><span class="font-label-md text-label-md text-primary font-semibold">All Branches (System Admin)</span></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-2xs px-space-sm py-1 rounded-full bg-surface-subtle text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span><span class="font-label-md text-label-md font-semibold">Scope: Nationwide / All Branches</span></div><button aria-label="Toggle theme" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="relative flex items-center"><img alt="Profile" class="w-9 h-9 rounded-full object-cover shadow-[0_1px_3px_rgba(15,23,42,0.04)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-card"><span class="material-symbols-outlined text-[10px]">verified</span></span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Good morning, Dr. Aritha</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal leading-tight">Administrator · All Branches</span></div></div></div></div></header><main class="w-full pt-[68px] px-gutter-desktop pb-space-2xl max-w-[1600px] mx-auto bg-canvas-bg"><div class="flex flex-col w-full">
+<!-- Top Level Notification Banner / Subtle Metric Ribbon -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-sm mb-space-md">
+<div class="bg-surface-card rounded-xl p-space-sm flex items-center gap-space-sm shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">stethoscope</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Total Doctors</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">48</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-sm flex items-center gap-space-sm shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">domain</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Clinical Specialties</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">14</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-sm flex items-center gap-space-sm shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-status-completed-bg text-status-completed-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Active On-Duty</span>
+<span class="font-headline-md text-headline-md text-status-completed-text font-bold">42</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-sm flex items-center gap-space-sm shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-status-pending-bg text-status-pending-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">time_to_leave</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Scheduled Leave</span>
+<span class="font-headline-md text-headline-md text-status-pending-text font-bold">6</span>
+</div>
+</div>
+</div>
+<!-- Main View Container -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+<!-- Header Section -->
+<div class="p-space-lg bg-surface-card">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Clinical Directory §3.5</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Manage Doctors &amp; Specialties</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Assign specialties and manage doctor availability across regional branches.</p>
+</div>
+<!-- Tab Navigation Buttons -->
+<div class="flex items-center gap-space-xs p-1 bg-surface-subtle rounded-xl self-start lg:self-center">
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-card text-primary font-label-lg text-label-lg shadow-sm font-bold transition-all" id="tabBtnDoctors" onclick="switchTab('doctors')">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+<span>Doctors</span>
+<span class="px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold">48</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg font-bold transition-all" id="tabBtnSpecialties" onclick="switchTab('specialties')">
+<span class="material-symbols-outlined text-[18px]">category</span>
+<span>Specialties</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">14</span>
+</button>
+</div>
+</div>
+<!-- Unified Action Bar -->
+<div class="mt-space-lg pt-space-md flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md bg-surface-subtle p-space-sm rounded-xl">
+<div class="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-space-sm">
+<!-- Doctor Search Input -->
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+<input class="w-full h-[42px] pl-10 pr-4 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-card" placeholder="Search doctor by name or SLMC reg number..." type="text"/>
+</div>
+<!-- Branch Filter Dropdown -->
+<div class="relative min-w-[200px]">
+<select aria-label="Branch Filter" class="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer">
+<option value="all">All Branches (Islandwide)</option>
+<option value="colombo">Colombo Central Branch</option>
+<option value="kandy">Kandy General Unit</option>
+<option value="galle">Galle Coastal Center</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[20px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Right Quick Action -->
+<div class="flex items-center gap-space-xs">
+<button class="h-[42px] px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold flex items-center gap-space-xs shadow-sm transition-all" onclick="openAddSpecialtyQuickModal()">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Add Specialty</span>
+</button>
+</div>
+</div>
+</div>
+<!-- TAB 1 CONTENT: DOCTORS TABLE -->
+<div class="block" id="tabContentDoctors">
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-subtle">
+<tr>
+<th class="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Doctor &amp; SLMC Reg</th>
+<th class="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Branch Location</th>
+<th class="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Assigned Specialties</th>
+<th class="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Clinical Status</th>
+<th class="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- Row 1: Dr. K. Bandara -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-11 h-11 rounded-full object-cover shadow-sm" data-alt="Portrait photo of a senior male physician with spectacles and stethoscope wearing clinical lab coat with blue tones, professional medical lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz2y8Q1udTED7VxJmgGn4lU_r2torQo51HsrTeaf__j3jLxliTHUf3N5t3FzEzHnTmuMT1eaYojEl_u3bOGXafrlWD8q3JN6Sghv6E-ZNR9AgunfoO6Kwma9OewwKb9rVMm3LGU-U2OrjxOgaNqPt8y7Qz6YEdgK5W-Rp4VdwlJ17TEPD7PzVj7VQk6GnfLV_T1I2qTkzYXvHJle_hbLkuL_ntPjkhrEYRrCWfUzcj_dqCQlQwLSWyyw"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-2xs">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Dr. K. Bandara</span>
+<span class="material-symbols-outlined text-[16px] text-primary" title="Senior Consultant">verified</span>
+</div>
+<span class="font-mono-data text-mono-data text-outline">SLMC #48201 · MBBS, MD (Card)</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[18px] text-outline">apartment</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Colombo Central</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Floor 3, Cardiac Wing</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    Cardiology (Primary)
+                  </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+                    Interventional Cardiology
+                  </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm font-semibold">
+                    Cardiac Diagnostics
+                  </span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-status-completed-text animate-pulse"></span>
+                  Active
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1" onclick="openManageSpecialtiesModal('Dr. K. Bandara', '48201', 'Cardiology')">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>Manage Specialties</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" title="View Schedule">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Dr. Sarah Jayasinghe -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-11 h-11 rounded-full object-cover shadow-sm" data-alt="Portrait photo of a female Sri Lankan pediatrician smiling gently in clinical consultation room, wearing navy scrubs with stethoscope around neck" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy_NFCCzgVarl5lWu5PTmXfrfyfzg17CSH_jPJ_6O3lM81TwNUxMana9EoVgC0zn5ejxqUy2EPHSbY0XaYWQbphU8W38M1-OGLSRh4rxRbhJNvtSp3wFtwAZKWBbtXq9dT50uxlx_5IyFO3BXkwsCXAKDuoSeetmAdtexI3d92XyRtTaIsi-9kINZ82Ggui5vlLA1pvIgncVXSFMLdT2VtO3RY-Emiuva3izKmEJ8rv60mFG4_0aV9bQ"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-2xs">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Dr. Sarah Jayasinghe</span>
+</div>
+<span class="font-mono-data text-mono-data text-outline">SLMC #24095 · MBBS, DCH</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[18px] text-outline">apartment</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Kandy General</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Pediatrics Suite B</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    Pediatrics (Primary)
+                  </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+                    Neonatology
+                  </span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+                  Active
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1" onclick="openManageSpecialtiesModal('Dr. Sarah Jayasinghe', '24095', 'Pediatrics')">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>Manage Specialties</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" title="View Schedule">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Dr. Priyantha Alwis -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-11 h-11 rounded-full object-cover shadow-sm" data-alt="Senior male orthopedic surgeon in teal scrub cap and clean medical setting looking forward with calm focused authority" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrtE81LfYnVjQkFUdccgCaJInkS4XXBdqFzn834pG1oBt0IYbgtPV8glEobZcsjjJQgMQLAc2Vp232q9ixGqMYtLRCAq2i_7QOkWjjN_eKWtoutClMWvg3UsEUrxPj9W1lnrQBSqcURpNvD3E24lnYBHG8WQMOShoIf66kxNhrct7atmBnt_MBbA5JDzO2q2WT7GzuPxX6_08FOb6EF9b0-RpEuisxOGMZ8PWkPWYbAF2UeY__syzJwA"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-status-pending-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-2xs">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Dr. Priyantha Alwis</span>
+</div>
+<span class="font-mono-data text-mono-data text-outline">SLMC #19388 · MBBS, MS (Ortho)</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[18px] text-outline">apartment</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Galle Coastal</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Orthopedic OP Wing</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    Orthopedic Surgery
+                  </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+                    Sports Medicine
+                  </span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-pending-bg text-status-pending-text font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-status-pending-text"></span>
+                  On Leave
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1" onclick="openManageSpecialtiesModal('Dr. Priyantha Alwis', '19388', 'Orthopedic Surgery')">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>Manage Specialties</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" title="View Schedule">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Dr. Nimal Fonseka -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-11 h-11 rounded-full object-cover shadow-sm" data-alt="Portrait of an experienced physician with rimless glasses smiling gently in warm hospital lighting wearing medical consultation suit and tie" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGoWojVTHEc43s5ycNzMg9s-vVPyAU4KncvGOH4i5KWGlVlRB4MydoL7FiUtzXZ4hUOY4ImoNpsxpkZe2alprQvPF4nfs5rTd6BUjQKy3moZOi3NxQQxZy3b2VsmUPXd9qcNsrodEU-nWdLvHe4PqgaIJum0t1t9L2FWl0IKqMhYeSXFawAkd_EVGpmzgB4K3QFIL3JyCYSRm_fk0bEKgdtjVodSlBVlq3pcX17AWP1Y6d3Ksh0iQxIA"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-status-completed-text ring-2 ring-surface-card"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-2xs">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Dr. Nimal Fonseka</span>
+</div>
+<span class="font-mono-data text-mono-data text-outline">SLMC #41299 · MBBS, MD (Medicine)</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[18px] text-outline">apartment</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Colombo Central</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Consultant Suite 4</span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    General Medicine
+                  </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+                    Diabetology
+                  </span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+                  Active
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1" onclick="openManageSpecialtiesModal('Dr. Nimal Fonseka', '41299', 'General Medicine')">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>Manage Specialties</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" title="View Schedule">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination bar -->
+<div class="p-space-md bg-surface-card flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Showing 1 to 4 of 48 active registered practitioners</span>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-3 rounded-lg bg-surface-subtle text-outline font-label-md text-label-md flex items-center gap-1 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+<span>Prev</span>
+</button>
+<button class="h-8 w-8 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center">1</button>
+<button class="h-8 w-8 rounded-lg bg-surface-subtle text-on-surface font-label-md text-label-md font-medium hover:bg-surface-container flex items-center justify-center">2</button>
+<button class="h-8 w-8 rounded-lg bg-surface-subtle text-on-surface font-label-md text-label-md font-medium hover:bg-surface-container flex items-center justify-center">3</button>
+<button class="h-8 px-3 rounded-lg bg-surface-subtle text-on-surface font-label-md text-label-md hover:bg-surface-container flex items-center gap-1 font-bold">
+<span>Next</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- TAB 2 CONTENT: SPECIALTIES DIRECTORY & QUICK ADD FORM -->
+<div class="hidden p-space-lg" id="tabContentSpecialties">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-space-lg">
+<!-- Table Column (2 Cols) -->
+<div class="xl:col-span-2 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-brand-navy-deep font-bold">Clinical Specialties Directory</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Comprehensive listing of all active hospital practice categories and fee structures.</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-bold">
+              14 Active Departments
+            </span>
+</div>
+<div class="overflow-x-auto rounded-xl bg-surface-subtle p-1">
+<table class="w-full text-left bg-surface-card rounded-lg overflow-hidden">
+<thead class="bg-surface-subtle">
+<tr>
+<th class="h-10 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Specialty Name</th>
+<th class="h-10 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Code</th>
+<th class="h-10 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Doctors</th>
+<th class="h-10 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">Avg. Fee (LKR)</th>
+<th class="h-10 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[16px]">cardiology</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Cardiology</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-outline">CARD-01</td>
+<td class="py-3 px-space-md">
+<span class="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">8 Doctors</span>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-on-surface font-semibold">LKR 4,500.00</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center" title="Edit Specialty">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center" title="Deactivate">
+<span class="material-symbols-outlined text-[16px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-primary flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[16px]">child_care</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Pediatrics</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-outline">PED-03</td>
+<td class="py-3 px-space-md">
+<span class="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">11 Doctors</span>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-on-surface font-semibold">LKR 3,500.00</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center" title="Edit Specialty">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center" title="Deactivate">
+<span class="material-symbols-outlined text-[16px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-status-completed-bg text-status-completed-text flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[16px]">accessibility</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Orthopedic Surgery</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-outline">ORTH-05</td>
+<td class="py-3 px-space-md">
+<span class="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">6 Doctors</span>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-on-surface font-semibold">LKR 4,000.00</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center" title="Edit Specialty">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center" title="Deactivate">
+<span class="material-symbols-outlined text-[16px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[16px]">healing</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold">General Medicine</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-outline">GEN-02</td>
+<td class="py-3 px-space-md">
+<span class="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">14 Doctors</span>
+</td>
+<td class="py-3 px-space-md font-mono-data text-mono-data text-on-surface font-semibold">LKR 2,500.00</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center" title="Edit Specialty">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center" title="Deactivate">
+<span class="material-symbols-outlined text-[16px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Add Specialty Form Card (1 Col) -->
+<div class="bg-surface-subtle rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div>
+<div class="flex items-center gap-space-xs mb-space-sm">
+<span class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+</span>
+<h3 class="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">Add New Specialty</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Create clinical departments to categorize consultations and specialist booking queues.</p>
+<form class="space-y-space-sm" onsubmit="event.preventDefault(); alert('Specialty registered successfully.');">
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-1">Specialty Name *</label>
+<input class="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none" placeholder="e.g. Dermatology &amp; Cosmetology" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-1">Department Code *</label>
+<input class="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none" placeholder="e.g. DERM-04" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-1">Base Consultation Fee (LKR)</label>
+<input class="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none" placeholder="3500" type="number"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-1">Clinical Scope / Notes</label>
+<textarea class="w-full p-3 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none resize-none" placeholder="Summary of services and required laboratory attachments..." rows="2"></textarea>
+</div>
+<div class="pt-space-xs">
+<button class="w-full h-[42px] rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-sm transition-all flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Save Specialty</span>
+</button>
+</div>
+</form>
+</div>
+<div class="mt-space-md p-space-sm rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5">info</span>
+<span class="font-body-sm text-body-sm">Newly added specialties will immediately appear in doctor assignment pickers and patient channelling flows.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SPECIALTY ASSIGNMENT MODAL / DRAWER (INTERACTIVE OVERLAY) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy-deep/40 backdrop-blur-sm p-space-md hidden" id="manageSpecialtiesModal">
+<div class="bg-surface-card rounded-2xl w-full max-w-xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<!-- Modal Header -->
+<div class="p-space-lg bg-surface-subtle flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[24px]">assignment_ind</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-headline-md text-brand-navy-deep font-bold" id="modalDoctorName">Dr. K. Bandara</h3>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-mono-data text-mono-data font-bold" id="modalDoctorSlmc">SLMC #48201</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage clinical appointments and configure primary billing queue.</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface flex items-center justify-center transition-colors" onclick="closeManageSpecialtiesModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-lg space-y-space-md">
+<!-- Assigned Multi-Select Chips Container -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-2">
+            Assigned Clinical Specialties
+          </label>
+<div class="flex flex-wrap items-center gap-2 p-3 bg-surface-subtle rounded-xl min-h-[52px]">
+<!-- Chip 1 -->
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-card text-on-surface font-label-md text-label-md font-bold shadow-sm" id="chipCardio">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Cardiology</span>
+<button class="w-4 h-4 rounded-full hover:bg-surface-subtle text-outline flex items-center justify-center" onclick="removeChip('chipCardio')" type="button">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</span>
+<!-- Chip 2 -->
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-card text-on-surface font-label-md text-label-md font-bold shadow-sm" id="chipDiagnostics">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span>Cardiac Diagnostics</span>
+<button class="w-4 h-4 rounded-full hover:bg-surface-subtle text-outline flex items-center justify-center" onclick="removeChip('chipDiagnostics')" type="button">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</span>
+<!-- Add Specialty Inline Action -->
+<div class="relative inline-block">
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md font-bold transition-all" onclick="toggleDropdown()" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Add Specialty</span>
+</button>
+<!-- Hidden Mini Selector Dropdown -->
+<div class="absolute left-0 top-8 w-48 bg-surface-card rounded-xl shadow-lg p-1.5 hidden z-10" id="addSpecialtyDropdown">
+<button class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface-subtle text-on-surface font-label-md text-label-md font-medium" onclick="addSampleChip('Pediatrics'); toggleDropdown();" type="button">Pediatrics</button>
+<button class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface-subtle text-on-surface font-label-md text-label-md font-medium" onclick="addSampleChip('Interventional Cardiology'); toggleDropdown();" type="button">Interventional Cardiology</button>
+<button class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface-subtle text-on-surface font-label-md text-label-md font-medium" onclick="addSampleChip('General Medicine'); toggleDropdown();" type="button">General Medicine</button>
+</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-outline mt-1 block">Click "x" to detach any secondary specialty accreditation.</span>
+</div>
+<!-- Primary Specialty Selector Radio Group -->
+<div class="pt-space-xs">
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-2">
+            Primary Specialty (Default for OPD Channelling)
+          </label>
+<div class="space-y-2">
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary" name="primarySpecialty" type="radio" value="Cardiology"/>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold block">Cardiology</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Default consult rate: LKR 4,500</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold">Current</span>
+</label>
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="primarySpecialty" type="radio" value="Cardiac Diagnostics"/>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface font-bold block">Cardiac Diagnostics</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Default consult rate: LKR 3,800</span>
+</div>
+</div>
+<span class="text-outline font-label-sm text-label-sm">Secondary</span>
+</label>
+</div>
+</div>
+<!-- Clinical Note / Justification -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface font-bold mb-1">Administrative Endorsement Note</label>
+<input class="w-full h-[40px] px-3 bg-surface-subtle rounded-lg text-on-surface font-body-sm text-body-sm focus:outline-none" type="text" value="Approved by Clinical Governance Board (Q2 review)."/>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-space-md bg-surface-subtle flex items-center justify-end gap-space-sm">
+<button class="h-[42px] px-space-md rounded-lg bg-surface-card hover:bg-surface-container text-on-surface font-label-lg text-label-lg font-bold transition-all" onclick="closeManageSpecialtiesModal()" type="button">
+          Cancel
+        </button>
+<button class="h-[42px] px-space-lg rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-sm transition-all flex items-center gap-2" onclick="saveSpecialtyAssignment()" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Save Changes</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchTab(tab) {
+    const btnDocs = document.getElementById('tabBtnDoctors');
+    const btnSpecs = document.getElementById('tabBtnSpecialties');
+    const contentDocs = document.getElementById('tabContentDoctors');
+    const contentSpecs = document.getElementById('tabContentSpecialties');
+
+    if (tab === 'doctors') {
+      btnDocs.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-card text-primary font-label-lg text-label-lg shadow-sm font-bold transition-all";
+      btnSpecs.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg font-bold transition-all";
+      contentDocs.classList.remove('hidden');
+      contentSpecs.classList.add('hidden');
+    } else {
+      btnSpecs.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-card text-primary font-label-lg text-label-lg shadow-sm font-bold transition-all";
+      btnDocs.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg font-bold transition-all";
+      contentDocs.classList.add('hidden');
+      contentSpecs.classList.remove('hidden');
+    }
+  }
+
+  function openManageSpecialtiesModal(docName, slmc, primarySpecialty) {
+    document.getElementById('modalDoctorName').innerText = docName;
+    document.getElementById('modalDoctorSlmc').innerText = 'SLMC #' + slmc;
+    document.getElementById('manageSpecialtiesModal').classList.remove('hidden');
+  }
+
+  function closeManageSpecialtiesModal() {
+    document.getElementById('manageSpecialtiesModal').classList.add('hidden');
+  }
+
+  function removeChip(elementId) {
+    const el = document.getElementById(elementId);
+    if (el) el.remove();
+  }
+
+  function toggleDropdown() {
+    const dd = document.getElementById('addSpecialtyDropdown');
+    dd.classList.toggle('hidden');
+  }
+
+  function addSampleChip(name) {
+    const container = document.getElementById('manageSpecialtiesModal').querySelector('.flex-wrap');
+    const newChip = document.createElement('span');
+    newChip.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-card text-on-surface font-label-md text-label-md font-bold shadow-sm";
+    newChip.innerHTML = `
+      <span class="w-2 h-2 rounded-full bg-primary"></span>
+      <span>${name}</span>
+      <button onclick="this.parentElement.remove()" type="button" class="w-4 h-4 rounded-full hover:bg-surface-subtle text-outline flex items-center justify-center">
+        <span class="material-symbols-outlined text-[14px]">close</span>
+      </button>
+    `;
+    // Insert before the add button wrapper
+    container.insertBefore(newChip, container.lastElementChild);
+  }
+
+  function saveSpecialtyAssignment() {
+    closeManageSpecialtiesModal();
+    // Micro feedback alert
+    alert("Specialty assignments updated for practitioner.");
+  }
+
+  function openAddSpecialtyQuickModal() {
+    switchTab('specialties');
+  }
+</script></main></div></body></html>
