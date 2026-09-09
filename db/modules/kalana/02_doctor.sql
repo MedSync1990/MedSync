@@ -1,20 +1,16 @@
 -- ============================================================================
--- Table: DOCTOR
--- Module: Doctor/Specialty & Appointment Management
+-- Table: doctor
+-- Module: 02 - Doctor & Appointment Management
 -- Owner: Kalana Jayawardena
--- Description: Doctor profile extending staff/user with medical credentials
+-- Reference: docs/database.md §2.1
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS doctor (
-    user_id INT PRIMARY KEY,
-    license_number VARCHAR(50) NOT NULL UNIQUE,
-    consultation_fee NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
-    -- AGENTS.md rule: No hard deletes on DOCTOR, use is_active flag
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id         INT PRIMARY KEY,
+    license_number  VARCHAR(30) NOT NULL UNIQUE
 );
 
--- Foreign key to STAFF table (owned by Dilantha):
+-- Foreign key to staff(user_id) ON DELETE RESTRICT
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'staff') THEN
         IF NOT EXISTS (
@@ -27,6 +23,3 @@ DO $$ BEGIN
         END IF;
     END IF;
 END $$;
-
--- Index for doctor active status and license lookup
-CREATE INDEX IF NOT EXISTS idx_doctor_is_active ON doctor(is_active);
