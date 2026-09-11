@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS patient_insurance (
     insurance_card_number  VARCHAR(40) NOT NULL,
     start_date             DATE NOT NULL,
     end_date               DATE NOT NULL CHECK (end_date > start_date), 
-    is_active               BOOLEAN NOT NULL DEFAULT TRUE                -
+    is_active              BOOLEAN NOT NULL DEFAULT TRUE                
 );
 
 -- Index for fast patient policy lookup during invoice generation

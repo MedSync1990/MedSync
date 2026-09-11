@@ -44,8 +44,9 @@ this work:
 ## 2. Component rules
 
 - **Buttons**: primary action = filled teal (matches brand color from the screenshot), max one
-  primary button per card/section. Secondary actions = outlined. Destructive actions (cancel
-  appointment, delete) = red, always behind a confirmation dialog.
+  primary button per card/section. Secondary actions = outlined (transparent fill, `outline-variant`
+  border), never filled grey — filled-but-muted reads as a second primary action at a glance.
+  Destructive actions (cancel appointment, delete) = red, always behind a confirmation dialog.
 - **Search fields**: icon-left input with placeholder text describing exactly what's searchable
   (e.g. "Enter NIC or Name" — not just "Search").
 - **Cards**: 1px border, rounded corners, consistent padding; a card's header states what step
@@ -87,10 +88,36 @@ this work:
 ## 6. Accessibility / usability baseline
 
 - All interactive elements keyboard-reachable, visible focus states (`outline: 2px solid
-  #0284C7; outline-offset: 2px` on `:focus-visible`).
+  #0284C7; outline-offset: 2px` on `:focus-visible`) — set globally, not only via per-component
+  focus-ring utility classes, so no interactive element can slip through without one.
 - Respect `prefers-reduced-motion` — disable non-essential transitions/animations for users who
   request it at the OS level.
 - Color is never the only signal for status — pair status pills with text, not color alone. This
   extends to the region-separation rule in §1.1: color plus shadow/contrast, never color alone.
 - Form errors are announced near the field, not only in a toast, so screen readers/low-vision
   users don't lose them.
+
+## 7. Typography
+
+- **Typeface**: Roboto (weights 100–900, italics included) for every text role — labels, body
+  copy, headlines, and data/mono fields. One family system-wide; don't introduce a second
+  typeface for headlines or a monospace face for data — weight and size carry the hierarchy
+  instead.
+- **Type scale** (size / line-height):
+  | Role | Size | Line-height |
+  |---|---|---|
+  | `label-sm` | 12px | 16px |
+  | `body-sm` / `label-md` | 13px | 18px |
+  | `mono-data` | 14px | 20px |
+  | `body-md` | 15px | 22px |
+  | `label-lg` | 15px | 22px |
+  | `body-lg` | 17px | 26px |
+  | `headline-sm` | 18px | 26px |
+  | `headline-md` | 22px | 30px |
+  | `headline-lg` / `display-lg-mobile` | 26px | 34px |
+  | `display-lg` | 34px | 42px |
+- This scale runs a notch larger than a typical dense-admin default — reception and clinical
+  desks are read at a glance, often on shared monitors under bright lighting, so err toward
+  legibility over information density.
+- Don't hand-set a one-off font size in a page; use the scale's named roles so any future
+  type-scale change (accessibility request, display density setting) only has to happen once.

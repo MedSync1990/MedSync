@@ -1,7 +1,3 @@
--- db/modules/shavinda/08_fn_is_policy_active.sql
--- Module: Billing & Insurance
--- Author: Shavinda
--- Requirement: FR-IM-02 (Insurance policy active date range evaluation)
 
 -- Evaluates policy validity against current date (source of truth is date range)
 CREATE OR REPLACE FUNCTION fn_is_policy_active(p_insurance_id INT)

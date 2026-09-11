@@ -1,7 +1,3 @@
--- db/modules/shavinda/09_fn_calculate_insurance_coverage.sql
--- Module: Billing & Insurance
--- Author: Shavinda
--- Requirement: FR-IM-03 / FR-IM-04 (Money math - insurance coverage calculation)
 
 -- Computes total insurance covered amount for eligible treatments under active patient policy
 CREATE OR REPLACE FUNCTION fn_calculate_insurance_coverage(
@@ -24,7 +20,7 @@ BEGIN
     ORDER BY end_date DESC
     LIMIT 1;
 
-    -- FR-IM-06: Return 0 coverage if patient has no policy or policy is expired
+    -- Return 0 coverage if patient has no policy or policy is expired
     IF v_insurance_id IS NULL OR NOT fn_is_policy_active(v_insurance_id) THEN
         RETURN 0;
     END IF;

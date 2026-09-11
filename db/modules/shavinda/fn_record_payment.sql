@@ -15,7 +15,7 @@ DECLARE
     v_paid_so_far DECIMAL(10,2);
     v_outstanding DECIMAL(10,2);
 BEGIN
-    -- FR-BPM-08: Lock target invoice row to block race conditions on concurrent payments
+    -- Lock target invoice row to block race conditions on concurrent payments
     SELECT total_amount, insurance_amount INTO v_total, v_insurance
     FROM invoices WHERE invoice_id = p_invoice_id
     FOR UPDATE;
@@ -31,7 +31,7 @@ BEGIN
     -- Calculate remaining unpaid balance
     v_outstanding := v_total - v_insurance - v_paid_so_far;
 
-    -- FR-BPM-06: Validate payment amount > 0 and <= outstanding balance
+    -- Validate payment amount > 0 and <= outstanding balance
     IF p_amount <= 0 THEN
         RAISE EXCEPTION 'payment amount must be positive' USING ERRCODE = '23514';
     END IF;
@@ -45,7 +45,7 @@ BEGIN
     INSERT INTO payments (invoice_id, amount_paid, payment_type)
     VALUES (p_invoice_id, p_amount, p_payment_type);
 
-    -- FR-BPM-07: Update status to Paid if fully settled, otherwise Partially Paid
+    -- Update status to Paid if fully settled, otherwise Partially Paid
     UPDATE invoices
     SET status = CASE
         WHEN (v_outstanding - p_amount) <= 0 THEN 'Paid'::invoice_status_enum

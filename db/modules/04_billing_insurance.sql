@@ -8,8 +8,8 @@
 \i db/modules/shavinda/policy_treatment_coverage.sql
 \i db/modules/shavinda/invoices.sql
 \i db/modules/shavinda/payments.sql
-\i db/modules/shavinda/function_record_payment.sql
-\i db/modules/shavinda/function_calculate_invoice_total.sql
-\i db/modules/shavinda/function_is_policy_active.sql
-\i db/modules/shavinda/function_calculate_insurance_coverage.sql
+\i db/modules/shavinda/fn_record_payment.sql
+\i db/modules/shavinda/fn_calculate_invoice_total.sql
+\i db/modules/shavinda/fn_is_policy_active.sql
+\i db/modules/shavinda/fn_calculate_insurance_coverage.sql
 

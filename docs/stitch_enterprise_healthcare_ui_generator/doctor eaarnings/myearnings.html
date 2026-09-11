@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+  @layer base{
+    html,body{margin:0;padding:0;}
+    body{overscroll-behavior:none;}
+    main>:first-child{margin-top:0!important;}
+    main>:last-child{margin-bottom:0!important;}
+  }
+  ::-webkit-scrollbar{display:none;}
+  :focus-visible{outline:2px solid #0284C7;outline-offset:2px;}
+  #topBar{transition:box-shadow 200ms ease;}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:0.001ms!important;
+      animation-iteration-count:1!important;
+      transition-duration:0.001ms!important;
+      scroll-behavior:auto!important;
+    }
+  }
+</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface":"#f8f9ff","border-focus":"#0284C7","status-cancelled-bg":"#FFE4E6","on-primary":"#ffffff","border-subtle":"#E2E8F0","status-completed-text":"#047857","tertiary-fixed":"#c9e6ff","primary-fixed":"#cce5ff","status-scheduled-text":"#0369A1","canvas-bg":"#E9EEF5","error-container":"#ffdad6","tertiary-fixed-dim":"#89ceff","on-tertiary-fixed":"#001e2f","inverse-surface":"#213145","surface-dim":"#cbdbf5","on-secondary-fixed-variant":"#3f465c","background":"#f8f9ff","surface-subtle":"#F1F5F9","secondary":"#565e74","on-secondary":"#ffffff","surface-container-lowest":"#ffffff","status-pending-text":"#B45309","on-tertiary-container":"#fcfcff","status-completed-bg":"#D1FAE5","outline-variant":"#bfc7d2","on-tertiary-fixed-variant":"#004c6e","surface-variant":"#d3e4fe","on-surface-variant":"#3f4850","surface-container-low":"#eff4ff","secondary-container":"#dae2fd","brand-navy-deep":"#0F172A","surface-container-high":"#dce9ff","on-secondary-container":"#5c647a","secondary-fixed-dim":"#bec6e0","tertiary-container":"#007cb1","inverse-primary":"#93ccff","secondary-fixed":"#dae2fd","on-secondary-fixed":"#131b2e","primary":"#006194","surface-tint":"#006398","brand-teal-light":"#38BDF8","on-tertiary":"#ffffff","error":"#ba1a1a","on-background":"#0b1c30","on-surface":"#0b1c30","on-primary-fixed-variant":"#004b73","surface-container-highest":"#d3e4fe","inverse-on-surface":"#eaf1ff","surface-container":"#e5eeff","on-error-container":"#93000a","outline":"#707881","primary-fixed-dim":"#93ccff","status-scheduled-bg":"#E0F2FE","tertiary":"#00628d","surface-bright":"#f8f9ff","on-primary-container":"#fdfcff","status-pending-bg":"#FEF3C7","on-error":"#ffffff","primary-container":"#007bb9","on-primary-fixed":"#001d31","status-cancelled-text":"#BE123C","surface-card":"#FFFFFF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"sidebar-collapsed-width":"72px","space-xs":"0.5rem","gutter-desktop":"1.5rem","space-sm":"0.75rem","space-lg":"1.5rem","space-xl":"2rem","space-2xs":"0.25rem","content-max-width":"1600px","space-md":"1rem","gutter-mobile":"1rem","sidebar-width":"260px","topbar-height":"68px","space-2xl":"2.5rem","space-3xl":"3rem"},"fontFamily":{"headline-lg":["Roboto"],"headline-md":["Roboto"],"headline-sm":["Roboto"],"body-sm":["Roboto"],"display-lg":["Roboto"],"body-lg":["Roboto"],"label-sm":["Roboto"],"mono-data":["Roboto"],"label-lg":["Roboto"],"body-md":["Roboto"],"display-lg-mobile":["Roboto"],"label-md":["Roboto"]},"fontSize":{"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}],"display-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["34px",{"lineHeight":"42px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.02em","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"22px","fontWeight":"400"}],"body-lg":["17px",{"lineHeight":"26px","fontWeight":"400"}],"mono-data":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}],"label-lg":["15px",{"lineHeight":"22px","fontWeight":"600"}],"headline-lg":["26px",{"lineHeight":"34px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}};</script>
+</head>
+<body class="bg-canvas-bg font-body-md text-on-surface antialiased">
+
+<!-- ============ SIDEBAR (dark navy region per UI Guidelines §1.1) ============ -->
+<aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-[#0F172A] z-50 flex flex-col justify-between shadow-[2px_0_10px_rgba(0,0,0,0.18)]">
+  <div class="flex flex-col flex-1 min-h-0">
+    <div class="h-topbar-height px-space-lg flex items-center gap-space-sm border-b border-white/10">
+      <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-brand-teal-light">
+        <span class="material-symbols-outlined text-[22px]">local_hospital</span>
+      </div>
+      <div class="flex flex-col min-w-0">
+        <span class="font-headline-sm text-headline-sm text-white leading-tight truncate">MedSync</span>
+        <span class="font-label-sm text-label-sm text-brand-teal-light uppercase tracking-wider">Doctor Portal</span>
+      </div>
+    </div>
+
+    <div class="px-space-md py-space-sm">
+      <div class="flex items-center gap-space-2xs px-space-sm py-1.5 rounded-lg bg-white/10">
+        <span class="material-symbols-outlined text-[16px] text-brand-teal-light">location_on</span>
+        <span class="font-label-md text-label-md text-white/70 truncate">Colombo Central Branch</span>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-space-md py-space-xs space-y-space-md">
+      <div class="space-y-1">
+        <a class="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="dashboard" href="#">
+          <span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white transition-colors">grid_view</span>
+          <span class="font-label-lg text-label-lg">Dashboard</span>
+        </a>
+      </div>
+
+      <div>
+        <div class="px-space-sm pb-space-2xs font-label-sm text-label-sm text-white/40 uppercase tracking-widest">My Work</div>
+        <div class="space-y-1">
+          <a class="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="my-schedule" href="#">
+            <span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white transition-colors">calendar_month</span>
+            <span class="font-label-lg text-label-lg">My Schedule</span>
+          </a>
+          <a class="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="consultation" href="#">
+            <span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white transition-colors">stethoscope</span>
+            <span class="font-label-lg text-label-lg">Consultation</span>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="px-space-sm pb-space-2xs font-label-sm text-label-sm text-white/40 uppercase tracking-widest">Earnings</div>
+        <div class="space-y-1">
+          <a aria-current="page" class="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all bg-white/10 text-white font-semibold relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-brand-teal-light before:rounded-r-full" data-path="my-earnings" href="#">
+            <span class="material-symbols-outlined text-[20px] text-brand-teal-light">account_balance_wallet</span>
+            <span class="font-label-lg text-label-lg">My Earnings</span>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="px-space-sm pb-space-2xs font-label-sm text-label-sm text-white/40 uppercase tracking-widest">Reference</div>
+        <div class="space-y-1">
+          <a class="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="treatment-catalogue" href="#">
+            <span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white transition-colors">menu_book</span>
+            <span class="font-label-lg text-label-lg">Treatment Catalogue</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div class="p-space-md border-t border-white/10">
+    <div class="space-y-1">
+      <a class="group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="settings" href="#">
+        <span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white transition-colors">settings</span>
+        <span class="font-label-md text-label-md">Settings</span>
+      </a>
+      <a class="group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" data-path="help-center" href="#">
+        <span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white transition-colors">help</span>
+        <span class="font-label-md text-label-md">Help Center</span>
+      </a>
+      <a class="group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all" data-path="logout" href="#">
+        <span class="material-symbols-outlined text-[18px] text-rose-400 group-hover:text-rose-300">logout</span>
+        <span class="font-label-md text-label-md font-semibold">Logout</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<div class="pl-sidebar-width">
+
+  <!-- ============ TOP BAR (white surface, shadow strengthens on scroll per §1.1) ============ -->
+  <header id="topBar" class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-space-lg flex items-center justify-between" style="box-shadow:0 1px 4px rgba(15,23,42,0.04);">
+    <div class="flex items-center gap-space-md">
+      <div class="flex flex-col">
+        <div class="flex items-center gap-space-xs">
+          <span class="font-headline-sm text-headline-sm text-brand-navy-deep">Good morning, Dr. Bandara</span>
+          <span class="material-symbols-outlined text-brand-teal-light text-[20px]">verified</span>
+        </div>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Colombo Central Branch · Doctor · Cardiology Specialist</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-md">
+      <div class="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-status-scheduled-bg border border-brand-teal-light/30 text-status-scheduled-text font-label-md text-label-md">
+        <span class="material-symbols-outlined text-[16px]">domain</span>
+        <span>Central Campus - Wing B</span>
+      </div>
+      <button aria-label="Theme Toggle" class="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button">
+        <span class="material-symbols-outlined text-[20px]">dark_mode</span>
+      </button>
+      <button aria-label="Notifications" class="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button">
+        <span class="material-symbols-outlined text-[20px]">notifications</span>
+        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
+      </button>
+      <div class="h-7 w-[1px] bg-border-subtle"></div>
+      <div class="flex items-center gap-space-sm pl-space-xs">
+        <div class="text-right hidden sm:block">
+          <div class="font-label-lg text-label-lg text-brand-navy-deep leading-tight">Dr. K. Bandara</div>
+          <div class="font-body-sm text-body-sm text-on-surface-variant">Cardiologist</div>
+        </div>
+        <img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ CONTENT CANVAS (grey-blue #E9EEF5, inset shadow reinforces sidebar edge, §1.1) ============ -->
+  <main class="relative pt-topbar-height w-full px-gutter-desktop min-h-screen bg-canvas-bg" style="box-shadow:inset 1px 0 0 rgba(15,23,42,0.06);">
+    <div class="flex flex-col w-full pb-space-3xl max-w-[1400px] mx-auto">
+
+      <!-- 1. Header Section -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 pb-5">
+        <div>
+          <h1 class="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Payments</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">View your hospital payments and payment requests</p>
+        </div>
+        <div class="self-start sm:self-auto">
+          <button class="inline-flex items-center gap-2 px-3.5 h-10 rounded-lg bg-transparent border border-outline-variant shadow-sm font-label-md text-label-md text-brand-navy-deep hover:bg-surface-subtle transition-colors" type="button">
+            <span class="material-symbols-outlined text-[18px] text-outline">calendar_today</span>
+            <span>This Month (Sep 2026)</span>
+            <span class="material-symbols-outlined text-[18px] text-outline -mr-0.5">expand_more</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Alert Banner -->
+      <div class="mb-5 rounded-xl border border-status-scheduled-text/30 bg-status-scheduled-bg/60 p-3.5 sm:px-4 sm:py-3 flex items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-5 h-5 rounded-full bg-status-scheduled-text text-white flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[15px] font-bold">check</span>
+          </div>
+          <span class="font-body-sm text-body-sm font-medium text-status-scheduled-text truncate">
+            Payment request submitted successfully. Request ref <span class="font-semibold">#REQ-2026-0902</span> is currently under administrative audit.
+          </span>
+        </div>
+        <span class="shrink-0 px-2.5 py-1 rounded-md font-label-sm text-label-sm bg-status-pending-bg text-status-pending-text border border-status-pending-text/30">
+          Pending Approval
+        </span>
+      </div>
+
+      <!-- 3. Top 3 Stat Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+        <!-- Card 1: TOTAL EARNED -->
+        <div class="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex flex-col justify-between relative">
+          <div>
+            <div class="flex items-start justify-between">
+              <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Earned</span>
+              <div class="w-9 h-9 rounded-full bg-surface-subtle flex items-center justify-center text-on-surface-variant">
+                <span class="material-symbols-outlined text-[19px]">attach_money</span>
+              </div>
+            </div>
+            <div class="mt-1">
+              <span class="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Rs. 185,000</span>
+            </div>
+          </div>
+          <p class="font-body-sm text-body-sm text-outline mt-4 leading-relaxed">
+            Cumulative earned from completed consultations &amp; services
+          </p>
+        </div>
+
+        <!-- Card 2: PAID BY HOSPITAL -->
+        <div class="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex flex-col justify-between relative">
+          <div>
+            <div class="flex items-start justify-between">
+              <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Paid by Hospital</span>
+              <div class="w-9 h-9 rounded-full bg-status-completed-bg text-status-completed-text flex items-center justify-center">
+                <span class="material-symbols-outlined text-[19px]">check_circle</span>
+              </div>
+            </div>
+            <div class="mt-1">
+              <span class="font-display-lg text-display-lg text-status-completed-text tracking-tight">Rs. 140,000</span>
+            </div>
+          </div>
+          <p class="font-body-sm text-body-sm text-outline mt-4 leading-relaxed">
+            Successfully disbursed to bank account
+          </p>
+        </div>
+
+        <!-- Card 3: OUTSTANDING -->
+        <div class="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex flex-col justify-between relative">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Outstanding</span>
+                <span class="px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-status-scheduled-bg text-status-scheduled-text border border-status-scheduled-text/20">
+                  Available
+                </span>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+                <span class="material-symbols-outlined text-[19px]">schedule</span>
+              </div>
+            </div>
+            <div class="mt-1">
+              <span class="font-display-lg text-display-lg text-status-scheduled-text tracking-tight">Rs. 45,000</span>
+            </div>
+          </div>
+          <p class="font-body-sm text-body-sm text-outline mt-4 leading-relaxed">
+            Formula: Total Earned (Rs. 185,000) − Paid by Hospital (Rs. 140,000)
+          </p>
+        </div>
+      </div>
+
+      <!-- 4. "Request Payment" Card -->
+      <div class="bg-surface-card rounded-xl border border-border-subtle p-5 sm:p-6 shadow-sm mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-brand-navy-deep tracking-tight">Request Payment</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Submit an on-demand payout request to the hospital accounts department</p>
+          </div>
+          <div class="self-start sm:self-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-status-scheduled-text/30 bg-status-scheduled-bg/60 text-status-scheduled-text font-label-md text-label-md shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+              <span>Available to Request: <strong class="font-bold font-mono-data text-mono-data">Rs. 45,000</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <form class="pt-2" onsubmit="event.preventDefault(); showRequestConfirmDialog();">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end">
+            <!-- Input 1: Request Amount -->
+            <div class="md:col-span-4">
+              <label class="block font-label-md text-label-md text-brand-navy-deep mb-1.5" for="requestAmount">Request Amount (LKR)</label>
+              <input class="w-full h-11 px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card border border-border-subtle font-mono-data text-mono-data font-semibold text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="requestAmount" type="text" value="Rs. 30,000"/>
+            </div>
+            <!-- Input 2: Destination Bank Account -->
+            <div class="md:col-span-5">
+              <label class="block font-label-md text-label-md text-brand-navy-deep mb-1.5" for="bankAccountSelect">Destination Bank Account</label>
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3.5 text-outline text-[18px] pointer-events-none">account_balance</span>
+                <select class="w-full h-11 pl-11 pr-9 rounded-lg bg-surface-subtle focus:bg-surface-card border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer" id="bankAccountSelect">
+                  <option selected="">Commercial Bank (Acc: **** 5821)</option>
+                  <option>Sampath Bank (Acc: **** 9044)</option>
+                  <option>Hatton National Bank (Acc: **** 1120)</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 text-outline text-[18px] pointer-events-none">unfold_more</span>
+              </div>
+            </div>
+            <!-- Button (single primary action on this card) -->
+            <div class="md:col-span-3">
+              <button class="w-full h-11 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-sm transition-all" type="submit">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+                <span>Request Payment</span>
+              </button>
+            </div>
+          </div>
+        </form>
+        <div class="flex items-center gap-1.5 font-body-sm text-body-sm text-outline mt-3 pt-1">
+          <span class="material-symbols-outlined text-[15px] text-outline">info</span>
+          <span>Max eligible request: Rs. 45,000. Payouts are reviewed and credited within 2 business days.</span>
+        </div>
+      </div>
+
+      <!-- 5. "Payment Requests" Section / Table -->
+      <div class="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden mb-6">
+        <div class="px-5 py-4 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-headline-sm text-headline-sm text-brand-navy-deep tracking-tight">Payment Requests</h3>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Doctor-initiated payout requests awaiting hospital approval or disbursement</p>
+          </div>
+          <span class="font-body-sm text-body-sm text-outline self-start sm:self-auto">Showing 4 requests</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-subtle border-b border-border-subtle font-label-sm text-label-sm text-outline uppercase tracking-wider h-10">
+                <th class="px-5 py-2.5">Request Date</th>
+                <th class="px-5 py-2.5">Requested Amount</th>
+                <th class="px-5 py-2.5 text-center">Status</th>
+                <th class="px-5 py-2.5">Processed Date</th>
+                <th class="px-5 py-2.5">Remarks / Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm text-on-surface-variant">
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">02 Sep 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data text-mono-data">Rs. 20,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-status-pending-bg text-status-pending-text border border-status-pending-text/30">Pending</span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-outline">—</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">Monthly consultation payout</td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">15 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data text-mono-data">Rs. 25,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-status-completed-bg text-status-completed-text border border-status-completed-text/30">Paid</span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium">20 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">Bi-weekly OPD disbursement</td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">01 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data text-mono-data">Rs. 25,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-status-completed-bg text-status-completed-text border border-status-completed-text/30">Paid</span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium">05 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">Ward rounds &amp; emergency procedures</td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">15 Jul 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data text-mono-data">Rs. 40,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-status-completed-bg text-status-completed-text border border-status-completed-text/30">Paid</span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium">19 Jul 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">July mid-month settlement</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 6. "Hospital Payment History" Section / Table -->
+      <div class="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-headline-sm text-headline-sm text-brand-navy-deep tracking-tight">Hospital Payment History</h3>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Record of disbursements made directly to your registered bank account</p>
+          </div>
+          <div class="font-body-sm text-body-sm text-on-surface-variant self-start sm:self-auto">
+            Total Received: <span class="font-bold text-status-completed-text font-mono-data text-mono-data">Rs. 140,000</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-subtle border-b border-border-subtle font-label-sm text-label-sm text-outline uppercase tracking-wider h-10">
+                <th class="px-5 py-2.5">Payment Date</th>
+                <th class="px-5 py-2.5">Amount Paid</th>
+                <th class="px-5 py-2.5">Payment Reference</th>
+                <th class="px-5 py-2.5">Payment Method</th>
+                <th class="px-5 py-2.5">Bank Account / Destination</th>
+                <th class="px-5 py-2.5 text-center">Receipt / Advice Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm text-on-surface-variant">
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">20 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data text-mono-data">Rs. 25,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">PAY-00482</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-outline">account_balance</span>
+                    <span>Bank Transfer</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">Commercial Bank •••• 5821</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-container-low text-primary font-label-sm text-label-sm transition-colors" onclick="alert('Downloading remittance slip for PAY-00482 (PDF)')" type="button">
+                    <span class="material-symbols-outlined text-[15px]">download</span>
+                    <span>Download Slip</span>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">05 Aug 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data text-mono-data">Rs. 25,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">PAY-00391</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-outline">account_balance</span>
+                    <span>Bank Transfer</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">Commercial Bank •••• 5821</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-container-low text-primary font-label-sm text-label-sm transition-colors" onclick="alert('Downloading remittance slip for PAY-00391 (PDF)')" type="button">
+                    <span class="material-symbols-outlined text-[15px]">download</span>
+                    <span>Download Slip</span>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">19 Jul 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data text-mono-data">Rs. 40,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">PAY-00288</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-outline">account_balance</span>
+                    <span>Bank Transfer</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">Commercial Bank •••• 5821</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-container-low text-primary font-label-sm text-label-sm transition-colors" onclick="alert('Downloading remittance slip for PAY-00288 (PDF)')" type="button">
+                    <span class="material-symbols-outlined text-[15px]">download</span>
+                    <span>Download Slip</span>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-subtle/60 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">02 Jul 2026</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data text-mono-data">Rs. 50,000</td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">PAY-00194</td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-outline">account_balance</span>
+                    <span>Bank Transfer</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap font-mono-data text-mono-data">Commercial Bank •••• 5821</td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-container-low text-primary font-label-sm text-label-sm transition-colors" onclick="alert('Downloading remittance slip for PAY-00194 (PDF)')" type="button">
+                    <span class="material-symbols-outlined text-[15px]">download</span>
+                    <span>Download Slip</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Confirmation dialog before the payment request actually fires (SRS §3.1 requires confirmation before payment-modification actions) -->
+    <div class="fixed inset-0 z-50 hidden items-center justify-center bg-brand-navy-deep/40 backdrop-blur-sm p-4" id="requestConfirmModal">
+      <div class="bg-surface-card rounded-xl shadow-xl max-w-sm w-full p-space-xl space-y-space-lg text-center">
+        <div class="w-14 h-14 rounded-full bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center mx-auto">
+          <span class="material-symbols-outlined text-[30px]">send</span>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-headline-md text-headline-md text-brand-navy-deep">Submit this payment request?</h3>
+          <p class="font-body-md text-body-md text-on-surface-variant">Rs. 30,000 will be requested to Commercial Bank •••• 5821. This goes to Central Finance for approval.</p>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button class="flex-1 h-11 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer" onclick="closeRequestConfirmDialog()" type="button">Cancel</button>
+          <button class="flex-1 h-11 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-sm transition-all cursor-pointer" onclick="confirmRequestSubmit()" type="button">Confirm &amp; Send</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Top bar shadow strengthens on scroll (UI Guidelines §1.1)
+  (function () {
+    var topBar = document.getElementById('topBar');
+    function updateTopBarShadow() {
+      topBar.style.boxShadow = window.scrollY > 4
+        ? '0 4px 12px rgba(15,23,42,0.08)'
+        : '0 1px 4px rgba(15,23,42,0.04)';
+    }
+    window.addEventListener('scroll', updateTopBarShadow, { passive: true });
+    updateTopBarShadow();
+  })();
+
+  function showRequestConfirmDialog() {
+    const modal = document.getElementById('requestConfirmModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeRequestConfirmDialog() {
+    const modal = document.getElementById('requestConfirmModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  function confirmRequestSubmit() {
+    closeRequestConfirmDialog();
+    alert('Payment request of Rs. 30,000 submitted successfully to Central Finance.');
+  }
+</script>
+</body>
+</html>
