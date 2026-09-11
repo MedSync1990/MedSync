@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "brand-navy-deep": "#0F172A", "on-error": "#ffffff", "surface-subtle": "#F1F5F9", "surface-container-low": "#eff4ff", "error": "#ba1a1a", "surface-container": "#e5eeff", "on-error-container": "#93000a", "surface-card": "#FFFFFF", "status-completed-bg": "#D1FAE5", "tertiary-fixed-dim": "#89ceff", "primary-fixed-dim": "#93ccff", "outline": "#707881", "on-secondary-fixed": "#131b2e", "primary": "#006194", "on-tertiary-fixed": "#001e2f", "surface-dim": "#cbdbf5", "on-secondary": "#ffffff", "status-pending-text": "#B45309", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#001d31", "inverse-surface": "#213145", "on-primary-fixed-variant": "#004b73", "surface-bright": "#f8f9ff", "surface": "#f8f9ff", "border-subtle": "#E2E8F0", "on-primary": "#ffffff", "primary-container": "#007bb9", "surface-container-highest": "#d3e4fe", "on-tertiary": "#ffffff", "surface-tint": "#006398", "canvas-bg": "#F8FAFC", "on-background": "#0b1c30", "border-focus": "#0284C7", "status-pending-bg": "#FEF3C7", "surface-container-high": "#dce9ff", "status-completed-text": "#047857", "tertiary": "#00628d", "inverse-on-surface": "#eaf1ff", "secondary-fixed": "#dae2fd", "tertiary-fixed": "#c9e6ff", "tertiary-container": "#007cb1", "on-secondary-container": "#5c647a", "secondary-fixed-dim": "#bec6e0", "brand-teal-light": "#38BDF8", "on-secondary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-surface": "#0b1c30", "on-tertiary-container": "#fcfcff", "on-tertiary-fixed-variant": "#004c6e", "secondary": "#565e74", "outline-variant": "#bfc7d2", "primary-fixed": "#cce5ff", "inverse-primary": "#93ccff", "on-primary-container": "#fdfcff", "on-surface-variant": "#3f4850", "surface-variant": "#d3e4fe", "status-scheduled-bg": "#E0F2FE", "background": "#f8f9ff", "secondary-container": "#dae2fd", "status-cancelled-text": "#BE123C", "status-cancelled-bg": "#FFE4E6", "status-scheduled-text": "#0369A1" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "sidebar-width": "260px", "sidebar-collapsed-width": "72px", "space-md": "1rem", "topbar-height": "68px", "space-2xl": "2.5rem", "space-lg": "1.5rem", "content-max-width": "1600px", "space-sm": "0.75rem", "space-2xs": "0.25rem", "gutter-mobile": "1rem", "space-3xl": "3rem", "gutter-desktop": "1.5rem", "space-xs": "0.5rem" }, "fontFamily": { "mono-data": [ "inter" ], "body-lg": [ "inter" ], "label-sm": [ "inter" ], "headline-md": [ "plusJakartaSans" ], "display-lg": [ "plusJakartaSans" ], "label-md": [ "inter" ], "body-md": [ "inter" ], "body-sm": [ "inter" ], "headline-lg": [ "plusJakartaSans" ], "display-lg-mobile": [ "plusJakartaSans" ], "label-lg": [ "inter" ], "headline-sm": [ "plusJakartaSans" ] }, "fontSize": { "mono-data": [ "13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" } ], "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-lg": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "display-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "label-lg": [ "14px", { "lineHeight": "20px", "fontWeight": "600" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-canvas-bg font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="flex flex-col"><div class="h-[68px] px-space-md flex items-center gap-space-sm bg-surface-card"><div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-[0_1px_3px_rgba(15,23,42,0.04)]">M</div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold">MedSync</span><span class="font-label-sm text-label-sm uppercase text-primary font-bold tracking-wider">Plus</span></div><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold truncate">Administrator Portal</span></div></div><nav class="flex flex-col px-space-sm pt-space-md gap-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Overview</span></div><a aria-current="page" class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg transition-all bg-status-scheduled-bg text-status-scheduled-text font-bold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-primary before:rounded-r-full" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Reports</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="branch-appointment-summary" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Branch Appointments</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="doctor-revenue" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Doctor Revenue</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="outstanding-balances" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Outstanding Balances</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="treatment-category-breakdown" href="#"><span class="material-symbols-outlined text-[20px]">pie_chart</span><span>Treatment Breakdown</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="insurance-vs-out-of-pocket" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Insurance vs. Cash</span></a><div class="px-space-sm pt-space-lg pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Management</span></div><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-branches" href="#"><span class="material-symbols-outlined text-[20px]">apartment</span><span>Manage Branches</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-staff-users" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Manage Staff &amp; Users</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-doctors-specialties" href="#"><span class="material-symbols-outlined text-[20px]">stethoscope</span><span>Doctors &amp; Specialties</span></a><a class="relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="manage-treatment-catalogue" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span>Treatment Catalogue</span></a></nav></div><div class="p-space-sm pt-space-lg flex flex-col gap-1 bg-surface-card"><div class="px-space-sm pb-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">System</span></div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help</span><span>Help Center</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-status-cancelled-text hover:bg-status-cancelled-bg transition-all font-body-md text-body-md" data-path="logout" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Logout</span></a></div></aside><div class="pl-[260px] min-h-screen flex flex-col"><header class="fixed top-0 left-[260px] right-0 h-[68px] z-40 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="w-full h-[68px] px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><button aria-label="Collapse Sidebar" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">menu_open</span></button><div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low"><span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary/20"></span><span class="font-label-md text-label-md text-primary font-semibold">All Branches (System Admin)</span></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-2xs px-space-sm py-1 rounded-full bg-surface-subtle text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">travel_explore</span><span class="font-label-md text-label-md font-semibold">Scope: Nationwide / All Branches</span></div><button aria-label="Toggle theme" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="relative flex items-center"><img alt="Profile" class="w-9 h-9 rounded-full object-cover shadow-[0_1px_3px_rgba(15,23,42,0.04)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center ring-2 ring-surface-card"><span class="material-symbols-outlined text-[10px]">verified</span></span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-lg text-label-lg text-on-surface font-semibold leading-tight">Good morning, Dr. Aritha</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal leading-tight">Administrator · All Branches</span></div></div></div></div></header><main class="w-full pt-[68px] px-gutter-desktop pb-space-2xl max-w-[1600px] mx-auto bg-canvas-bg"><div class="flex flex-col w-full">
+<div class="relative py-space-md mb-space-lg">
+<div class="absolute -top-10 -right-8 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-20 left-1/3 w-64 h-64 bg-brand-teal-light/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md relative z-10">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Enterprise Healthcare Network</span>
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Real-Time Core Engine</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-brand-navy-deep font-bold tracking-tight">Good morning, Aritha</h1>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+<span>Administrator · All Branches (Nationwide Scope)</span>
+</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-space-xs px-space-sm py-2 rounded-xl bg-status-completed-bg text-status-completed-text shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-completed-text animate-pulse"></span>
+<span class="font-label-md text-label-md font-bold">All 6 Branches Online &amp; Synced</span>
+<span class="font-mono-data text-mono-data text-status-completed-text/80 ml-1">99.98%</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-2 rounded-xl bg-surface-card text-on-surface shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">event</span>
+<span class="font-label-md text-label-md font-semibold">Today, Sep 08, 2026</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center" type="button">
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<a class="px-space-sm py-2 rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-low transition-all font-label-md text-label-md font-semibold shadow-sm flex items-center gap-1.5" data-path="manage-staff-users" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary">group_add</span>
+<span>Staff Portal</span>
+</a>
+<a class="px-space-sm py-2 rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-low transition-all font-label-md text-label-md font-semibold shadow-sm flex items-center gap-1.5" data-path="manage-branches" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary">domain</span>
+<span>Branches</span>
+</a>
+<button class="px-space-md py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-label-md font-bold shadow-md shadow-primary/20 flex items-center gap-1.5" id="exportAuditBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Export System Audit</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm relative z-10">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Total Active Patients</span>
+<div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]">person_heart</span>
+</div>
+</div>
+<div class="flex flex-col relative z-10">
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg font-bold text-brand-navy-deep tracking-tight">14,820</span>
+<span class="flex items-center text-status-completed-text font-label-md text-label-md font-bold bg-status-completed-bg px-1.5 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+            +8.4%
+          </span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 text-on-surface-variant font-body-sm text-body-sm">
+<span>MoM Growth</span>
+<span class="font-mono-data text-mono-data text-primary font-semibold">1,148 new this month</span>
+</div>
+</div>
+<div class="mt-space-sm h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-700" style="width: 78%"></div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="absolute top-0 right-0 w-24 h-24 bg-brand-teal-light/10 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm relative z-10">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Active Doctors</span>
+<div class="w-9 h-9 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]">stethoscope</span>
+</div>
+</div>
+<div class="flex flex-col relative z-10">
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg font-bold text-brand-navy-deep tracking-tight">48</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Across Network</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 text-on-surface-variant font-body-sm text-body-sm">
+<span>Duty Status</span>
+<span class="font-mono-data text-mono-data text-status-completed-text font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+            39 On Duty Now
+          </span>
+</div>
+</div>
+<div class="mt-space-sm h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+<div class="h-full bg-brand-teal-light rounded-full transition-all duration-700" style="width: 81%"></div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary-container/30 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm relative z-10">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Total Staff Personnel</span>
+<div class="w-9 h-9 rounded-lg bg-surface-container text-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+</div>
+<div class="flex flex-col relative z-10">
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg font-bold text-brand-navy-deep tracking-tight">186</span>
+<span class="font-label-sm text-label-sm text-status-pending-text bg-status-pending-bg px-2 py-0.5 rounded-full font-bold">4 Pending</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 text-on-surface-variant font-body-sm text-body-sm">
+<span>Clinical &amp; Support</span>
+<span class="font-mono-data text-mono-data text-brand-navy-deep font-semibold">96.8% Coverage</span>
+</div>
+</div>
+<div class="mt-space-sm h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full transition-all duration-700" style="width: 92%"></div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="absolute top-0 right-0 w-24 h-24 bg-status-completed-bg/30 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm relative z-10">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Clinic Branches</span>
+<div class="w-9 h-9 rounded-lg bg-status-completed-bg text-status-completed-text flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]">apartment</span>
+</div>
+</div>
+<div class="flex flex-col relative z-10">
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg font-bold text-brand-navy-deep tracking-tight">6</span>
+<span class="font-label-sm text-label-sm text-status-completed-text font-bold uppercase">100% Operational</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="truncate">Colombo, Kandy, Galle, +3</span>
+<span class="font-mono-data text-mono-data text-primary font-semibold">All Synced</span>
+</div>
+</div>
+<div class="mt-space-sm h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+<div class="h-full bg-status-completed-text rounded-full transition-all duration-700" style="width: 100%"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl">
+<div class="lg:col-span-8 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">query_stats</span>
+<h2 class="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">Today Across All Branches</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time consolidated patient appointment volume across Sri Lanka network</p>
+</div>
+<div class="flex items-center gap-space-xs self-start sm:self-auto bg-surface-subtle px-3 py-1.5 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Consolidated:</span>
+<span class="font-mono-data text-mono-data text-brand-navy-deep font-bold">384 Appointments</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm mb-space-lg">
+<div class="p-space-sm rounded-xl bg-status-completed-bg/40 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-status-completed-text">Completed</span>
+<span class="material-symbols-outlined text-[18px] text-status-completed-text">check_circle</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-brand-navy-deep">218</span>
+<span class="font-label-lg text-label-lg font-bold text-status-completed-text">57%</span>
+</div>
+<div class="w-full bg-status-completed-bg h-1 rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-status-completed-text rounded-full" style="width: 57%"></div>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-status-scheduled-bg/40 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-status-scheduled-text">Scheduled</span>
+<span class="material-symbols-outlined text-[18px] text-status-scheduled-text">schedule</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-brand-navy-deep">142</span>
+<span class="font-label-lg text-label-lg font-bold text-status-scheduled-text">37%</span>
+</div>
+<div class="w-full bg-status-scheduled-bg h-1 rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-status-scheduled-text rounded-full" style="width: 37%"></div>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-status-cancelled-bg/40 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-status-cancelled-text">Cancelled / No-Show</span>
+<span class="material-symbols-outlined text-[18px] text-status-cancelled-text">cancel</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-lg text-headline-lg font-bold text-brand-navy-deep">24</span>
+<span class="font-label-lg text-label-lg font-bold text-status-cancelled-text">6%</span>
+</div>
+<div class="w-full bg-status-cancelled-bg h-1 rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-status-cancelled-text rounded-full" style="width: 6%"></div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep uppercase tracking-wider">Branch Volume Distribution</span>
+<span class="font-label-sm text-label-sm text-outline">Sorted by workload share</span>
+</div>
+<div class="space-y-3">
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Colombo Central</span>
+<span class="text-on-surface-variant">Flagship Tertiary Clinic</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">120 appts</span>
+<span class="text-on-surface-variant w-10 text-right">31.3%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary rounded-full" style="width: 31.25%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Kandy</span>
+<span class="text-on-surface-variant">Central Province Hub</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">85 appts</span>
+<span class="text-on-surface-variant w-10 text-right">22.1%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-primary-container rounded-full" style="width: 22.13%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Galle</span>
+<span class="text-on-surface-variant">Southern Coastal Clinic</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">64 appts</span>
+<span class="text-on-surface-variant w-10 text-right">16.7%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-brand-teal-light rounded-full" style="width: 16.66%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Negombo</span>
+<span class="text-on-surface-variant">Western Gateway Center</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">45 appts</span>
+<span class="text-on-surface-variant w-10 text-right">11.7%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-secondary rounded-full" style="width: 11.71%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Kurunegala</span>
+<span class="text-on-surface-variant">North Western Center</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">40 appts</span>
+<span class="text-on-surface-variant w-10 text-right">10.4%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-tertiary rounded-full" style="width: 10.41%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 p-space-xs rounded-lg hover:bg-surface-subtle transition-colors">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep w-36">Jaffna</span>
+<span class="text-on-surface-variant">Northern Regional Unit</span>
+</div>
+<div class="flex items-center gap-space-sm font-mono-data text-mono-data">
+<span class="font-bold text-brand-navy-deep">30 appts</span>
+<span class="text-on-surface-variant w-10 text-right">7.8%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-subtle rounded-full overflow-hidden flex">
+<div class="bg-outline rounded-full" style="width: 7.81%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">sync</span>
+          Auto-synchronized every 60s
+        </span>
+<a class="text-primary hover:underline font-label-md text-label-md font-bold flex items-center gap-1" data-path="branch-appointment-summary" href="#">
+<span>View Full Breakdowns</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">bolt</span>
+<h2 class="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">Quick Actions</h2>
+</div>
+<span class="font-label-sm text-label-sm text-outline uppercase font-semibold">Direct Shortcuts</span>
+</div>
+<div class="grid grid-cols-1 gap-2.5">
+<a class="group flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container-low transition-all" data-path="manage-staff-users" href="#">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-card text-primary flex items-center justify-center shadow-sm group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">badge</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-brand-navy-deep">Manage Staff &amp; Users</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Permissions &amp; Credentialing</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm font-bold px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text">
+                4 pending
+              </span>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+<a class="group flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container-low transition-all" data-path="manage-branches" href="#">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-card text-status-completed-text flex items-center justify-center shadow-sm group-hover:bg-status-completed-text group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">domain</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-brand-navy-deep">Manage Branches</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Facilities, Ops Hours &amp; Capacity</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm font-bold px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text">
+                All 6 Active
+              </span>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+<a class="group flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container-low transition-all" data-path="manage-treatment-catalogue" href="#">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-card text-secondary flex items-center justify-center shadow-sm group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[22px]">medication</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-brand-navy-deep">Manage Treatments</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pricing, Codes &amp; Protocols</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono-data text-mono-data text-on-surface-variant font-semibold">
+                148 procs
+              </span>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+<a class="group flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container-low transition-all" href="#" id="reviewAuditsBtn">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-card text-primary flex items-center justify-center shadow-sm group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">policy</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-brand-navy-deep">System Access Audits</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Security Trails &amp; Login Monitor</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+</a>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-outline">Network Infrastructure</span>
+<span class="font-label-sm text-label-sm font-bold px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text">Optimal</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Primary DB Latency</span>
+<span class="font-mono-data text-mono-data font-semibold text-brand-navy-deep">14 ms</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Sync Replicas</span>
+<span class="font-mono-data text-mono-data font-semibold text-status-completed-text">6 / 6 synced</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Audit Encryption</span>
+<span class="font-mono-data text-mono-data font-semibold text-brand-navy-deep">AES-256 Validated</span>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center gap-1.5 text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-status-completed-text">shield</span>
+<span>HIPAA &amp; National eHealth Standard compliant</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">security_update_good</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">Administrative Activity Feed &amp; Security Log</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time immutable audit trail across national healthcare nodes</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-subtle text-on-surface-variant text-body-sm font-body-sm">
+<span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+<span>Live Stream Active</span>
+</div>
+<button class="p-1.5 rounded-lg hover:bg-surface-subtle text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-subtle text-outline font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-space-md rounded-l-lg">Timestamp</th>
+<th class="py-3 px-space-md">Actor &amp; Role</th>
+<th class="py-3 px-space-md">Action Context</th>
+<th class="py-3 px-space-md">Branch Node</th>
+<th class="py-3 px-space-md">Security Status</th>
+<th class="py-3 px-space-md text-right rounded-r-lg">Details</th>
+</tr>
+</thead>
+<tbody class="text-body-sm font-body-sm divide-y-0">
+<tr class="hover:bg-surface-subtle/70 transition-colors">
+<td class="py-3.5 px-space-md font-mono-data text-mono-data text-on-surface-variant whitespace-nowrap">
+              Today · 09:42:15
+            </td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-label-md text-label-md font-bold">
+                  CM
+                </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep">Chaminda M.</span>
+<span class="font-body-sm text-body-sm text-outline">Branch Manager</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="text-brand-navy-deep font-semibold">Approved clinical staff shift override</span>
+<span class="text-on-surface-variant block font-body-sm text-body-sm">Roster ref: #RST-2026-09A (Emergency Cover)</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+                Colombo Central
+              </span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+                Authorized
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right">
+<button class="text-primary hover:text-primary-container p-1 rounded hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/70 transition-colors">
+<td class="py-3.5 px-space-md font-mono-data text-mono-data text-on-surface-variant whitespace-nowrap">
+              Today · 09:18:04
+            </td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-brand-teal-light/20 text-tertiary flex items-center justify-center font-label-md text-label-md font-bold">
+                  DB
+                </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep">Dr. Bandara</span>
+<span class="font-body-sm text-body-sm text-outline">Lead Physician</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="text-brand-navy-deep font-semibold">Submitted monthly revenue &amp; charge reconciliation</span>
+<span class="text-on-surface-variant block font-body-sm text-body-sm">Document: #FIN-REC-AUG-04</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+                Kandy
+              </span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">pending</span>
+                Under Audit
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right">
+<button class="text-primary hover:text-primary-container p-1 rounded hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/70 transition-colors">
+<td class="py-3.5 px-space-md font-mono-data text-mono-data text-on-surface-variant whitespace-nowrap">
+              Today · 08:55:40
+            </td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-label-md text-label-md font-bold">
+                  SA
+                </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep">SysAdmin Service</span>
+<span class="font-body-sm text-body-sm text-outline">Automated Identity</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="text-brand-navy-deep font-semibold">New staff credentials issued for Nurse Nimanthi</span>
+<span class="text-on-surface-variant block font-body-sm text-body-sm">Role: Staff Nurse · Ward B · ID #STF-8821</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+                Kandy
+              </span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check</span>
+                Active
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right">
+<button class="text-primary hover:text-primary-container p-1 rounded hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/70 transition-colors">
+<td class="py-3.5 px-space-md font-mono-data text-mono-data text-on-surface-variant whitespace-nowrap">
+              Today · 08:30:12
+            </td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-label-md text-label-md font-bold">
+                  RJ
+                </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep">Rohan J.</span>
+<span class="font-body-sm text-body-sm text-outline">Billing Supervisor</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="text-brand-navy-deep font-semibold">Cleared insurance settlement batch</span>
+<span class="text-on-surface-variant block font-body-sm text-body-sm">Batch #INS-2026-784 (LKR 842,500 disbursed)</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+                Galle
+              </span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+                Reconciled
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right">
+<button class="text-primary hover:text-primary-container p-1 rounded hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-subtle/70 transition-colors">
+<td class="py-3.5 px-space-md font-mono-data text-mono-data text-on-surface-variant whitespace-nowrap">
+              Today · 07:58:20
+            </td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-label-md text-label-md font-bold">
+                  SY
+                </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-brand-navy-deep">Security Daemon</span>
+<span class="font-body-sm text-body-sm text-outline">Network Firewall</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="text-brand-navy-deep font-semibold">Multiple failed login attempts throttled</span>
+<span class="text-on-surface-variant block font-body-sm text-body-sm">IP: 192.168.4.112 blocked after 5 unauthorized tries</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+                Negombo
+              </span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-status-cancelled-bg text-status-cancelled-text font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">block</span>
+                Mitigated
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right">
+<button class="text-primary hover:text-primary-container p-1 rounded hover:bg-surface-subtle transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md pt-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
+<span>Showing 5 of 248 audit entries recorded in the last 24 hours</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1.5 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold transition-colors" type="button">
+          Previous Page
+        </button>
+<button class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold transition-colors shadow-sm" type="button">
+          Next Page
+        </button>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 z-50 bg-brand-navy-deep text-on-primary px-space-md py-3 rounded-xl shadow-xl flex items-center gap-space-sm transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="toastNotification">
+<span class="material-symbols-outlined text-brand-teal-light text-[22px]">check_circle</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold" id="toastTitle">Action Triggered</span>
+<span class="font-body-sm text-body-sm text-surface-subtle" id="toastDesc">Enterprise audit report package is generating...</span>
+</div>
+</div>
+<script>
+    (function() {
+      const exportBtn = document.getElementById('exportAuditBtn');
+      const reviewAuditsBtn = document.getElementById('reviewAuditsBtn');
+      const toast = document.getElementById('toastNotification');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastDesc = document.getElementById('toastDesc');
+
+      function showToast(title, message) {
+        if (!toast) return;
+        toastTitle.textContent = title;
+        toastDesc.textContent = message;
+        toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(function() {
+          toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 3400);
+      }
+
+      if (exportBtn) {
+        exportBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          showToast('Audit Export Queued', 'Full snapshot (6 branches) is compiling to encrypted CSV format.');
+        });
+      }
+
+      if (reviewAuditsBtn) {
+        reviewAuditsBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          showToast('System Audits Active', 'Access audit ledger focused on network administrative nodes.');
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

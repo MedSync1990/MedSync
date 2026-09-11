@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=inter:wght@100..900&amp;family=plusJakartaSans:wght@100..900&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed":"#cce5ff","status-scheduled-text":"#0369A1","secondary-container":"#dae2fd","on-error":"#ffffff","surface-container-high":"#dce9ff","on-tertiary":"#ffffff","tertiary-fixed-dim":"#89ceff","on-tertiary-fixed-variant":"#004c6e","on-secondary-container":"#5c647a","status-pending-bg":"#FEF3C7","tertiary":"#00628d","error":"#ba1a1a","status-cancelled-text":"#BE123C","status-cancelled-bg":"#FFE4E6","error-container":"#ffdad6","surface-subtle":"#F1F5F9","inverse-surface":"#213145","border-subtle":"#E2E8F0","on-error-container":"#93000a","surface-container":"#e5eeff","surface":"#f8f9ff","outline-variant":"#bfc7d2","background":"#f8f9ff","surface-container-lowest":"#ffffff","on-surface-variant":"#3f4850","secondary-fixed":"#dae2fd","inverse-on-surface":"#eaf1ff","primary-container":"#007bb9","secondary":"#565e74","status-completed-text":"#047857","tertiary-fixed":"#c9e6ff","primary-fixed-dim":"#93ccff","surface-container-low":"#eff4ff","outline":"#707881","on-primary-fixed-variant":"#004b73","on-primary":"#ffffff","on-primary-container":"#fdfcff","brand-teal-light":"#38BDF8","surface-dim":"#cbdbf5","tertiary-container":"#007cb1","on-background":"#0b1c30","status-pending-text":"#B45309","border-focus":"#0284C7","surface-bright":"#f8f9ff","on-primary-fixed":"#001d31","on-tertiary-fixed":"#001e2f","canvas-bg":"#F8FAFC","surface-tint":"#006398","brand-navy-deep":"#0F172A","on-tertiary-container":"#fcfcff","secondary-fixed-dim":"#bec6e0","inverse-primary":"#93ccff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","on-secondary-fixed-variant":"#3f465c","on-secondary":"#ffffff","surface-container-highest":"#d3e4fe","surface-card":"#FFFFFF","on-secondary-fixed":"#131b2e","primary":"#006194","status-completed-bg":"#D1FAE5","status-scheduled-bg":"#E0F2FE"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-2xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","space-xl":"2rem","sidebar-width":"260px","space-sm":"0.75rem","gutter-desktop":"1.5rem","content-max-width":"1600px","space-3xl":"3rem","sidebar-collapsed-width":"72px","space-2xl":"2.5rem","topbar-height":"68px","space-md":"1rem","space-xs":"0.5rem"},"fontFamily":{"label-sm":["inter"],"display-lg-mobile":["plusJakartaSans"],"headline-md":["plusJakartaSans"],"headline-sm":["plusJakartaSans"],"display-lg":["plusJakartaSans"],"body-sm":["inter"],"label-md":["inter"],"body-md":["inter"],"body-lg":["inter"],"mono-data":["inter"],"label-lg":["inter"],"headline-lg":["plusJakartaSans"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.05em","fontWeight":"700"}],"display-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"mono-data":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"500"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-card z-50 flex flex-col justify-between border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="h-[68px] px-space-lg flex items-center gap-space-sm border-b border-border-subtle"><div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-brand-navy-deep leading-none">MedSync</span><span class="font-label-sm text-[10px] text-outline tracking-wider uppercase mt-1">Healthcare System</span></div></div><div class="p-space-md flex-1"><div class="mb-space-lg"><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a aria-current="page" class="flex items-center gap-space-sm px-space-md h-10 transition-all group bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">dashboard</span><span class="">Dashboard</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Patients</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="register-patient" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">person_add</span><span class="">Register Patient</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg hover:text-on-surface transition-all group font-label-lg text-label-lg bg-status-scheduled-bg text-status-scheduled-text font-semibold relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full" data-path="patient-directory" href="#"><span class="material-symbols-outlined text-[20px] group-hover:text-on-surface text-primary">contact_page</span><span class="">Patient Directory</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Appointments</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="book-appointment" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">event_available</span><span class="">Book Appointment</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="manage-appointments" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">calendar_month</span><span class="">Manage Appointments</span></a></nav></div><div class="mb-space-lg"><div class="px-space-md mb-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">Billing &amp; Payments</div><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-primary before:rounded-r-full"><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="invoices" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">receipt_long</span><span class="">Invoices</span></a><a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-label-lg text-label-lg" data-path="collect-payment" href="#"><span class="material-symbols-outlined text-[20px] text-outline group-hover:text-on-surface">payments</span><span class="">Collect Payment</span></a></nav></div></div></div><div class="p-space-md border-t border-border-subtle bg-surface-card"><nav class="space-y-1" data-active-classes="bg-status-scheduled-bg text-status-scheduled-text font-label-lg rounded-lg"><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-body-md text-body-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">settings</span><span class="">Settings</span></a><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-all group font-body-md text-body-md" data-path="help-center" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">help</span><span class="">Help Center</span></a><a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-all group font-body-md text-body-md" data-path="login" href="#"><span class="material-symbols-outlined text-[18px] text-error group-hover:text-on-error-container">logout</span><span class="">Logout</span></a></nav></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-[68px] bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-space-lg flex items-center justify-between shadow-[0_1px_4px_rgba(15,23,42,0.02)]"><div class="flex items-center gap-space-md"><button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">menu_open</span></button><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="text-brand-navy-deep font-headline-sm text-headline-sm">MedSync</span><span class="text-outline">/</span><span class="">Reception Desk</span></div></div><div class="flex items-center gap-space-md"><div class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg border border-brand-teal-light/30 text-status-scheduled-text font-label-sm text-label-sm"><span class="material-symbols-outlined text-[14px]">apartment</span><span class="">Colombo Central Branch</span></div><div class="h-5 w-px bg-border-subtle hidden lg:block"></div><div class="flex items-center gap-1"><button class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button></div><div class="h-5 w-px bg-border-subtle"></div><div class="flex items-center gap-space-sm pl-1 cursor-pointer group"><div class="hidden sm:flex flex-col text-right"><span class="font-label-md text-label-md text-brand-navy-deep leading-tight group-hover:text-primary transition-colors">Good morning, Sarah</span><span class="font-body-sm text-body-sm text-outline leading-tight mt-0.5">Receptionist · Colombo Central Branch</span></div><div class="relative flex items-center gap-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface transition-colors">expand_more</span></div></div></div></header><main class="relative pt-[68px] min-h-screen bg-canvas-bg w-full"><div class="flex flex-col w-full">
+<div class="p-space-lg max-w-content-max-width mx-auto w-full space-y-space-lg">
+<!-- Top Summary & Action Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs mb-1">
+<span class="font-headline-lg text-headline-lg text-brand-navy-deep tracking-tight">Patient Directory</span>
+<span class="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm uppercase">Central DB</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Search and manage patient records across all healthcare branches.</p>
+</div>
+<div class="flex items-center gap-space-md flex-wrap">
+<div class="flex items-center gap-space-sm bg-surface-card px-space-md py-2 rounded-xl shadow-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">1,428</span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Registered Patients</span>
+</div>
+</div>
+<button class="inline-flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-space-lg h-[42px] rounded-xl hover:bg-primary-container shadow-sm transition-all transform hover:-translate-y-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span class="">Register Patient</span>
+</button>
+</div>
+</div>
+<!-- Quick Stats Cards Inspired by Clinical Reference Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="bg-surface-card p- space-md rounded-xl shadow-sm p-4 flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Active Patients</span>
+<div class="font-headline-md text-headline-md text-brand-navy-deep">1,284</div>
+<span class="font-label-md text-label-md text-status-completed-text flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +3.2% this month
+          </span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-status-completed-bg text-status-completed-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+</div>
+<div class="bg-surface-card p-4 rounded-xl shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Insured Registry</span>
+<div class="font-headline-md text-headline-md text-brand-navy-deep">892</div>
+<span class="font-label-md text-label-md text-status-scheduled-text flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">shield_with_heart</span> 62.4% Coverage
+          </span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">health_and_safety</span>
+</div>
+</div>
+<div class="bg-surface-card p-4 rounded-xl shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Colombo Central</span>
+<div class="font-headline-md text-headline-md text-brand-navy-deep">745</div>
+<span class="font-label-md text-label-md text-outline flex items-center gap-1">
+            Primary Facility
+          </span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">local_hospital</span>
+</div>
+</div>
+<div class="bg-surface-card p-4 rounded-xl shadow-sm flex items-center justify-between">
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">New Registrations</span>
+<div class="font-headline-md text-headline-md text-brand-navy-deep">28</div>
+<span class="font-label-md text-label-md text-status-scheduled-text flex items-center gap-1">
+            Today's Inflow
+          </span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+</div>
+</div>
+</div>
+<!-- Search, Filter & Quick Controls Bar -->
+<div class="bg-surface-card p-space-lg rounded-xl shadow-sm border border-border-subtle flex flex-col gap-space-md relative overflow-hidden"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-sm pb-1 border-b border-border-subtle"><div class="flex items-center gap-2 overflow-x-auto py-1"><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider mr-1">Search Patients:</span></div><div class="flex items-center gap-2 text-outline font-body-sm text-body-sm"></div></div><div class="relative w-full"><span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[24px] text-primary">search</span><input class="w-full h-12 pl-12 pr-28 bg-canvas-bg rounded-xl font-body-md text-body-md text-brand-navy-deep placeholder:text-outline focus:outline-none focus:bg-surface-card ring-1 ring-border-subtle focus:ring-2 focus:ring-border-focus transition-all shadow-inner" id="patientSearchInput" placeholder="Search by NIC, name, or contact number..." type="text"/><div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2"><button class="w-7 h-7 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors" onclick="document.getElementById('patientSearchInput').value=''; document.getElementById('patientSearchInput').dispatchEvent(new Event('input'));" title="Clear Search" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button><div class="h-5 w-px bg-border-subtle"></div><span class="px-2 py-0.5 rounded bg-surface-card border border-border-subtle font-mono-data text-[11px] text-outline shadow-sm">ESC</span></div></div><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-sm"><div class="flex items-center gap-2 flex-wrap"><span class="font-label-sm text-label-sm text-outline flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">history</span>Recent:</span><button class="px-2.5 py-1 rounded-full bg-surface-subtle hover:bg-surface-container text-on-surface-variant font-mono-data text-[12px] transition-colors" onclick="document.getElementById('patientSearchInput').value='199283019283'; document.getElementById('patientSearchInput').dispatchEvent(new Event('input'));" type="button">199283019283</button><button class="px-2.5 py-1 rounded-full bg-surface-subtle hover:bg-surface-container text-on-surface-variant font-body-sm text-body-sm transition-colors" onclick="document.getElementById('patientSearchInput').value='Priyantha'; document.getElementById('patientSearchInput').dispatchEvent(new Event('input'));" type="button">Priyantha Dharmasena</button><button class="px-2.5 py-1 rounded-full bg-surface-subtle hover:bg-surface-container text-primary font-mono-data text-[12px] transition-colors" onclick="document.getElementById('patientSearchInput').value='PT-003420'; document.getElementById('patientSearchInput').dispatchEvent(new Event('input'));" type="button">PT-003420</button><button class="px-2.5 py-1 rounded-full bg-surface-subtle hover:bg-surface-container text-on-surface-variant font-mono-data text-[12px] transition-colors" onclick="document.getElementById('patientSearchInput').value='077'; document.getElementById('patientSearchInput').dispatchEvent(new Event('input'));" type="button">077 Hotline</button></div><div class="flex items-center gap-space-xs flex-wrap"><div class="flex items-center bg-canvas-bg p-1 rounded-xl border border-border-subtle"><button class="branch-pill px-3 py-1 rounded-lg font-label-md text-label-md transition-all bg-surface-card text-primary shadow-sm" data-branch="all" type="button">All Branches</button><button class="branch-pill px-3 py-1 rounded-lg font-label-md text-label-md transition-all text-on-surface-variant hover:text-brand-navy-deep" data-branch="colombo" type="button">Colombo Central</button><button class="branch-pill px-3 py-1 rounded-lg font-label-md text-label-md transition-all text-on-surface-variant hover:text-brand-navy-deep" data-branch="kandy" type="button">Kandy General</button><button class="branch-pill px-3 py-1 rounded-lg font-label-md text-label-md transition-all text-on-surface-variant hover:text-brand-navy-deep" data-branch="galle" type="button">Galle</button></div><div class="relative"><select class="h-9 px-3 pr-8 bg-canvas-bg border border-border-subtle rounded-xl font-label-md text-label-md text-on-surface-variant appearance-none cursor-pointer focus:outline-none shadow-sm" id="insuranceFilter"><option value="all">Insurance: All</option><option value="yes">Insured Only</option><option value="no">Self-Pay Only</option></select><span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span></div><button class="w-9 h-9 rounded-xl bg-canvas-bg hover:bg-surface-subtle border border-border-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors shadow-sm" id="resetFilters" title="Reset Filters" type="button"><span class="material-symbols-outlined text-[18px]">filter_alt_off</span></button></div></div><div class="flex items-center justify-between pt-2 border-t border-border-subtle text-body-sm text-body-sm"><div class="flex items-center gap-2 text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-status-completed-text animate-pulse"></span><span class="">Live directory query: showing matching patients across all connected branches</span></div><button class="text-primary hover:text-primary-container font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="document.getElementById('resetFilters').click();" type="button"><span class="material-symbols-outlined text-[14px]">restart_alt</span>Clear active search</button></div></div>
+<!-- Data Table Container -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-canvas-bg h-11 text-outline font-label-sm text-label-sm uppercase tracking-wider">
+<th class="px-space-md py-3 font-semibold">Patient ID</th>
+<th class="px-space-md py-3 font-semibold">Patient Name</th>
+<th class="px-space-md py-3 font-semibold">NIC Number</th>
+<th class="px-space-md py-3 font-semibold">Contact Phone</th>
+<th class="px-space-md py-3 font-semibold">Registered Branch</th>
+<th class="px-space-md py-3 font-semibold">Insurance</th>
+<th class="px-space-md py-3 font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-md text-body-md" id="patientTableBody">
+<!-- Row 1 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group" data-branch="colombo" data-insurance="yes" data-name="Priyantha Dharmasena" data-nic="881920391V" data-phone="077 123 4567">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    PD
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003420</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Priyantha Dharmasena</span>
+<span class="font-body-sm text-body-sm text-outline">48 yrs · Male</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">881920391V</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">077 123 4567</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Colombo Central Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check</span> Insured
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group bg-canvas-bg/30" data-branch="colombo" data-insurance="yes" data-name="Dinuka Senanayake" data-nic="199283019283" data-phone="071 892 3451">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    DS
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003419</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Dinuka Senanayake</span>
+<span class="font-body-sm text-body-sm text-outline">32 yrs · Female</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">199283019283</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">071 892 3451</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Colombo Central Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check</span> Insured
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group" data-branch="kandy" data-insurance="no" data-name="Chathura Wickramasinghe" data-nic="762910482V" data-phone="076 554 1290">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-secondary-container text-secondary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    CW
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003418</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Chathura Wickramasinghe</span>
+<span class="font-body-sm text-body-sm text-outline">47 yrs · Male</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">762910482V</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">076 554 1290</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span> Kandy General Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm">
+                  Self-Pay
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group bg-canvas-bg/30" data-branch="colombo" data-insurance="yes" data-name="Sanduni Rathnayake" data-nic="199572019482" data-phone="070 334 8912">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    SR
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003415</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Sanduni Rathnayake</span>
+<span class="font-body-sm text-body-sm text-outline">29 yrs · Female</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">199572019482</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">070 334 8912</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Colombo Central Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check</span> Insured
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group" data-branch="galle" data-insurance="yes" data-name="Rohan Gunasekara" data-nic="651029384V" data-phone="072 445 6789">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    RG
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003410</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Rohan Gunasekara</span>
+<span class="font-body-sm text-body-sm text-outline">58 yrs · Male</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">651029384V</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">072 445 6789</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Galle Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check</span> Insured
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group bg-canvas-bg/30" data-branch="colombo" data-insurance="no" data-name="Nirosha De Silva" data-nic="198854019284" data-phone="077 889 1234">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-secondary-container text-secondary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    ND
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003401</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Nirosha De Silva</span>
+<span class="font-body-sm text-body-sm text-outline">36 yrs · Female</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">198854019284</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">077 889 1234</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Colombo Central Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm">
+                  Self-Pay
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 7 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group" data-branch="kandy" data-insurance="yes" data-name="Kamal Wickramasinghe" data-nic="801938472V" data-phone="071 223 9988">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    KW
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003392</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Kamal Wickramasinghe</span>
+<span class="font-body-sm text-body-sm text-outline">44 yrs · Male</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">801938472V</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">071 223 9988</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-text"></span> Kandy General Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">check</span> Insured
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 8 -->
+<tr class="patient-row hover:bg-surface-subtle transition-colors group bg-canvas-bg/30" data-branch="colombo" data-insurance="no" data-name="Sunil Karunaratne" data-nic="521092837V" data-phone="075 667 8901">
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-secondary-container text-secondary flex items-center justify-center font-mono-data text-label-sm font-semibold">
+                    SK
+                  </div>
+<span class="font-mono-data text-mono-data font-semibold text-primary">PT-003387</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">Sunil Karunaratne</span>
+<span class="font-body-sm text-body-sm text-outline">71 yrs · Male</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">521092837V</span>
+</td>
+<td class="px-space-md py-3.5">
+<div class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-outline">call</span>
+<span class="">075 667 8901</span>
+</div>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Colombo Central Branch
+                </span>
+</td>
+<td class="px-space-md py-3.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm">
+                  Self-Pay
+                </span>
+</td>
+<td class="px-space-md py-3.5 text-right">
+<div class="inline-flex items-center gap-1.5 justify-end">
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="View Profile" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center" title="Edit Record" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1" title="Book Appointment" type="button">
+<span class="material-symbols-outlined text-[15px]">event_available</span>
+<span class="">Book</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State Container (Hidden by default) -->
+<div class="hidden p-space-2xl text-center flex-col items-center justify-center space-y-2" id="noResultsMessage">
+<div class="w-12 h-12 rounded-full bg-surface-subtle flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[28px]">search_off</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-brand-navy-deep">No matching patient records found</p>
+<p class="font-body-md text-body-md text-outline max-w-sm">Try modifying your search query by NIC, patient full name, or adjusting the branch filter.</p>
+</div>
+<!-- Pagination Footer -->
+<div class="px-space-md py-3.5 bg-canvas-bg/60 flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+          Showing <span class="font-semibold text-brand-navy-deep" id="showingCount">1 to 8</span> of <span class="font-semibold text-brand-navy-deep">1,428</span> patients
+        </div>
+<div class="flex items-center gap-space-xs">
+<span class="font-body-sm text-body-sm text-outline mr-2">Page 1 of 179</span>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-outline hover:text-brand-navy-deep hover:bg-surface-subtle flex items-center justify-center shadow-sm disabled:opacity-50 transition-colors" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center shadow-sm" type="button">
+            1
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors" type="button">
+            2
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors" type="button">
+            3
+          </button>
+<span class="text-outline px-1">...</span>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors" type="button">
+            179
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-outline hover:text-brand-navy-deep hover:bg-surface-subtle flex items-center justify-center shadow-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Ensure Patient Directory sidebar tab is highlighted
+  (function initActiveNav() {
+    const navItems = document.querySelectorAll('aside nav a[data-path]');
+    navItems.forEach(item => {
+      if (item.getAttribute('data-path') === 'patient-directory') {
+        item.classList.remove('text-on-surface-variant', 'hover:bg-surface-subtle');
+        item.classList.add('bg-status-scheduled-bg', 'text-status-scheduled-text', 'font-semibold', 'relative', 'before:content-[\'\']', 'before:absolute', 'before:left-0', 'before:top-2', 'before:bottom-2', 'before:w-[3px]', 'before:bg-primary', 'before:rounded-r-full');
+        const icon = item.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.classList.remove('text-outline');
+          icon.classList.add('text-primary');
+        }
+      }
+    });
+  })();
+
+  // Interactive Live Filter logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('patientSearchInput');
+    const insuranceSelect = document.getElementById('insuranceFilter');
+    const branchPills = document.querySelectorAll('.branch-pill');
+    const rows = document.querySelectorAll('.patient-row');
+    const noResults = document.getElementById('noResultsMessage');
+    const resetBtn = document.getElementById('resetFilters');
+    const showingCount = document.getElementById('showingCount');
+
+    let activeBranch = 'all';
+
+    function applyFilters() {
+      const query = (searchInput.value || '').trim().toLowerCase();
+      const ins = insuranceSelect.value;
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const name = (row.getAttribute('data-name') || '').toLowerCase();
+        const nic = (row.getAttribute('data-nic') || '').toLowerCase();
+        const phone = (row.getAttribute('data-phone') || '').replace(/\s+/g, '').toLowerCase();
+        const branch = row.getAttribute('data-branch') || '';
+        const insurance = row.getAttribute('data-insurance') || '';
+        const cleanQuery = query.replace(/\s+/g, '');
+
+        const matchesQuery = !query || name.includes(query) || nic.includes(query) || phone.includes(cleanQuery);
+        const matchesBranch = activeBranch === 'all' || branch === activeBranch;
+        const matchesInsurance = ins === 'all' || insurance === ins;
+
+        if (matchesQuery && matchesBranch && matchesInsurance) {
+          row.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+        noResults.classList.add('flex');
+        showingCount.textContent = '0';
+      } else {
+        noResults.classList.add('hidden');
+        noResults.classList.remove('flex');
+        showingCount.textContent = `1 to ${visibleCount}`;
+      }
+    }
+
+    // Branch Pill Click Handlers
+    branchPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        branchPills.forEach(p => {
+          p.classList.remove('bg-surface-card', 'text-primary', 'shadow-sm');
+          p.classList.add('text-on-surface-variant');
+        });
+        pill.classList.add('bg-surface-card', 'text-primary', 'shadow-sm');
+        pill.classList.remove('text-on-surface-variant');
+        activeBranch = pill.getAttribute('data-branch');
+        applyFilters();
+      });
+    });
+
+    // Inputs
+    searchInput.addEventListener('input', applyFilters);
+    insuranceSelect.addEventListener('change', applyFilters);
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      insuranceSelect.value = 'all';
+      activeBranch = 'all';
+      branchPills.forEach(p => {
+        if (p.getAttribute('data-branch') === 'all') {
+          p.classList.add('bg-surface-card', 'text-primary', 'shadow-sm');
+          p.classList.remove('text-on-surface-variant');
+        } else {
+          p.classList.remove('bg-surface-card', 'text-primary', 'shadow-sm');
+          p.classList.add('text-on-surface-variant');
+        }
+      });
+      applyFilters();
+    });
+  });
+</script></main></div>
+</body></html>
