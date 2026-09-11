@@ -10,10 +10,10 @@
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 -- 2. Table DDLs
-\ir kalana/01_specialty.sql
-\ir kalana/02_doctor.sql
-\ir kalana/03_doctor_speciality.sql
-\ir kalana/04_doctor_availability_slots.sql
+\ir kalana/specialty.sql
+\ir kalana/doctor.sql
+\ir kalana/doctor_speciality.sql
+\ir kalana/doctor_availability_slots.sql
 \ir kalana/05_appointments.sql
 
 -- 3. Stored Functions & Triggers
