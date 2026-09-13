@@ -18,7 +18,7 @@ BEGIN
         SELECT 1 
         FROM pg_constraint 
         WHERE conname = 'fk_doctor_staff'
-        ) THEN
+    ) THEN
             -- Adding foreign key
             -- ON DELETE RESTRICT make sure record cannot be deleted from staff table
             -- if a record on doctor table exists

@@ -1,9 +1,7 @@
 -- ============================================================================
 -- Function: fn_cancel_appointment
--- Module: 02 - Doctor & Appointment Management
--- Owner: Kalana Jayawardena
 -- Description: Cancels a scheduled appointment and reopens the corresponding slot.
--- Reference: docs/database.md §7.4 (FR-AM-06/08)
+-- Owner: Kalana Jayawardena
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION fn_cancel_appointment(p_appointment_id INT) RETURNS VOID
@@ -17,7 +15,7 @@ DECLARE
 BEGIN
     SELECT slot_id, status INTO v_slot_id, v_status
     FROM appointments WHERE appointment_id = p_appointment_id
-    FOR UPDATE;
+    FOR UPDATE;  -- lock appointment row
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'appointment % does not exist', p_appointment_id USING ERRCODE = 'P0002';
@@ -25,7 +23,7 @@ BEGIN
 
     IF v_status <> 'Scheduled' THEN
         RAISE EXCEPTION 'only a Scheduled appointment can be cancelled (current status: %)', v_status
-            USING ERRCODE = '23514';
+            USING ERRCODE = '22000'; -- data_exception
     END IF;
 
     UPDATE appointments SET status = 'Cancelled' WHERE appointment_id = p_appointment_id;

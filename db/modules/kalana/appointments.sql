@@ -19,7 +19,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS appointments (
     appointment_id    INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    appointment_code  VARCHAR(10) GENERATED ALWAYS AS ('APT-' || lpad(appointment_id::text, 6, '0')) STORED,
+    appointment_code  VARCHAR(20) GENERATED ALWAYS AS ('APT-' || lpad(appointment_id::text, 6, '0')) STORED,
     patient_id        INT NOT NULL,
     slot_id           INT NOT NULL UNIQUE REFERENCES doctor_availability_slots(slot_id) ON DELETE RESTRICT,
     appointment_type  appointment_type_enum NOT NULL DEFAULT 'Scheduled Visit',
@@ -39,6 +39,6 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- Indexes per docs/database.md §2.6:
-CREATE INDEX IF NOT EXISTS idx_appt_patient ON appointments(patient_id);
-CREATE INDEX IF NOT EXISTS idx_appt_status ON appointments(status);
+-- Indexes per docs/database.md:
+CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);

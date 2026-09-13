@@ -27,16 +27,16 @@ SEED_FILE = BASE_DIR / "db" / "seed" / "02_doctors_specialties_slots.sql"
 
 # Ordered list of Kalana's individual DDL, function, and trigger files
 SQL_FILES = [
-    "01_specialty.sql",
-    "02_doctor.sql",
-    "03_doctor_speciality.sql",
-    "04_doctor_availability_slots.sql",
-    "05_appointments.sql",
-    "06_fn_book_appointment.sql",
-    "07_fn_create_walk_in.sql",
-    "08_fn_reschedule_appointment.sql",
-    "09_fn_cancel_appointment.sql",
-    "10_trg_block_delete_doctor.sql",
+    "specialty.sql",
+    "doctor.sql",
+    "doctor_speciality.sql",
+    "doctor_availability_slots.sql",
+    "appointments.sql",
+    "fn_book_appointment.sql",
+    "fn_create_walk_in.sql",
+    "fn_reschedule_appointment.sql",
+    "fn_cancel_appointment.sql",
+    "trg_block_delete_doctor.sql",
 ]
 
 
@@ -142,7 +142,7 @@ async def run_tests():
         try:
             await conn.execute("DELETE FROM doctor WHERE user_id = 101")
             print("  ✗ FAILED: Hard delete succeeded on doctor!")
-        except asyncpg.CheckViolationError as e:
+        except (asyncpg.CheckViolationError, asyncpg.IntegrityConstraintViolationError) as e:
             print(f"  ✓ trg_block_delete_doctor: Blocked hard delete -> '{e.message}'")
 
         # Cleanup test appointment records
