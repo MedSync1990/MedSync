@@ -1,9 +1,7 @@
 -- ============================================================================
 -- Trigger & Function: trg_block_delete_doctor
--- Module: 02 - Doctor & Appointment Management
+-- Description: Guard against hard delete on DOCTOR table.
 -- Owner: Kalana Jayawardena
--- Description: Guard against hard delete on DOCTOR table (FR-DMI-08 / AGENTS.md §2).
--- Reference: docs/database.md §7.10
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION fn_block_hard_delete()
@@ -12,11 +10,13 @@ LANGUAGE plpgsql
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-    RAISE EXCEPTION '% rows cannot be hard-deleted — use the deactivate function/route instead', TG_TABLE_NAME
-        USING ERRCODE = '23514';
+    -- TG_TABLE_NAME is a built-in dynamic variable that automatically inserts the name of the table that called it.
+    RAISE EXCEPTION '% row (ID: %) cannot be hard-deleted — use the deactivate function/route instead', TG_TABLE_NAME, OLD.user_id
+        USING ERRCODE = '23000'; --integrity constraint violation
 END;
 $$;
 
+-- make the trigger execute the function before deletion on doctor.
 DROP TRIGGER IF EXISTS trg_block_delete_doctor ON doctor;
 CREATE TRIGGER trg_block_delete_doctor
     BEFORE DELETE ON doctor 

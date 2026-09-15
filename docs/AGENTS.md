@@ -1,4 +1,48 @@
-s correctly is
+# AGENTS.md — MedSync CATMS
+
+Read this file completely before writing or editing any code. It tells you what to read next,
+how the codebase is organized, and the conventions every contributor (human or agent) follows.
+
+## 0. Read order (do this before touching code)
+
+1. `AGENTS.md` (this file)
+2. `docs/architecture.md` — system shape, stack, folder layout
+3. `docs/database.md` — schema, keys, procedures/triggers, indexing
+4. `docs/api-routes.md` — endpoint contract the frontend depends on
+5. `docs/ui-guidelines.md` — component + interaction rules
+6. `docs/page-content.md` — copy/labels for each screen (source of truth — don't invent copy)
+7. `docs/workload-division.md` — who owns which module, so you don't step on another member's files
+
+If a task touches the database, re-check `docs/database.md` against the actual `.sql` migration
+files before assuming the doc is current — the doc is a design reference, the migrations are the
+source of truth once they exist.
+
+## 1. Project summary
+
+MedSync CATMS is a multi-branch clinic appointment/treatment/billing system.
+
+Stack (fixed by the SRS and course requirements, do not substitute):
+- **DB**: PostgreSQL 16 (ACID-compliant by default via its WAL — no storage-engine choice needed,
+  unlike MySQL)
+- **Backend**: FastAPI + `asyncpg`, JWT auth. **No ORM** (SQLAlchemy or any other table-mapping
+  library) — this is a database course project, and query/schema logic is meant to be visible,
+  not generated. Every route calls parameterized raw SQL or a `PL/pgSQL` function from
+  `database.md` §7 directly through an `asyncpg` connection pool. Pydantic models are fine and
+  expected for request/response validation — that's shape-checking, not persistence, and isn't
+  what "no ORM" restricts.
+- **Frontend**: React + TypeScript
+
+## 2. Non-negotiable rules
+
+- **Every appointment write** (create/reschedule) must go through the overlap-check logic —
+  never insert directly without it. **Decision: enforced at the DB level** via the `EXCLUDE`
+  constraint on `doctor_availability_slots` plus `fn_book_appointment()` /
+  `fn_reschedule_appointment()` (`database.md` §2.2/§7.1/§7.3) — routes call these functions,
+  they don't reimplement the overlap check in Python.
+- **Treatments/consultations can only be attached to a `Completed` appointment.** **Decision:
+  enforced via a DB trigger** (`fn_guard_consultation`/`fn_guard_consultation_treatments`,
+  `database.md` §7.6), not a service-layer check — don't add a redundant Python-side check for
+  the same rule. The one call site that satisfies this correctly is
   `fn_complete_appointment()` (§7.5), which flips the appointment to `Completed` *before*
   inserting the consultation/treatment rows in the same transaction.
 - **No hard deletes** on `PATIENT`, `DOCTOR`, `BRANCH`, `TREATMENT_CATALOGUE` — use an
@@ -102,48 +146,4 @@ building against the same actual tables.
       without a heads-up
 - [ ] No ORM model classes, no `db.query(...)`-style calls — raw parameterized `asyncpg` calls
       or a `database.md` §7 function only
-- [ ] No hardcoded secrets — `.env` values only, `.env.example` updated if a new variable was added# AGENTS.md — MedSync CATMS
-
-Read this file completely before writing or editing any code. It tells you what to read next,
-how the codebase is organized, and the conventions every contributor (human or agent) follows.
-
-## 0. Read order (do this before touching code)
-
-1. `AGENTS.md` (this file)
-2. `docs/architecture.md` — system shape, stack, folder layout
-3. `docs/database.md` — schema, keys, procedures/triggers, indexing
-4. `docs/api-routes.md` — endpoint contract the frontend depends on
-5. `docs/ui-guidelines.md` — component + interaction rules
-6. `docs/page-content.md` — copy/labels for each screen (source of truth — don't invent copy)
-7. `docs/workload-division.md` — who owns which module, so you don't step on another member's files
-
-If a task touches the database, re-check `docs/database.md` against the actual `.sql` migration
-files before assuming the doc is current — the doc is a design reference, the migrations are the
-source of truth once they exist.
-
-## 1. Project summary
-
-MedSync CATMS is a multi-branch clinic appointment/treatment/billing system.
-
-Stack (fixed by the SRS and course requirements, do not substitute):
-- **DB**: PostgreSQL 16 (ACID-compliant by default via its WAL — no storage-engine choice needed,
-  unlike MySQL)
-- **Backend**: FastAPI + `asyncpg`, JWT auth. **No ORM** (SQLAlchemy or any other table-mapping
-  library) — this is a database course project, and query/schema logic is meant to be visible,
-  not generated. Every route calls parameterized raw SQL or a `PL/pgSQL` function from
-  `database.md` §7 directly through an `asyncpg` connection pool. Pydantic models are fine and
-  expected for request/response validation — that's shape-checking, not persistence, and isn't
-  what "no ORM" restricts.
-- **Frontend**: React + TypeScript
-
-## 2. Non-negotiable rules
-
-- **Every appointment write** (create/reschedule) must go through the overlap-check logic —
-  never insert directly without it. **Decision: enforced at the DB level** via the `EXCLUDE`
-  constraint on `doctor_availability_slots` plus `fn_book_appointment()` /
-  `fn_reschedule_appointment()` (`database.md` §2.2/§7.1/§7.3) — routes call these functions,
-  they don't reimplement the overlap check in Python.
-- **Treatments/consultations can only be attached to a `Completed` appointment.** **Decision:
-  enforced via a DB trigger** (`fn_guard_consultation`/`fn_guard_consultation_treatments`,
-  `database.md` §7.6), not a service-layer check — don't add a redundant Python-side check for
-  the same rule. The one call site that satisfies thi
+- [ ] No hardcoded secrets — `.env` values only, `.env.example` updated if a new variable was added
