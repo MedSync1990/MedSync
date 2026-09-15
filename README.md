@@ -68,7 +68,7 @@ the shared Neon instance, by whoever's turn it is in the Phase 1 build sequence
 ```bash
 psql "$DATABASE_URL" -f db/modules/01_auth_branch_staff.sql   # Dilantha, first
 psql "$DATABASE_URL" -f db/modules/02_doctor_appointment.sql  # Kalana + Chenith, in parallel
-psql "$DATABASE_URL" -f db/modules/03_patient_consultation.sql
+psql "$DATABASE_URL" -f db/modules/chenith/03_patient_consultation.sql
 psql "$DATABASE_URL" -f db/modules/04_billing_insurance.sql   # Shavinda
 psql "$DATABASE_URL" -f db/modules/05_reporting_infra.sql     # Ashen — merge, roles, RLS
 psql "$DATABASE_URL" -f db/seed/seed_data.sql
