@@ -15,11 +15,16 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
     v_old_slot_id INT;
+    v_old_doctor_id INT;
+    v_new_doctor_id INT;
     v_status appointment_status_enum;
     v_new_slot_status slot_status_enum;
 BEGIN
-    SELECT slot_id, status INTO v_old_slot_id, v_status
-    FROM appointments WHERE appointment_id = p_appointment_id
+    SELECT a.slot_id, a.status, old_slot.doctor_id
+    INTO v_old_slot_id, v_status, v_old_doctor_id
+    FROM appointments a
+    JOIN doctor_availability_slots old_slot ON old_slot.slot_id = a.slot_id
+    WHERE a.appointment_id = p_appointment_id
     FOR UPDATE;
 
     IF NOT FOUND THEN
@@ -31,7 +36,7 @@ BEGIN
             USING ERRCODE = '22000';
     END IF;
 
-    SELECT status INTO v_new_slot_status
+    SELECT status, doctor_id INTO v_new_slot_status, v_new_doctor_id
     FROM doctor_availability_slots WHERE slot_id = p_new_slot_id
     FOR UPDATE;
 
@@ -42,6 +47,11 @@ BEGIN
 
     IF v_new_slot_status <> 'Open' THEN
         RAISE EXCEPTION 'the selected new slot is no longer available' USING ERRCODE = '23505';
+    END IF;
+
+    IF v_new_doctor_id <> v_old_doctor_id THEN
+        RAISE EXCEPTION 'the new slot must belong to the same doctor as the appointment'
+            USING ERRCODE = '23514';
     END IF;
 
     UPDATE doctor_availability_slots SET status = 'Open' WHERE slot_id = v_old_slot_id;
