@@ -52,6 +52,8 @@ async def migrate():
             label = "inline SQL"
             sql = inline_sql
         else:
+            if not file_path:
+                continue
             label = file_path
             try:
                 with open(file_path, "r", encoding="utf-8") as f:

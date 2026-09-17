@@ -1,16 +1,63 @@
 from contextlib import asynccontextmanager
-
 import asyncpg
 from fastapi import FastAPI
-
-from app import config
-
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import config
+from app.errors import (
+    NotFoundError, not_found_exception_handler,
+    ConflictError, conflict_exception_handler,
+    ForbiddenError, forbidden_exception_handler,
+    UnauthorizedError, unauthorized_exception_handler,
+    AppValidationError, validation_exception_handler,
+    generic_exception_handler
+)
+from app.routers import (
+    auth, branches, staff, doctors, specialties, appointments,
+    patients, allergies, treatments, consultations, invoices,
+    payments, insurance, reports
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL)
+    app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url())
     yield
     await app.state.pool.close()
+    await app.state.admin_pool.close()
 
+app = FastAPI(
+    title="MedSync CATMS API",
+    version="1.0.0",
+    description="Centralized multi-branch clinic management system REST API.",
+    lifespan=lifespan
+)
 
-app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_exception_handler(NotFoundError, not_found_exception_handler)
+app.add_exception_handler(ConflictError, conflict_exception_handler)
+app.add_exception_handler(ForbiddenError, forbidden_exception_handler)
+app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)
+app.add_exception_handler(AppValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
+
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+app.include_router(branches.router, prefix="/api/v1/branches", tags=["Branches"])
+app.include_router(staff.router, prefix="/api/v1/staff", tags=["Staff"])
+app.include_router(doctors.router, prefix="/api/v1/doctors", tags=["Doctors"])
+app.include_router(specialties.router, prefix="/api/v1/specialties", tags=["Specialties"])
+app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
+app.include_router(patients.router, prefix="/api/v1/patients", tags=["Patients"])
+app.include_router(allergies.router, prefix="/api/v1/allergies", tags=["Allergies"])
+app.include_router(treatments.router, prefix="/api/v1/treatments", tags=["Treatments"])
+app.include_router(consultations.router, prefix="/api/v1/consultations", tags=["Consultations"])
+app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"])
+app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
+app.include_router(insurance.router, prefix="/api/v1/insurance", tags=["Insurance"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
