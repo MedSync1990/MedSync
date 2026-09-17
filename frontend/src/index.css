@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #E9EEF5;
+  color: #0b1c30;
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+}
+
+/* UI Guidelines §6: Accessibility focus states */
+:focus-visible {
+  outline: 2px solid #0284C7;
+  outline-offset: 2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+}

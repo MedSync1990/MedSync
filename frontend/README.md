@@ -56,14 +56,90 @@ frontend/
 Page ownership matches [`../docs/workload-division.md`](../docs/workload-division.md) — each
 page should be created and worked on inside its owner's `phase-*-<lastname>` branch.
 
-## Setup (once `package.json` exists)
+## Getting Started for Team Members (Run This After Pulling)
+
+> [!NOTE]
+> If you just cloned the repository or pulled the latest changes, the files (`package.json`, `tailwind.config.js`, `src/`, etc.) **are already created**. You do **NOT** need to re-run the initialization steps below.
+
+All you need to do is install the dependencies and start the development server:
 
 ```bash
+# 1. Navigate to frontend directory
 cd frontend
-cp .env.example .env
+
+# 2. Install dependencies listed in package.json
 npm install
+
+# 3. (Optional) Setup environment variables if needed
+# cp .env.example .env
+
+# 4. Start the local Vite development server
 npm run dev
 ```
 
-Points at the backend's `VITE_API_BASE_URL` (default `http://localhost:8000/api/v1`) — see
-[`../README.md`](../README.md).
+The app will be available at `http://localhost:5173/`. It points at the backend's `VITE_API_BASE_URL` (default `http://localhost:8000/api/v1`) — see [`../README.md`](../README.md).
+
+To verify there are no TypeScript or build errors:
+```bash
+npm run build
+```
+
+---
+
+## One-Time Initialization History (Reference Only)
+
+> [!WARNING]
+> **Do NOT run these commands again.** These steps were executed once to bootstrap the project repository from scratch. They are documented here solely for reference and reproducibility.
+
+Here are the step-by-step commands and actions used to initialize this React + TypeScript + Tailwind project:
+
+### Step 1: Initialize `package.json`
+Inside the `frontend/` directory, initialize the project:
+```bash
+cd frontend
+npm init -y
+```
+
+### Step 2: Install Core & Dev Dependencies
+Install React 18, React Router, Lucide icons, Tailwind CSS, TypeScript, and Vite:
+```bash
+# Core application dependencies
+npm install react@^18.3.1 react-dom@^18.3.1 react-router-dom@^6.28.0 lucide-react clsx tailwind-merge
+
+# Developer and build dependencies
+npm install -D typescript@^5.6.3 vite@^6.0.1 @vitejs/plugin-react@^4.3.4 @types/react@^18.3.12 @types/react-dom@^18.3.1 tailwindcss@^3.4.15 postcss@^8.4.49 autoprefixer@^10.4.20
+```
+
+### Step 3: Configure Build & Tooling Files
+The following configuration files were created:
+1. `vite.config.ts`: Configures Vite with the `@vitejs/plugin-react` plugin.
+2. `tsconfig.json`: Configures TypeScript for modern ES2020 syntax, JSX support (`react-jsx`), and strict type checking.
+3. `postcss.config.js`: Integrates Tailwind CSS and Autoprefixer into the PostCSS pipeline.
+4. `tailwind.config.js`: Sets up content paths (`./index.html`, `./src/**/*.{js,ts,jsx,tsx}`) and extends colors with the MedSync design tokens (`brand-navy-deep: #0F172A`, `brand-teal-light: #38BDF8`, `canvas-bg: #F8FAFC`, etc.) defined in `../docs/ui-guidelines.md`.
+
+### Step 4: Setup HTML Entry & Fonts
+Created `index.html` referencing Google Fonts (`Inter` and `Plus Jakarta Sans`) and Google Material Symbols icons:
+```html
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+```
+Points to `/src/main.tsx` as the entry script.
+
+### Step 5: Setup Global Styles & Reusable Shell
+1. `src/index.css`: Loaded `@tailwind base;`, `@tailwind components;`, and `@tailwind utilities;`.
+2. Created reusable shell components:
+   - `src/components/Sidebar.tsx`: Fixed dark navy sidebar (`#0F172A`) with role-based navigation sections.
+   - `src/components/TopBar.tsx`: Fixed floating header with user greeting, branch badge, notifications, and profile.
+   - `src/components/Layout.tsx`: Common shell wrapper hosting `<Sidebar />`, `<TopBar />`, and `<Outlet />`.
+3. Created sample modular page and router:
+   - `src/pages/DoctorDashboard.tsx`: Dashboard widgets.
+   - `src/App.tsx`: Configured `BrowserRouter` with `Layout`.
+   - `src/main.tsx`: Mounted the root React component.
+
+### Step 6: Verify Build
+Run the TypeScript check and Vite production bundle builder:
+```bash
+npm run build
+```
+
+
