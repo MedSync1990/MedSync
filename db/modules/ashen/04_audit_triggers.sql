@@ -28,7 +28,7 @@ CREATE TRIGGER trg_audit_appointments
 -- Chenith's tables
 CREATE TRIGGER trg_audit_patient
     AFTER INSERT OR UPDATE OR DELETE ON patient
-    FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('patient_id');
+    FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('user_id');
 
 CREATE TRIGGER trg_audit_consultations
     AFTER INSERT OR UPDATE OR DELETE ON consultations
@@ -45,7 +45,7 @@ CREATE TRIGGER trg_audit_treatment_catalogue
 -- Shavinda's tables
 CREATE TRIGGER trg_audit_patient_insurance
     AFTER INSERT OR UPDATE OR DELETE ON patient_insurance
-    FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('patient_insurance_id');
+    FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('insurance_id');
 
 CREATE TRIGGER trg_audit_invoices
     AFTER INSERT OR UPDATE ON invoices

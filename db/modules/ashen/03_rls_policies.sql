@@ -58,6 +58,26 @@ CREATE POLICY appointments_doctor_own ON appointments
         )
     );
 
+CREATE POLICY appointments_doctor_complete_own ON appointments
+    FOR UPDATE
+    USING (
+        current_setting('app.current_role', true) = 'Doctor'
+        AND EXISTS (
+            SELECT 1 FROM doctor_availability_slots das
+            WHERE das.slot_id = appointments.slot_id
+              AND das.doctor_id = current_setting('app.current_user_id', true)::int
+        )
+    )
+    WITH CHECK (
+        current_setting('app.current_role', true) = 'Doctor'
+        AND status = 'Completed'
+        AND EXISTS (
+            SELECT 1 FROM doctor_availability_slots das
+            WHERE das.slot_id = appointments.slot_id
+              AND das.doctor_id = current_setting('app.current_user_id', true)::int
+        )
+    );
+
 CREATE POLICY appointments_branch_manager_own_branch ON appointments
     FOR SELECT
     USING (
