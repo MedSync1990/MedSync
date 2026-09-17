@@ -31,7 +31,8 @@ ON CONFLICT (role_name) DO NOTHING;
 INSERT INTO branch (name, address, phone_number) VALUES
     ('Colombo', '123 Galle Road, Colombo 03',  '0112345678'),
     ('Kandy',   '45 Dalada Vidiya, Kandy',      '0812345678'),
-    ('Galle',   '78 Main Street, Galle',         '0912345678');
+    ('Galle',   '78 Main Street, Galle',         '0912345678')
+ON CONFLICT DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3. App Users (1 Administrator + 1 Branch Manager per branch = 6 users)
@@ -52,7 +53,7 @@ INSERT INTO app_user (role_id, first_name, middle_name, last_name, id_number, ad
     ((SELECT role_id FROM role WHERE role_name = 'Administrator'),
      'Nimal', NULL, 'Fernando', '198512345678',
      '67 Peradeniya Road, Kandy', '1985-11-08', 'Male', 'Married',
-     'admin.kdy@medsync.lk'),
+    'admin.kdy@medsync.lk'),
     -- Kandy Branch Manager
     ((SELECT role_id FROM role WHERE role_name = 'Branch Manager'),
      'Sunil', 'Kumar', 'Jayawardena', '199012345678',
@@ -67,7 +68,8 @@ INSERT INTO app_user (role_id, first_name, middle_name, last_name, id_number, ad
     ((SELECT role_id FROM role WHERE role_name = 'Branch Manager'),
      'Roshan', 'Lakmal', 'Bandara', '921234567V',
      '34 Church Street, Galle', '1992-12-05', 'Male', 'Single',
-     'bm.gle@medsync.lk');
+    'bm.gle@medsync.lk')
+ON CONFLICT (id_number) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4. Staff records (password_hash using pgcrypto bcrypt)
@@ -76,28 +78,28 @@ INSERT INTO app_user (role_id, first_name, middle_name, last_name, id_number, ad
 
 INSERT INTO staff (user_id, branch_id, username, password_hash) VALUES
     -- Colombo
-    ((SELECT user_id FROM app_user WHERE email = 'admin.cmb@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Colombo'),
+    ((SELECT user_id FROM app_user WHERE email = 'admin.cmb@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Colombo' LIMIT 1),
      'admin.cmb', crypt('MedSync@2026', gen_salt('bf'))),
 
-    ((SELECT user_id FROM app_user WHERE email = 'bm.cmb@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Colombo'),
+    ((SELECT user_id FROM app_user WHERE email = 'bm.cmb@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Colombo' LIMIT 1),
      'bm.cmb', crypt('MedSync@2026', gen_salt('bf'))),
 
     -- Kandy
-    ((SELECT user_id FROM app_user WHERE email = 'admin.kdy@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Kandy'),
+    ((SELECT user_id FROM app_user WHERE email = 'admin.kdy@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Kandy' LIMIT 1),
      'admin.kdy', crypt('MedSync@2026', gen_salt('bf'))),
 
-    ((SELECT user_id FROM app_user WHERE email = 'bm.kdy@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Kandy'),
+    ((SELECT user_id FROM app_user WHERE email = 'bm.kdy@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Kandy' LIMIT 1),
      'bm.kdy', crypt('MedSync@2026', gen_salt('bf'))),
 
     -- Galle
-    ((SELECT user_id FROM app_user WHERE email = 'admin.gle@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Galle'),
+    ((SELECT user_id FROM app_user WHERE email = 'admin.gle@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Galle' LIMIT 1),
      'admin.gle', crypt('MedSync@2026', gen_salt('bf'))),
-
-    ((SELECT user_id FROM app_user WHERE email = 'bm.gle@medsync.lk'),
-     (SELECT branch_id FROM branch WHERE name = 'Galle'),
-     'bm.gle', crypt('MedSync@2026', gen_salt('bf')));
+    ((SELECT user_id FROM app_user WHERE email = 'bm.gle@medsync.lk' LIMIT 1),
+    (SELECT branch_id FROM branch WHERE name = 'Galle' LIMIT 1),
+     'bm.gle', crypt('MedSync@2026', gen_salt('bf')))
+ON CONFLICT (username) DO NOTHING;

@@ -81,12 +81,19 @@ async def run_tests():
 
         # Step 4: Test Slot Overlap Prevention (FR-AM-03: excl_slot_overlap)
         print("\n[4/5] Testing slot overlap prevention constraint (FR-AM-03)...")
+        doctor_id = await conn.fetchval("SELECT user_id FROM doctor ORDER BY user_id LIMIT 1")
+        if doctor_id is None:
+            raise RuntimeError("No seeded doctor is available for verification")
+        patient_id = await conn.fetchval("SELECT user_id FROM patient ORDER BY user_id LIMIT 1")
+        if patient_id is None:
+            raise RuntimeError("No seeded patient is available for verification")
         try:
             await conn.execute(
                 """
                 INSERT INTO doctor_availability_slots (doctor_id, date, start_time, end_time, status)
-                VALUES (101, CURRENT_DATE, '09:15:00', '09:45:00', 'Open');
-            """
+                VALUES ($1, CURRENT_DATE, '09:15:00', '09:45:00', 'Open');
+                """,
+                doctor_id,
             )
             print("  ✗ FAILED: Database allowed overlapping slot!")
         except asyncpg.ExclusionViolationError:
@@ -97,13 +104,14 @@ async def run_tests():
 
         # 5a: Test fn_book_appointment
         slot = await conn.fetchrow(
-            "SELECT slot_id FROM doctor_availability_slots WHERE doctor_id = 101 AND status = 'Open' LIMIT 1"
+            "SELECT slot_id FROM doctor_availability_slots WHERE doctor_id = $1 AND status = 'Open' LIMIT 1",
+            doctor_id,
         )
         if slot:
             slot_id = slot["slot_id"]
             appt_id = await conn.fetchval(
                 "SELECT fn_book_appointment($1, $2, $3::appointment_type_enum)",
-                999,
+                patient_id,
                 slot_id,
                 "Scheduled Visit",
             )
@@ -113,7 +121,7 @@ async def run_tests():
             try:
                 await conn.fetchval(
                     "SELECT fn_book_appointment($1, $2, $3::appointment_type_enum)",
-                    998,
+                    patient_id,
                     slot_id,
                     "Scheduled Visit",
                 )
@@ -123,7 +131,8 @@ async def run_tests():
 
             # 5b: Test fn_reschedule_appointment
             new_slot = await conn.fetchrow(
-                "SELECT slot_id FROM doctor_availability_slots WHERE doctor_id = 101 AND status = 'Open' AND slot_id <> $1 LIMIT 1",
+                "SELECT slot_id FROM doctor_availability_slots WHERE doctor_id = $1 AND status = 'Open' AND slot_id <> $2 LIMIT 1",
+                doctor_id,
                 slot_id,
             )
             if new_slot:
@@ -140,13 +149,14 @@ async def run_tests():
 
         # 5d: Test trg_block_delete_doctor
         try:
-            await conn.execute("DELETE FROM doctor WHERE user_id = 101")
+            await conn.execute("DELETE FROM doctor WHERE user_id = $1", doctor_id)
             print("  ✗ FAILED: Hard delete succeeded on doctor!")
         except (asyncpg.CheckViolationError, asyncpg.IntegrityConstraintViolationError) as e:
             print(f"  ✓ trg_block_delete_doctor: Blocked hard delete -> '{e.message}'")
 
         # Cleanup test appointment records
-        await conn.execute("DELETE FROM appointments WHERE patient_id IN (998, 999)")
+        if slot:
+            await conn.execute("DELETE FROM appointments WHERE appointment_id = $1", appt_id)
 
         print("\n==================================================================")
         print(" ALL TESTS PASSED! Module 02 is 100% verified against Neon DB.")

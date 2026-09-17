@@ -21,32 +21,67 @@ INSERT INTO specialty (name, description) VALUES
     ('Psychiatry', 'Mental health diagnostics, emotional wellness, and therapy')
 ON CONFLICT (name) DO NOTHING;
 
--- 2. Seed Doctor Profiles (user_id 101 to 108)
--- Assumes staff rows exist for user_id 101 to 108 (from Dilantha's seed 01_branches_staff.sql)
-INSERT INTO doctor (user_id, license_number) VALUES
-    (101, 'SLMC-48192'), -- Dr. Samantha Perera (Colombo)
-    (102, 'SLMC-39281'), -- Dr. Nuwan Fernando (Colombo)
-    (103, 'SLMC-51920'), -- Dr. Priyantha Silva (Kandy)
-    (104, 'SLMC-28491'), -- Dr. Anoma Wijesinghe (Kandy)
-    (105, 'SLMC-61029'), -- Dr. Rohan De Silva (Galle)
-    (106, 'SLMC-47201'), -- Dr. Kusal Mendis (Colombo)
-    (107, 'SLMC-38190'), -- Dr. Dilani Jayasuriya (Galle)
-    (108, 'SLMC-59281')  -- Dr. Chamara Gunawardena (Kandy)
-ON CONFLICT (user_id) DO UPDATE 
-    SET license_number = EXCLUDED.license_number;
+-- 2. Seed doctor users and staff rows before extending them as doctors.
+INSERT INTO app_user (
+    role_id, first_name, last_name, id_number, address, birthdate, gender, email
+)
+SELECT r.role_id, doctors.first_name, doctors.last_name, doctors.id_number,
+    doctors.address, doctors.birthdate::DATE, doctors.gender::gender_enum, doctors.email
+FROM (VALUES
+    ('Samantha', 'Perera', '901234567V', 'Colombo', '1989-01-15', 'Female', 'dr.samantha@medsync.lk'),
+    ('Nuwan', 'Fernando', '901234568V', 'Colombo', '1989-04-20', 'Male', 'dr.nuwan@medsync.lk'),
+    ('Priyantha', 'Silva', '901234569V', 'Kandy', '1989-07-10', 'Male', 'dr.priyantha@medsync.lk'),
+    ('Anoma', 'Wijesinghe', '901234570V', 'Kandy', '1989-09-12', 'Female', 'dr.anoma@medsync.lk'),
+    ('Rohan', 'De Silva', '901234571V', 'Galle', '1989-11-02', 'Male', 'dr.rohan@medsync.lk'),
+    ('Kusal', 'Mendis', '901234572V', 'Colombo', '1990-02-08', 'Male', 'dr.kusal@medsync.lk'),
+    ('Dilani', 'Jayasuriya', '901234573V', 'Galle', '1990-05-14', 'Female', 'dr.dilani@medsync.lk'),
+    ('Chamara', 'Gunawardena', '901234574V', 'Kandy', '1990-08-18', 'Male', 'dr.chamara@medsync.lk')
+) AS doctors(first_name, last_name, id_number, address, birthdate, gender, email)
+CROSS JOIN role r
+WHERE r.role_name = 'Doctor'
+ON CONFLICT (id_number) DO NOTHING;
+
+INSERT INTO staff (user_id, branch_id, username, password_hash)
+SELECT u.user_id, b.branch_id, 'doctor.' || lower(u.first_name),
+       crypt('MedSync@2026', gen_salt('bf'))
+FROM app_user u
+JOIN branch b ON b.name = split_part(u.address, ', ', 1)
+WHERE u.email LIKE 'dr.%@medsync.lk'
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO doctor (user_id, license_number)
+SELECT u.user_id, doctors.license_number
+FROM (VALUES
+    ('dr.samantha@medsync.lk', 'SLMC-48192'),
+    ('dr.nuwan@medsync.lk', 'SLMC-39281'),
+    ('dr.priyantha@medsync.lk', 'SLMC-51920'),
+    ('dr.anoma@medsync.lk', 'SLMC-28491'),
+    ('dr.rohan@medsync.lk', 'SLMC-61029'),
+    ('dr.kusal@medsync.lk', 'SLMC-47201'),
+    ('dr.dilani@medsync.lk', 'SLMC-38190'),
+    ('dr.chamara@medsync.lk', 'SLMC-59281')
+) AS doctors(email, license_number)
+JOIN app_user u ON u.email = doctors.email
+ON CONFLICT (license_number) DO NOTHING;
 
 -- 3. Seed Doctor Specialties (allocating 1-2 specialties per doctor)
-INSERT INTO doctor_speciality (user_id, speciality_id) VALUES
-    (101, 1), -- Dr. Samantha -> General Medicine
-    (102, 2), -- Dr. Nuwan -> Cardiology
-    (102, 1), -- Dr. Nuwan -> General Medicine (secondary)
-    (103, 4), -- Dr. Priyantha -> Pediatrics
-    (104, 3), -- Dr. Anoma -> Dermatology
-    (105, 5), -- Dr. Rohan -> Orthopedics
-    (106, 6), -- Dr. Kusal -> Neurology
-    (107, 7), -- Dr. Dilani -> Gynecology
-    (108, 9), -- Dr. Chamara -> ENT
-    (108, 1)  -- Dr. Chamara -> General Medicine (secondary)
+INSERT INTO doctor_speciality (user_id, speciality_id)
+SELECT d.user_id, s.speciality_id
+FROM (VALUES
+    ('dr.samantha@medsync.lk', 'General Medicine'),
+    ('dr.nuwan@medsync.lk', 'Cardiology'),
+    ('dr.nuwan@medsync.lk', 'General Medicine'),
+    ('dr.priyantha@medsync.lk', 'Pediatrics'),
+    ('dr.anoma@medsync.lk', 'Dermatology'),
+    ('dr.rohan@medsync.lk', 'Orthopedics'),
+    ('dr.kusal@medsync.lk', 'Neurology'),
+    ('dr.dilani@medsync.lk', 'Gynecology & Obstetrics'),
+    ('dr.chamara@medsync.lk', 'ENT (Otolaryngology)'),
+    ('dr.chamara@medsync.lk', 'General Medicine')
+) AS assignments(email, specialty_name)
+JOIN app_user u ON u.email = assignments.email
+JOIN doctor d ON d.user_id = u.user_id
+JOIN specialty s ON s.name = assignments.specialty_name
 ON CONFLICT (user_id, speciality_id) DO NOTHING;
 
 -- 4. Seed Availability Slots (A full week of consultation slots per doctor)
