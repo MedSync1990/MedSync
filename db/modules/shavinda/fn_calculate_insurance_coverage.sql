@@ -27,7 +27,7 @@ BEGIN
 
     -- Sum covered portion across insurance-eligible consultation treatments
     SELECT COALESCE(SUM(
-        tc.price * ct.quantity * ptc.coverage_percentage / 100.0
+        ct.unit_price * ct.quantity * ptc.coverage_percentage / 100.0
     ), 0)
     INTO v_total_covered
     FROM consultation_treatments ct
