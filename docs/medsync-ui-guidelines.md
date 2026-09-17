@@ -41,7 +41,31 @@ this work:
   for a specific page — if a page needs to feel different, vary content inside the white cards,
   not the shell around them.
 
+### 1.2 Typography
+
+- **Roboto is the only typeface in the system.** Earlier pages used a two-font system (Plus
+  Jakarta Sans for headings, Inter for body/labels) — this has been replaced. Every text token
+  (`display-lg`, `headline-md`, `headline-sm`, `body-md`, `body-sm`, `label-lg`, `label-md`,
+  `label-sm`, `mono-data`) maps to Roboto, loaded once via:
+  `https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap`
+- Don't reintroduce a second family for headings "to add personality" — differentiate headings
+  from body text with weight and size only (the existing `font-*` tokens already do this).
+- **Type scale baseline** (revised up from the original spec for legibility on shared desk
+  monitors): `body-md` 16px, `body-sm` / `label-md` 14px, `label-lg` 16px, `mono-data` 14px,
+  `label-sm` 12px. Headline and display sizes are unchanged from the original scale
+  (`headline-sm` 16px, `headline-md` 20px, `headline-lg`/`display-lg-mobile` 24px, `display-lg`
+  32px). Apply this scale by editing the shared `fontSize` tokens in the Tailwind config, never
+  by hand-picking a literal size (`text-[13px]`, etc.) on individual elements — a handful of
+  IDs/tags across the Manage Appointments table did this and had to be swept up after the fact.
+
 ## 2. Component rules
+
+- **Summary counts**: prefer small pill badges next to the page title (e.g. "✓ 06 Completed",
+  "⛔ 02 Cancelled") over a full row of large metric cards when the counts are secondary context,
+  not the primary thing the page is for. Reserve the full metric-card strip (icon, big number,
+  trend line) for pages where those numbers *are* the point, like the Dashboard. A page built
+  around a working table (Manage Appointments, Invoices) shouldn't spend a quarter of the
+  viewport on stats before the user reaches the table they came for.
 
 - **Buttons**: primary action = filled teal (matches brand color from the screenshot), max one
   primary button per card/section. Secondary actions = outlined. Destructive actions (cancel
