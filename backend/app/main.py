@@ -40,11 +40,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(NotFoundError, not_found_exception_handler)
-app.add_exception_handler(ConflictError, conflict_exception_handler)
-app.add_exception_handler(ForbiddenError, forbidden_exception_handler)
-app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)
-app.add_exception_handler(AppValidationError, validation_exception_handler)
+app.add_exception_handler(NotFoundError, not_found_exception_handler)  # type: ignore
+app.add_exception_handler(ConflictError, conflict_exception_handler)  # type: ignore
+app.add_exception_handler(ForbiddenError, forbidden_exception_handler)  # type: ignore
+app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)  # type: ignore
+app.add_exception_handler(AppValidationError, validation_exception_handler)  # type: ignore
 app.add_exception_handler(Exception, generic_exception_handler)
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
