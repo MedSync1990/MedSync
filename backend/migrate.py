@@ -114,12 +114,20 @@ async def migrate():
                 logger.error(f"File not found: {file_path}")
                 await conn.close()
                 return
+            else:
+                logger.warning("Empty migration item skipped.")
+                continue
 
         logger.info(f"Executing {label}...")
         try:
             await conn.execute(sql)
             logger.info(f"  ✓ {label}")
         except Exception as e:
+            error_str = str(e).lower()
+            if "already exists" in error_str:
+                logger.warning(f"  ⚠ Skipped (already exists): {label}")
+                continue
+                
             logger.error(f"  ✗ Error in {label}: {e}")
             if getattr(e, "sqlstate", None) in {"42P07", "42710", "42723"}:
                 logger.warning("  ⚠ Object already exists; continuing with the remaining migration.")
