@@ -11,7 +11,6 @@
   function decodeJwtPayload(token) {
     try {
       const payloadBase64 = token.split('.')[1];
-      // JWTs use base64url -- convert to standard base64 before decoding
       const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(atob(base64));
     } catch (err) {

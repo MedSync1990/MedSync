@@ -243,18 +243,21 @@
     <h2>Welcome Back!</h2>
     <p class="subtitle">Enter your email and password.</p>
 
-    <form onsubmit="event.preventDefault();">
+    <form id="login-form">
+      <!-- Hidden by default, shows up if login fails -->
+      <p id="error-message" style="display: none; color: #dc2626; text-align: center; font-size: 14px; margin-top: 0; margin-bottom: 16px; font-weight: 500;"></p>
+
       <div class="field">
         <div class="input-wrap">
           <span class="material-symbols-outlined">mail</span>
-          <input type="email" placeholder="Enter Email Id" autocomplete="username"/>
+          <input type="email" id="username" placeholder="Enter Email Id" autocomplete="username" required/>
         </div>
       </div>
 
       <div class="field">
         <div class="input-wrap">
           <span class="material-symbols-outlined">lock</span>
-          <input type="password" placeholder="Enter Password" autocomplete="current-password"/>
+          <input type="password" id="password" placeholder="Enter Password" autocomplete="current-password" required/>
         </div>
       </div>
 

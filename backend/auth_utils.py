@@ -1,3 +1,6 @@
+from fastapi import Depends, HTTPException, status
+from typing import List
+
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt
@@ -40,3 +43,16 @@ def decode_access_token(token: str) -> dict:
     """
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
+class RoleChecker:
+    def __init__(self, allowed_roles: List[str]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user = Depends(get_current_user)):
+        # Adjust 'current_user.role' below if your user object is a dictionary 
+        # (e.g., current_user["role"]) instead of a Pydantic model/SQLAlchemy object
+        if current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to perform this action."
+            )
+        return current_user

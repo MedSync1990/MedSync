@@ -4,14 +4,16 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 
 from app.db import get_conn
-from auth_utils import verify_password, create_access_token, decode_access_token
+from auth_utils import verify_password, create_access_token, decode_access_token, RoleChecker, get_current_user
 from schemas import LoginRequest, TokenResponse, MeResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 LOCKOUT_THRESHOLD = 5  # placeholder per database.md §14 -- confirm before shipping
+
+# Instantiate RBAC checkers
+require_admin = RoleChecker(["System Admin", "Branch Manager"])
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -86,3 +88,7 @@ async def get_me(token: str = Depends(oauth2_scheme)):
         role=payload["role"],
         branch_id=payload.get("branch_id"),
     )
+
+@router.get("/admin-only-dashboard", dependencies=[Depends(require_admin)])
+async def admin_dashboard_data():
+    return {"message": "Welcome to the admin dashboard! Your role allowed you here."}
