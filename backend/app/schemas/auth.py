@@ -4,10 +4,8 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
-
+class LoginResponse(BaseModel):
+    message: str
 class MeResponse(BaseModel):
     user_id: int
     username: str

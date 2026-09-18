@@ -27,3 +27,7 @@ def decode_access_token(token: str) -> dict:
         raise UnauthorizedError("Your session has expired. Please log in again.")
     except jwt.InvalidTokenError:
         raise UnauthorizedError("Invalid token.")
+
+def generate_csrf_token() -> str:
+    import secrets
+    return secrets.token_urlsafe(32)
