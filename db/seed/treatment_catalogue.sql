@@ -1,3 +1,5 @@
+TRUNCATE treatment_catalogue CASCADE;
+
 INSERT INTO treatment_catalogue
     (treatment_name, category, price, is_eligible_for_insurance)
 VALUES

@@ -3,11 +3,12 @@
 -- Author: Shavinda
 
 -- Seed Insurance Providers & Policy Details
+TRUNCATE insurance_policy_details CASCADE;
+
 INSERT INTO insurance_policy_details (provider_name, policy_name) VALUES
     ('Ceylinco Life', 'Gold Health Shield'),
     ('Softlogic Life', 'Executive Healthcare'),
-    ('AIA Insurance', 'Comprehensive Care Plus')
-ON CONFLICT DO NOTHING;
+    ('AIA Insurance', 'Comprehensive Care Plus');
 
 -- Resolve policy and treatment IDs by stable names rather than identity values.
 INSERT INTO policy_treatment_coverage (policy_id, treatment_code, coverage_percentage)

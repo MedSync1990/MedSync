@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from asyncpg import Connection
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user
 from app.schemas.reports import (
@@ -125,7 +125,8 @@ async def get_doctor_itemized_payments(
           AND ($3::date IS NULL OR p.payment_date::date >= $3)
           AND ($4::date IS NULL OR p.payment_date::date <= $4)
     """
-    total = await conn.fetchval(count_query, target_doctor_id, actual_branch_id, start_date, end_date)
+    total_val = await conn.fetchval(count_query, target_doctor_id, actual_branch_id, start_date, end_date)
+    total = int(total_val) if total_val is not None else 0
     
     if total == 0:
         return ItemizedPaymentResponse(data=[], total=0)

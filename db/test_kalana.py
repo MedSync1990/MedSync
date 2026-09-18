@@ -103,6 +103,7 @@ async def run_tests():
         print("\n[5/5] Testing Stored Functions & Delete Guard Trigger...")
 
         # 5a: Test fn_book_appointment
+        appt_id = None
         slot = await conn.fetchrow(
             "SELECT slot_id FROM doctor_availability_slots WHERE doctor_id = $1 AND status = 'Open' LIMIT 1",
             doctor_id,
@@ -127,7 +128,7 @@ async def run_tests():
                 )
                 print("  ✗ FAILED: Double-booking succeeded on same slot!")
             except asyncpg.PostgresError as e:
-                print(f"  ✓ Double-booking blocked cleanly: {e.message}")
+                print(f"  ✓ Double-booking blocked cleanly: {str(e)}")
 
             # 5b: Test fn_reschedule_appointment
             new_slot = await conn.fetchrow(
@@ -152,7 +153,7 @@ async def run_tests():
             await conn.execute("DELETE FROM doctor WHERE user_id = $1", doctor_id)
             print("  ✗ FAILED: Hard delete succeeded on doctor!")
         except (asyncpg.CheckViolationError, asyncpg.IntegrityConstraintViolationError) as e:
-            print(f"  ✓ trg_block_delete_doctor: Blocked hard delete -> '{e.message}'")
+            print(f"  ✓ trg_block_delete_doctor: Blocked hard delete -> '{e}'")
 
         # Cleanup test appointment records
         if slot:

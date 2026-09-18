@@ -1,0 +1,21 @@
+# docker-compose.yml
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "80:80" # Maps localhost:80 to the Nginx container
+    depends_on:
+      - backend
+    restart: always
