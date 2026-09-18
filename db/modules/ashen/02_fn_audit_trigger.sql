@@ -2,13 +2,6 @@
 -- 02_fn_audit_trigger.sql — Generic audit trigger function
 -- Module: Audit & RLS (Ashen)
 -- =============================================================================
--- A single reusable trigger function attached to every audited table.
--- Pass the primary key column name as TG_ARGV[0] when creating the trigger.
---
--- Example:
---   EXECUTE FUNCTION fn_audit_trigger('user_id');
--- =============================================================================
-
 CREATE OR REPLACE FUNCTION fn_audit_trigger()
 RETURNS trigger
 LANGUAGE plpgsql
