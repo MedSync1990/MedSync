@@ -2,33 +2,34 @@ from dataclasses import dataclass
 from typing import Optional
 from fastapi import Depends, Request
 from app.errors import UnauthorizedError, ForbiddenError
+from app.security import decode_access_token
 
 @dataclass
 class CurrentUser:
     user_id: int
     role: str
     branch_id: Optional[int]
-    first_name: str
-    last_name: str
+    username: str
 
 async def get_current_user(request: Request) -> CurrentUser:
-    # Stub: Ashen will implement actual JWT decoding here
-    # For now, it expects the Authorization header to be "Bearer <role>" just for testing
-    auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Bearer "):
-        raise UnauthorizedError("Missing or invalid token.")
-    
-    token = auth.split(" ")[1]
-    
-    # Stub logic for testing routes without a real JWT
-    role = token if token in ["Administrator", "Branch Manager", "Doctor", "Receptionist", "Patient"] else "Administrator"
-    
+    token = request.cookies.get("access_token")
+    if not token:
+        raise UnauthorizedError("Missing authentication token.")
+        
+    payload = decode_access_token(token)
+
+    if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+        cookie_csrf = request.cookies.get("csrf_token")
+        header_csrf = request.headers.get("X-CSRF-Token")
+        
+        if not cookie_csrf or not header_csrf or cookie_csrf != header_csrf:
+            raise ForbiddenError("CSRF token missing or invalid.")
+            
     user = CurrentUser(
-        user_id=1,
-        role=role,
-        branch_id=1 if role != "Administrator" else None,
-        first_name="Test",
-        last_name="User"
+        user_id=payload["user_id"],
+        role=payload["role"],
+        branch_id=payload.get("branch_id"),
+        username=payload["username"]
     )
     request.state.user = user
     return user
