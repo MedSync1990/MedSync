@@ -1,13 +1,9 @@
+import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 
-# TODO: change this import to match wherever your DB dependency actually
-# lives (e.g. `from app.db import get_db`). get_db is assumed to yield a
-# connection with an asyncpg-style `.fetchrow(query, *args)` interface --
-# adjust the query calls below if your project uses psycopg instead.
-from app.db import get_db
-
+from app.db import get_conn
 from auth_utils import verify_password, create_access_token, decode_access_token
 from schemas import LoginRequest, TokenResponse, MeResponse
 
@@ -19,7 +15,7 @@ LOCKOUT_THRESHOLD = 5  # placeholder per database.md §14 -- confirm before ship
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(payload: LoginRequest, db=Depends(get_db)):
+async def login(payload: LoginRequest, db: asyncpg.Connection = Depends(get_conn)):
     row = await db.fetchrow(
         """
         SELECT s.user_id, s.password_hash, s.branch_id, r.role_name, s.is_active

@@ -32,3 +32,11 @@ def create_access_token(data: dict):
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_access_token(token: str) -> dict:
+    """
+    Decodes and validates a JWT. Raises jose.JWTError (expired, bad signature,
+    malformed, etc.) if invalid -- the caller (the route) turns that into a 401.
+    """
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
