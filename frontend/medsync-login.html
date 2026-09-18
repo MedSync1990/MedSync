@@ -280,5 +280,71 @@
   </div>
 </div>
 
+<script>
+  // Must match the URL in your auth-guard.js
+  const API_BASE_URL = 'http://localhost:8000';
+
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault(); 
+    
+    const usernameInput = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
+    const errorMessage = document.getElementById('error-message'); 
+    
+    // Reset error message state
+    if(errorMessage) errorMessage.style.display = 'none';
+
+    try {
+      // FastAPI's OAuth2PasswordRequestForm expects x-www-form-urlencoded data
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          'username': usernameInput,
+          'password': passwordInput
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if(errorMessage) {
+            errorMessage.textContent = errorData.detail || 'Invalid username or password.';
+            errorMessage.style.display = 'block';
+        } else {
+            alert(errorData.detail || 'Invalid username or password.');
+        }
+        return;
+      }
+
+      const data = await response.json();
+      
+      // 1. Store the JWT
+      localStorage.setItem('access_token', data.access_token);
+
+      // 2. Fetch and store the current user's profile data immediately
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${data.access_token}` }
+      });
+
+      if (meResponse.ok) {
+        const userData = await meResponse.json();
+        localStorage.setItem('current_user', JSON.stringify(userData));
+      }
+
+      // 3. Redirect to your protected dashboard/index page
+      window.location.href = '/index.html'; 
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      if(errorMessage) {
+          errorMessage.textContent = 'Unable to connect to the server. Please try again later.';
+          errorMessage.style.display = 'block';
+      }
+    }
+  });
+</script>
+
 </body>
 </html>
