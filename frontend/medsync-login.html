@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedSync — Welcome Back</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --primary:#006194;
+    --primary-container:#007bb9;
+    --teal-light:#38BDF8;
+    --navy-deep:#0F172A;
+    --surface-card:#FFFFFF;
+    --surface-subtle:#F1F5F9;
+    --outline:#707881;
+    --border-subtle:#E2E8F0;
+    --border-focus:#0284C7;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Roboto',sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    padding:40px 24px;
+    position:relative;
+    overflow:hidden;
+    background:var(--primary-container);
+  }
+  :focus-visible{outline:2px solid var(--border-focus);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:0.001ms!important;transition-duration:0.001ms!important;}}
+
+  /* Decorative background blobs, recolored to brand palette */
+  .blob{position:absolute;border-radius:50%;z-index:0;}
+  .blob-1{
+    width:520px;height:520px;top:-220px;left:-160px;
+    background:var(--primary);
+  }
+  .blob-2{
+    width:640px;height:640px;bottom:-320px;right:-220px;
+    background:var(--navy-deep);
+    opacity:0.9;
+  }
+  .blob-3{
+    width:360px;height:360px;bottom:-140px;left:20%;
+    background:var(--teal-light);
+    opacity:0.55;
+  }
+
+  .auth-card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:900px;
+    min-height:500px;
+    background:var(--surface-card);
+    border-radius:28px;
+    box-shadow:0 30px 70px rgba(15,23,42,0.28);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    overflow:hidden;
+  }
+  @media (max-width:760px){
+    .auth-card{grid-template-columns:1fr;}
+    .visual-panel{display:none;}
+  }
+
+  /* Left visual panel */
+  .visual-panel{
+    position:relative;
+    background:linear-gradient(160deg, var(--teal-light) 0%, var(--primary-container) 60%, var(--primary) 100%);
+    overflow:hidden;
+  }
+  .zigzag{
+    position:absolute;inset:0;
+    opacity:0.18;
+    background-image:
+      linear-gradient(45deg, transparent 45%, #fff 45% 55%, transparent 55%),
+      linear-gradient(-45deg, transparent 45%, #fff 45% 55%, transparent 55%);
+    background-size:36px 36px;
+    mix-blend-mode:overlay;
+  }
+  .visual-panel img{
+    position:absolute;
+    left:0;bottom:0;
+    height:100%;width:60%;
+    object-fit:cover;
+    object-position:top center;
+  }
+  .quote-block{
+    position:absolute;
+    right:16px;top:40px;
+    width:52%;
+    z-index:2;
+  }
+  .quote-mark{
+    font-family:Georgia, serif;
+    font-size:44px;
+    font-weight:700;
+    color:var(--navy-deep);
+    line-height:1;
+    margin:0 0 6px;
+  }
+  .quote-block h1{
+    margin:0;
+    font-size:22px;
+    line-height:1.22;
+    font-weight:800;
+    text-transform:uppercase;
+    color:var(--navy-deep);
+    letter-spacing:0.01em;
+  }
+
+  /* Right form panel */
+  .form-panel{
+    padding:56px 52px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .form-panel h2{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+    margin:0 0 6px;
+    color:var(--navy-deep);
+  }
+  .form-panel p.subtitle{
+    text-align:center;
+    margin:0 0 28px;
+    color:var(--outline);
+    font-size:14px;
+  }
+  .field{margin-bottom:16px;}
+  .input-wrap{position:relative;display:flex;align-items:center;}
+  .input-wrap .material-symbols-outlined{
+    position:absolute;left:16px;
+    font-size:18px;color:var(--outline);
+    pointer-events:none;
+  }
+  .input-wrap input{
+    width:100%;
+    height:48px;
+    border-radius:999px;
+    border:1px solid var(--border-subtle);
+    background:var(--surface-subtle);
+    padding:0 16px 0 46px;
+    font-family:'Roboto',sans-serif;
+    font-size:14px;
+    color:var(--navy-deep);
+  }
+  .input-wrap input::placeholder{color:var(--outline);}
+  .input-wrap input:focus{
+    outline:none;
+    border-color:var(--border-focus);
+    box-shadow:0 0 0 3px rgba(2,132,199,0.15);
+    background:var(--surface-card);
+  }
+  .forgot-row{text-align:center;margin:4px 0 18px;}
+  .forgot-row a{
+    font-size:13px;color:var(--navy-deep);
+    text-decoration:none;font-weight:500;
+  }
+  .forgot-row a:hover{text-decoration:underline;}
+
+  button.login-btn{
+    width:100%;
+    height:50px;
+    border:none;
+    border-radius:999px;
+    background:linear-gradient(120deg, var(--primary), var(--teal-light));
+    color:#fff;
+    font-family:'Roboto',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(0,97,148,0.30);
+    transition:transform 120ms ease, box-shadow 120ms ease;
+  }
+  button.login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,97,148,0.36);}
+  button.login-btn:active{transform:translateY(0);}
+
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    margin:18px 0;
+    color:var(--outline);
+    font-size:12px;
+    font-weight:600;
+  }
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-subtle);}
+
+  .social-row{display:flex;gap:12px;}
+  .social-btn{
+    flex:1;
+    height:44px;
+    border-radius:999px;
+    border:1px solid var(--border-subtle);
+    background:var(--surface-subtle);
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:'Roboto',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:var(--navy-deep);
+    cursor:pointer;
+    transition:background 120ms ease;
+  }
+  .social-btn:hover{background:var(--border-subtle);}
+  .social-btn svg{width:18px;height:18px;}
+
+  .register-row{
+    text-align:center;
+    margin-top:22px;
+    font-size:13px;
+    color:var(--navy-deep);
+  }
+  .register-row a{
+    color:var(--primary);
+    font-weight:700;
+    text-decoration:none;
+  }
+  .register-row a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="auth-card">
+  <div class="visual-panel">
+    <div class="zigzag"></div>
+    <img alt="Smiling nurse in scrubs with a stethoscope" src="https://images.presentationgo.com/2025/07/female-nurse-blue-scrubs.jpg"/>
+    <div class="quote-block">
+      <p class="quote-mark">&ldquo;</p>
+      <h1>Putting people first in every healthcare moment</h1>
+    </div>
+  </div>
+
+  <div class="form-panel">
+    <h2>Welcome Back!</h2>
+    <p class="subtitle">Enter your email and password.</p>
+
+    <form id="login-form">
+      <!-- Hidden by default, shows up if login fails -->
+      <p id="error-message" style="display: none; color: #dc2626; text-align: center; font-size: 14px; margin-top: 0; margin-bottom: 16px; font-weight: 500;"></p>
+
+      <div class="field">
+        <div class="input-wrap">
+          <span class="material-symbols-outlined">mail</span>
+          <input type="email" id="username" placeholder="Enter Email Id" autocomplete="username" required/>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="input-wrap">
+          <span class="material-symbols-outlined">lock</span>
+          <input type="password" id="password" placeholder="Enter Password" autocomplete="current-password" required/>
+        </div>
+      </div>
+
+      <div class="forgot-row"><a href="#">Forget Password?</a></div>
+
+      <button class="login-btn" type="submit">Login</button>
+    </form>
+
+    <div class="divider">OR</div>
+
+    <div class="social-row">
+      <button class="social-btn" type="button">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.8 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 14 24 14c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.4 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.9-3.2 5.2-6 6.6l6.2 5.2C38.9 37.4 44 31.2 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+        Google
+      </button>
+      <button class="social-btn" type="button">
+        <svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.09 24 18.1 24 12.07z"/></svg>
+        Facebook
+      </button>
+    </div>
+
+    <p class="register-row">Don't have account? <a href="#">Register Now</a></p>
+  </div>
+</div>
+
+<script>
+  // Must match the URL in your auth-guard.js
+  const API_BASE_URL = 'http://localhost:8000';
+
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault(); 
+    
+    const usernameInput = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
+    const errorMessage = document.getElementById('error-message'); 
+    
+    // Reset error message state
+    if(errorMessage) errorMessage.style.display = 'none';
+
+    try {
+      // FastAPI's OAuth2PasswordRequestForm expects x-www-form-urlencoded data
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          'username': usernameInput,
+          'password': passwordInput
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if(errorMessage) {
+            errorMessage.textContent = errorData.detail || 'Invalid username or password.';
+            errorMessage.style.display = 'block';
+        } else {
+            alert(errorData.detail || 'Invalid username or password.');
+        }
+        return;
+      }
+
+      const data = await response.json();
+      
+      // 1. Store the JWT
+      localStorage.setItem('access_token', data.access_token);
+
+      // 2. Fetch and store the current user's profile data immediately
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${data.access_token}` }
+      });
+
+      if (meResponse.ok) {
+        const userData = await meResponse.json();
+        localStorage.setItem('current_user', JSON.stringify(userData));
+      }
+
+      // 3. Redirect to your protected dashboard/index page
+      window.location.href = '/index.html'; 
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      if(errorMessage) {
+          errorMessage.textContent = 'Unable to connect to the server. Please try again later.';
+          errorMessage.style.display = 'block';
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
