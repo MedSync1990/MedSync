@@ -106,18 +106,16 @@ this work:
 - **Type scale** (size / line-height):
   | Role | Size | Line-height |
   |---|---|---|
-  | `label-sm` | 12px | 16px |
-  | `body-sm` / `label-md` | 13px | 18px |
-  | `mono-data` | 14px | 20px |
-  | `body-md` | 15px | 22px |
-  | `label-lg` | 15px | 22px |
-  | `body-lg` | 17px | 26px |
+  | `label-sm` | 14px | 18px |
+  | `body-sm` / `label-md` | 16px | 22px |
+  | `mono-data` | 16px | 22px |
+  | `body-md` | 18px | 26px |
+  | `label-lg` | 18px | 26px |
+  | `body-lg` | 18px | 26px |
   | `headline-sm` | 18px | 26px |
-  | `headline-md` | 22px | 30px |
-  | `headline-lg` / `display-lg-mobile` | 26px | 34px |
+  | `headline-md` | 24px | 32px |
+  | `headline-lg` / `display-lg-mobile` | 30px | 38px |
   | `display-lg` | 34px | 42px |
-- This scale runs a notch larger than a typical dense-admin default — reception and clinical
-  desks are read at a glance, often on shared monitors under bright lighting, so err toward
-  legibility over information density.
+- This scale has been scaled up to maximize high-precision legibility on shared clinic and receptionist desk monitors.
 - Don't hand-set a one-off font size in a page; use the scale's named roles so any future
   type-scale change (accessibility request, display density setting) only has to happen once.
