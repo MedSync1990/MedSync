@@ -3,49 +3,22 @@
   const LOGIN_PAGE = '/medsync-login.html';
 
   function redirectToLogin() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('current_user');
+    sessionStorage.removeItem('current_user');
     window.location.href = LOGIN_PAGE;
   }
 
-  function decodeJwtPayload(token) {
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    } catch (err) {
-      return null;
-    }
+  function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   async function checkAuth() {
-    const token = localStorage.getItem('access_token');
-
-    if (!token) {
-      redirectToLogin();
-      return;
-    }
-
-    // Quick client-side expiry check first -- avoids a network call for
-    // the common case of an obviously expired token.
-    const payload = decodeJwtPayload(token);
-    if (!payload || !payload.exp) {
-      redirectToLogin();
-      return;
-    }
-
-    const nowInSeconds = Math.floor(Date.now() / 1000);
-    if (payload.exp < nowInSeconds) {
-      redirectToLogin();
-      return;
-    }
-
-    // Confirm the token is actually still valid server-side (catches
-    // tampered/invalid-signature tokens a client-side check can't see),
-    // and pull down fresh user info for the sidebar/shell to use.
+    // access_token is httpOnly -- JS can never read it, so the only way to
+    // confirm the session is valid is to ask the server. The browser sends
+    // the cookie automatically because of credentials: 'include'.
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -54,12 +27,11 @@
       }
 
       const user = await response.json();
-      localStorage.setItem('current_user', JSON.stringify(user));
+      // Convenience only, for things like showing the user's name later --
+      // this is NOT the security boundary. The cookie is.
+      sessionStorage.setItem('current_user', JSON.stringify(user));
     } catch (err) {
-      // Network/server unreachable -- don't lock the user out on a
-      // temporary connectivity blip; the client-side expiry check above
-      // already passed, so let them through and let subsequent API calls
-      // surface a 401 if the token turns out to be genuinely bad.
+      redirectToLogin();
     }
   }
 
@@ -68,16 +40,17 @@
   // Exposed globally so any page's logout button can call authGuard.logout()
   window.authGuard = {
     logout: async function () {
-      const token = localStorage.getItem('access_token');
       try {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+          headers: { 'X-CSRF-Token': getCsrfToken() },
         });
       } catch (err) {
         // Ignore network errors -- log out locally regardless.
       }
       redirectToLogin();
     },
+    getCsrfToken: getCsrfToken, // for other pages to attach to POST/PUT/PATCH/DELETE calls
   };
 })();
