@@ -15,6 +15,11 @@ class CurrentUser:
 async def get_current_user(request: Request) -> CurrentUser:
     token = request.cookies.get("access_token")
     if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.lower().startswith("bearer "):
+            token = auth_header.split(" ", 1)[1].strip()
+
+    if not token:
         raise UnauthorizedError("Missing authentication token.")
 
     payload = decode_access_token(token)

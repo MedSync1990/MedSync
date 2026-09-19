@@ -64,18 +64,18 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=config.COOKIE_SECURE,
         samesite="lax",
-        max_age=max_age
+        max_age=max_age,
     )
 
     response.set_cookie(
         key="csrf_token",
         value=csrf_token,
         httponly=False,
-        secure=True,
+        secure=config.COOKIE_SECURE,
         samesite="lax",
-        max_age=max_age
+        max_age=max_age,
     )
 
     return LoginResponse(message="Login successful")

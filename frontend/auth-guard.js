@@ -3,21 +3,13 @@
   const LOGIN_PAGE = '/medsync-login.html';
 
   function redirectToLogin() {
-    sessionStorage.removeItem('current_user');
+    localStorage.removeItem('current_user');
     window.location.href = LOGIN_PAGE;
   }
 
-  function getCsrfToken() {
-    const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
-    return match ? decodeURIComponent(match[1]) : null;
-  }
-
   async function checkAuth() {
-    // access_token is httpOnly -- JS can never read it, so the only way to
-    // confirm the session is valid is to ask the server. The browser sends
-    // the cookie automatically because of credentials: 'include'.
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: 'include',
       });
 
@@ -37,14 +29,12 @@
 
   checkAuth();
 
-  // Exposed globally so any page's logout button can call authGuard.logout()
   window.authGuard = {
     logout: async function () {
       try {
         await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           credentials: 'include',
-          headers: { 'X-CSRF-Token': getCsrfToken() },
         });
       } catch (err) {
         // Ignore network errors -- log out locally regardless.
