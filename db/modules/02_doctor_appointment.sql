@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 -- 2. Table DDLs
 \ir kalana/specialty.sql
 \ir kalana/doctor.sql
-\ir kalana/doctor_speciality.sql
+\ir kalana/doctor_specialty.sql
 \ir kalana/doctor_availability_slots.sql
 \ir kalana/appointments.sql
 

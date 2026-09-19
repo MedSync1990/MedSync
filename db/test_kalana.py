@@ -29,7 +29,7 @@ SEED_FILE = BASE_DIR / "db" / "seed" / "02_doctors_specialties_slots.sql"
 SQL_FILES = [
     "specialty.sql",
     "doctor.sql",
-    "doctor_speciality.sql",
+    "doctor_specialty.sql",
     "doctor_availability_slots.sql",
     "appointments.sql",
     "fn_book_appointment.sql",
@@ -72,7 +72,7 @@ async def run_tests():
         for table in [
             "specialty",
             "doctor",
-            "doctor_speciality",
+            "doctor_specialty",
             "doctor_availability_slots",
             "appointments",
         ]:

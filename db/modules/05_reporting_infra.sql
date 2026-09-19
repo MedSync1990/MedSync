@@ -15,7 +15,7 @@ CREATE TRIGGER trg_block_delete_treatment_catalogue
 
 -- Operational grants for the application and reporting roles.
 GRANT SELECT, INSERT, UPDATE ON
-    doctor, specialty, doctor_speciality, doctor_availability_slots,
+    doctor, specialty, doctor_specialty, doctor_availability_slots,
     patient, allergy, patient_allergy, admission, treatment_catalogue,
     appointments, consultations, consultation_treatments,
     insurance_policy_details, patient_insurance, policy_treatment_coverage,
@@ -23,7 +23,7 @@ GRANT SELECT, INSERT, UPDATE ON
     TO catms_app;
 
 GRANT SELECT ON
-    doctor, specialty, doctor_speciality, doctor_availability_slots,
+    doctor, specialty, doctor_specialty, doctor_availability_slots,
     patient, allergy, patient_allergy, admission, treatment_catalogue,
     appointments, consultations, consultation_treatments,
     insurance_policy_details, patient_insurance, policy_treatment_coverage,

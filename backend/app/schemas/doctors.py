@@ -35,7 +35,7 @@ class DoctorBase(BaseModel):
 # Request body when creating a doctor: POST /doctors
 class DoctorCreate(DoctorBase):
     license_number: str = Field(..., min_length=1, max_length=50)
-    speciality_ids: List[int] = Field(
+    specialty_ids: List[int] = Field(
         ...,
         min_items=1,
         description="Doctor must have at least one specialty assigned",
