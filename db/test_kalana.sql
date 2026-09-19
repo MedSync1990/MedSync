@@ -8,7 +8,7 @@ SELECT 'specialty' AS table_name, COUNT(*) AS total_rows FROM specialty
 UNION ALL
 SELECT 'doctor', COUNT(*) FROM doctor
 UNION ALL
-SELECT 'doctor_speciality', COUNT(*) FROM doctor_speciality
+SELECT 'doctor_specialty', COUNT(*) FROM doctor_specialty
 UNION ALL
 SELECT 'doctor_availability_slots', COUNT(*) FROM doctor_availability_slots
 UNION ALL
@@ -20,8 +20,8 @@ SELECT
     d.license_number,
     s.name AS specialty_name
 FROM doctor d
-JOIN doctor_speciality ds ON d.user_id = ds.user_id
-JOIN specialty s ON ds.speciality_id = s.speciality_id
+JOIN doctor_specialty ds ON d.user_id = ds.user_id
+JOIN specialty s ON ds.specialty_id = s.specialty_id
 ORDER BY d.user_id
 LIMIT 6;
 
