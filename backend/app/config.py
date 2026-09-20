@@ -11,8 +11,8 @@ ENV_FILE = BACKEND_DIR / ".env"
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    DATABASE_ADMIN_URL: Optional[str] = None
-    JWT_SECRET: str = Field(default="change-me-in-production")
+    DATABASE_ADMIN_URL: str
+    JWT_SECRET: str
     JWT_EXPIRY_MINUTES: int = Field(default=60)
     COOKIE_SECURE: bool = True
     CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80", "http://localhost"]
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
         return value
 
     def get_admin_url(self) -> str:
-        return self.DATABASE_ADMIN_URL if self.DATABASE_ADMIN_URL else self.DATABASE_URL
+        return self.DATABASE_ADMIN_URL
 
 
 config = Settings()

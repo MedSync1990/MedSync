@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import TypeVar, Generic
 from pydantic import BaseModel, Field
 
@@ -14,3 +15,8 @@ class PaginationParams(BaseModel):
 class PaginatedResponse(BaseModel, Generic[T]):
     data: list[T]
     total: int
+
+class GenderEnum(str, Enum):
+    Male = "Male"
+    Female = "Female"
+    Other = "Other"

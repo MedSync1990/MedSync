@@ -19,7 +19,9 @@
       }
 
       const user = await response.json();
-      localStorage.setItem('current_user', JSON.stringify(user));
+      // Convenience only, for things like showing the user's name later --
+      // this is NOT the security boundary. The cookie is.
+      sessionStorage.setItem('current_user', JSON.stringify(user));
     } catch (err) {
       redirectToLogin();
     }
@@ -30,7 +32,7 @@
   window.authGuard = {
     logout: async function () {
       try {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -39,5 +41,6 @@
       }
       redirectToLogin();
     },
+    getCsrfToken: getCsrfToken, // for other pages to attach to POST/PUT/PATCH/DELETE calls
   };
 })();
