@@ -19,10 +19,10 @@ from app.schemas.invoices import (
 router = APIRouter()
 
 
-async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str):
+async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_type: str = "invoice"):
     """
     Helper to fetch core invoice header, patient info, doctor info, and branch info
-    given an invoice ID (integer string) or invoice code (e.g. INV-000001).
+    given an invoice ID, invoice code, or NIC.
     """
     is_numeric = identifier.isdigit()
 
@@ -52,24 +52,38 @@ async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str):
         JOIN branch b ON s.branch_id = b.branch_id
         LEFT JOIN patient_insurance pi ON p.user_id = pi.patient_id
         LEFT JOIN insurance_policy_details ipd ON pi.policy_id = ipd.policy_id
-        WHERE ($1::boolean AND i.invoice_id = $2::int)
-           OR (NOT $1::boolean AND UPPER(i.invoice_code) = UPPER($3::text))
+        WHERE ($1::boolean AND $4::text != 'nic' AND i.invoice_id = $2::int)
+           OR ($4::text != 'nic' AND UPPER(i.invoice_code) = UPPER($3::text))
+           OR ($4::text = 'nic' AND UPPER(pu.id_number) = UPPER($3::text))
+        ORDER BY i.created_at DESC
         LIMIT 1
     """
-    int_val = int(identifier) if is_numeric else 0
-    row = await conn.fetchrow(query, is_numeric, int_val, identifier)
+    int_val = 0
+    if is_numeric:
+        val = int(identifier)
+        if val > 2147483647:
+            is_numeric = False
+        else:
+            int_val = val
+            
+    row = await conn.fetchrow(query, is_numeric, int_val, identifier, search_type)
     return row
 
 
 @router.get("/{identifier}", response_model=InvoiceDetailResponse)
 async def get_invoice_detail(
-    identifier: str = Path(..., description="Invoice ID or Invoice Code (e.g. 1 or INV-000001)"),
+    identifier: str = Path(..., description="Invoice ID, Invoice Code, or Patient NIC (e.g. 1, INV-000001, 123456789V)"),
+    type: Optional[str] = Query("invoice", description="Search type: 'invoice' or 'nic'"),
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist")),
     conn: Connection = Depends(get_conn)
 ):
-    inv = await fetch_invoice_by_id_or_code(conn, identifier)
+    search_type = type if type is not None else "invoice"
+    inv = await fetch_invoice_by_id_or_code(conn, identifier, search_type)
     if not inv:
-        raise NotFoundError(f"Invoice '{identifier}' not found.")
+        if search_type == "nic":
+            raise AppValidationError([{"field": "identifier", "message": "Enter Valid NIC Number"}])
+        else:
+            raise AppValidationError([{"field": "identifier", "message": "Enter Valid Invoice Code"}])
 
     invoice_id = inv["invoice_id"]
     consultation_id = inv["consultation_id"]
