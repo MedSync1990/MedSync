@@ -115,8 +115,4 @@ this work:
 - Color is never the only signal for status — pair status pills with text, not color alone. This
   extends to the region-separation rule in §1.1: color plus shadow/contrast, never color alone.
 - Form errors are announced near the field, not only in a toast, so screen readers/low-vision
-<<<<<<< HEAD
   users don't lose them.
-=======
-  users don't lose them.
->>>>>>> origin/shavinda
