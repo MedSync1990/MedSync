@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_EXPIRY_MINUTES: int = Field(default=60)
     COOKIE_SECURE: bool = True
-    CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
+    CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80", "http://localhost"]
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),
