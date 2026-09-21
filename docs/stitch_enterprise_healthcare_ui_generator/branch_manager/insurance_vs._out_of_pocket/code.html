@@ -1,3 +1,15 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+.font-display-lg,.font-display-lg-mobile,.font-headline-lg,.font-headline-md,.font-headline-sm,.font-body-lg,.font-body-md,.font-body-sm,.font-label-lg,.font-label-md,.font-label-sm,.font-mono-data{font-family:Roboto,sans-serif!important;}
+.metric-block,.metric-block *{color:#000!important;}
+body.bg-surface{background:#E9EEF5!important;}
+aside.fixed{background:#0F172A!important;}
+aside.fixed .text-on-surface,aside.fixed .text-on-surface-variant{color:rgba(255,255,255,.7)!important;}
+aside.fixed .text-primary{color:#38BDF8!important;}
+main.bg-surface{background:#E9EEF5!important;box-shadow:inset 1px 0 0 rgba(15,23,42,.06);}
+svg text{font-family:Roboto,sans-serif!important;}
+</style>
+
 <!DOCTYPE html>
 
 <html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
@@ -75,14 +87,12 @@
 <!-- Key Metrics Bento -->
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
 <!-- Card 1: Insurance Coverage -->
-<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-<div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-primary/5 pointer-events-none transition-transform group-hover:scale-125 duration-500"></div>
+<div class="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
 <div class="flex items-start justify-between">
 <div>
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Insurance Coverage</span>
 <div class="flex items-baseline gap-2 mt-1">
 <span class="font-display-lg text-display-lg text-primary">64.2%</span>
-<span class="font-label-sm text-label-sm text-status-completed-text bg-status-completed-bg px-1.5 py-0.5 rounded-full font-semibold">+1.6%</span>
 </div>
 </div>
 <div class="w-10 h-10 rounded-lg bg-status-scheduled-bg text-primary flex items-center justify-center">
@@ -95,8 +105,7 @@
 </div>
 </div>
 <!-- Card 2: Out of Pocket -->
-<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-<div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-tertiary/5 pointer-events-none transition-transform group-hover:scale-125 duration-500"></div>
+<div class="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
 <div class="flex items-start justify-between">
 <div>
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Out-of-Pocket Ratio</span>
@@ -115,8 +124,7 @@
 </div>
 </div>
 <!-- Card 3: Total Gross Billed -->
-<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-<div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-secondary/5 pointer-events-none transition-transform group-hover:scale-125 duration-500"></div>
+<div class="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
 <div class="flex items-start justify-between">
 <div>
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Gross Billed</span>
@@ -135,8 +143,7 @@
 </div>
 </div>
 <!-- Card 4: Claim Settlement Time -->
-<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-<div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-status-completed-bg/30 pointer-events-none transition-transform group-hover:scale-125 duration-500"></div>
+<div class="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
 <div class="flex items-start justify-between">
 <div>
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Claim Settlement</span>
@@ -148,12 +155,6 @@
 <div class="w-10 h-10 rounded-lg bg-status-completed-bg text-status-completed-text flex items-center justify-center">
 <span class="material-symbols-outlined text-[22px]">timer</span>
 </div>
-</div>
-<div class="mt-space-md pt-space-xs flex items-center justify-between font-mono-data text-mono-data">
-<span class="text-secondary">SLA Benchmark</span>
-<span class="text-status-completed-text font-semibold flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">arrow_downward</span> 0.6 days faster
-        </span>
 </div>
 </div>
 </div>
