@@ -65,8 +65,8 @@ JOIN app_user u ON u.email = doctors.email
 ON CONFLICT (license_number) DO NOTHING;
 
 -- 3. Seed Doctor Specialties (allocating 1-2 specialties per doctor)
-INSERT INTO doctor_speciality (user_id, speciality_id)
-SELECT d.user_id, s.speciality_id
+INSERT INTO doctor_specialty (user_id, specialty_id)
+SELECT d.user_id, s.specialty_id
 FROM (VALUES
     ('dr.samantha@medsync.lk', 'General Medicine'),
     ('dr.nuwan@medsync.lk', 'Cardiology'),
@@ -82,7 +82,7 @@ FROM (VALUES
 JOIN app_user u ON u.email = assignments.email
 JOIN doctor d ON d.user_id = u.user_id
 JOIN specialty s ON s.name = assignments.specialty_name
-ON CONFLICT (user_id, speciality_id) DO NOTHING;
+ON CONFLICT (user_id, specialty_id) DO NOTHING;
 
 -- 4. Seed Availability Slots (A full week of consultation slots per doctor)
 -- Status is 'Open'::slot_status_enum per docs/database.md §2.2

@@ -5,7 +5,7 @@
 -- =======================================================================================
 
 CREATE TABLE IF NOT EXISTS specialty (
-    speciality_id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    specialty_id   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name           VARCHAR(100) NOT NULL UNIQUE,
     description    VARCHAR(500)
 );

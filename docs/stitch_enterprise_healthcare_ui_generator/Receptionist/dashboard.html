@@ -6,56 +6,75 @@
 @media (prefers-reduced-motion: reduce){*{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;}}
 .content-shell{box-shadow: inset 1px 0 0 rgba(15,23,42,0.06);}
 .topbar-shell{transition: box-shadow 150ms ease;}
-</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed":"#cce5ff","status-scheduled-text":"#0369A1","secondary-container":"#dae2fd","on-error":"#ffffff","surface-container-high":"#dce9ff","on-tertiary":"#ffffff","tertiary-fixed-dim":"#89ceff","on-tertiary-fixed-variant":"#004c6e","on-secondary-container":"#5c647a","status-pending-bg":"#FEF3C7","tertiary":"#00628d","error":"#ba1a1a","status-cancelled-text":"#BE123C","status-cancelled-bg":"#FFE4E6","error-container":"#ffdad6","surface-subtle":"#F1F5F9","inverse-surface":"#213145","border-subtle":"#E2E8F0","on-error-container":"#93000a","surface-container":"#e5eeff","surface":"#f8f9ff","outline-variant":"#bfc7d2","background":"#f8f9ff","surface-container-lowest":"#ffffff","on-surface-variant":"#3f4850","secondary-fixed":"#dae2fd","inverse-on-surface":"#eaf1ff","primary-container":"#007bb9","secondary":"#565e74","status-completed-text":"#047857","tertiary-fixed":"#c9e6ff","primary-fixed-dim":"#93ccff","surface-container-low":"#eff4ff","outline":"#707881","on-primary-fixed-variant":"#004b73","on-primary":"#ffffff","on-primary-container":"#fdfcff","brand-teal-light":"#38BDF8","surface-dim":"#cbdbf5","tertiary-container":"#007cb1","on-background":"#0b1c30","status-pending-text":"#B45309","border-focus":"#0284C7","surface-bright":"#f8f9ff","on-primary-fixed":"#001d31","on-tertiary-fixed":"#001e2f","canvas-bg":"#E9EEF5","surface-tint":"#006398","brand-navy-deep":"#0F172A","on-tertiary-container":"#fcfcff","secondary-fixed-dim":"#bec6e0","inverse-primary":"#93ccff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","on-secondary-fixed-variant":"#3f465c","on-secondary":"#ffffff","surface-container-highest":"#d3e4fe","surface-card":"#FFFFFF","on-secondary-fixed":"#131b2e","primary":"#006194","status-completed-bg":"#D1FAE5","status-scheduled-bg":"#E0F2FE"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-2xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","space-xl":"2rem","sidebar-width":"260px","space-sm":"0.75rem","gutter-desktop":"1.5rem","content-max-width":"1600px","space-3xl":"3rem","sidebar-collapsed-width":"72px","space-2xl":"2.5rem","topbar-height":"68px","space-md":"1rem","space-xs":"0.5rem"},"fontFamily":{"label-sm":["Roboto"],"display-lg-mobile":["Roboto"],"headline-md":["Roboto"],"headline-sm":["Roboto"],"display-lg":["Roboto"],"body-sm":["Roboto"],"label-md":["Roboto"],"body-md":["Roboto"],"body-lg":["Roboto"],"mono-data":["Roboto"],"label-lg":["Roboto"],"headline-lg":["Roboto"]},"fontSize":{"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"display-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["14px",{"lineHeight":"19px","fontWeight":"400"}],"label-md":["14px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["16px",{"lineHeight":"23px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"mono-data":["14px",{"lineHeight":"19px","letterSpacing":"0.01em","fontWeight":"500"}],"label-lg":["16px",{"lineHeight":"22px","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased">
 
-<aside class="fixed left-0 top-0 h-full w-[260px] bg-[#0F172A] z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
+/* --- Sidebar responsive collapse (fixes: auto icon-only below 1024px + manual toggle override) --- */
+#app-sidebar{width:260px;transition:width 200ms ease;}
+#app-shell{padding-left:260px;transition:padding-left 200ms ease;}
+#app-topbar{left:260px;transition:left 200ms ease;}
+
+@media (max-width: 1023px){
+  #app-sidebar{width:72px;}
+  #app-shell{padding-left:72px;}
+  #app-topbar{left:72px;}
+  #app-sidebar .sidebar-text,
+  #app-sidebar .sidebar-group-label{display:none;}
+}
+
+/* Manual override via the sidebar toggle button, wins regardless of viewport width */
+#app-sidebar.is-icon-only .sidebar-text,
+#app-sidebar.is-icon-only .sidebar-group-label{display:none;}
+#app-sidebar.is-expanded .sidebar-text,
+#app-sidebar.is-expanded .sidebar-group-label{display:block !important;}
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed":"#cce5ff","status-scheduled-text":"#0369A1","secondary-container":"#dae2fd","on-error":"#ffffff","surface-container-high":"#dce9ff","on-tertiary":"#ffffff","tertiary-fixed-dim":"#89ceff","on-tertiary-fixed-variant":"#004c6e","on-secondary-container":"#5c647a","status-pending-bg":"#FEF3C7","tertiary":"#00628d","error":"#ba1a1a","status-cancelled-text":"#BE123C","status-cancelled-bg":"#FFE4E6","error-container":"#ffdad6","surface-subtle":"#F1F5F9","inverse-surface":"#213145","border-subtle":"#E2E8F0","on-error-container":"#93000a","surface-container":"#e5eeff","surface":"#f8f9ff","outline-variant":"#bfc7d2","background":"#f8f9ff","surface-container-lowest":"#ffffff","on-surface-variant":"#3f4850","secondary-fixed":"#dae2fd","inverse-on-surface":"#eaf1ff","primary-container":"#007bb9","secondary":"#565e74","status-completed-text":"#047857","tertiary-fixed":"#c9e6ff","primary-fixed-dim":"#93ccff","surface-container-low":"#eff4ff","outline":"#707881","on-primary-fixed-variant":"#004b73","on-primary":"#ffffff","on-primary-container":"#fdfcff","brand-teal-light":"#38BDF8","surface-dim":"#cbdbf5","tertiary-container":"#007cb1","on-background":"#0b1c30","status-pending-text":"#B45309","border-focus":"#0284C7","surface-bright":"#f8f9ff","on-primary-fixed":"#001d31","on-tertiary-fixed":"#001e2f","canvas-bg":"#E9EEF5","surface-tint":"#006398","brand-navy-deep":"#0F172A","on-tertiary-container":"#fcfcff","secondary-fixed-dim":"#bec6e0","inverse-primary":"#93ccff","on-surface":"#0b1c30","surface-variant":"#d3e4fe","on-secondary-fixed-variant":"#3f465c","on-secondary":"#ffffff","surface-container-highest":"#d3e4fe","surface-card":"#FFFFFF","on-secondary-fixed":"#131b2e","primary":"#006194","status-completed-bg":"#D1FAE5","status-scheduled-bg":"#E0F2FE"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-2xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","space-xl":"2rem","sidebar-width":"260px","space-sm":"0.75rem","gutter-desktop":"1.5rem","content-max-width":"1600px","space-3xl":"3rem","sidebar-collapsed-width":"72px","space-2xl":"2.5rem","topbar-height":"68px","space-md":"1rem","space-xs":"0.5rem"},"fontFamily":{"label-sm":["Roboto"],"display-lg-mobile":["Roboto"],"headline-md":["Roboto"],"headline-sm":["Roboto"],"display-lg":["Roboto"],"body-sm":["Roboto"],"label-md":["Roboto"],"body-md":["Roboto"],"body-lg":["Roboto"],"mono-data":["Roboto"],"label-lg":["Roboto"],"headline-lg":["Roboto"]},"fontSize":{"label-sm":["14px",{"lineHeight":"18px","letterSpacing":"0.04em","fontWeight":"700"}],"display-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["34px",{"lineHeight":"42px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["16px",{"lineHeight":"22px","fontWeight":"400"}],"label-md":["16px",{"lineHeight":"22px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["18px",{"lineHeight":"26px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"26px","fontWeight":"400"}],"mono-data":["16px",{"lineHeight":"22px","letterSpacing":"0.01em","fontWeight":"500"}],"label-lg":["18px",{"lineHeight":"26px","fontWeight":"600"}],"headline-lg":["30px",{"lineHeight":"38px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased">
+
+<aside id="app-sidebar" class="fixed left-0 top-0 h-full bg-[#0F172A] z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.06)] overflow-hidden">
   <div class="flex flex-col flex-1 overflow-y-auto">
     <div class="h-[68px] px-space-lg flex items-center gap-space-sm border-b border-white/10">
-      <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-brand-teal-light"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div>
-      <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-white leading-none">MedSync</span><span class="font-label-sm text-[10px] text-white/50 tracking-wider uppercase mt-1">Healthcare System</span></div>
+      <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-brand-teal-light flex-shrink-0"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div>
+      <div class="flex flex-col sidebar-text"><span class="font-headline-sm text-headline-sm text-white leading-none">MedSync</span><span class="font-label-sm text-[10px] text-white/50 tracking-wider uppercase mt-1">Healthcare System</span></div>
     </div>
     <div class="p-space-md flex-1">
       <div class="mb-space-lg">
         <nav class="space-y-1" aria-label="Primary">
-          <a aria-current="page" class="flex items-center gap-space-sm px-space-md h-10 transition-all group bg-white/10 text-white font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-brand-teal-light before:rounded-r-full" href="#"><span class="material-symbols-outlined text-[20px] text-brand-teal-light">dashboard</span><span>Dashboard</span></a>
+          <a aria-current="page" class="flex items-center gap-space-sm px-space-md h-10 transition-all group bg-white/10 text-white font-label-lg rounded-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-brand-teal-light before:rounded-r-full" href="#"><span class="material-symbols-outlined text-[20px] text-brand-teal-light flex-shrink-0">dashboard</span><span class="sidebar-text">Dashboard</span></a>
         </nav>
       </div>
       <div class="mb-space-lg">
-        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Patients</div>
+        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider sidebar-group-label">Patients</div>
         <nav class="space-y-1" aria-label="Patients">
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">person_add</span><span>Register Patient</span></a>
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">contact_page</span><span>Patient Directory</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">person_add</span><span class="sidebar-text">Register Patient</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">contact_page</span><span class="sidebar-text">Patient Directory</span></a>
         </nav>
       </div>
       <div class="mb-space-lg">
-        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Appointments</div>
+        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider sidebar-group-label">Appointments</div>
         <nav class="space-y-1" aria-label="Appointments">
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">event_available</span><span>Book Appointment</span></a>
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">calendar_month</span><span>Manage Appointments</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">event_available</span><span class="sidebar-text">Book Appointment</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">calendar_month</span><span class="sidebar-text">Manage Appointments</span></a>
         </nav>
       </div>
       <div class="mb-space-lg">
-        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Billing &amp; Payments</div>
+        <div class="px-space-md mb-space-xs font-label-sm text-label-sm text-white/40 uppercase tracking-wider sidebar-group-label">Billing &amp; Payments</div>
         <nav class="space-y-1" aria-label="Billing and payments">
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">receipt_long</span><span>Invoices</span></a>
-          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">payments</span><span>Collect Payment</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">receipt_long</span><span class="sidebar-text">Invoices</span></a>
+          <a class="flex items-center gap-space-sm px-space-md h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg text-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white flex-shrink-0">payments</span><span class="sidebar-text">Collect Payment</span></a>
         </nav>
       </div>
     </div>
   </div>
   <div class="p-space-md border-t border-white/10 bg-[#0F172A]">
     <nav class="space-y-1" aria-label="Account">
-      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white">settings</span><span>Settings</span></a>
-      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white">help</span><span>Help Center</span></a>
-      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-rose-300 group-hover:text-rose-200">logout</span><span>Logout</span></a>
+      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white flex-shrink-0">settings</span><span class="sidebar-text">Settings</span></a>
+      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white flex-shrink-0">help</span><span class="sidebar-text">Help Center</span></a>
+      <a class="flex items-center gap-space-sm px-space-md h-9 rounded-lg text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all group font-body-md text-body-md" href="#"><span class="material-symbols-outlined text-[18px] text-rose-300 group-hover:text-rose-200 flex-shrink-0">logout</span><span class="sidebar-text">Logout</span></a>
     </nav>
   </div>
 </aside>
 
-<div class="pl-[260px]">
-  <header id="app-topbar" class="topbar-shell fixed top-0 left-[260px] right-0 h-[68px] bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-space-lg flex items-center justify-between shadow-[0_1px_4px_rgba(15,23,42,0.04)]">
+<div id="app-shell">
+  <header id="app-topbar" class="topbar-shell fixed top-0 right-0 h-[68px] bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-space-lg flex items-center justify-between shadow-[0_1px_4px_rgba(15,23,42,0.04)]">
     <div class="flex items-center gap-space-md">
-      <button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button" aria-label="Toggle sidebar"><span class="material-symbols-outlined text-[20px]">menu_open</span></button>
+      <button id="sidebar-toggle-btn" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button" aria-label="Toggle sidebar" aria-pressed="false"><span class="material-symbols-outlined text-[20px]">menu_open</span></button>
       <div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
         <span class="text-brand-navy-deep font-headline-sm text-headline-sm">MedSync</span><span class="text-outline">/</span><span>Reception Desk</span>
       </div>
@@ -66,7 +85,7 @@
       </div>
       <div class="h-5 w-px bg-border-subtle hidden lg:block"></div>
       <div class="flex items-center gap-1">
-        <button class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button" aria-label="Notifications"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span></button>
+        <button class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button" aria-label="Notifications, 1 unread"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card" aria-hidden="true"></span></button>
         <button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors" type="button" aria-label="Toggle theme"><span class="material-symbols-outlined text-[20px]">light_mode</span></button>
       </div>
       <div class="h-5 w-px bg-border-subtle"></div>
@@ -86,20 +105,13 @@
   <main class="content-shell relative pt-[68px] min-h-screen bg-canvas-bg w-full">
     <div class="flex flex-col w-full px-space-md md:px-space-xl py-space-lg space-y-space-lg max-w-[1600px] mx-auto">
 
-      <!-- Breadcrumb -->
-      <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 font-body-sm text-body-sm text-outline">
-        <a class="hover:text-primary transition-colors" href="#">MedSync</a>
-        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-        <span class="text-brand-navy-deep font-medium">Dashboard</span>
-      </nav>
-
       <!-- Top Greeting & Header Bar -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
         <div class="space-y-1">
           <div class="flex items-center gap-3">
             <h1 class="font-headline-lg text-headline-lg text-brand-navy-deep tracking-tight">Good morning, Sarah</h1>
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-md text-label-md">
-              <span class="w-2 h-2 rounded-full bg-status-completed-text"></span>
+              <span class="w-2 h-2 rounded-full bg-status-completed-text" aria-hidden="true"></span>
               Front Desk Active
             </span>
           </div>
@@ -113,12 +125,20 @@
             <span class="material-symbols-outlined text-[18px] text-primary mr-2">schedule</span>
             <span>Colombo Time: <strong class="font-mono-data text-brand-navy-deep ml-1" id="current-clock">09:42 AM</strong></span>
           </div>
-          <button class="inline-flex items-center gap-2 px-4 py-2 bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98]" type="button">
-            <span class="material-symbols-outlined text-[18px] text-primary">sync</span>
-            <span>Sync Live Queue</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button id="sync-queue-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98]" type="button">
+              <span class="material-symbols-outlined text-[18px] text-primary" id="sync-icon">sync</span>
+              <span>Sync Live Queue</span>
+            </button>
+            <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md" id="queue-status">
+              <span class="material-symbols-outlined text-[16px]">groups</span>
+              <span id="queue-count">4 waiting</span>
+            </span>
+          </div>
         </div>
       </div>
+      <!-- Live region so screen reader users hear the result of a sync, not just see it -->
+      <p class="sr-only" role="status" aria-live="polite" id="queue-live-region"></p>
 
       <!-- Primary Action Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -258,6 +278,74 @@
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+  })();
+
+  // Sidebar collapse: auto icon-only under 1024px is handled purely by CSS.
+  // This adds a manual override so the toggle button works at any viewport width.
+  (function sidebarToggle() {
+    const sidebar = document.getElementById('app-sidebar');
+    const shell = document.getElementById('app-shell');
+    const topbar = document.getElementById('app-topbar');
+    const btn = document.getElementById('sidebar-toggle-btn');
+    if (!sidebar || !shell || !topbar || !btn) return;
+
+    const EXPANDED = 260;
+    const COLLAPSED = 72;
+    let manual = null; // null = follow the CSS media query; 'expanded' / 'collapsed' = user override
+
+    function isAutoCollapsedNow() {
+      return window.matchMedia('(max-width: 1023px)').matches;
+    }
+
+    function apply() {
+      if (manual === null) {
+        sidebar.style.width = '';
+        shell.style.paddingLeft = '';
+        topbar.style.left = '';
+        sidebar.classList.remove('is-icon-only', 'is-expanded');
+        btn.setAttribute('aria-pressed', String(isAutoCollapsedNow()));
+        return;
+      }
+      const collapsed = manual === 'collapsed';
+      const width = collapsed ? COLLAPSED : EXPANDED;
+      sidebar.style.width = width + 'px';
+      shell.style.paddingLeft = width + 'px';
+      topbar.style.left = width + 'px';
+      sidebar.classList.toggle('is-icon-only', collapsed);
+      sidebar.classList.toggle('is-expanded', !collapsed);
+      btn.setAttribute('aria-pressed', String(collapsed));
+    }
+
+    btn.addEventListener('click', () => {
+      const currentlyCollapsed = manual === 'collapsed' || (manual === null && isAutoCollapsedNow());
+      manual = currentlyCollapsed ? 'expanded' : 'collapsed';
+      apply();
+    });
+
+    apply();
+  })();
+
+  // "Sync Live Queue" now visibly does something: refreshes the waiting-count
+  // badge and announces the result to screen readers via the live region.
+  (function syncQueue() {
+    const btn = document.getElementById('sync-queue-btn');
+    const icon = document.getElementById('sync-icon');
+    const countEl = document.getElementById('queue-count');
+    const liveRegion = document.getElementById('queue-live-region');
+    if (!btn || !countEl || !liveRegion) return;
+
+    btn.addEventListener('click', () => {
+      icon.classList.add('animate-spin');
+      btn.disabled = true;
+      // Simulated fetch of the live front-desk queue.
+      setTimeout(() => {
+        const waiting = Math.floor(Math.random() * 8) + 1;
+        countEl.textContent = waiting + (waiting === 1 ? ' waiting' : ' waiting');
+        liveRegion.textContent = 'Queue synced: ' + waiting + ' patient' + (waiting === 1 ? '' : 's') + ' currently waiting.';
+        icon.classList.remove('animate-spin');
+        btn.disabled = false;
+      }, 700);
+    });
   })();
 </script>
 </body></html>
