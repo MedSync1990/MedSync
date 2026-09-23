@@ -53,7 +53,7 @@ async def migrate():
         (None, "db/modules/chenith/treatment_catalogue.sql"),
         (None, "db/modules/kalana/specialty.sql"),
         (None, "db/modules/kalana/doctor.sql"),
-        (None, "db/modules/kalana/doctor_speciality.sql"),
+        (None, "db/modules/kalana/doctor_specialty.sql"),
         (None, "db/modules/kalana/doctor_availability_slots.sql"),
         (None, "db/modules/kalana/appointments.sql"),
         (None, "db/modules/kalana/fn_book_appointment.sql"),

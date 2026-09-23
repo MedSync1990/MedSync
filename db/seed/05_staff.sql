@@ -2,7 +2,7 @@ INSERT INTO staff (user_id, branch_id, username, password_hash)
 SELECT u.user_id,
        b.branch_id,
        split_part(u.email, '@', 1),
-       '$2b$12$LQv3c1yqBW6GZBqVqY5e2eX9y4Qd6R7fK8nM2pL5sT1uV3wX4yZ6a'
+    '$2b$12$4240chNONKaShJF.Q8MUguccZSbYxRc2UMxxqkASkXYzO02Y4z3RC'
 FROM app_user u
 JOIN branch b ON b.name = CASE (u.user_id - (SELECT min(user_id) FROM app_user WHERE email LIKE 'admin%')) % 10
     WHEN 0 THEN 'Colombo Central' WHEN 1 THEN 'Kandy City' WHEN 2 THEN 'Galle Fort'
