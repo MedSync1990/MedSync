@@ -1,6 +1,7 @@
 import asyncio
 import asyncpg
 import os
+import sys
 from dotenv import load_dotenv
 import logging
 from pathlib import Path
@@ -8,9 +9,9 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from the repository root regardless of the current directory.
+# Load the backend environment regardless of the current working directory.
 ROOT_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(dotenv_path=ROOT_DIR / ".env")
+load_dotenv(dotenv_path=ROOT_DIR / "backend" / ".env")
 
 
 async def migrate():
@@ -83,63 +84,88 @@ async def migrate():
         (None, "db/modules/ashen/03_rls_policies.sql"),
         (None, "db/modules/ashen/04_audit_triggers.sql"),
         (None, "db/modules/ashen/05_reporting_views.sql"),
-        (None, "db/seed/01_branches_staff.sql"),
-        (None, "db/seed/02_doctors_specialties_slots.sql"),
-        (None, "db/seed/app_user.sql"),
-        (None, "db/seed/patient.sql"),
-        (None, "db/seed/contact.sql"),
-        (None, "db/seed/allergy.sql"),
-        (None, "db/seed/patient_allergy.sql"),
-        (None, "db/seed/admission.sql"),
-        (None, "db/seed/treatment_catalogue.sql"),
-        (None, "db/seed/consultations.sql"),
-        (None, "db/seed/consultation_treatments.sql"),
-        (None, "db/seed/04_billing_insurance_seed.sql"),
+        (None, "db/seed/01_roles.sql"),
+        (None, "db/seed/02_branches.sql"),
+        (None, "db/seed/03_users.sql"),
+        (None, "db/seed/04_contacts.sql"),
+        (None, "db/seed/05_staff.sql"),
+        (None, "db/seed/06_specialties.sql"),
+        (None, "db/seed/07_doctors.sql"),
+        (None, "db/seed/08_doctor_specialities.sql"),
+        (None, "db/seed/09_patients.sql"),
+        (None, "db/seed/10_allergies.sql"),
+        (None, "db/seed/11_patient_allergies.sql"),
+        (None, "db/seed/12_admissions.sql"),
+        (None, "db/seed/13_treatments.sql"),
+        (None, "db/seed/14_slots.sql"),
+        (None, "db/seed/15_appointments.sql"),
+        (None, "db/seed/16_consultations.sql"),
+        (None, "db/seed/17_consultation_treatments.sql"),
+        (None, "db/seed/18_insurance_policies.sql"),
+        (None, "db/seed/19_patient_insurance.sql"),
+        (None, "db/seed/20_policy_coverage.sql"),
+        (None, "db/seed/21_invoices.sql"),
+        (None, "db/seed/22_payments.sql"),
+        (None, "db/seed/23_audit_log.sql"),
     ]
 
-    for item in files_to_run:
-        inline_sql, file_path = item
+    if "--seed-only" in sys.argv:
+        seed_files = [
+            "01_roles.sql",
+            "02_branches.sql",
+            "03_users.sql",
+            "04_contacts.sql",
+            "05_staff.sql",
+            "06_specialties.sql",
+            "07_doctors.sql",
+            "08_doctor_specialities.sql",
+            "09_patients.sql",
+            "10_allergies.sql",
+            "11_patient_allergies.sql",
+            "12_admissions.sql",
+            "13_treatments.sql",
+            "14_slots.sql",
+            "15_appointments.sql",
+            "16_consultations.sql",
+            "17_consultation_treatments.sql",
+            "18_insurance_policies.sql",
+            "19_patient_insurance.sql",
+            "20_policy_coverage.sql",
+            "21_invoices.sql",
+            "22_payments.sql",
+            "23_audit_log.sql",
+        ]
+        files_to_run = [(None, f"db/seed/{file_name}") for file_name in seed_files]
+        logger.info("Seed-only mode enabled; schema files will be skipped.")
 
-        if inline_sql:
-            label = "inline SQL"
-            sql = inline_sql
-        else:
-            if not file_path:
-                continue
-            label = file_path
-            try:
-                with open(ROOT_DIR / file_path, "r", encoding="utf-8") as f:
-                    sql = f.read()
-            except FileNotFoundError:
-                logger.error(f"File not found: {file_path}")
-                await conn.close()
-                return
-            else:
-                logger.warning("Empty migration item skipped.")
-                continue
+    try:
+        async with conn.transaction():
+            for inline_sql, file_path in files_to_run:
+                if inline_sql:
+                    label = "inline SQL"
+                    sql = inline_sql
+                else:
+                    if not file_path:
+                        continue
+                    label = file_path
+                    try:
+                        sql = (ROOT_DIR / file_path).read_text(encoding="utf-8")
+                    except FileNotFoundError:
+                        raise RuntimeError(f"SQL file not found: {file_path}") from None
 
-        logger.info(f"Executing {label}...")
-        try:
-            await conn.execute(sql)
-            logger.info(f"  ✓ {label}")
-        except Exception as e:
-            error_str = str(e).lower()
-            if "already exists" in error_str:
-                logger.warning(f"  ⚠ Skipped (already exists): {label}")
-                continue
-                
-            logger.error(f"  ✗ Error in {label}: {e}")
-            if getattr(e, "sqlstate", None) in {"42P07", "42710", "42723"}:
-                logger.warning("  ⚠ Object already exists; continuing with the remaining migration.")
-                continue
-            # Continue with remaining files if it's a non-critical error (e.g., role creation on Neon)
-            if file_path and "07_pg_roles" in file_path:
-                logger.warning("  ⚠ Role creation may not be supported on managed databases — skipping.")
-                continue
-            await conn.close()
-            return
+                    if not sql.strip():
+                        logger.warning("Skipping empty SQL file: %s", label)
+                        continue
 
-    await conn.close()
+                logger.info("Executing %s...", label)
+                await conn.execute(sql)
+                logger.info("  ✓ %s", label)
+    except Exception:
+        logger.exception("Migration failed; all changes in this run were rolled back.")
+        raise
+    finally:
+        await conn.close()
+
     logger.info("Migration complete!")
 
 
