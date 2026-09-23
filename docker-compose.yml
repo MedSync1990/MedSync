@@ -1,5 +1,17 @@
 # docker-compose.yml
 services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: medsync
+      POSTGRES_PASSWORD: medsync_dev
+      POSTGRES_DB: medsync
+    ports:
+      - "5432:5432"         # expose locally so you can connect with psql / DBeaver
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build: 
       context: ./backend
@@ -8,6 +20,13 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    # environment:
+    #   # Uncomment below to use local DB instead of Neon
+    #   DATABASE_URL: postgresql://medsync:medsync_dev@db:5432/medsync
+    volumes:
+      - ./db:/app/db
+    depends_on:
+      - db
     restart: always
 
   frontend:
@@ -19,3 +38,6 @@ services:
     depends_on:
       - backend
     restart: always
+
+volumes:
+  postgres_data:

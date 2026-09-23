@@ -1,25 +1,30 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './receptionist/components/layout/DashboardLayout';
-import InvoicePage from './receptionist/pages/invoice/InvoicePage';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Layout } from './components/Layout';
+import InvoicePage from './pages/shared/InvoicePage';
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Receptionist Routes */}
-        <Route path="/receptionist" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/receptionist/invoice" replace />} />
-          <Route path="invoice" element={<InvoicePage />} />
-          <Route path="invoice/:invoiceId" element={<InvoicePage />} />
-          {/* Add more receptionist routes here later */}
+        <Route element={<Layout />}>
+          <Route path="/receptionist/invoices" element={<InvoicePage />} />
+          <Route path="/receptionist/invoices/:invoiceId" element={<InvoicePage />} />
         </Route>
-        
-        {/* Redirect root to receptionist/invoice */}
-        <Route path="/" element={<Navigate to="/receptionist/invoice" replace />} />
+
+        <Route path="/billing/invoices" element={<Navigate to="/receptionist/invoices" replace />} />
+        <Route path="/billing/invoices/:invoiceId" element={<LegacyInvoiceRedirect />} />
+        <Route path="/receptionist/invoice" element={<Navigate to="/receptionist/invoices" replace />} />
+        <Route path="/receptionist/invoice/:invoiceId" element={<LegacyInvoiceRedirect />} />
+        <Route path="/" element={<Navigate to="/receptionist/invoices" replace />} />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function LegacyInvoiceRedirect() {
+  const { invoiceId } = useParams<{ invoiceId: string }>();
+  return <Navigate to={`/receptionist/invoices/${invoiceId || ''}`} replace />;
 }
 
 export default App;

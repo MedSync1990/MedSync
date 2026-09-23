@@ -1,4 +1,4 @@
-import type { InvoiceData } from './invoiceTypes';
+import type { InvoiceData } from '../invoiceTypes';
 
 interface InvoiceDetailsProps {
   invoiceData: InvoiceData;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import InvoiceDetails from '../../components/invoice/InvoiceDetails';
-import InvoiceSearch from '../../components/invoice/InvoiceSearch';
-import RecordPaymentModal from '../../components/invoice/RecordPaymentModal';
-import type { InvoiceData } from '../../components/invoice/invoiceTypes';
+import InvoiceDetails from '../../features/invoices/components/InvoiceDetails';
+import InvoiceSearch from '../../features/invoices/components/InvoiceSearch';
+import RecordPaymentModal from '../../features/invoices/components/RecordPaymentModal';
+import type { InvoiceData } from '../../features/invoices/invoiceTypes';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -63,7 +63,7 @@ export default function InvoicePage() {
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (searchQuery.trim()) navigate(`/receptionist/invoice/${searchQuery.trim()}?type=${searchType}`);
+    if (searchQuery.trim()) navigate(`/receptionist/invoices/${searchQuery.trim()}?type=${searchType}`);
   };
 
   const handleRecordPayment = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -108,7 +108,7 @@ export default function InvoicePage() {
         <button className="inline-flex items-center gap-2 bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-[18px] px-5 py-3 rounded-xl border border-border-subtle shadow-sm transition-all duration-150" type="button" onClick={() => window.print()}><span className="material-symbols-outlined text-[22px] text-outline">ios_share</span><span>Export Invoices</span></button>
       </div>
 
-      <InvoiceSearch searchQuery={searchQuery} searchType={searchType} invoiceId={invoiceId} onSearchQueryChange={setSearchQuery} onSearchTypeChange={setSearchType} onSubmit={handleSearchSubmit} onQuickLookup={() => navigate('/receptionist/invoice/2')} />
+      <InvoiceSearch searchQuery={searchQuery} searchType={searchType} invoiceId={invoiceId} onSearchQueryChange={setSearchQuery} onSearchTypeChange={setSearchType} onSubmit={handleSearchSubmit} onQuickLookup={() => navigate('/receptionist/invoices/2')} />
 
       <div className="w-full">
         {!invoiceId ? (
