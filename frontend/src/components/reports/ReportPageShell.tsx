@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../auth/AuthContext';
-import { get } from '../../../api/client';
-import type { BranchResponse } from '../../../api/types';
+import { useAuth } from '../../auth/AuthContext';
+import { get } from '../../api/client';
+import type { BranchResponse } from '../../api/types';
 
 interface ReportPageShellProps {
   title: string;
@@ -39,13 +39,13 @@ export const ReportPageShell: React.FC<ReportPageShellProps> = ({
     // Only load branches if admin
     if (!isBranchManager) {
       get<{ data: BranchResponse[] }>('/branches')
-        .then((res) => {
+        .then((res: any) => {
           // Admin endpoint returns array or paginated response, assuming paginated pattern based on other endpoints
           // Actually, api-routes says GET /branches returns list, but we can handle both
           if (Array.isArray(res)) setBranches(res);
           else if (res.data) setBranches(res.data);
         })
-        .catch((err) => console.error('Failed to load branches:', err));
+        .catch((err: any) => console.error('Failed to load branches:', err));
     }
   }, [isBranchManager]);
 

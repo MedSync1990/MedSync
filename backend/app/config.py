@@ -10,9 +10,9 @@ ENV_FILE = BACKEND_DIR / ".env"
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str
+    DATABASE_URL: str = ""
     DATABASE_ADMIN_URL: str | None = None
-    JWT_SECRET: str
+    JWT_SECRET: str = ""
     JWT_EXPIRY_MINUTES: int = Field(default=60)
     COOKIE_SECURE: bool = True
     CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80", "http://localhost"]
@@ -22,6 +22,13 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def validate_database_url(cls, value: str) -> str:
+        if not value:
+            raise ValueError("DATABASE_URL must be configured.")
+        return value
 
     @field_validator("JWT_SECRET")
     @classmethod

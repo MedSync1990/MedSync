@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './receptionist/components/layout/DashboardLayout';
-import InvoicePage from './receptionist/pages/invoice/InvoicePage';
+import { Layout as DashboardLayout } from './components/Layout';
+import InvoicePage from './pages/shared/InvoicePage';
 import DashboardPage from './pages/dashboard-page/DashboardPage';
 import LoginPage from './pages/login-page/LoginPage';
 
@@ -57,9 +57,5 @@ function App() {
   );
 }
 
-function LegacyInvoiceRedirect() {
-  const { invoiceId } = useParams<{ invoiceId: string }>();
-  return <Navigate to={`/receptionist/invoices/${invoiceId || ''}`} replace />;
-}
 
 export default App;

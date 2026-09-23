@@ -52,8 +52,11 @@ async def get_stats_overview(
         where_clause = "WHERE branch_id = $1"
         args.append(effective_branch)
         
-    # Patients (not branch specific in DB, but we could scope it if needed)
-    patients_count = await db.fetchval("SELECT COUNT(*) FROM patient WHERE is_active = TRUE")
+    # Patients
+    if effective_branch is not None:
+        patients_count = await db.fetchval("SELECT COUNT(*) FROM patient WHERE is_active = TRUE AND registered_branch = $1", effective_branch)
+    else:
+        patients_count = await db.fetchval("SELECT COUNT(*) FROM patient WHERE is_active = TRUE")
     
     # Doctors
     doc_query = f"SELECT COUNT(*) FROM staff WHERE is_active = TRUE AND user_id IN (SELECT user_id FROM app_user WHERE role_id = (SELECT role_id FROM role WHERE role_name = 'Doctor')) {where_clause.replace('WHERE', 'AND') if where_clause else ''}"
@@ -68,19 +71,20 @@ async def get_stats_overview(
     
     # Today's appointments
     today = date.today()
-    apt_args = [today]
-    apt_where = "appointment_date = $1"
-    
+    apt_query = """
+        SELECT a.status, COUNT(*) as count 
+        FROM appointments a
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        WHERE das.date = $1
+    """
+    apt_args: list[object] = [today]
     if effective_branch is not None:
+        apt_query += " AND s.branch_id = $2"
         apt_args.append(effective_branch)
-        apt_where += " AND branch_id = $2"
         
-    appointments = await db.fetch(f"""
-        SELECT status, COUNT(*) as count 
-        FROM appointment 
-        WHERE {apt_where} 
-        GROUP BY status
-    """, *apt_args)
+    apt_query += " GROUP BY a.status"
+    appointments = await db.fetch(apt_query, *apt_args)
     
     scheduled = 0
     completed = 0
@@ -92,10 +96,10 @@ async def get_stats_overview(
         elif row['status'] == 'Cancelled': cancelled = row['count']
         
     return StatsOverview(
-        total_patients=patients_count,
-        total_doctors=doctors_count,
-        total_staff=staff_count,
-        total_branches=branches_count,
+        total_patients=patients_count or 0,
+        total_doctors=doctors_count or 0,
+        total_staff=staff_count or 0,
+        total_branches=branches_count or 0,
         today_appointments=TodayAppointments(
             scheduled=scheduled,
             completed=completed,
@@ -122,15 +126,14 @@ async def get_recent_activity(
         
     query = """
         SELECT 
-            log_id as id,
-            action as action_type,
+            audit_id as id,
+            operation as action_type,
             table_name as entity_type,
-            record_id as entity_id,
-            'Performed ' || action || ' on ' || table_name as description,
-            user_id::text as performed_by,
-            timestamp::text as created_at
+            row_pk as entity_id,
+            changed_by as performed_by,
+            changed_at::text as created_at
         FROM audit_log
-        ORDER BY timestamp DESC
+        ORDER BY changed_at DESC
         LIMIT $1
     """
     rows = await db.fetch(query, limit)
@@ -145,13 +148,18 @@ async def get_recent_activity(
         if action == 'INSERT': desc = f"Created new {entity} record"
         elif action == 'DELETE': desc = f"Deleted {entity} record"
         
+        raw_entity_id = row['entity_id']
+        entity_id_val = int(raw_entity_id) if raw_entity_id and str(raw_entity_id).isdigit() else None
+        
+        user_str = f"User #{row['performed_by']}" if row['performed_by'] else "System"
+
         items.append(ActivityItem(
             id=row['id'],
             action_type=row['action_type'],
             entity_type=row['entity_type'],
-            entity_id=row['entity_id'],
+            entity_id=entity_id_val,
             description=desc,
-            performed_by=f"User #{row['performed_by']}",
+            performed_by=user_str,
             created_at=row['created_at']
         ))
         

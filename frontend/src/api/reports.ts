@@ -58,14 +58,14 @@ export interface InsuranceVsOutOfPocketParams {
 export function getAppointmentsSummary(
   params?: AppointmentsSummaryParams,
 ): Promise<AppointmentsSummaryResponse> {
-  return get<AppointmentsSummaryResponse>('/reports/appointments-summary', params);
+  return get<AppointmentsSummaryResponse>('/reports/appointments-summary', params as Record<string, any>);
 }
 
 /** Doctor Revenue aggregate report (A, BM, D) */
 export function getDoctorRevenue(
   params?: DoctorRevenueParams,
 ): Promise<DoctorRevenueResponse> {
-  return get<DoctorRevenueResponse>('/reports/doctor-revenue', params);
+  return get<DoctorRevenueResponse>('/reports/doctor-revenue', params as Record<string, any>);
 }
 
 /** Doctor Itemized Payments — line-by-line payment detail (A, BM own branch, D self) */
@@ -73,26 +73,26 @@ export function getDoctorItemizedPayments(
   doctorId: number,
   params?: ItemizedPaymentParams,
 ): Promise<ItemizedPaymentResponse> {
-  return get<ItemizedPaymentResponse>(`/reports/doctor-revenue/${doctorId}/payments`, params);
+  return get<ItemizedPaymentResponse>(`/reports/doctor-revenue/${doctorId}/payments`, params as Record<string, any>);
 }
 
 /** Outstanding Balances report (A, BM) */
 export function getOutstandingBalances(
   params?: OutstandingBalancesParams,
 ): Promise<OutstandingBalancesResponse> {
-  return get<OutstandingBalancesResponse>('/reports/outstanding-balances', params);
+  return get<OutstandingBalancesResponse>('/reports/outstanding-balances', params as Record<string, any>);
 }
 
 /** Treatment Category Breakdown report (A, BM) */
 export function getTreatmentCategories(
   params?: TreatmentCategoriesParams,
 ): Promise<TreatmentCategoriesResponse> {
-  return get<TreatmentCategoriesResponse>('/reports/treatment-categories', params);
+  return get<TreatmentCategoriesResponse>('/reports/treatment-categories', params as Record<string, any>);
 }
 
 /** Insurance vs Out-of-Pocket report (A, BM) */
 export function getInsuranceVsOutOfPocket(
   params?: InsuranceVsOutOfPocketParams,
 ): Promise<InsuranceVsOutOfPocketResponse> {
-  return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', params);
+  return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', params as Record<string, any>);
 }

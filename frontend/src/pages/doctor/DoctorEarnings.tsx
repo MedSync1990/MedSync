@@ -31,11 +31,11 @@ export const DoctorEarnings: React.FC = () => {
   };
 
   const loadItemizedPayments = async () => {
-    if (!user?.userId) return;
+    if (!user?.id) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await getDoctorItemizedPayments(user.userId, {
+      const res = await getDoctorItemizedPayments(user.id, {
         from: dateFrom || undefined,
         to: dateTo || undefined,
       });
@@ -53,7 +53,7 @@ export const DoctorEarnings: React.FC = () => {
       loadItemizedPayments();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, user?.userId]);
+  }, [activeTab, user?.id]);
 
   return (
     <div className="flex flex-col w-full pb-space-3xl max-w-content-max-width mx-auto">

@@ -74,14 +74,14 @@ export const InsuranceVsOutOfPocket: React.FC = () => {
                   outerRadius={130}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
-                  {chartData.map((entry, index) => (
+                  {chartData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => `LKR ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                  formatter={(value: any) => `LKR ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Legend verticalAlign="bottom" height={36} />
