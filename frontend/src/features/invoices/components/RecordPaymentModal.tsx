@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react';
-import type { InvoiceData } from './invoiceTypes';
+import type { InvoiceData } from '../invoiceTypes';
 
 interface RecordPaymentModalProps {
   invoiceData: InvoiceData;

@@ -1,7 +1,15 @@
 import asyncio
-import asyncpg
+import os
+from pathlib import Path
 
-DATABASE_URL = "postgresql://neondb_owner:npg_d73vqaJpKmXG@ep-still-king-b33dqhaw-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+import asyncpg
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set in backend/.env")
 
 async def run():
     conn = await asyncpg.connect(DATABASE_URL)

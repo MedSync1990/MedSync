@@ -1,6 +1,7 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import { useAuth, UserRole } from '../auth/AuthContext';
+import { useAuth } from '../auth/AuthContext';
+import type { UserRole } from '../auth/AuthContext';
 import { DoctorDashboard } from './doctor/DoctorDashboard';
 
 /**
