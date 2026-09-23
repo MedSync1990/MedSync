@@ -1,4 +1,16 @@
 services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: medsync
+      POSTGRES_PASSWORD: medsync_dev
+      POSTGRES_DB: medsync
+    ports:
+      - "5432:5432"         # expose locally so you can connect with psql / DBeaver
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build:
       context: ./backend

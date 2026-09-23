@@ -11,7 +11,7 @@ ENV_FILE = BACKEND_DIR / ".env"
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    DATABASE_ADMIN_URL: str
+    DATABASE_ADMIN_URL: str | None = None
     JWT_SECRET: str
     JWT_EXPIRY_MINUTES: int = Field(default=60)
     COOKIE_SECURE: bool = True
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
         return value
 
     def get_admin_url(self) -> str:
-        return self.DATABASE_ADMIN_URL
+        return self.DATABASE_ADMIN_URL or self.DATABASE_URL
 
 
 config = Settings()

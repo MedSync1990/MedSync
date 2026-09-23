@@ -27,4 +27,9 @@ function App() {
   );
 }
 
+function LegacyInvoiceRedirect() {
+  const { invoiceId } = useParams<{ invoiceId: string }>();
+  return <Navigate to={`/receptionist/invoices/${invoiceId || ''}`} replace />;
+}
+
 export default App;
