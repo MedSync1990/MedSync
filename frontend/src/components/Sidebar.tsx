@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth, UserRole } from '../auth/AuthContext';
+import { useAuth } from '../auth/AuthContext';
+import type { UserRole } from '../auth/AuthContext';
 
 export interface NavItem {
   label: string;
