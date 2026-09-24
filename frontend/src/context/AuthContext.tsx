@@ -5,7 +5,6 @@ export type UserRole =
   | 'Branch Manager'
   | 'Doctor'
   | 'Receptionist'
-  | 'Cashier'
   | 'Patient';
 
 export interface UserProfile {
@@ -78,10 +77,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     setToken(null);
-    fetch('http://localhost:8000/api/v1/auth/logout', {
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    fetch(`${apiBase}/api/v1/auth/logout`, {
       method: 'POST',
       credentials: 'include',
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   return (
