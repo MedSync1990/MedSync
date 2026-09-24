@@ -53,9 +53,24 @@ class PatientInvoicesResponse(BaseModel):
     data: List[PatientInvoiceItem]
 
 
+class RecentInvoiceItem(BaseModel):
+    invoice_code: str
+    patient_name: str
+    created_at: datetime
+    total_amount: float
+    outstanding_balance: float
+    status: str
+
+
+class RecentInvoicesResponse(BaseModel):
+    data: List[RecentInvoiceItem]
+
+
+
 class RecordPaymentRequest(BaseModel):
     amount: float = Field(gt=0, description="Amount to pay against the invoice")
-    payment_type: str = Field(description="Payment type: Cash, Card, or Insurance Settlement")
+    payment_type: str = Field(description="Payment type: Cash, Card / POS, or LankaPay / QR")
+    reference: Optional[str] = Field(default=None, description="Optional POS slip number or remarks")
 
 
 class RecordPaymentResponse(BaseModel):

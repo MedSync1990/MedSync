@@ -29,37 +29,45 @@ export const Sidebar: React.FC = () => {
     {
       header: 'MY WORK',
       items: [
-        { label: 'My Schedule', path: '/my-schedule', icon: 'calendar_month', roles: ['Doctor'] },
-        { label: 'Consultation', path: '/consultation', icon: 'stethoscope', roles: ['Doctor'] },
+        { label: 'My Schedule', path: '/doctor/schedule', icon: 'calendar_month', roles: ['Doctor'] },
+        { label: 'Consultation', path: '/doctor/consultation', icon: 'stethoscope', roles: ['Doctor'] },
       ],
     },
     {
       header: 'PATIENTS & VISITS',
       items: [
+<<<<<<< HEAD
         { label: 'Register Patient', path: "/receptionist/register-patient", icon: 'person_add', roles: ['Receptionist', 'Administrator'] },
         { label: 'Patient Directory', path: '/patients', icon: 'folder_shared', roles: ['Receptionist', 'Administrator'] },
         { label: 'Book Appointment', path: '/appointments/book', icon: 'calendar_today', roles: ['Receptionist', 'Patient', 'Administrator'] },
         { label: 'Manage Appointments', path: '/appointments', icon: 'event_note', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
+=======
+        { label: 'Register Patient', path: '/receptionist/register-patient', icon: 'person_add', roles: ['Receptionist', 'Administrator'] },
+        { label: 'Patient Directory', path: '/receptionist/patients', icon: 'folder_shared', roles: ['Receptionist', 'Administrator'] },
+        { label: 'Book Appointment', path: '/receptionist/book-appointment', icon: 'calendar_today', roles: ['Receptionist', 'Patient', 'Administrator'] },
+        { label: 'Manage Appointments', path: '/receptionist/appointments', icon: 'event_note', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
+>>>>>>> development
       ],
     },
     {
       header: 'BILLING & PAYMENTS',
       items: [
-        { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', roles: ['Receptionist', 'Cashier', 'Administrator', 'Branch Manager'] },
-        { label: 'Collect Payment', path: '/billing/collect', icon: 'payments', roles: ['Cashier', 'Administrator'] },
+        { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
+        { label: 'Collect Payment', path: '/receptionist/collect-payment', icon: 'payments', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
       ],
     },
     {
       header: 'EARNINGS & REPORTS',
       items: [
-        { label: 'My Earnings', path: '/my-earnings', icon: 'account_balance_wallet', roles: ['Doctor'] },
-        { label: 'Reports', path: '/reports', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
+        { label: 'My Earnings', path: '/doctor/earnings', icon: 'account_balance_wallet', roles: ['Doctor'] },
+        { label: 'Reports', path: '/reports/appointments-summary', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
       ],
     },
     {
       header: 'REFERENCE',
       items: [
-        { label: 'Treatment Catalogue', path: '/treatment-catalogue', icon: 'menu_book' },
+        { label: 'Treatment Catalogue', path: '/doctor/treatment-catalogue', icon: 'menu_book', roles: ['Doctor'] },
+        { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'menu_book', roles: ['Administrator'] },
         { label: 'Manage Branches', path: '/admin/branches', icon: 'domain', roles: ['Administrator'] },
         { label: 'Manage Staff', path: '/admin/staff', icon: 'badge', roles: ['Administrator', 'Branch Manager'] },
         { label: 'Manage Doctors', path: '/admin/doctors', icon: 'medical_services', roles: ['Administrator'] },

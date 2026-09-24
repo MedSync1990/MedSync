@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import InvoiceDetails from '../../components/invoices/InvoiceDetails';
 import InvoiceSearch from '../../components/invoices/InvoiceSearch';
-import RecordPaymentModal from '../../components/invoices/RecordPaymentModal';
-import type { InvoiceData } from '../../types/invoiceTypes';
+import type { InvoiceData, RecentInvoiceItem } from '../../types/invoiceTypes';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1`;
 
 export default function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -17,22 +16,35 @@ export default function InvoicePage() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentType, setPaymentType] = useState('Cash');
-  const [paymentSubmitting, setPaymentSubmitting] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
+  const [recentInvoices, setRecentInvoices] = useState<RecentInvoiceItem[]>([]);
   const urlSearchType = searchParams.get('type');
 
   useEffect(() => {
     setSearchQuery(invoiceId || '');
-    if (invoiceId) fetchInvoiceDetail(invoiceId);
-    else {
+    if (invoiceId) {
+      fetchInvoiceDetail(invoiceId);
+    } else {
       setInvoiceData(null);
       setError(null);
+      fetchRecentInvoices();
     }
   }, [invoiceId, urlSearchType]);
+
+  const fetchRecentInvoices = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/invoices/recent`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRecentInvoices(data.data || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch recent invoices', e);
+    }
+  };
 
   const fetchInvoiceDetail = async (identifier: string) => {
     setLoading(true);
@@ -52,7 +64,6 @@ export default function InvoicePage() {
       }
       const data: InvoiceData = await response.json();
       setInvoiceData(data);
-      if (data.outstanding_balance > 0) setPaymentAmount(data.outstanding_balance.toString());
     } catch (fetchError: any) {
       setError(fetchError.message || 'Failed to fetch invoice details.');
       setInvoiceData(null);
@@ -66,35 +77,10 @@ export default function InvoicePage() {
     if (searchQuery.trim()) navigate(`/receptionist/invoices/${searchQuery.trim()}?type=${searchType}`);
   };
 
-  const handleRecordPayment = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!invoiceId || !paymentAmount || Number(paymentAmount) <= 0) {
-      setPaymentError('Please enter a valid payment amount greater than zero.');
-      return;
-    }
-    setPaymentSubmitting(true);
-    setPaymentError(null);
-    setPaymentSuccess(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/invoices/${encodeURIComponent(invoiceId)}/payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ amount: parseFloat(paymentAmount), payment_type: paymentType }),
-      });
-      const responseData = await response.json();
-      if (!response.ok) throw new Error(responseData.message || 'Failed to record payment.');
-      setPaymentSuccess(responseData.message || 'Payment recorded successfully!');
-      setTimeout(() => {
-        setShowPaymentModal(false);
-        setPaymentSuccess(null);
-      }, 1500);
-      fetchInvoiceDetail(invoiceId);
-    } catch (paymentSubmitError: any) {
-      setPaymentError(paymentSubmitError.message || 'An error occurred while recording payment.');
-    } finally {
-      setPaymentSubmitting(false);
-    }
+  // When "Record Payment" is clicked, navigate to the Collect Payment page
+  // passing the invoice code in the URL so that page can pre-load the invoice.
+  const handleRecordPayment = (invoiceCode: string) => {
+    navigate(`/receptionist/collect-payment/${encodeURIComponent(invoiceCode)}`);
   };
 
   return (
@@ -112,15 +98,75 @@ export default function InvoicePage() {
 
       <div className="w-full">
         {!invoiceId ? (
-          <div className="bg-surface-card rounded-2xl border border-dashed border-border-subtle p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-sm"><div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-primary"><span className="material-symbols-outlined text-[36px]">receipt_long</span></div><div className="space-y-1"><h3 className="text-[22px] font-bold text-brand-navy-deep">Enter an Invoice Code or Patient NIC to Search</h3><p className="text-[16px] text-on-surface-variant max-w-md mx-auto">Use the search console above or click a quick sample invoice button to load real patient invoice details and treatment breakdowns.</p></div></div>
+          <div className="w-full">
+            {recentInvoices.length > 0 ? (
+              <div className="bg-surface-card rounded-2xl border border-border-subtle overflow-hidden shadow-sm">
+                <div className="px-6 py-4 border-b border-border-subtle bg-surface-subtle">
+                  <h3 className="font-bold text-brand-navy-deep text-[18px]">Recent Invoices</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-surface-main border-b border-border-subtle text-on-surface-variant font-label-sm uppercase tracking-wider text-[14px]">
+                        <th className="px-6 py-4 font-semibold">Date</th>
+                        <th className="px-6 py-4 font-semibold">Invoice Number</th>
+                        <th className="px-6 py-4 font-semibold">Patient</th>
+                        <th className="px-6 py-4 font-semibold text-right">Amount</th>
+                        <th className="px-6 py-4 font-semibold text-right">Outstanding</th>
+                        <th className="px-6 py-4 font-semibold text-center">Status</th>
+                        <th className="px-6 py-4 font-semibold text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-subtle">
+                      {recentInvoices.map((inv) => (
+                        <tr key={inv.invoice_code} className="hover:bg-surface-subtle transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-[15px]">{new Date(inv.created_at).toLocaleDateString()}</td>
+                          <td className="px-6 py-4 whitespace-nowrap font-medium text-brand-navy-deep">{inv.invoice_code}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-[15px]">{inv.patient_name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right font-medium">Rs. {inv.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-orange-600">Rs. {inv.outstanding_balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`inline-flex px-3 py-1 rounded-full text-[13px] font-bold ${inv.status === 'Paid' ? 'bg-green-100 text-green-700' : inv.status === 'Unpaid' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>{inv.status}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <button
+                              onClick={() => navigate(`/receptionist/invoices/${inv.invoice_code}?type=invoice`)}
+                              className="text-primary hover:text-primary-dark font-medium text-[15px] inline-flex items-center gap-1"
+                            >
+                              <span>View</span>
+                              <span className="material-symbols-outlined text-[16px]">visibility</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-surface-card rounded-2xl border border-dashed border-border-subtle p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-sm">
+                <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined text-[36px]">receipt_long</span>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-[22px] font-bold text-brand-navy-deep">Enter an Invoice Code or Patient NIC to Search</h3>
+                  <p className="text-[16px] text-on-surface-variant max-w-md mx-auto">Use the search console above to load real patient invoice details and treatment breakdowns.</p>
+                </div>
+              </div>
+            )}
+          </div>
         ) : loading ? (
           <div className="bg-surface-card rounded-2xl border border-border-subtle p-12 text-center flex flex-col items-center justify-center space-y-3 shadow-sm"><div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div><p className="text-[18px] font-semibold text-brand-navy-deep">Loading invoice details...</p></div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-8 text-center space-y-3 shadow-sm"><span className="material-symbols-outlined text-[42px] text-red-500">error</span><h3 className="text-[22px] font-bold">Error Loading Invoice</h3><p className="text-[16px]">{error}</p></div>
-        ) : invoiceData ? <InvoiceDetails invoiceData={invoiceData} onPrint={() => window.print()} onRecordPayment={() => setShowPaymentModal(true)} /> : null}
+        ) : invoiceData ? (
+          <InvoiceDetails
+            invoiceData={invoiceData}
+            onPrint={() => window.print()}
+            onRecordPayment={() => handleRecordPayment(invoiceData.invoice_code)}
+          />
+        ) : null}
       </div>
-
-      {showPaymentModal && invoiceData && <RecordPaymentModal invoiceData={invoiceData} paymentAmount={paymentAmount} paymentType={paymentType} paymentSubmitting={paymentSubmitting} paymentError={paymentError} paymentSuccess={paymentSuccess} onPaymentAmountChange={setPaymentAmount} onPaymentTypeChange={setPaymentType} onSubmit={handleRecordPayment} onClose={() => setShowPaymentModal(false)} />}
     </div>
   );
 }

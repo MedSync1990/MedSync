@@ -26,11 +26,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
 
   return (
     <header
-      className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-shadow duration-200 ${
-        isScrolled
+      className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-shadow duration-200 ${isScrolled
           ? 'shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
           : 'shadow-[0_1px_4px_rgba(15,23,42,0.04)]'
-      }`}
+        }`}
     >
       {/* Greeting & Role Info */}
       <div className="flex items-center gap-space-md">

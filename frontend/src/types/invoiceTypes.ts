@@ -29,3 +29,12 @@ export interface InvoiceData {
   items: InvoiceLineItem[];
   payments: InvoicePayment[];
 }
+
+export interface RecentInvoiceItem {
+  invoice_code: string;
+  patient_name: string;
+  created_at: string;
+  total_amount: number;
+  outstanding_balance: number;
+  status: string;
+}
