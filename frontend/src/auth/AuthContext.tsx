@@ -31,11 +31,11 @@ interface AuthContextType {
 // Default mock user profile so team members can immediately test their pages
 const defaultTestUser: UserProfile = {
   id: 1,
-  username: 'kbandara',
-  firstName: 'K.',
-  lastName: 'Bandara',
-  role: 'Doctor',
-  roleTitle: 'Doctor · Cardiology Specialist',
+  username: 'receptionist',
+  firstName: 'Sarah',
+  lastName: 'Perera',
+  role: 'Receptionist',
+  roleTitle: 'Receptionist Portal',
   branchId: 1,
   branchName: 'Colombo Central Branch',
   avatarUrl:

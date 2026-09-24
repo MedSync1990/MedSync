@@ -46,15 +46,15 @@ BEGIN
     END IF;
 
     -- Failed login: increment counter, lock if threshold reached
-    UPDATE staff
-    SET failed_login_attempts = failed_login_attempts + 1,
+    UPDATE staff AS staff_row
+    SET failed_login_attempts = staff_row.failed_login_attempts + 1,
         locked_until = CASE
-            WHEN failed_login_attempts + 1 >= p_lockout_threshold
+            WHEN staff_row.failed_login_attempts + 1 >= p_lockout_threshold
                 THEN now() + INTERVAL '15 minutes'
-            ELSE locked_until
+            ELSE staff_row.locked_until
         END
-    WHERE user_id = v_user_id
-    RETURNING (failed_login_attempts >= p_lockout_threshold), staff.locked_until
+    WHERE staff_row.user_id = v_user_id
+    RETURNING (staff_row.failed_login_attempts >= p_lockout_threshold), staff_row.locked_until
     INTO is_locked, locked_until;
 
     RETURN NEXT;

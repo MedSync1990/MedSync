@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth, UserRole } from '../auth/AuthContext';
+import { useAuth } from '../auth/AuthContext';
+import type { UserRole } from '../auth/AuthContext';
 
 export interface NavItem {
   label: string;
@@ -44,7 +45,7 @@ export const Sidebar: React.FC = () => {
     {
       header: 'BILLING & PAYMENTS',
       items: [
-        { label: 'Invoices', path: '/billing/invoices', icon: 'receipt_long', roles: ['Cashier', 'Administrator', 'Branch Manager'] },
+        { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', roles: ['Receptionist', 'Cashier', 'Administrator', 'Branch Manager'] },
         { label: 'Collect Payment', path: '/billing/collect', icon: 'payments', roles: ['Cashier', 'Administrator'] },
       ],
     },

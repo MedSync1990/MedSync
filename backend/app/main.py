@@ -14,7 +14,7 @@ from app.errors import (
 from app.routers import (
     auth, branches, staff, doctors, specialties, appointments,
     patients, allergies, treatments, consultations, invoices,
-    payments, insurance, reports
+    payments, insurance, reports, stats
 )
 
 @asynccontextmanager
@@ -34,10 +34,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=config.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-CSRF-Token"],
+    expose_headers=["X-CSRF-Token"],
 )
 
 app.add_exception_handler(NotFoundError, not_found_exception_handler)  # type: ignore
@@ -60,4 +61,5 @@ app.include_router(consultations.router, prefix="/api/v1/consultations", tags=["
 app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"])
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(insurance.router, prefix="/api/v1/insurance", tags=["Insurance"])
-app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
+app.include_router(stats.router, prefix="/api/v1/stats", tags=["Stats"])
