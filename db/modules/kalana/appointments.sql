@@ -27,18 +27,6 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Foreign key to patient(user_id) ON DELETE RESTRICT
-DO $$ BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'fk_appt_patient'
-    ) THEN
-        ALTER TABLE appointments
-            ADD CONSTRAINT fk_appt_patient
-            FOREIGN KEY (patient_id) REFERENCES patient(user_id)
-            ON DELETE RESTRICT;
-    END IF;
-END $$;
-
 -- Indexes per docs/database.md:
 CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);

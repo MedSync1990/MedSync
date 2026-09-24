@@ -1,6 +1,14 @@
--- Module 03: Patient, consultation, and treatment management.
--- Execute after Modules 01 and 02 and before Module 04.
 \i db/modules/chenith/patient.sql
+DO $$ BEGIN
+	IF NOT EXISTS (
+		SELECT 1 FROM pg_constraint WHERE conname = 'fk_appt_patient'
+	) THEN
+		ALTER TABLE appointments
+			ADD CONSTRAINT fk_appt_patient
+			FOREIGN KEY (patient_id) REFERENCES patient(user_id)
+			ON DELETE RESTRICT;
+	END IF;
+END $$;
 \i db/modules/chenith/allergy.sql
 \i db/modules/chenith/patient_allergy.sql
 \i db/modules/chenith/admission.sql
