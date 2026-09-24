@@ -36,6 +36,7 @@ import ManageDoctors from '../pages/admin/ManageDoctors';
 import ManageTreatmentCatalogue from '../pages/admin/ManageTreatmentCatalogue';
 
 // Reports
+import { ReportsIndex } from '../pages/reports/ReportsIndex';
 import BranchAppointmentSummary from '../pages/reports/BranchAppointmentSummary';
 import { DoctorRevenue } from '../pages/reports/DoctorRevenue';
 import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
@@ -106,6 +107,7 @@ export const AppRoutes: React.FC = () => {
 
         {/* Reports Routes */}
         <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
+          <Route path="/reports" element={<ReportsIndex />} />
           <Route path="/reports/appointments-summary" element={<BranchAppointmentSummary />} />
           <Route path="/reports/doctor-revenue" element={<DoctorRevenue />} />
           <Route path="/reports/outstanding-balances" element={<OutstandingBalances />} />
