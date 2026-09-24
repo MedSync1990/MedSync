@@ -13,8 +13,9 @@
  */
 
 // ─── Configuration ─────────────────────────────────────────────────────────
-const API_BASE_URL: string =
-  (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
+const rawBase = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
+const cleanedBase = rawBase.replace(/\/+$/, '');
+const API_BASE_URL: string = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
 
 // ─── Error type ─────────────────────────────────────────────────────────────
 export interface ApiErrorBody {
