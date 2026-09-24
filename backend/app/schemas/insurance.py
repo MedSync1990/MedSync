@@ -9,6 +9,14 @@ class VerifyInsuranceRequest(BaseModel):
     start_date: date
     end_date: date
 
+class VerifyInsuranceResponse(BaseModel):
+    message: str
+    insurance_id: int
+    patient_id: int
+    policy_id: int
+    insurance_card_number: str
+    start_date: date
+    end_date: date
 
 class PatientInsuranceItem(BaseModel):
     insurance_id: int 
