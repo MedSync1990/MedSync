@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { ReportPageShell } from '../../components/reports/ReportPageShell';
+import { ReportPageShell } from '../../components/ReportPageShell';
 import { getAppointmentsSummary } from '../../api';
 import type { AppointmentsSummaryResponse } from '../../api';
 
@@ -43,10 +43,10 @@ export const AppointmentSummary: React.FC = () => {
   // Transform data for the chart: group by status
   const chartData = hasData
     ? data.data.map((item) => ({
-        name: item.status,
-        count: item.count,
-        type: item.appointment_type,
-      }))
+      name: item.status,
+      count: item.count,
+      type: item.appointment_type,
+    }))
     : [];
 
   return (
@@ -95,13 +95,12 @@ export const AppointmentSummary: React.FC = () => {
                     <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
                       <td className="py-3 px-space-md font-body-sm text-brand-navy-deep">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md font-label-sm ${
-                            item.status === 'Completed'
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md font-label-sm ${item.status === 'Completed'
                               ? 'bg-status-completed-bg text-status-completed-text'
                               : item.status === 'Cancelled'
-                              ? 'bg-status-cancelled-bg text-status-cancelled-text'
-                              : 'bg-status-scheduled-bg text-status-scheduled-text'
-                          }`}
+                                ? 'bg-status-cancelled-bg text-status-cancelled-text'
+                                : 'bg-status-scheduled-bg text-status-scheduled-text'
+                            }`}
                         >
                           {item.status}
                         </span>

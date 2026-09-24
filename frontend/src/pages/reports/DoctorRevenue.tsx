@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReportPageShell } from '../../components/reports/ReportPageShell';
+import { ReportPageShell } from '../../components/ReportPageShell';
 import { getDoctorRevenue } from '../../api';
 import type { DoctorRevenueResponse } from '../../api';
 

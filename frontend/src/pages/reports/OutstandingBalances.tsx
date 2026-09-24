@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReportPageShell } from '../../components/reports/ReportPageShell';
+import { ReportPageShell } from '../../components/ReportPageShell';
 import { getOutstandingBalances } from '../../api';
 import type { OutstandingBalancesResponse } from '../../api';
 
