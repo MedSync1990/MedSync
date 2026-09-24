@@ -44,18 +44,44 @@ const defaultTestUser: UserProfile = {
 const AuthContext = createContext<AuthContextType>({
   user: defaultTestUser,
   token: 'mock-jwt-token',
-  setUser: () => {},
-  setToken: () => {},
-  logout: () => {},
+  setUser: () => { },
+  setToken: () => { },
+  logout: () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(defaultTestUser);
+  const [user, setUserState] = useState<UserProfile | null>(() => {
+    try {
+      const stored = localStorage.getItem('current_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.role) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse current_user from localStorage', e);
+    }
+    return defaultTestUser;
+  });
   const [token, setToken] = useState<string | null>('mock-jwt-token');
+
+  const setUser = (newUser: UserProfile | null) => {
+    setUserState(newUser);
+    if (newUser) {
+      localStorage.setItem('current_user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('current_user');
+    }
+  };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    fetch('http://localhost:8000/api/v1/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(() => {});
   };
 
   return (
