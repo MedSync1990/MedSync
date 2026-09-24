@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthenticatedLayout } from '../layouts/AuthenticatedLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { useAuth } from '../context/AuthContext';
+import { RoleGuard } from '../components/RoleGuard';
 
 // Auth
 import { Login } from '../pages/Login';
@@ -40,6 +42,21 @@ import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
 import TreatmentCategoryBreakdown from '../pages/reports/TreatmentCategoryBreakdown';
 import { InsuranceVsOutOfPocket } from '../pages/reports/InsuranceVsOutOfPocket';
 
+const RoleDashboardRedirect: React.FC = () => {
+  const { user } = useAuth();
+  switch (user?.role) {
+    case 'Administrator':
+      return <Navigate to="/admin/dashboard" replace />;
+    case 'Branch Manager':
+      return <Navigate to="/branch-manager/dashboard" replace />;
+    case 'Doctor':
+      return <Navigate to="/doctor/dashboard" replace />;
+    case 'Receptionist':
+    default:
+      return <Navigate to="/receptionist/dashboard" replace />;
+  }
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -50,44 +67,54 @@ export const AppRoutes: React.FC = () => {
 
       {/* Authenticated Application Routes */}
       <Route element={<AuthenticatedLayout />}>
-        {/* Receptionist */}
-        <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
-        <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
-        <Route path="/receptionist/patients" element={<PatientDirectory />} />
-        <Route path="/receptionist/book-appointment" element={<BookAppointment />} />
-        <Route path="/receptionist/appointments" element={<ManageAppointments />} />
-        <Route path="/receptionist/invoices" element={<Invoices />} />
-        <Route path="/receptionist/invoices/:invoiceId" element={<Invoices />} />
-        <Route path="/receptionist/collect-payment" element={<CollectPayment />} />
-        <Route path="/receptionist/collect-payment/:invoiceCode" element={<CollectPayment />} />
+        {/* Receptionist Routes */}
+        <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator']} />}>
+          <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
+          <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
+          <Route path="/receptionist/patients" element={<PatientDirectory />} />
+          <Route path="/receptionist/book-appointment" element={<BookAppointment />} />
+          <Route path="/receptionist/appointments" element={<ManageAppointments />} />
+          <Route path="/receptionist/invoices" element={<Invoices />} />
+          <Route path="/receptionist/invoices/:invoiceId" element={<Invoices />} />
+          <Route path="/receptionist/collect-payment" element={<CollectPayment />} />
+          <Route path="/receptionist/collect-payment/:invoiceCode" element={<CollectPayment />} />
+        </Route>
 
-        {/* Doctor */}
-        <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-        <Route path="/doctor/schedule" element={<MySchedule />} />
-        <Route path="/doctor/consultation" element={<Consultation />} />
-        <Route path="/doctor/treatment-catalogue" element={<TreatmentCatalogue />} />
-        <Route path="/doctor/earnings" element={<MyEarnings />} />
+        {/* Doctor Routes */}
+        <Route element={<RoleGuard allowedRoles={['Doctor']} />}>
+          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          <Route path="/doctor/schedule" element={<MySchedule />} />
+          <Route path="/doctor/consultation" element={<Consultation />} />
+          <Route path="/doctor/treatment-catalogue" element={<TreatmentCatalogue />} />
+          <Route path="/doctor/earnings" element={<MyEarnings />} />
+        </Route>
 
-        {/* Branch Manager */}
-        <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
-        <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
+        {/* Branch Manager Routes */}
+        <Route element={<RoleGuard allowedRoles={['Branch Manager', 'Administrator']} />}>
+          <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
+          <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
+        </Route>
 
-        {/* Admin */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/branches" element={<ManageBranches />} />
-        <Route path="/admin/staff" element={<ManageStaff />} />
-        <Route path="/admin/doctors" element={<ManageDoctors />} />
-        <Route path="/admin/treatment-catalogue" element={<ManageTreatmentCatalogue />} />
+        {/* Admin Routes */}
+        <Route element={<RoleGuard allowedRoles={['Administrator']} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/branches" element={<ManageBranches />} />
+          <Route path="/admin/staff" element={<ManageStaff />} />
+          <Route path="/admin/doctors" element={<ManageDoctors />} />
+          <Route path="/admin/treatment-catalogue" element={<ManageTreatmentCatalogue />} />
+        </Route>
 
-        {/* Reports */}
-        <Route path="/reports/appointments-summary" element={<BranchAppointmentSummary />} />
-        <Route path="/reports/doctor-revenue" element={<DoctorRevenue />} />
-        <Route path="/reports/outstanding-balances" element={<OutstandingBalances />} />
-        <Route path="/reports/treatment-categories" element={<TreatmentCategoryBreakdown />} />
-        <Route path="/reports/insurance-vs-out-of-pocket" element={<InsuranceVsOutOfPocket />} />
+        {/* Reports Routes */}
+        <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
+          <Route path="/reports/appointments-summary" element={<BranchAppointmentSummary />} />
+          <Route path="/reports/doctor-revenue" element={<DoctorRevenue />} />
+          <Route path="/reports/outstanding-balances" element={<OutstandingBalances />} />
+          <Route path="/reports/treatment-categories" element={<TreatmentCategoryBreakdown />} />
+          <Route path="/reports/insurance-vs-out-of-pocket" element={<InsuranceVsOutOfPocket />} />
+        </Route>
 
-        {/* Fallback dashboard */}
-        <Route path="/dashboard" element={<ReceptionistDashboard />} />
+        {/* Dynamic Role Dashboard redirect */}
+        <Route path="/dashboard" element={<RoleDashboardRedirect />} />
       </Route>
 
       {/* Redirect root to login */}
