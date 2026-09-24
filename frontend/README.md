@@ -73,3 +73,90 @@ export default defineConfig([
 ])
 
 ```
+
+## Directory Structure
+
+The current working file structure for the frontend is organized as follows:
+
+`	ext
+src/
+│
+├── app/
+│   ├── App.tsx
+│   └── routes.tsx
+│
+├── layouts/
+│   ├── AuthenticatedLayout.tsx
+│   └── AuthLayout.tsx
+│
+├── pages/
+│   ├── Login.tsx
+│   │
+│   ├── receptionist/
+│   │   ├── Dashboard.tsx
+│   │   ├── RegisterPatient.tsx
+│   │   ├── PatientDirectory.tsx
+│   │   ├── BookAppointment.tsx
+│   │   ├── ManageAppointments.tsx
+│   │   ├── Invoices.tsx
+│   │   └── CollectPayment.tsx
+│   │
+│   ├── doctor/
+│   │   ├── Dashboard.tsx
+│   │   ├── MySchedule.tsx
+│   │   ├── Consultation.tsx
+│   │   ├── TreatmentCatalogue.tsx
+│   │   └── MyEarnings.tsx
+│   │
+│   ├── branch-manager/
+│   │   ├── Dashboard.tsx
+│   │   └── BranchDetails.tsx
+│   │
+│   ├── admin/
+│   │   ├── Dashboard.tsx
+│   │   ├── ManageBranches.tsx
+│   │   ├── ManageStaff.tsx
+│   │   ├── ManageDoctors.tsx
+│   │   └── ManageTreatmentCatalogue.tsx
+│   │
+│   └── reports/
+│       ├── BranchAppointmentSummary.tsx
+│       ├── DoctorRevenue.tsx
+│       ├── OutstandingBalances.tsx
+│       ├── TreatmentCategoryBreakdown.tsx
+│       └── InsuranceVsOutOfPocket.tsx
+│
+├── components/
+│   ├── Sidebar.tsx
+│   ├── TopBar.tsx
+│   ├── Breadcrumbs.tsx
+│   ├── PageHeader.tsx
+│   ├── DataTable.tsx
+│   ├── StatusBadge.tsx
+│   ├── Modal.tsx
+│   ├── ConfirmDialog.tsx
+│   ├── EmptyState.tsx
+│   ├── LoadingState.tsx
+│   └── Toast.tsx
+│
+├── services/
+│   ├── api.ts
+│   ├── authService.ts
+│   ├── patientService.ts
+│   ├── appointmentService.ts
+│   ├── consultationService.ts
+│   ├── invoiceService.ts
+│   └── reportService.ts
+│
+├── context/
+│   └── AuthContext.tsx
+│
+├── config/
+│   └── navigation.ts
+│
+├── types/
+│   └── index.ts
+│
+└── styles/
+    └── globals.css
+`
