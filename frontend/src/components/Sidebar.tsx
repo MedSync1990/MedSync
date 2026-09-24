@@ -45,8 +45,8 @@ export const Sidebar: React.FC = () => {
     {
       header: 'BILLING & PAYMENTS',
       items: [
-        { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', roles: ['Receptionist', 'Cashier', 'Administrator', 'Branch Manager'] },
-        { label: 'Collect Payment', path: '/receptionist/collect-payment', icon: 'payments', roles: ['Cashier', 'Receptionist', 'Administrator'] },
+        { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
+        { label: 'Collect Payment', path: '/receptionist/collect-payment', icon: 'payments', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
       ],
     },
     {
