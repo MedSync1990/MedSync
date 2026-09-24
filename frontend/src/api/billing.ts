@@ -15,7 +15,7 @@ import type {
   PatientInsuranceResponse,
   VerifyInsuranceRequest,
   VerifyInsuranceResponse,
-} from './types';
+} from './types.ts';
 
 /** Get a single invoice by code or patient NIC */
 export function getInvoice(
