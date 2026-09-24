@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 
-type Gender = 'Male' | 'Female' | 'Other';
+type Gender = 'Male' | 'Female';
 
 interface SecondaryPhone {
   number: string;
@@ -325,8 +325,8 @@ export const RegisterPatient: React.FC = () => {
               <label className="font-label-lg text-label-lg text-brand-navy-deep">
                 Gender <span className="text-error font-bold">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2 h-[42px] p-1 bg-surface-subtle rounded-lg">
-                {(['Male', 'Female', 'Other'] as Gender[]).map((opt) => (
+              <div className="grid grid-cols-2 gap-2 h-[42px] p-1 bg-surface-subtle rounded-lg">
+                {(['Male', 'Female'] as Gender[]).map((opt) => (
                   <label
                     key={opt}
                     className={`flex items-center justify-center gap-1.5 rounded-md cursor-pointer text-center font-label-md text-label-md transition-all select-none ${
@@ -344,7 +344,7 @@ export const RegisterPatient: React.FC = () => {
                       className="sr-only"
                     />
                     <span className="material-symbols-outlined text-[16px]">
-                      {opt === 'Male' ? 'male' : opt === 'Female' ? 'female' : 'transgender'}
+                      {opt === 'Male' ? 'male' : 'female'}
                     </span>
                     <span>{opt}</span>
                   </label>
