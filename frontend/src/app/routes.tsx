@@ -12,6 +12,7 @@ import { Login } from '../pages/Login';
 import ReceptionistDashboard from '../pages/receptionist/Dashboard';
 import RegisterPatient from '../pages/receptionist/RegisterPatient';
 import PatientDirectory from '../pages/receptionist/PatientDirectory';
+import PatientProfile from '../pages/receptionist/PatientProfile';
 import BookAppointment from '../pages/receptionist/BookAppointment';
 import ManageAppointments from '../pages/receptionist/ManageAppointments';
 import Invoices from '../pages/receptionist/Invoices';
@@ -73,6 +74,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
           <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
           <Route path="/receptionist/patients" element={<PatientDirectory />} />
+          <Route path="/receptionist/patients/:patientId" element={<PatientProfile />} />
           <Route path="/receptionist/book-appointment" element={<BookAppointment />} />
           <Route path="/receptionist/appointments" element={<ManageAppointments />} />
           <Route path="/receptionist/invoices" element={<Invoices />} />
