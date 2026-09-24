@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type UserProfile, type UserRole } from '../context/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const rawBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const cleanedBase = rawBase.replace(/\/+$/, '');
+const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   'Administrator': '/admin/dashboard',
@@ -25,7 +27,7 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -42,7 +44,7 @@ export const Login = () => {
         throw new Error(errorData.detail || 'Invalid email or password.');
       }
 
-      const meResponse = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: 'include',
       });
 
