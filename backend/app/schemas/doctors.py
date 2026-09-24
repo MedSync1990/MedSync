@@ -23,7 +23,7 @@ class DoctorBase(BaseModel):
 
     phone_numbers: List[Annotated[str, Field(pattern=r"^[0-9]{10}$")]] = Field(
         ...,
-        min_items=1,
+        min_length=1,
         description="List of 10 digit contact numbers",
     )
 
@@ -37,7 +37,7 @@ class DoctorCreate(DoctorBase):
     license_number: str = Field(..., min_length=1, max_length=50)
     specialty_ids: List[int] = Field(
         ...,
-        min_items=1,
+        min_length=1,
         description="Doctor must have at least one specialty assigned",
     )
 

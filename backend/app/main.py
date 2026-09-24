@@ -14,7 +14,7 @@ from app.errors import (
 from app.routers import (
     auth, branches, staff, doctors, specialties, appointments,
     patients, allergies, treatments, consultations, invoices,
-    payments, insurance, reports
+    payments, insurance, reports, stats
 )
 
 @asynccontextmanager
@@ -62,3 +62,4 @@ app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"]
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(insurance.router, prefix="/api/v1/insurance", tags=["Insurance"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
+app.include_router(stats.router, prefix="/api/v1/stats", tags=["Stats"])

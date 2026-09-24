@@ -1,43 +1,27 @@
-# docker-compose.yml
 services:
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: medsync
-      POSTGRES_PASSWORD: medsync_dev
-      POSTGRES_DB: medsync
-    ports:
-      - "5432:5432"         # expose locally so you can connect with psql / DBeaver
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     env_file:
       - ./backend/.env
-    # environment:
-    #   # Uncomment below to use local DB instead of Neon
-    #   DATABASE_URL: postgresql://medsync:medsync_dev@db:5432/medsync
     volumes:
-      - ./db:/app/db
-    depends_on:
-      - db
-    restart: always
+      - ./backend:/app          # mount source so --reload picks up changes
+    restart: unless-stopped
+    init: true
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "80:80" # Maps localhost:80 to the Nginx container
+      - "5173:5173"             # Vite dev server
+    volumes:
+      - ./frontend:/app         # mount source for Vite HMR
+      - /app/node_modules       # keep container's node_modules, don't override with host
     depends_on:
       - backend
-    restart: always
-
-volumes:
-  postgres_data:
+    restart: unless-stopped
