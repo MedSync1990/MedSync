@@ -93,6 +93,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleGuard allowedRoles={['Branch Manager', 'Administrator']} />}>
           <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
           <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
+          <Route path="/branch-manager/doctors" element={<ManageDoctors />} />
         </Route>
 
         {/* Admin Routes */}
