@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import InvoiceDetails from '../../features/invoices/components/InvoiceDetails';
-import InvoiceSearch from '../../features/invoices/components/InvoiceSearch';
-import RecordPaymentModal from '../../features/invoices/components/RecordPaymentModal';
-import type { InvoiceData } from '../../features/invoices/invoiceTypes';
+import InvoiceDetails from '../../components/invoices/InvoiceDetails';
+import InvoiceSearch from '../../components/invoices/InvoiceSearch';
+import RecordPaymentModal from '../../components/invoices/RecordPaymentModal';
+import type { InvoiceData } from '../../types/invoiceTypes';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 

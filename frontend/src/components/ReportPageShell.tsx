@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../auth/AuthContext';
-import { get } from '../../api/client';
-import type { BranchResponse } from '../../api/types';
+import { useAuth } from '../auth/AuthContext';
+import { get } from '../api/client';
+import type { BranchResponse } from '../api/types';
 
 interface ReportPageShellProps {
   title: string;

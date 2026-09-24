@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { ReportPageShell } from '../../components/reports/ReportPageShell';
+import { ReportPageShell } from '../../components/ReportPageShell';
 import { getInsuranceVsOutOfPocket } from '../../api';
 import type { InsuranceVsOutOfPocketResponse } from '../../api';
 
@@ -43,9 +43,9 @@ export const InsuranceVsOutOfPocket: React.FC = () => {
   // Chart data
   const chartData = hasData
     ? [
-        { name: 'Insurance Covered', value: totalInsurance },
-        { name: 'Out-of-Pocket', value: totalOutOfPocket },
-      ]
+      { name: 'Insurance Covered', value: totalInsurance },
+      { name: 'Out-of-Pocket', value: totalOutOfPocket },
+    ]
     : [];
 
   const COLORS = ['#006194', '#38BDF8'];

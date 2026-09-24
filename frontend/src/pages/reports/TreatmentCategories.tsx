@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { ReportPageShell } from '../../components/reports/ReportPageShell';
+import { ReportPageShell } from '../../components/ReportPageShell';
 import { getTreatmentCategories } from '../../api';
 import type { TreatmentCategoriesResponse } from '../../api';
 
@@ -35,7 +35,7 @@ export const TreatmentCategories: React.FC = () => {
   };
 
   const hasData = data !== null && data.data.length > 0;
-  
+
   // Calculate total counts for percentages
   const totalUsageCount = hasData ? data.data.reduce((sum, item) => sum + item.usage_count, 0) : 0;
   const totalRevenue = hasData ? data.data.reduce((sum, item) => sum + item.total_revenue, 0) : 0;
@@ -43,10 +43,10 @@ export const TreatmentCategories: React.FC = () => {
   // Chart data
   const chartData = hasData
     ? data.data.map((item) => ({
-        name: item.category,
-        Usage: item.usage_count,
-        Revenue: item.total_revenue,
-      }))
+      name: item.category,
+      Usage: item.usage_count,
+      Revenue: item.total_revenue,
+    }))
     : [];
 
   return (
