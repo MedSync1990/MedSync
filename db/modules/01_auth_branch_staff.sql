@@ -19,6 +19,12 @@
 
 -- Custom types needed by this module
 CREATE TYPE gender_enum AS ENUM ('Male', 'Female', 'Other');
+CREATE TYPE slot_status_enum AS ENUM ('Open', 'Booked', 'Blocked');
+CREATE TYPE appointment_type_enum AS ENUM ('Scheduled Visit', 'Walk-in', 'Follow-up');
+CREATE TYPE appointment_status_enum AS ENUM ('Scheduled', 'Completed', 'Cancelled');
+CREATE TYPE admission_status_enum AS ENUM ('Admitted', 'Discharged');
+CREATE TYPE invoice_status_enum AS ENUM ('Unpaid', 'Partially Paid', 'Paid');
+CREATE TYPE payment_type_enum AS ENUM ('Cash', 'Card', 'Insurance Settlement');
 
 -- Tables (FK-safe order)
 \i db/modules/dilantha/01_role.sql

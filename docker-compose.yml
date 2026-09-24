@@ -1,0 +1,27 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app          # mount source so --reload picks up changes
+    restart: unless-stopped
+    init: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"             # Vite dev server
+    volumes:
+      - ./frontend:/app         # mount source for Vite HMR
+      - /app/node_modules       # keep container's node_modules, don't override with host
+    depends_on:
+      - backend
+    restart: unless-stopped
