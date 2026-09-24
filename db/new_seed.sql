@@ -13,7 +13,7 @@
 --   - It uses explicit IDs to guarantee deterministic references.
 --   - Identity columns are reset with ALTER TABLE ... RESTART WITH after
 --     explicit inserts so future app-generated IDs do not collide.
---   - Password hash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJgW2y'
+--   - Password hash: '$2b$12$8oR8QG1CzwICjoIQqYHa1OKQX4KygnGybO52NTqU8SIrb.Dbr118a'
 --     is bcrypt for "medsync" (cost factor 12). Replace if the backend
 --     uses Argon2 — see note at bottom of file.
 --   - All names, NICs, phones, emails, addresses are fictional.
@@ -122,7 +122,7 @@ INSERT INTO policy_treatment_coverage (policy_id, treatment_code, coverage_perce
 -- SECTION 2: APPLICATION USERS (20 total)
 -- =============================================================================
 -- Password hash below is bcrypt cost-12 for the string "medsync":
---   $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJgW2y
+--   $2b$12$8oR8QG1CzwICjoIQqYHa1OKQX4KygnGybO52NTqU8SIrb.Dbr118a
 -- All 15 staff users share the same password "medsync" as required.
 -- =============================================================================
 
@@ -211,6 +211,10 @@ VALUES
     (13, 3, 'receptionist3','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJgW2y', TRUE, 0, NULL, NULL),
     (14, 1, 'receptionist4','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJgW2y', TRUE, 0, NULL, NULL),
     (15, 2, 'receptionist5','$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiAYMyzJgW2y', TRUE, 0, NULL, NULL);
+
+-- Normalize the seeded staff credentials to the verified bcrypt hash for "medsync".
+UPDATE staff
+SET password_hash = '$2b$12$8oR8QG1CzwICjoIQqYHa1OKQX4KygnGybO52NTqU8SIrb.Dbr118a';
 
 -- =============================================================================
 -- SECTION 4: DOCTOR PROFILES + SPECIALTIES
