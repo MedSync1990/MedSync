@@ -58,6 +58,7 @@ export interface AppointmentResponse {
 export interface AppointmentBookRequest {
   patient_id: number;
   slot_id: number;
+  doctor_id?: number;
   appointment_type?: string;
 }
 
@@ -78,6 +79,22 @@ export interface DoctorSlotResponse {
   start_time: string;
   end_time: string;
   status: string;
+}
+
+export interface DoctorResponse {
+  doctor_id: number;
+  first_name: string;
+  last_name: string;
+  specialty?: string;
+  specialties?: string[];
+  is_active?: boolean;
+  phone?: string;
+  email?: string;
+}
+
+export interface AppointmentListResponse {
+  data: AppointmentResponse[];
+  total: number;
 }
 
 // ─── Billing / Invoices ─────────────────────────────────────────────────────
@@ -237,12 +254,32 @@ export interface PatientResponse {
 export interface StatsOverview {
   total_patients: number;
   total_appointments_today: number;
+  today_appointments: {
+    scheduled: number;
+    completed: number;
+    cancelled: number;
+  };
   total_revenue: number;
   pending_invoices: number;
+  total_doctors: number;
+  total_staff: number;
+  total_branches: number;
 }
 
-export interface RecentActivityItem {
-  type: string;
+export interface ActivityItem {
+  id: number;
+  type?: string;
+  action_type: string;
   description: string;
-  timestamp: string;
+  timestamp?: string;
+  created_at: string;
+  performed_by: string;
+}
+
+export interface BranchResponse {
+  branch_id: number;
+  branch_name: string;
+  name?: string;
+  address?: string;
+  phone?: string;
 }
