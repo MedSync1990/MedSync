@@ -1,13 +1,12 @@
 /**
- * MedSync — Shared TypeScript types
+ * MedSync — Shared API TypeScript interfaces
  *
- * These interfaces mirror the Pydantic models in backend/app/schemas/*.py
- * so the frontend has type-safe access to every API response shape.
+ * Every type used across the API client modules lives here so there's
+ * one source of truth and a single import path.
  */
 
-// ─── Common / Envelope ──────────────────────────────────────────────────────
+// ─── Common / Pagination ────────────────────────────────────────────────────
 
-/** Standard paginated list response (api-routes.md §0.1) */
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -15,13 +14,7 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
-/** Standard error body returned by the backend on 4xx / 5xx */
-export interface ErrorResponse {
-  message?: string;
-  errors?: Array<{ field: string; message: string }>;
-}
-
-// ─── Auth (schemas/auth.py) ─────────────────────────────────────────────────
+// ─── Auth ───────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {
   username: string;
@@ -30,155 +23,64 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   message: string;
+  user: MeResponse;
 }
 
 export interface MeResponse {
   user_id: number;
   username: string;
+  first_name: string;
+  last_name: string;
   role: string;
   branch_id: number | null;
+  branch_name: string | null;
 }
 
-// ─── Roles (auth/AuthContext.tsx) ───────────────────────────────────────────
-
-export type UserRole =
-  | 'Administrator'
-  | 'Branch Manager'
-  | 'Doctor'
-  | 'Receptionist'
-  | 'Cashier'
-  | 'Patient';
-
-// ─── Reports (schemas/reports.py) ───────────────────────────────────────────
-
-export interface AppointmentSummaryItem {
-  status: string;
-  appointment_type: string;
-  count: number;
-}
-
-export interface AppointmentsSummaryResponse {
-  data: AppointmentSummaryItem[];
-  total: number;
-}
-
-export interface DoctorRevenueItem {
-  doctor_id: number;
-  doctor_name: string;
-  branch_name: string;
-  total_appointments: number;
-  total_revenue: number;
-}
-
-export interface DoctorRevenueResponse {
-  data: DoctorRevenueItem[];
-  total: number;
-}
-
-export interface ItemizedPaymentItem {
-  payment_date: string; // ISO date string
-  patient_name: string;
-  invoice_id: number;
-  amount: number;
-  payment_type: string;
-  running_total: number;
-}
-
-export interface ItemizedPaymentResponse {
-  data: ItemizedPaymentItem[];
-  total: number;
-}
-
-export interface OutstandingBalanceItem {
-  patient_id: number;
-  patient_name: string;
-  contact_number: string;
-  outstanding_balance: number;
-}
-
-export interface OutstandingBalancesResponse {
-  data: OutstandingBalanceItem[];
-  total: number;
-}
-
-export interface TreatmentCategoryItem {
-  category: string;
-  usage_count: number;
-  total_revenue: number;
-}
-
-export interface TreatmentCategoriesResponse {
-  data: TreatmentCategoryItem[];
-  total: number;
-}
-
-export interface InsuranceVsOutOfPocketItem {
-  branch_name: string;
-  total_insurance_covered: number;
-  total_out_of_pocket: number;
-  total_revenue: number;
-}
-
-export interface InsuranceVsOutOfPocketResponse {
-  data: InsuranceVsOutOfPocketItem[];
-  total: number;
-}
-
-// ─── Appointments (schemas/appointments.py) ─────────────────────────────────
-
-export type AppointmentType = 'Scheduled Visit' | 'Walk-in' | 'Follow-up';
-export type AppointmentStatus = 'Scheduled' | 'Completed' | 'Cancelled';
-export type SlotStatus = 'Open' | 'Booked' | 'Blocked';
-
-export interface DoctorSlotResponse {
-  slot_id: number;
-  doctor_id: number;
-  date: string; // ISO date
-  start_time: string;
-  end_time: string;
-  status: SlotStatus;
-}
-
-export interface AppointmentBookRequest {
-  patient_id: number;
-  doctor_id: number;
-  slot_id: number;
-  appointment_type?: AppointmentType;
-}
-
-export interface WalkInAppointmentRequest {
-  patient_id: number;
-  doctor_id: number;
-  date: string; // ISO date
-  start_time: string;
-  end_time: string;
-}
-
-export interface AppointmentRescheduleRequest {
-  new_slot_id: number;
-}
+// ─── Appointments ───────────────────────────────────────────────────────────
 
 export interface AppointmentResponse {
   appointment_id: number;
   appointment_code: string;
   patient_id: number;
   patient_name: string;
-  doctor_id: number;
-  doctor_name: string;
-  branch_id: number;
-  branch_name?: string;
   slot_id: number;
-  appointment_date: string; // ISO date
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  appointment_date: string;
   start_time: string;
   end_time: string;
-  appointment_type: AppointmentType;
-  status: AppointmentStatus;
-  created_at: string; // ISO datetime
+  appointment_type: string;
+  status: string;
+  created_at: string;
 }
 
-export type AppointmentListResponse = PaginatedResponse<AppointmentResponse>;
+export interface AppointmentBookRequest {
+  patient_id: number;
+  slot_id: number;
+  appointment_type?: string;
+}
 
-// ─── Invoices / Billing (schemas/invoices.py) ───────────────────────────────
+export interface WalkInAppointmentRequest {
+  patient_id: number;
+  doctor_id: number;
+  appointment_type?: string;
+}
+
+export interface AppointmentRescheduleRequest {
+  new_slot_id: number;
+}
+
+export interface DoctorSlotResponse {
+  slot_id: number;
+  doctor_id: number;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+}
+
+// ─── Billing / Invoices ─────────────────────────────────────────────────────
 
 export interface InvoiceLineItem {
   treatment_name: string;
@@ -189,7 +91,7 @@ export interface InvoiceLineItem {
 }
 
 export interface InvoicePayment {
-  payment_date: string; // ISO datetime
+  payment_date: string;
   amount: number;
   payment_type: string;
 }
@@ -204,30 +106,29 @@ export interface InvoiceDetailResponse {
   total_amount: number;
   insurance_amount: number;
   insurance_percentage: number;
-  insurance_policy_number?: string;
+  insurance_policy_number: string | null;
   status: string;
-  created_at: string; // ISO datetime
+  created_at: string;
   outstanding_balance: number;
   items: InvoiceLineItem[];
   payments: InvoicePayment[];
 }
 
-export interface PatientInvoiceItem {
-  invoice_code: string;
-  created_at: string; // ISO datetime
-  total_amount: number;
-  insurance_amount: number;
-  outstanding_balance: number;
-  status: string;
-}
-
 export interface PatientInvoicesResponse {
-  data: PatientInvoiceItem[];
+  data: Array<{
+    invoice_code: string;
+    created_at: string;
+    total_amount: number;
+    insurance_amount: number;
+    outstanding_balance: number;
+    status: string;
+  }>;
 }
 
 export interface RecordPaymentRequest {
   amount: number;
   payment_type: string;
+  reference?: string;
 }
 
 export interface RecordPaymentResponse {
@@ -243,68 +144,91 @@ export interface PatientBalanceResponse {
   outstanding_balance: number;
 }
 
-// ─── Doctors (schemas/doctors.py) ───────────────────────────────────────────
+// ─── Insurance ──────────────────────────────────────────────────────────────
 
-export interface DoctorResponse {
-  doctor_id: number;
-  full_name: string;
-  id_number: string;
-  phone_numbers: string[];
-  email?: string;
-  branch_id: number;
-  branch_name?: string;
-  license_number: string;
+export interface PatientInsuranceItem {
+  insurance_id: number;
+  policy_id: number;
+  provider_name: string;
+  policy_name: string;
+  insurance_card_number: string;
+  start_date: string;
+  end_date: string;
   is_active: boolean;
-  specialties: string[];
 }
 
-export interface DoctorCreateResponse extends DoctorResponse {
-  temp_password: string;
+export interface PatientInsuranceResponse {
+  data: PatientInsuranceItem[];
 }
 
-export interface DoctorSpecialtiesUpdate {
-  add: number[];
-  remove: number[];
+export interface VerifyInsuranceRequest {
+  patient_id: number;
+  policy_id: number;
+  insurance_card_number: string;
+  start_date: string;
+  end_date: string;
 }
 
-// ─── Specialties (schemas/specialties.py) ───────────────────────────────────
-
-export interface SpecialtyCreate {
-  name: string;
-  description?: string;
+export interface VerifyInsuranceResponse {
+  message: string;
+  insurance_id: number;
+  patient_id: number;
+  policy_id: number;
+  insurance_card_number: string;
+  start_date: string;
+  end_date: string;
 }
 
-export interface SpecialtyResponse {
-  specialty_id: number;
-  name: string;
-  description?: string;
-  doctor_count: number;
+// ─── Reports ────────────────────────────────────────────────────────────────
+
+export interface AppointmentsSummaryResponse {
+  data: Array<Record<string, any>>;
+  total: number;
 }
 
-// ─── Patients (stub — Chenith fills in detail) ─────────────────────────────
+export interface DoctorRevenueResponse {
+  data: Array<Record<string, any>>;
+  total: number;
+}
+
+export interface ItemizedPaymentResponse {
+  data: Array<Record<string, any>>;
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface OutstandingBalancesResponse {
+  data: Array<Record<string, any>>;
+  total: number;
+}
+
+export interface TreatmentCategoriesResponse {
+  data: Array<Record<string, any>>;
+  total: number;
+}
+
+export interface InsuranceVsOutOfPocketResponse {
+  data: Array<Record<string, any>>;
+  total: number;
+}
+
+// ─── Patients ───────────────────────────────────────────────────────────────
 
 export interface PatientResponse {
-  patient_id: number;
+  user_id: number;
   patient_code: string;
   first_name: string;
   last_name: string;
   id_number: string;
-  phone_number: string;
-  email?: string;
   date_of_birth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  is_active: boolean;
-}
-
-// ─── Branches (stub — admin pages fill in detail) ──────────────────────────
-
-export interface BranchResponse {
-  branch_id: number;
-  name: string;
-  address: string;
-  phone_number?: string;
-  branch_manager_name?: string;
-  staff_count: number;
+  gender: string;
+  phone: string;
+  email: string | null;
+  address: string | null;
+  blood_group: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
   is_active: boolean;
 }
 
@@ -312,22 +236,13 @@ export interface BranchResponse {
 
 export interface StatsOverview {
   total_patients: number;
-  total_doctors: number;
-  total_staff: number;
-  total_branches: number;
-  today_appointments: {
-    scheduled: number;
-    completed: number;
-    cancelled: number;
-  };
+  total_appointments_today: number;
+  total_revenue: number;
+  pending_invoices: number;
 }
 
-export interface ActivityItem {
-  id: number;
-  action_type: string;
-  entity_type: string;
-  entity_id?: number;
+export interface RecentActivityItem {
+  type: string;
   description: string;
-  performed_by: string;
-  created_at: string; // ISO datetime
+  timestamp: string;
 }
