@@ -48,9 +48,24 @@ def require_roles(*allowed_roles: str):
     return role_checker
 
 def get_branch_scope(current_user: CurrentUser) -> Optional[int]:
+    """Return the branch a caller is allowed to access."""
     if current_user.role == "Administrator":
         return None
     return current_user.branch_id
+
+
+def get_effective_branch_id(current_user: CurrentUser, requested_branch_id: Optional[int] = None) -> Optional[int]:
+    """
+    Enforce the server-side branch override required by api-routes.md §0.5.
+    Branch Managers are always pinned to their own branch_id, even if the client sends a
+    different branch filter value. Administrators still receive the requested branch when one
+    is supplied; other roles keep their direct request value or branch context.
+    """
+    if current_user.role == "Branch Manager":
+        return get_branch_scope(current_user)
+    if current_user.role == "Administrator":
+        return requested_branch_id
+    return requested_branch_id if requested_branch_id is not None else current_user.branch_id
 
 
 async def get_db(
