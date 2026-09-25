@@ -13,6 +13,7 @@ import type {
   DoctorSlotResponse,
   PatientListItem,
   AppointmentType,
+  BranchResponse,
 } from '../../types';
 
 
@@ -38,6 +39,36 @@ function formatTime(timeStr: string): string {
   return `${hour.toString().padStart(2, '0')}:${min} ${ampm}`;
 }
 
+// Helper: current time as HH:MM
+function getCurrentTimeString(): string {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+// Helper: add minutes to HH:MM time string
+function addMinutesToTime(timeStr: string, minutes: number): string {
+  if (!timeStr) return '';
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return timeStr;
+  let totalMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) + minutes;
+  totalMin = (totalMin + 1440) % 1440;
+  const newH = String(Math.floor(totalMin / 60)).padStart(2, '0');
+  const newM = String(totalMin % 60).padStart(2, '0');
+  return `${newH}:${newM}`;
+}
+
+// Helper: Check if two time ranges [start1, end1) and [start2, end2) overlap
+function checkTimeOverlap(start1: string, end1: string, start2: string, end2: string): boolean {
+  if (!start1 || !end1 || !start2 || !end2) return false;
+  const s1 = start1.slice(0, 5);
+  const e1 = end1.slice(0, 5);
+  const s2 = start2.slice(0, 5);
+  const e2 = end2.slice(0, 5);
+  return s1 < e2 && e1 > s2;
+}
+
 export const BookAppointment: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -48,12 +79,29 @@ export const BookAppointment: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<PatientListItem | null>(null);
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
+  const patientDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        patientDropdownRef.current &&
+        !patientDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowPatientDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // ─── Step 2: Category State ────────────────────────────────────────────────
   const [category, setCategory] = useState<AppointmentType>('Scheduled Visit');
 
-  // ─── Step 3: Doctor, Specialty & Slot State ────────────────────────────────
+  // ─── Step 3: Doctor, Branch, Specialty & Slot State ────────────────────────
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
+  const [allBranches, setAllBranches] = useState<BranchResponse[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<string>('All');
   const [allSpecialties, setAllSpecialties] = useState<SpecialtyResponse[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('All');
   const [doctorSearch, setDoctorSearch] = useState('');
@@ -69,10 +117,32 @@ export const BookAppointment: React.FC = () => {
   }, []);
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
 
-  // Slots
+  // Standard pre-scheduled slots
   const [slots, setSlots] = useState<DoctorSlotResponse[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<DoctorSlotResponse | null>(null);
+
+  // Walk-in manual time slot inputs
+  const [walkInStartTime, setWalkInStartTime] = useState<string>(() => getCurrentTimeString());
+  const [walkInEndTime, setWalkInEndTime] = useState<string>(() => addMinutesToTime(getCurrentTimeString(), 20));
+
+  // Determine if entered walk-in time slot overlaps with an existing doctor slot
+  const conflictingSlot = useMemo(() => {
+    if (category !== 'Walk-in' || !walkInStartTime || !walkInEndTime || walkInEndTime <= walkInStartTime) {
+      return null;
+    }
+    return slots.find((s) => checkTimeOverlap(walkInStartTime, walkInEndTime, s.start_time, s.end_time)) || null;
+  }, [category, walkInStartTime, walkInEndTime, slots]);
+
+  // Filter open slots for scheduled visit selection
+  const openSlots = useMemo(() => {
+    return slots.filter((s) => s.status?.toLowerCase() === 'open');
+  }, [slots]);
+
+  // Filter booked slots for schedule overview
+  const bookedSlots = useMemo(() => {
+    return slots.filter((s) => s.status?.toLowerCase() === 'booked');
+  }, [slots]);
 
   // ─── Step 4: Submission & Confirmation State ───────────────────────────────
   const [submitting, setSubmitting] = useState(false);
@@ -83,12 +153,29 @@ export const BookAppointment: React.FC = () => {
     const loadInitialData = async () => {
       setLoadingDoctors(true);
       try {
-        const [docsRes, specsRes] = await Promise.all([
+        const [docsRes, specsRes, branchesRes] = await Promise.all([
           get<DoctorResponse[]>('/doctors').catch(() => []),
           get<SpecialtyResponse[]>('/specialties').catch(() => []),
+          get<BranchResponse[]>('/branches').catch(() => []),
         ]);
         setAllDoctors(docsRes || []);
         setAllSpecialties(specsRes || []);
+
+        if (branchesRes && branchesRes.length > 0) {
+          setAllBranches(branchesRes);
+        } else if (docsRes && docsRes.length > 0) {
+          // Derive fallback branches from doctors list
+          const unique = Array.from(new Set(docsRes.map((d) => d.branch_name).filter(Boolean)));
+          setAllBranches(
+            unique.map((bName, idx) => ({
+              branch_id: idx + 1,
+              name: bName as string,
+              address: '',
+              phone_number: '',
+              is_active: true,
+            }))
+          );
+        }
       } catch (err: any) {
         showToast(err?.message || 'Failed to load doctors or specialties', 'error');
       } finally {
@@ -98,25 +185,25 @@ export const BookAppointment: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // ─── Patient Search Effect ─────────────────────────────────────────────────
-  useEffect(() => {
-    const trimmed = patientSearch.trim().toLowerCase();
-    if (!trimmed) {
+  // ─── Patient Search Functions ──────────────────────────────────────────────
+  const searchPatients = async (query?: string) => {
+    setSearchingPatients(true);
+    try {
+      const trimmed = query?.trim();
+      const res = await patientService.list(trimmed ? { search: trimmed, limit: 10 } : { limit: 10 });
+      setPatientResults(res?.data || []);
+    } catch {
       setPatientResults([]);
-      setShowPatientDropdown(false);
-      return;
+    } finally {
+      setSearchingPatients(false);
+      setShowPatientDropdown(true);
     }
+  };
 
-    const timer = setTimeout(async () => {
-      setSearchingPatients(true);
-      try {
-        const res = await patientService.list({ search: trimmed });
-        setPatientResults(res?.data || []);
-      } catch {
-        setPatientResults([]);
-      } finally {
-        setSearchingPatients(false);
-        setShowPatientDropdown(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (patientSearch.trim()) {
+        searchPatients(patientSearch);
       }
     }, 250);
 
@@ -134,7 +221,7 @@ export const BookAppointment: React.FC = () => {
     const fetchSlots = async () => {
       setLoadingSlots(true);
       try {
-        const res = await appointmentService.getAvailability(selectedDoctor.doctor_id, selectedDate);
+        const res = await appointmentService.getAvailability(selectedDoctor.doctor_id, selectedDate, true);
         setSlots(res || []);
       } catch {
         setSlots([]);
@@ -150,6 +237,11 @@ export const BookAppointment: React.FC = () => {
   const filteredDoctors = useMemo(() => {
     return allDoctors.filter((doc) => {
       const docName = doc.full_name;
+      const matchesBranch =
+        selectedBranch === 'All' ||
+        doc.branch_name?.toLowerCase() === selectedBranch.toLowerCase() ||
+        String(doc.branch_id) === selectedBranch;
+
       const matchesSpecialty =
         selectedSpecialty === 'All' ||
         (doc.specialties && doc.specialties.includes(selectedSpecialty));
@@ -159,9 +251,9 @@ export const BookAppointment: React.FC = () => {
         docName.toLowerCase().includes(doctorSearch.trim().toLowerCase()) ||
         Boolean(doc.branch_name && doc.branch_name.toLowerCase().includes(doctorSearch.trim().toLowerCase()));
 
-      return matchesSpecialty && matchesSearch;
+      return matchesBranch && matchesSpecialty && matchesSearch;
     });
-  }, [allDoctors, selectedSpecialty, doctorSearch]);
+  }, [allDoctors, selectedBranch, selectedSpecialty, doctorSearch]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleSelectPatient = (patient: PatientListItem) => {
@@ -176,8 +268,11 @@ export const BookAppointment: React.FC = () => {
     setCategory('Scheduled Visit');
     setSelectedDoctor(null);
     setSelectedSlot(null);
+    setSelectedBranch('All');
     setSelectedSpecialty('All');
     setDoctorSearch('');
+    setWalkInStartTime(getCurrentTimeString());
+    setWalkInEndTime(addMinutesToTime(getCurrentTimeString(), 20));
   };
 
   const handleExecuteBooking = async () => {
@@ -189,52 +284,116 @@ export const BookAppointment: React.FC = () => {
       showToast('Please choose an available doctor.', 'error');
       return;
     }
-    if (!selectedSlot) {
-      showToast('Please pick an open time slot.', 'error');
-      return;
-    }
 
-    setSubmitting(true);
-    try {
-      await appointmentService.book({
-        patient_id: selectedPatient.patient_id,
-        doctor_id: selectedDoctor.doctor_id,
-        slot_id: selectedSlot.slot_id,
-        appointment_type: category,
-      });
-
-      const formattedSlotTime = formatTime(selectedSlot.start_time);
-      showToast(
-        `Appointment booked for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedSlot.date} at ${formattedSlotTime}.`,
-        'success',
-      );
-
-      // Navigate to appointments management page
-      setTimeout(() => {
-        navigate('/receptionist/appointments');
-      }, 1200);
-    } catch (err: any) {
-      const msg = err?.message || '';
-      if (err?.isConflict || msg.includes('no longer available') || msg.includes('exclusion')) {
+    if (category === 'Walk-in') {
+      if (!walkInStartTime || !walkInEndTime) {
+        showToast('Please enter both start time and end time for the walk-in appointment.', 'error');
+        return;
+      }
+      if (walkInEndTime <= walkInStartTime) {
+        showToast('Walk-in end time must be after start time.', 'error');
+        return;
+      }
+      if (conflictingSlot) {
         showToast(
-          'This doctor is no longer available at the selected time. Please choose another slot.',
+          `Cannot book walk-in: entered time overlaps with an existing ${conflictingSlot.status.toLowerCase()} slot (${formatTime(conflictingSlot.start_time)} – ${formatTime(conflictingSlot.end_time)}).`,
           'error',
         );
-      } else {
-        showToast(msg || 'Failed to book appointment', 'error');
+        return;
       }
 
-      // Refresh slots on collision
-      if (selectedDoctor && selectedDate) {
-        appointmentService.getAvailability(selectedDoctor.doctor_id, selectedDate).then(setSlots);
+      setSubmitting(true);
+      try {
+        const formattedStart = walkInStartTime.length === 5 ? `${walkInStartTime}:00` : walkInStartTime;
+        const formattedEnd = walkInEndTime.length === 5 ? `${walkInEndTime}:00` : walkInEndTime;
+
+        await appointmentService.createWalkIn({
+          patient_id: selectedPatient.patient_id,
+          doctor_id: selectedDoctor.doctor_id,
+          date: selectedDate,
+          start_time: formattedStart,
+          end_time: formattedEnd,
+        });
+
+        showToast(
+          `Walk-in appointment booked for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedDate} (${formatTime(walkInStartTime)} – ${formatTime(walkInEndTime)}).`,
+          'success',
+        );
+
+        setTimeout(() => {
+          navigate('/receptionist/appointments');
+        }, 1200);
+      } catch (err: any) {
+        const msg = err?.message || '';
+        if (err?.isConflict || msg.includes('already booked') || msg.includes('overlap')) {
+          showToast(
+            'This doctor is already booked over this time range. Please choose another time.',
+            'error',
+          );
+        } else {
+          showToast(msg || 'Failed to create walk-in appointment', 'error');
+        }
+      } finally {
+        setSubmitting(false);
+        setShowConfirmModal(false);
       }
-    } finally {
-      setSubmitting(false);
-      setShowConfirmModal(false);
+    } else {
+      if (!selectedSlot) {
+        showToast('Please pick an open time slot.', 'error');
+        return;
+      }
+
+      setSubmitting(true);
+      try {
+        await appointmentService.book({
+          patient_id: selectedPatient.patient_id,
+          doctor_id: selectedDoctor.doctor_id,
+          slot_id: selectedSlot.slot_id,
+          appointment_type: category,
+        });
+
+        const formattedSlotTime = formatTime(selectedSlot.start_time);
+        showToast(
+          `Appointment booked for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedSlot.date} at ${formattedSlotTime}.`,
+          'success',
+        );
+
+        setTimeout(() => {
+          navigate('/receptionist/appointments');
+        }, 1200);
+      } catch (err: any) {
+        const msg = err?.message || '';
+        if (err?.isConflict || msg.includes('no longer available') || msg.includes('exclusion')) {
+          showToast(
+            'This doctor is no longer available at the selected time. Please choose another slot.',
+            'error',
+          );
+        } else {
+          showToast(msg || 'Failed to book appointment', 'error');
+        }
+
+        // Refresh slots on collision
+        if (selectedDoctor && selectedDate) {
+          appointmentService.getAvailability(selectedDoctor.doctor_id, selectedDate, true).then(setSlots);
+        }
+      } finally {
+        setSubmitting(false);
+        setShowConfirmModal(false);
+      }
     }
   };
 
-  const isReadyToConfirm = Boolean(selectedPatient && selectedDoctor && selectedSlot);
+  const isReadyToConfirm =
+    category === 'Walk-in'
+      ? Boolean(
+          selectedPatient &&
+          selectedDoctor &&
+          walkInStartTime &&
+          walkInEndTime &&
+          walkInEndTime > walkInStartTime &&
+          !conflictingSlot
+        )
+      : Boolean(selectedPatient && selectedDoctor && selectedSlot);
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -281,7 +440,7 @@ export const BookAppointment: React.FC = () => {
 
           {!selectedPatient ? (
             /* Search Bar & Dropdown */
-            <div className="relative">
+            <div className="relative" ref={patientDropdownRef}>
               <div className="flex flex-col sm:flex-row items-center gap-space-sm">
                 <div className="relative flex-1 w-full">
                   <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">
@@ -291,19 +450,26 @@ export const BookAppointment: React.FC = () => {
                     type="text"
                     value={patientSearch}
                     onChange={(e) => setPatientSearch(e.target.value)}
-                    onFocus={() => setShowPatientDropdown(patientResults.length > 0)}
-                    placeholder="Search by NIC, Patient Name, or ID (e.g. 762271890V or Priyantha)..."
+                    onFocus={() => {
+                      if (patientResults.length === 0) {
+                        searchPatients(patientSearch);
+                      } else {
+                        setShowPatientDropdown(true);
+                      }
+                    }}
+                    placeholder="Search by NIC, Patient Name, Phone, or ID (e.g. 198821400293 or Priyantha)..."
                     className="w-full h-[42px] pl-10 pr-4 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus transition-all"
                   />
                   {searchingPatients && (
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline font-label-sm text-label-sm animate-pulse">
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline font-label-sm text-label-sm animate-pulse flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
                       Searching...
                     </span>
                   )}
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowPatientDropdown(true)}
+                  onClick={() => searchPatients(patientSearch)}
                   className="w-full sm:w-auto h-[42px] px-space-lg bg-surface-subtle hover:bg-border-subtle border border-border-subtle text-brand-navy-deep font-label-md text-label-md rounded-lg flex items-center justify-center gap-1.5 transition-all font-semibold"
                 >
                   <span className="material-symbols-outlined text-[18px]">manage_search</span>
@@ -312,35 +478,68 @@ export const BookAppointment: React.FC = () => {
               </div>
 
               {/* Patient Autocomplete Results Dropdown */}
-              {showPatientDropdown && patientResults.length > 0 && (
+              {showPatientDropdown && (
                 <div className="absolute z-20 left-0 right-0 mt-2 bg-surface-card rounded-xl border border-border-subtle shadow-lg divide-y divide-border-subtle overflow-hidden max-h-64 overflow-y-auto">
-                  {patientResults.map((p) => (
-                    <div
-                      key={p.patient_id}
-                      onClick={() => handleSelectPatient(p)}
-                      className="p-3 px-4 hover:bg-surface-subtle cursor-pointer flex items-center justify-between transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center font-bold text-label-md">
-                          {p.first_name[0]}
-                          {p.last_name[0]}
+                  {searchingPatients && patientResults.length === 0 ? (
+                    <div className="p-4 text-center text-outline text-body-sm flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                      <span>Loading real patient records...</span>
+                    </div>
+                  ) : patientResults.length === 0 ? (
+                    <div className="p-4 text-center text-secondary text-body-sm space-y-1">
+                      <div>No registered patients found{patientSearch.trim() ? ` matching "${patientSearch.trim()}"` : ''}.</div>
+                      <Link
+                        to="/receptionist/register-patient"
+                        className="text-primary hover:underline font-semibold text-label-sm inline-flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">person_add</span>
+                        Register New Patient
+                      </Link>
+                    </div>
+                  ) : (
+                    patientResults.map((p) => (
+                      <div
+                        key={p.patient_id}
+                        onClick={() => handleSelectPatient(p)}
+                        className="p-3 px-4 hover:bg-surface-subtle cursor-pointer flex items-center justify-between transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center font-bold text-label-md">
+                            {p.first_name[0]}
+                            {p.last_name[0]}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-brand-navy-deep font-label-md text-label-md flex items-center gap-2">
+                              <span>{p.first_name} {p.last_name}</span>
+                              {p.branch_name && (
+                                <span className="px-1.5 py-0.2 rounded bg-surface-subtle border border-border-subtle text-[11px] text-secondary">
+                                  {p.branch_name}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-outline text-body-sm flex items-center gap-2">
+                              <span>NIC: {p.id_number}</span>
+                              <span>•</span>
+                              <span>{p.phone_number || 'No phone'}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-semibold text-brand-navy-deep font-label-md text-label-md">
-                            {p.first_name} {p.last_name}
-                          </div>
-                          <div className="text-outline text-body-sm flex items-center gap-2">
-                            <span>NIC: {p.id_number}</span>
-                            <span>•</span>
-                            <span>{p.phone_number}</span>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${p.has_insurance
+                              ? 'bg-status-completed-bg text-status-completed-text'
+                              : 'bg-surface-subtle text-secondary'
+                              }`}
+                          >
+                            {p.has_insurance ? 'Insured' : 'Self-Pay'}
+                          </span>
+                          <span className="px-2.5 py-1 rounded-full bg-surface border border-border-subtle font-mono-data text-[12px] text-secondary font-medium">
+                            {p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`}
+                          </span>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-surface border border-border-subtle font-mono-data text-[12px] text-secondary font-medium">
-                        {p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`}
-                      </span>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               )}
             </div>
@@ -360,17 +559,32 @@ export const BookAppointment: React.FC = () => {
                     <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-mono-data text-[11px] text-secondary">
                       {selectedPatient.patient_code || `PT-${String(selectedPatient.patient_id).padStart(6, '0')}`}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[11px] font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
-                      SLIC Insured
-                    </span>
+                    {selectedPatient.has_insurance ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[11px] font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                        Insured
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-secondary font-label-sm text-[11px] font-semibold">
+                        Self-Pay
+                      </span>
+                    )}
+                    {selectedPatient.branch_name && (
+                      <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-body-sm text-[11px] text-secondary">
+                        {selectedPatient.branch_name}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body-sm text-body-sm text-secondary">
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[15px] text-outline">cake</span>
-                      {selectedPatient.date_of_birth} ({getAge(selectedPatient.date_of_birth)} yrs)
-                    </span>
-                    <span>•</span>
+                    {selectedPatient.date_of_birth && (
+                      <>
+                        <span className="flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[15px] text-outline">cake</span>
+                          {selectedPatient.date_of_birth} ({getAge(selectedPatient.date_of_birth)} yrs)
+                        </span>
+                        <span>•</span>
+                      </>
+                    )}
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">male</span>
                       {selectedPatient.gender}
@@ -378,7 +592,7 @@ export const BookAppointment: React.FC = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">call</span>
-                      {selectedPatient.phone_number}
+                      {selectedPatient.phone_number || 'N/A'}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
@@ -557,9 +771,49 @@ export const BookAppointment: React.FC = () => {
             </div>
           </div>
 
+          {/* Clinic Branches Filter Pills */}
+          <div className="space-y-1.5">
+            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block font-semibold">
+              Clinic Branch
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedBranch('All')}
+                className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch === 'All'
+                  ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
+                  : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
+                  }`}
+              >
+                <span className="material-symbols-outlined text-[15px]">apartment</span>
+                <span>All Branches</span>
+                {selectedBranch === 'All' && (
+                  <span className="material-symbols-outlined text-[14px]">check</span>
+                )}
+              </button>
+              {allBranches.map((b) => (
+                <button
+                  key={b.branch_id}
+                  type="button"
+                  onClick={() => setSelectedBranch(b.name)}
+                  className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch.toLowerCase() === b.name.toLowerCase()
+                    ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
+                    : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-[15px]">location_on</span>
+                  <span>{b.name} Branch</span>
+                  {selectedBranch.toLowerCase() === b.name.toLowerCase() && (
+                    <span className="material-symbols-outlined text-[14px]">check</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Clinical Departments / Specialties Filter Pills */}
           <div className="space-y-1.5">
-            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block">
+            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block font-semibold">
               Clinical Departments
             </label>
             <div className="flex flex-wrap items-center gap-2">
@@ -601,7 +855,7 @@ export const BookAppointment: React.FC = () => {
               Available Doctors ({filteredDoctors.length} found)
             </span>
             <span className="font-body-sm text-body-sm text-outline">
-              Select a doctor &amp; time slot to proceed
+              Select a doctor &amp; {category === 'Walk-in' ? 'set walk-in time slot' : 'choose open slot'} to proceed
             </span>
           </div>
 
@@ -610,10 +864,10 @@ export const BookAppointment: React.FC = () => {
             <LoadingState message="Loading available clinical specialists..." />
           ) : filteredDoctors.length === 0 ? (
             <div className="p-space-lg text-center border border-dashed border-border-subtle rounded-xl text-outline font-body-md text-body-md">
-              No doctors found matching this specialty and search filter.
+              No doctors found matching the selected branch, specialty, and search filter.
             </div>
           ) : (
-            <div className="space-y-space-md">
+            <div className="space-y-space-md max-h-[620px] overflow-y-auto pr-1.5 scrollbar-thin">
               {filteredDoctors.map((doc) => {
                 const isDocSelected = selectedDoctor?.doctor_id === doc.doctor_id;
                 return (
@@ -648,20 +902,15 @@ export const BookAppointment: React.FC = () => {
                             Specialties: {doc.specialties?.join(', ') || 'General Practice'}
                           </p>
                           <div className="flex items-center gap-3 font-body-sm text-body-sm text-outline">
-                            <span className="text-amber-500 font-semibold flex items-center gap-0.5">
-                              <span className="material-symbols-outlined text-[16px]">star</span>
-                              4.9
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 text-secondary">
-                              <span className="material-symbols-outlined text-[16px]">apartment</span>
-                              {doc.branch_name || 'Central Clinic'}
+                            <span className="flex items-center gap-1 text-secondary font-medium">
+                              <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
+                              {doc.branch_name ? `${doc.branch_name} Branch` : 'Central Clinic'}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Fee & Select Indicator */}
+                      {/* Select Indicator */}
                       <div className="flex items-center justify-between lg:justify-end gap-space-lg self-stretch lg:self-auto">
                         {isDocSelected ? (
                           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-semibold">
@@ -685,51 +934,273 @@ export const BookAppointment: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Slots for Doctor when selected */}
+                    {/* Time selection for Doctor when selected */}
                     {isDocSelected && (
-                      <div className="space-y-space-sm pt-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                          <span className="font-label-sm text-label-sm text-brand-navy-deep min-w-[140px] font-semibold flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[16px] text-primary">
-                              today
-                            </span>
-                            Slots on {selectedDate}:
-                          </span>
-
-                          {loadingSlots ? (
-                            <span className="text-body-sm text-outline animate-pulse">
-                              Loading open time slots...
-                            </span>
-                          ) : slots.length === 0 ? (
-                            <span className="text-body-sm text-on-surface-variant italic">
-                              No open slots found for this date. Try another date above.
-                            </span>
-                          ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {slots.map((s) => {
-                                const isSelectedSlot = selectedSlot?.slot_id === s.slot_id;
-                                return (
-                                  <button
-                                    key={s.slot_id}
-                                    type="button"
-                                    onClick={() => setSelectedSlot(s)}
-                                    className={`px-3 py-1.5 rounded-lg font-label-md text-label-md transition-all flex items-center gap-1 font-semibold ${isSelectedSlot
-                                      ? 'bg-primary text-on-primary shadow-sm'
-                                      : 'bg-surface border border-border-subtle text-secondary hover:border-primary'
-                                      }`}
-                                  >
-                                    <span>{formatTime(s.start_time)}</span>
-                                    {isSelectedSlot && (
-                                      <span className="material-symbols-outlined text-[14px]">
-                                        check
-                                      </span>
-                                    )}
-                                  </button>
-                                );
-                              })}
+                      <div className="space-y-space-sm pt-2 border-t border-border-subtle/80">
+                        {category === 'Walk-in' ? (
+                          /* Walk-in Manual Time Slot Config */
+                          <div className="p-space-md rounded-xl bg-status-scheduled-bg/25 border border-brand-teal-light/40 space-y-space-sm">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 text-brand-navy-deep font-headline-sm font-semibold">
+                                <span className="material-symbols-outlined text-primary text-[22px]">
+                                  more_time
+                                </span>
+                                <span>Manual Walk-in Time Slot</span>
+                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                                  Emergency / On-Demand
+                                </span>
+                              </div>
+                              <span className="font-mono-data text-[12px] text-secondary">
+                                Date: <strong>{selectedDate}</strong>
+                              </span>
                             </div>
-                          )}
-                        </div>
+                            <p className="font-body-sm text-secondary">
+                              Enter the consultation time slot window for {doc.full_name} ({doc.branch_name}). No pre-existing slot required.
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-sm pt-1">
+                              <div>
+                                <label className="block font-label-sm text-outline mb-1 font-semibold">
+                                  Start Time (HH:MM)
+                                </label>
+                                <input
+                                  type="time"
+                                  value={walkInStartTime}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setWalkInStartTime(val);
+                                    if (val && (!walkInEndTime || walkInEndTime <= val)) {
+                                      setWalkInEndTime(addMinutesToTime(val, 20));
+                                    }
+                                  }}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
+                                    conflictingSlot
+                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                  }`}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block font-label-sm text-outline mb-1 font-semibold">
+                                  End Time (HH:MM)
+                                </label>
+                                <input
+                                  type="time"
+                                  value={walkInEndTime}
+                                  onChange={(e) => setWalkInEndTime(e.target.value)}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
+                                    conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
+                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                  }`}
+                                />
+                              </div>
+
+                              <div className="flex flex-col justify-end">
+                                <label className="block font-label-sm text-outline mb-1 font-semibold">
+                                  Quick Duration Presets
+                                </label>
+                                <div className="flex items-center gap-1.5 h-[40px]">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const now = getCurrentTimeString();
+                                      setWalkInStartTime(now);
+                                      setWalkInEndTime(addMinutesToTime(now, 15));
+                                    }}
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px] flex items-center justify-center gap-1"
+                                  >
+                                    <span className="material-symbols-outlined text-[15px]">schedule</span>
+                                    Now (+15m)
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (walkInStartTime) setWalkInEndTime(addMinutesToTime(walkInStartTime, 20));
+                                    }}
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px]"
+                                  >
+                                    +20 min
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (walkInStartTime) setWalkInEndTime(addMinutesToTime(walkInStartTime, 30));
+                                    }}
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px]"
+                                  >
+                                    +30 min
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Time conflict and validation messages */}
+                            {conflictingSlot && (
+                              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[12px]">
+                                <span className="material-symbols-outlined text-[18px] text-red-600 shrink-0 mt-0.5">
+                                  warning
+                                </span>
+                                <div>
+                                  <span className="font-bold">Schedule Overlap Detected:</span> The entered walk-in window ({formatTime(walkInStartTime)} – {formatTime(walkInEndTime)}) overlaps with an existing{' '}
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded font-bold ${
+                                      conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
+                                    }`}
+                                  >
+                                    {conflictingSlot.status}
+                                  </span>{' '}
+                                  slot ({formatTime(conflictingSlot.start_time)} – {formatTime(conflictingSlot.end_time)}). Choose a non-overlapping time window to avoid collision.
+                                </div>
+                              </div>
+                            )}
+
+                            {!conflictingSlot && walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime && (
+                              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[12px]">
+                                <span className="material-symbols-outlined text-[16px] text-red-600 shrink-0">
+                                  error
+                                </span>
+                                <span>Walk-in end time must be after start time ({formatTime(walkInStartTime)}).</span>
+                              </div>
+                            )}
+
+                            {!conflictingSlot && walkInStartTime && walkInEndTime && walkInEndTime > walkInStartTime && (
+                              <div className="flex items-center gap-1.5 text-status-completed-text text-[12px] font-medium">
+                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                Time slot available &amp; no schedule conflicts detected.
+                              </div>
+                            )}
+
+                            {/* Reference: doctor's existing pre-scheduled slots */}
+                            <div className="pt-2 border-t border-border-subtle/60 text-[12px] text-secondary space-y-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-brand-navy-deep flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
+                                    Doctor's Existing Schedule on {selectedDate}:
+                                  </span>
+                                  {!loadingSlots && slots.length > 0 && (
+                                    <div className="flex items-center gap-1.5 text-[11px]">
+                                      <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold border border-red-200">
+                                        {bookedSlots.length} Booked
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 font-bold border border-teal-200">
+                                        {openSlots.length} Open
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                  <span className="inline-flex items-center gap-1.5 text-teal-700 font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                                    Open Slot
+                                  </span>
+                                  <span className="inline-flex items-center gap-1.5 text-red-700 font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                    Booked Slot
+                                  </span>
+                                </div>
+                              </div>
+
+                              {loadingSlots ? (
+                                <span className="italic text-outline">Loading schedule...</span>
+                              ) : slots.length === 0 ? (
+                                <span className="italic text-outline">
+                                  No pre-scheduled slots today (full schedule open for walk-ins).
+                                </span>
+                              ) : (
+                                <div className="flex flex-wrap gap-2 pt-0.5">
+                                  {slots.map((s) => {
+                                    const isBooked = s.status?.toLowerCase() === 'booked';
+                                    const isConflict = conflictingSlot?.slot_id === s.slot_id;
+
+                                    return (
+                                      <span
+                                        key={s.slot_id}
+                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${
+                                          isConflict
+                                            ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
+                                            : isBooked
+                                            ? 'bg-red-50 border border-red-200 text-red-700 font-medium'
+                                            : 'bg-teal-50 border border-teal-200 text-teal-700 font-medium'
+                                        }`}
+                                      >
+                                        <span
+                                          className={`w-1.5 h-1.5 rounded-full ${
+                                            isConflict
+                                              ? 'bg-red-600 animate-ping'
+                                              : isBooked
+                                              ? 'bg-red-500'
+                                              : 'bg-teal-500'
+                                          }`}
+                                        />
+                                        <span>
+                                          {formatTime(s.start_time)} – {formatTime(s.end_time)}
+                                        </span>
+                                        <span
+                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                            isConflict
+                                              ? 'bg-red-600 text-white'
+                                              : isBooked
+                                              ? 'bg-red-100 text-red-800'
+                                              : 'bg-teal-100 text-teal-800'
+                                          }`}
+                                        >
+                                          {isConflict ? 'Conflict' : s.status}
+                                        </span>
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          /* Pre-scheduled Slots Chips */
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <span className="font-label-sm text-label-sm text-brand-navy-deep min-w-[140px] font-semibold flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-[16px] text-primary">
+                                today
+                              </span>
+                              Open Slots on {selectedDate}:
+                            </span>
+
+                            {loadingSlots ? (
+                              <span className="text-body-sm text-outline animate-pulse">
+                                Loading open time slots...
+                              </span>
+                            ) : openSlots.length === 0 ? (
+                              <span className="text-body-sm text-on-surface-variant italic">
+                                No open slots found for this date. Try another date above or switch to Walk-in.
+                              </span>
+                            ) : (
+                              <div className="flex flex-wrap gap-2">
+                                {openSlots.map((s) => {
+                                  const isSelectedSlot = selectedSlot?.slot_id === s.slot_id;
+                                  return (
+                                    <button
+                                      key={s.slot_id}
+                                      type="button"
+                                      onClick={() => setSelectedSlot(s)}
+                                      className={`px-3 py-1.5 rounded-lg font-label-md text-label-md transition-all flex items-center gap-1 font-semibold ${isSelectedSlot
+                                        ? 'bg-primary text-on-primary shadow-sm'
+                                        : 'bg-surface border border-border-subtle text-secondary hover:border-primary'
+                                        }`}
+                                    >
+                                      <span>{formatTime(s.start_time)}</span>
+                                      {isSelectedSlot && (
+                                        <span className="material-symbols-outlined text-[14px]">
+                                          check
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -754,7 +1225,7 @@ export const BookAppointment: React.FC = () => {
                   Confirm Booking Summary
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
-                  Review consultation and billing details before final issuance
+                  Review consultation and details before confirmation
                 </p>
               </div>
             </div>
@@ -797,10 +1268,16 @@ export const BookAppointment: React.FC = () => {
                     : 'Age / Gender'}
                 </p>
                 <p>{selectedPatient?.phone_number || 'Contact number'}</p>
-                <p className="text-status-completed-text font-semibold flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
-                  SLIC Insured
-                </p>
+                {selectedPatient?.has_insurance ? (
+                  <p className="text-status-completed-text font-semibold flex items-center gap-1 mt-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
+                    Insured
+                  </p>
+                ) : (
+                  <p className="text-secondary font-semibold flex items-center gap-1 mt-1">
+                    Self-Pay
+                  </p>
+                )}
               </div>
             </div>
 
@@ -826,7 +1303,7 @@ export const BookAppointment: React.FC = () => {
                 <p className="font-semibold text-brand-navy-deep">
                   License #{selectedDoctor?.license_number || '—'}
                 </p>
-                <p>{selectedDoctor?.branch_name || 'Central Clinic Wing'}</p>
+                <p>{selectedDoctor?.branch_name ? `${selectedDoctor.branch_name} Branch` : 'Clinic Branch'}</p>
               </div>
             </div>
 
@@ -840,25 +1317,33 @@ export const BookAppointment: React.FC = () => {
               </div>
               <div>
                 <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                  {selectedSlot ? selectedSlot.date : selectedDate}
+                  {category === 'Walk-in' ? selectedDate : selectedSlot ? selectedSlot.date : selectedDate}
                 </p>
                 <p className="font-label-lg text-label-lg text-primary font-bold">
-                  {selectedSlot ? formatTime(selectedSlot.start_time) : 'No slot chosen'}
+                  {category === 'Walk-in'
+                    ? walkInStartTime && walkInEndTime
+                      ? `${formatTime(walkInStartTime)} – ${formatTime(walkInEndTime)}`
+                      : 'Enter time window'
+                    : selectedSlot
+                      ? formatTime(selectedSlot.start_time)
+                      : 'No slot chosen'}
                 </p>
               </div>
               <div className="pt-1 border-t border-border-subtle font-body-sm text-body-sm text-secondary">
                 <span className="inline-flex items-center gap-1 text-status-scheduled-text font-medium">
-                  <span className="material-symbols-outlined text-[14px]">timer</span>
+                  <span className="material-symbols-outlined text-[14px]">
+                    {category === 'Walk-in' ? 'directions_walk' : 'timer'}
+                  </span>
                   Category: {category}
                 </span>
               </div>
             </div>
 
-            {/* Card 4: Facility & Policy */}
+            {/* Card 4: Facility & Branch */}
             <div className="p-space-md rounded-xl bg-surface border border-border-subtle space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">
-                  Facility &amp; Policy
+                  Facility &amp; Branch
                 </span>
                 <span className="material-symbols-outlined text-[18px] text-primary">
                   local_hospital
@@ -866,88 +1351,56 @@ export const BookAppointment: React.FC = () => {
               </div>
               <div>
                 <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                  {selectedDoctor?.branch_name || 'Colombo Central Branch'}
+                  {selectedDoctor?.branch_name ? `${selectedDoctor.branch_name} Branch` : 'Colombo Central Branch'}
                 </p>
                 <p className="font-body-sm text-body-sm text-secondary">Outpatient Clinic Wing</p>
               </div>
               <div className="pt-1 border-t border-border-subtle font-body-sm text-body-sm text-secondary">
                 <p className="text-[11px] leading-snug text-outline">
-                  Slots operate strictly on a 15-minute grace window per clinic guidelines.
+                  {category === 'Walk-in'
+                    ? 'Walk-in triage queue with immediate consultation reservation.'
+                    : 'Slots operate strictly on a 15-minute grace window per clinic guidelines.'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Fee Summary Inline Bar */}
-          <div className="rounded-xl bg-surface-subtle p-space-md border border-border-subtle flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-body-md text-body-md text-secondary">
-              <span>
-                Consultation Fee: <strong className="text-brand-navy-deep">LKR 3,500.00</strong>
-              </span>
-              <span className="text-outline">|</span>
-              <span>
-                Hospital Charge: <strong className="text-brand-navy-deep">LKR 0.00</strong>
-              </span>
-              <span className="text-outline">|</span>
-              <span>
-                Net Payable: <strong className="text-primary font-bold">LKR 3,500.00</strong>
-              </span>
-            </div>
-            <div className="font-label-sm text-label-sm text-secondary bg-surface-card px-2.5 py-1 rounded-md border border-border-subtle self-start md:self-auto font-medium">
-              Payment Mode: <strong className="text-brand-navy-deep font-semibold">Pay at Cashier Desk</strong>
-            </div>
-          </div>
-
-          {/* SMS Notification Callout Note */}
-          <div className="rounded-lg bg-status-scheduled-bg/40 border border-brand-teal-light/30 p-space-sm flex items-center gap-space-sm text-status-scheduled-text">
-            <span className="material-symbols-outlined text-[20px] text-primary">sms</span>
-            <span className="font-body-sm text-body-sm">
-              A confirmation SMS with e-Token will be automatically sent to patient's mobile{' '}
-              <strong>{selectedPatient?.phone_number || '(No phone number)'}</strong> upon booking.
-            </span>
-          </div>
-
           {/* Bottom Actions Bar */}
-          <div className="pt-space-md border-t border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-            <div className="flex items-center gap-2 font-mono-data text-mono-data text-secondary">
-              <span className="material-symbols-outlined text-[18px] text-outline">receipt</span>
-              <span>
-                Workflow Category: <strong>{category}</strong>
-              </span>
-            </div>
+          <div className="pt-space-md border-t border-border-subtle flex flex-col sm:flex-row items-center justify-end gap-space-sm">
+            <button
+              type="button"
+              onClick={handleResetForm}
+              className="w-full sm:w-auto h-[42px] px-space-lg rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-md text-label-md transition-all font-semibold"
+            >
+              Cancel &amp; Reset Form
+            </button>
 
-            <div className="flex items-center gap-space-sm justify-end">
-              <button
-                type="button"
-                onClick={handleResetForm}
-                className="h-[42px] px-space-lg rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-md text-label-md transition-all font-semibold"
-              >
-                Cancel &amp; Reset Form
-              </button>
-
-              <button
-                type="button"
-                disabled={!isReadyToConfirm || submitting}
-                onClick={() => setShowConfirmModal(true)}
-                className="h-[42px] px-space-xl rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm flex items-center gap-2 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
-                <span>{submitting ? 'Booking...' : 'Book Appointment'}</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={!isReadyToConfirm || submitting}
+              onClick={() => setShowConfirmModal(true)}
+              className="w-full sm:w-auto h-[42px] px-space-xl rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm flex items-center justify-center gap-2 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
+              <span>{submitting ? 'Booking...' : category === 'Walk-in' ? 'Book Walk-in' : 'Book Appointment'}</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Confirmation Modal */}
-      {selectedPatient && selectedDoctor && selectedSlot && (
+      {selectedPatient && selectedDoctor && (category === 'Walk-in' ? (walkInStartTime && walkInEndTime) : selectedSlot) && (
         <ConfirmDialog
           isOpen={showConfirmModal}
           onClose={() => setShowConfirmModal(false)}
           onConfirm={handleExecuteBooking}
-          title="Confirm Appointment Booking"
-          message={`Confirm booking consultation for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedSlot.date} at ${formatTime(selectedSlot.start_time)}?`}
-          confirmLabel="Confirm & Book"
+          title={category === 'Walk-in' ? 'Confirm Walk-in Appointment' : 'Confirm Appointment Booking'}
+          message={
+            category === 'Walk-in'
+              ? `Confirm booking a walk-in appointment for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} (${selectedDoctor.branch_name || 'Clinic'}) on ${selectedDate} from ${formatTime(walkInStartTime)} to ${formatTime(walkInEndTime)}?`
+              : `Confirm booking consultation for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedSlot?.date} at ${selectedSlot ? formatTime(selectedSlot.start_time) : ''}?`
+          }
+          confirmLabel={category === 'Walk-in' ? 'Confirm Walk-in' : 'Confirm & Book'}
           cancelLabel="Review Details"
         />
       )}
