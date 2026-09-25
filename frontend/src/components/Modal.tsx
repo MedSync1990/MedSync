@@ -13,20 +13,36 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-lg transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      {/* Modal Centering Wrapper */}
+      <div className="flex min-h-full items-center justify-center p-space-md">
+        <div className="relative w-full max-w-xl transform overflow-hidden rounded-xl bg-surface-card shadow-2xl transition-all border border-border-subtle text-on-surface">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-border-subtle px-space-lg py-space-md bg-surface-card">
+            <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+              {title}
+            </h3>
             <button
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
             >
-              ✕
+              <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
           </div>
-          <div className="px-6 py-4">{children}</div>
-          {footer && <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 flex justify-end gap-3">{footer}</div>}
+
+          {/* Content Body */}
+          <div className="px-space-lg py-space-md bg-surface-card">{children}</div>
+
+          {/* Footer */}
+          {footer && (
+            <div className="border-t border-border-subtle bg-surface-subtle px-space-lg py-space-md flex justify-end gap-space-sm items-center">
+              {footer}
+            </div>
+          )}
         </div>
       </div>
     </div>

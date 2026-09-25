@@ -3,21 +3,23 @@ import React from 'react';
 export interface EmptyStateProps {
   title?: string;
   message: string;
+  icon?: string;
   action?: React.ReactNode;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  title = 'No Data',
+  title = 'No Data Available',
   message,
+  icon = 'database_off',
   action,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-xl text-center">
-      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3 text-lg font-bold">
-        !
+    <div className="flex flex-col items-center justify-center p-space-xl bg-surface-card border border-border-subtle rounded-xl text-center shadow-sm">
+      <div className="w-14 h-14 rounded-full bg-surface-subtle flex items-center justify-center text-outline mb-space-sm">
+        <span className="material-symbols-outlined text-[32px]">{icon}</span>
       </div>
-      <h4 className="text-base font-semibold text-slate-800">{title}</h4>
-      <p className="text-sm text-slate-500 max-w-sm mt-1 mb-4">{message}</p>
+      <h4 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">{title}</h4>
+      <p className="font-body-md text-body-md text-on-surface-variant max-w-md mt-1 mb-space-md">{message}</p>
       {action && <div>{action}</div>}
     </div>
   );

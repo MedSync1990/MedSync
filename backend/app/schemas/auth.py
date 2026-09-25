@@ -11,3 +11,4 @@ class MeResponse(BaseModel):
     username: str
     role: str
     branch_id: int | None = None
+    branch_name: str | None = None
