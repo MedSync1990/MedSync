@@ -137,7 +137,7 @@ async def list_appointments(
     """
     List appointments with filters. Branch Manager is locked to their own branch.
     """
-    scoped_branch_id = get_branch_scope(user) or branch
+    scoped_branch_id = user.branch_id if user.role == "Branch Manager" else branch
     offset = (page - 1) * limit
 
     base_where = """
@@ -222,12 +222,11 @@ async def get_appointment(
     Get full appointment detail.
     BM gets 404 for appointments in other branches.
     """
-    scoped_branch_id = get_branch_scope(user)
     appt = await _fetch_appointment_detail(conn, id)
     if not appt:
         raise NotFoundError("Appointment not found.")
 
-    if scoped_branch_id is not None and appt.branch_id != scoped_branch_id:
+    if user.role == "Branch Manager" and user.branch_id is not None and appt.branch_id != user.branch_id:
         raise NotFoundError("Appointment not found.")
 
     return appt
