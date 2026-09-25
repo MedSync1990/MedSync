@@ -1,8 +1,8 @@
 /**
- * MedSync — Billing & Payment API endpoints
+ * MedSync — Billing, Payment & Insurance API endpoints
  *
- * Covers: invoice lookup, payment recording, patient balance
- * Owner: Shavinda (stub — fill in detail when building billing pages)
+ * Covers: invoice lookup, payment recording, patient balance, insurance
+ * Owner: Shavinda
  */
 
 import { get, post } from './client';
@@ -12,7 +12,10 @@ import type {
   RecordPaymentRequest,
   RecordPaymentResponse,
   PatientBalanceResponse,
-} from './types';
+  PatientInsuranceResponse,
+  VerifyInsuranceRequest,
+  VerifyInsuranceResponse,
+} from './types.ts';
 
 /** Get a single invoice by code or patient NIC */
 export function getInvoice(
@@ -41,4 +44,14 @@ export function recordPayment(
 /** Get a patient's total outstanding balance */
 export function getPatientBalance(patientId: number): Promise<PatientBalanceResponse> {
   return get<PatientBalanceResponse>(`/patients/${patientId}/balance`);
+}
+
+/** Get a patient's insurance policy details (api-routes.md §9) */
+export function getPatientInsurance(patientId: number): Promise<PatientInsuranceResponse> {
+  return get<PatientInsuranceResponse>(`/insurance/patient/${patientId}`);
+}
+
+/** Verify and link an insurance policy to a patient (api-routes.md §9) */
+export function verifyInsurance(data: VerifyInsuranceRequest): Promise<VerifyInsuranceResponse> {
+  return post<VerifyInsuranceResponse>('/insurance/verify', data);
 }
