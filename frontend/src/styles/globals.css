@@ -45,3 +45,33 @@ body {
     display: none !important;
   }
 }
+
+@media print {
+  /* Hide absolutely everything by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Only show elements inside the print-invoice-area */
+  .print-invoice-area, .print-invoice-area * {
+    visibility: visible;
+  }
+  
+  /* Reset the positioning so it prints neatly on the paper */
+  .print-invoice-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Explicitly hide buttons/UI inside the printable area */
+  .no-print, .no-print * {
+    display: none !important;
+  }
+}
