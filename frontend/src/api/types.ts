@@ -81,15 +81,29 @@ export interface DoctorSlotResponse {
   status: string;
 }
 
+export interface SpecialtyResponse {
+  specialty_id: number;
+  name: string;
+  description?: string;
+  doctor_count?: number;
+}
+
 export interface DoctorResponse {
   doctor_id: number;
-  first_name: string;
-  last_name: string;
+  user_id?: number;
+  full_name: string;
+  first_name?: string;
+  last_name?: string;
+  license_number: string;
   specialty?: string;
   specialties?: string[];
-  is_active?: boolean;
+  branch_id?: number;
+  branch_name?: string;
+  id_number?: string;
+  phone_numbers?: string[];
   phone?: string;
   email?: string;
+  is_active?: boolean;
 }
 
 export interface AppointmentListResponse {
@@ -240,6 +254,7 @@ export interface AllergyItem {
 
 export interface PatientResponse {
   user_id: number;
+  patient_id?: number;
   patient_code: string;
   first_name: string;
   middle_name?: string;
@@ -248,6 +263,9 @@ export interface PatientResponse {
   date_of_birth: string;
   gender: 'Male' | 'Female' | 'Other';
   address?: string;
+  phone?: string;
+  phone_number?: string;
+  email?: string;
   blood_group?: string;
   emergency_contact?: string;
   contact_name?: string;
@@ -274,16 +292,18 @@ export interface PatientListItem {
   is_active: boolean;
 }
 
-// ─── Branches (stub — admin pages fill in detail) ──────────────────────────
+// ─── Branches ──────────────────────────────────────────────────────────────
 
 export interface BranchResponse {
   branch_id: number;
   name: string;
-  address: string;
+  branch_name?: string;
+  address?: string;
+  phone?: string;
   phone_number?: string;
   branch_manager_name?: string;
-  staff_count: number;
-  is_active: boolean;
+  staff_count?: number;
+  is_active?: boolean;
 }
 
 // ─── Stats / Dashboard ─────────────────────────────────────────────────────
@@ -311,14 +331,6 @@ export interface ActivityItem {
   timestamp?: string;
   created_at: string;
   performed_by: string;
-}
-
-export interface BranchResponse {
-  branch_id: number;
-  branch_name: string;
-  name?: string;
-  address?: string;
-  phone?: string;
 }
 
 // ─── Treatments & Consultations ──────────────────────────────────────────

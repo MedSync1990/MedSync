@@ -20,6 +20,7 @@ interface OrderItem {
 }
 
 const DEFAULT_PATIENT: PatientResponse = {
+  user_id: 1,
   patient_id: 1,
   patient_code: 'PT-003420',
   first_name: 'Priyantha',
@@ -267,8 +268,9 @@ export const DoctorConsultation: React.FC = () => {
     setIsSavingAllergies(true);
     setAllergyNotification(null);
     try {
+      const pid = patient.patient_id || patient.user_id || 1;
       const updated = await patientService.updatePatientAllergies(
-        patient.patient_id,
+        pid,
         selectedAllergyIds
       );
       setAllergies(updated);

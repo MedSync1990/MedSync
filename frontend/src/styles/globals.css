@@ -67,9 +67,3 @@ body {
 ::-webkit-scrollbar {
   display: none;
 }
-
-  /* Explicitly hide buttons/UI inside the printable area */
-  .no-print, .no-print * {
-    display: none !important;
-  }
-}
