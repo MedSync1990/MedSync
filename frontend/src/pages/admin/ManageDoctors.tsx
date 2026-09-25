@@ -75,16 +75,16 @@ const SpecialtyChip: React.FC<SpecialtyChipProps> = ({ name }) => (
 
 
 
-// ─── Manage Specialties Modal ─────────────────────────────────────────────────
+// ─── Edit Doctor & Specialties Modal ──────────────────────────────────────────
 
-interface ManageSpecialtiesModalProps {
+interface EditDoctorModalProps {
   doctor: DoctorResponse | null;
   allSpecialties: SpecialtyResponse[];
   onClose: () => void;
-  onSave: (doctorId: number, assigned: string[]) => void;
+  onSave: (doctorId: number, assigned: string[], licenseNumber: string) => void;
 }
 
-const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
+const EditDoctorModal: React.FC<EditDoctorModalProps> = ({
   doctor,
   allSpecialties,
   onClose,
@@ -92,6 +92,7 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
 }) => {
   const { showToast } = useToast();
   const [assigned, setAssigned] = useState<string[]>([]);
+  const [licenseNumber, setLicenseNumber] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -99,6 +100,7 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
     if (doctor) {
       const sps = doctor.specialties ?? [];
       setAssigned(sps);
+      setLicenseNumber(doctor.license_number || '');
       setSearchQuery('');
     }
   }, [doctor]);
@@ -122,12 +124,23 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
   };
 
   const handleSave = async () => {
+    const trimmedLicense = licenseNumber.trim();
+    if (!trimmedLicense) {
+      showToast('Medical license number is required.', 'error');
+      return;
+    }
     if (assigned.length === 0) {
       showToast('A doctor must retain at least one specialty.', 'error');
       return;
     }
     setSaving(true);
     try {
+      // 1. Update license number if changed
+      if (trimmedLicense !== doctor.license_number) {
+        await put(`/doctors/${doctor.doctor_id}`, { license_number: trimmedLicense });
+      }
+
+      // 2. Update specialties if changed
       const allIds = allSpecialties.reduce<Record<string, number>>(
         (acc, s) => ({ ...acc, [s.name]: s.specialty_id }),
         {},
@@ -136,12 +149,16 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
       const newIds = assigned.map((n) => allIds[n]).filter(Boolean);
       const add = newIds.filter((id) => !currentIds.includes(id));
       const remove = currentIds.filter((id) => !newIds.includes(id));
-      await put(`/doctors/${doctor.doctor_id}/specialties`, { add, remove });
-      showToast('Doctor specialties updated successfully!', 'success');
-      onSave(doctor.doctor_id, assigned);
+
+      if (add.length > 0 || remove.length > 0) {
+        await put(`/doctors/${doctor.doctor_id}/specialties`, { add, remove });
+      }
+
+      showToast('Doctor details updated successfully!', 'success');
+      onSave(doctor.doctor_id, assigned, trimmedLicense);
       onClose();
     } catch (err: any) {
-      showToast(err?.message || 'Failed to update specialties', 'error');
+      showToast(err?.message || 'Failed to update doctor details', 'error');
     } finally {
       setSaving(false);
     }
@@ -151,7 +168,7 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
     <Modal
       isOpen={!!doctor}
       onClose={onClose}
-      title={`Manage Specialties — ${doctor.full_name} (#${doctor.license_number})`}
+      title={`Edit Doctor & Specialties — ${doctor.full_name}`}
       footer={
         <>
           <button
@@ -174,6 +191,46 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
       }
     >
       <div className="space-y-space-md">
+        {/* Doctor Quick Info Banner */}
+        <div className="p-3 bg-surface-subtle rounded-xl flex flex-wrap items-center justify-between gap-2 border border-border-subtle text-body-sm font-body-sm text-on-surface-variant">
+          <div>
+            <span className="font-semibold text-on-surface">Branch:</span> {doctor.branch_name || '—'}
+          </div>
+          <div>
+            <span className="font-semibold text-on-surface">NIC:</span> {doctor.id_number || '—'}
+          </div>
+          <div>
+            <span className="font-semibold text-on-surface">Phone:</span>{' '}
+            {doctor.phone_numbers?.length ? doctor.phone_numbers.join(', ') : '—'}
+          </div>
+          {doctor.email && (
+            <div>
+              <span className="font-semibold text-on-surface">Email:</span> {doctor.email}
+            </div>
+          )}
+        </div>
+
+        {/* License Number Input */}
+        <div>
+          <label className="block font-label-md text-label-md text-on-surface font-bold mb-1.5">
+            Medical License Number <span className="text-error">*</span>
+          </label>
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">
+              badge
+            </span>
+            <input
+              type="text"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="e.g. SLMC-12345"
+              className="w-full h-[40px] pl-10 pr-3 bg-surface-subtle border border-border-subtle rounded-lg text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:border-primary"
+            />
+          </div>
+          <span className="font-label-sm text-label-sm text-outline mt-1 block">
+            SLMC registration or equivalent medical council license number.
+          </span>
+        </div>
         {/* Chip container */}
         <div>
           <label className="block font-label-md text-label-md text-on-surface font-bold mb-2">
@@ -525,10 +582,12 @@ export const ManageDoctors: React.FC = () => {
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleModalSave = (doctorId: number, assigned: string[]) => {
+  const handleModalSave = (doctorId: number, assigned: string[], licenseNumber: string) => {
     setDoctors((prev) =>
       prev.map((d) =>
-        d.doctor_id === doctorId ? { ...d, specialties: assigned } : d,
+        d.doctor_id === doctorId
+          ? { ...d, specialties: assigned, license_number: licenseNumber }
+          : d,
       ),
     );
   };
@@ -548,7 +607,7 @@ export const ManageDoctors: React.FC = () => {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
       {/* ── Stat ribbon ── */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-space-sm mb-space-md">
         <StatCard
@@ -656,12 +715,12 @@ export const ManageDoctors: React.FC = () => {
                 </div>
                 {/* Branch filter */}
                 {isAdmin ? (
-                  <div className="relative min-w-[200px]">
+                  <div className="relative min-w-[240px]">
                     <select
                       aria-label="Branch Filter"
                       value={branchFilter}
                       onChange={(e) => handleBranchFilter(e.target.value)}
-                      className="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
+                      className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
                     >
                       <option value="all">All Branches (Islandwide)</option>
                       {branches.map((b) => (
@@ -815,9 +874,9 @@ export const ManageDoctors: React.FC = () => {
                                 className="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
                               >
                                 <span className="material-symbols-outlined text-[16px]">
-                                  edit_note
+                                  edit
                                 </span>
-                                <span>Manage Specialties</span>
+                                <span>Edit Doctor</span>
                               </button>
                             </div>
                           </td>
@@ -1007,9 +1066,9 @@ export const ManageDoctors: React.FC = () => {
         )}
       </div>
 
-      {/* Manage Specialties Modal */}
+      {/* Edit Doctor & Specialties Modal */}
       {modalDoctor && (
-        <ManageSpecialtiesModal
+        <EditDoctorModal
           doctor={modalDoctor}
           allSpecialties={specialties}
           onClose={() => setModalDoctor(null)}
