@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Path, Query ,Response
 from asyncpg import Connection, PostgresError, RaiseError
 from typing import List, Optional
 from datetime import datetime
 from app.db import get_conn
+from jinja2 import Environment, FileSystemLoader
+import weasyprint
 from app.dependencies import CurrentUser, require_roles, get_current_user
 from app.errors import NotFoundError, ConflictError, AppValidationError
 from app.schemas.invoices import (
@@ -17,6 +19,7 @@ from app.schemas.invoices import (
 )
 
 router = APIRouter()
+env = Environment(loader=FileSystemLoader('app/templates'))
 
 
 async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_type: str = "invoice"):
@@ -39,6 +42,8 @@ async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_
             p.patient_code,
             pu.first_name || ' ' || pu.last_name AS patient_name,
             pu.id_number AS patient_nic,
+            pu.address AS patient_address,
+            (SELECT phone_number FROM contact c WHERE c.user_id = pu.user_id LIMIT 1) AS patient_phone,
             du.first_name || ' ' || du.last_name AS doctor_name,
             b.name AS unit_name,
             pi.insurance_card_number AS insurance_policy_number
@@ -278,3 +283,71 @@ async def get_patient_balance(
         outstanding_balance=round(total_outstanding, 2)
     )
 
+@router.get("/{invoice_code}/pdf")
+async def download_invoice_pdf(
+    invoice_code: str, 
+    conn: Connection = Depends(get_conn)
+):
+    # 1. Fetch the exact invoice header from the DB
+    inv = await fetch_invoice_by_id_or_code(conn, invoice_code, search_type="invoice")
+    if not inv:
+        raise NotFoundError("Invoice not found")
+
+    # 2. Fetch Line Items for this specific consultation
+    items_query = """
+        SELECT 
+            tc.treatment_name,
+            ct.treatment_code,
+            ct.quantity,
+            ct.unit_price,
+            (ct.quantity * ct.unit_price) AS total_price
+        FROM consultation_treatments ct
+        JOIN treatment_catalogue tc ON ct.treatment_code = tc.treatment_code
+        WHERE ct.consultation_id = $1
+    """
+    item_rows = await conn.fetch(items_query, inv["consultation_id"])
+
+    # 3. Calculate outstanding balance by fetching payments
+    payments_query = "SELECT SUM(amount_paid) as total_paid FROM payments WHERE invoice_id = $1"
+    payments_row = await conn.fetchrow(payments_query, inv["invoice_id"])
+    total_paid = float(payments_row["total_paid"]) if payments_row and payments_row["total_paid"] else 0.0
+
+    subtotal = float(inv["total_amount"])
+    insurance_coverage = float(inv["insurance_amount"])
+    total_due = max(0.0, subtotal - insurance_coverage - total_paid)
+
+    # 4. Format items specifically for our Jinja template
+    items = []
+    for r in item_rows:
+        items.append({
+            "treatment_name": r["treatment_name"],
+            "treatment_code": str(r["treatment_code"]),
+            "quantity": r["quantity"],
+            "total_price": f"{float(r['total_price']):,.2f}"
+        })
+
+    # 5. Load the template and fill in the REAL data
+    template = env.get_template("invoice_template.html")
+    rendered_html = template.render(
+        invoice_code=inv["invoice_code"],
+        created_at=inv["created_at"].strftime("%Y-%m-%d"),
+        patient_name=inv["patient_name"],
+        patient_address=inv["patient_address"] or "N/A",
+        patient_phone=inv["patient_phone"] or "N/A", 
+        patient_nic=inv["patient_nic"],
+        doctor_name=inv["doctor_name"],
+        items=items,
+        subtotal=f"{subtotal:,.2f}",
+        insurance_coverage=f"{insurance_coverage:,.2f}",
+        total_due=f"{total_due:,.2f}"
+    )
+    
+    # 6. Generate the PDF
+    pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    
+    # 7. Return the PDF file directly to the browser
+    return Response(
+        content=pdf_bytes, 
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=Invoice_{invoice_code}.pdf"}
+    )
