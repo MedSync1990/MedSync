@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { get, put, post, del } from '../../services/api';
 import type {
   DoctorResponse,
@@ -66,84 +66,81 @@ const StatCard: React.FC<StatCardProps> = ({
 
 interface SpecialtyChipProps {
   name: string;
-  primary?: boolean;
 }
-const SpecialtyChip: React.FC<SpecialtyChipProps> = ({ name, primary }) =>
-  primary ? (
-    <span className="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
-      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-      {name} (Primary)
-    </span>
-  ) : (
-    <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
-      {name}
-    </span>
-  );
+const SpecialtyChip: React.FC<SpecialtyChipProps> = ({ name }) => (
+  <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+    {name}
+  </span>
+);
 
 
 
-// ─── Manage Specialties Modal ─────────────────────────────────────────────────
+// ─── Edit Doctor & Specialties Modal ──────────────────────────────────────────
 
-interface ManageSpecialtiesModalProps {
+interface EditDoctorModalProps {
   doctor: DoctorResponse | null;
   allSpecialties: SpecialtyResponse[];
   onClose: () => void;
-  onSave: (doctorId: number, assigned: string[], primary: string) => void;
+  onSave: (doctorId: number, assigned: string[], licenseNumber: string) => void;
 }
 
-const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
+const EditDoctorModal: React.FC<EditDoctorModalProps> = ({
   doctor,
   allSpecialties,
   onClose,
   onSave,
 }) => {
+  const { showToast } = useToast();
   const [assigned, setAssigned] = useState<string[]>([]);
-  const [primary, setPrimary] = useState<string>('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [note, setNote] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (doctor) {
       const sps = doctor.specialties ?? [];
       setAssigned(sps);
-      setPrimary(sps[0] ?? '');
-      setNote('');
+      setLicenseNumber(doctor.license_number || '');
+      setSearchQuery('');
     }
   }, [doctor]);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   if (!doctor) return null;
 
-  const unassigned = allSpecialties.filter((s) => !assigned.includes(s.name));
+  const filteredUnassigned = allSpecialties.filter(
+    (s) =>
+      !assigned.includes(s.name) &&
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const removeChip = (name: string) => {
     setAssigned((prev) => prev.filter((n) => n !== name));
-    if (primary === name) setPrimary(assigned.find((n) => n !== name) ?? '');
   };
 
   const addChip = (name: string) => {
     if (!assigned.includes(name)) {
       setAssigned((prev) => [...prev, name]);
-      if (!primary) setPrimary(name);
     }
-    setDropdownOpen(false);
   };
 
   const handleSave = async () => {
+    const trimmedLicense = licenseNumber.trim();
+    if (!trimmedLicense) {
+      showToast('Medical license number is required.', 'error');
+      return;
+    }
+    if (assigned.length === 0) {
+      showToast('A doctor must retain at least one specialty.', 'error');
+      return;
+    }
     setSaving(true);
     try {
+      // 1. Update license number if changed
+      if (trimmedLicense !== doctor.license_number) {
+        await put(`/doctors/${doctor.doctor_id}`, { license_number: trimmedLicense });
+      }
+
+      // 2. Update specialties if changed
       const allIds = allSpecialties.reduce<Record<string, number>>(
         (acc, s) => ({ ...acc, [s.name]: s.specialty_id }),
         {},
@@ -152,11 +149,16 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
       const newIds = assigned.map((n) => allIds[n]).filter(Boolean);
       const add = newIds.filter((id) => !currentIds.includes(id));
       const remove = currentIds.filter((id) => !newIds.includes(id));
-      await put(`/doctors/${doctor.doctor_id}/specialties`, { add, remove });
-      onSave(doctor.doctor_id, assigned, primary);
+
+      if (add.length > 0 || remove.length > 0) {
+        await put(`/doctors/${doctor.doctor_id}/specialties`, { add, remove });
+      }
+
+      showToast('Doctor details updated successfully!', 'success');
+      onSave(doctor.doctor_id, assigned, trimmedLicense);
       onClose();
-    } catch {
-      // keep modal open on error
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to update doctor details', 'error');
     } finally {
       setSaving(false);
     }
@@ -166,7 +168,7 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
     <Modal
       isOpen={!!doctor}
       onClose={onClose}
-      title={`Manage Specialties — ${doctor.full_name} (#${doctor.license_number})`}
+      title={`Edit Doctor & Specialties — ${doctor.full_name}`}
       footer={
         <>
           <button
@@ -189,121 +191,144 @@ const ManageSpecialtiesModal: React.FC<ManageSpecialtiesModalProps> = ({
       }
     >
       <div className="space-y-space-md">
+        {/* Doctor Quick Info Banner */}
+        <div className="p-3 bg-surface-subtle rounded-xl flex flex-wrap items-center justify-between gap-2 border border-border-subtle text-body-sm font-body-sm text-on-surface-variant">
+          <div>
+            <span className="font-semibold text-on-surface">Branch:</span> {doctor.branch_name || '—'}
+          </div>
+          <div>
+            <span className="font-semibold text-on-surface">NIC:</span> {doctor.id_number || '—'}
+          </div>
+          <div>
+            <span className="font-semibold text-on-surface">Phone:</span>{' '}
+            {doctor.phone_numbers?.length ? doctor.phone_numbers.join(', ') : '—'}
+          </div>
+          {doctor.email && (
+            <div>
+              <span className="font-semibold text-on-surface">Email:</span> {doctor.email}
+            </div>
+          )}
+        </div>
+
+        {/* License Number Input */}
+        <div>
+          <label className="block font-label-md text-label-md text-on-surface font-bold mb-1.5">
+            Medical License Number <span className="text-error">*</span>
+          </label>
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">
+              badge
+            </span>
+            <input
+              type="text"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="e.g. SLMC-12345"
+              className="w-full h-[40px] pl-10 pr-3 bg-surface-subtle border border-border-subtle rounded-lg text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:border-primary"
+            />
+          </div>
+          <span className="font-label-sm text-label-sm text-outline mt-1 block">
+            SLMC registration or equivalent medical council license number.
+          </span>
+        </div>
         {/* Chip container */}
         <div>
           <label className="block font-label-md text-label-md text-on-surface font-bold mb-2">
-            Assigned Clinical Specialties
+            Assigned Clinical Specialties ({assigned.length})
           </label>
           <div className="flex flex-wrap items-center gap-2 p-3 bg-surface-subtle rounded-xl min-h-[52px]">
-            {assigned.map((name) => (
-              <span
-                key={name}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-card text-on-surface font-label-md text-label-md font-bold shadow-sm"
-              >
-                <span className="w-2 h-2 rounded-full bg-primary" />
-                <span>{name}</span>
-                <button
-                  type="button"
-                  className="w-4 h-4 rounded-full hover:bg-surface-subtle text-outline flex items-center justify-center"
-                  onClick={() => removeChip(name)}
-                >
-                  <span className="material-symbols-outlined text-[14px]">close</span>
-                </button>
+            {assigned.length === 0 ? (
+              <span className="text-on-surface-variant font-body-sm text-body-sm">
+                No specialties assigned yet. Select from below to assign.
               </span>
-            ))}
-
-            {/* Add dropdown */}
-            <div className="relative inline-block" ref={dropdownRef}>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-label-md font-bold transition-all"
-                onClick={() => setDropdownOpen((v) => !v)}
-              >
-                <span className="material-symbols-outlined text-[16px]">add</span>
-                <span>Add Specialty</span>
-              </button>
-              {dropdownOpen && unassigned.length > 0 && (
-                <div className="absolute left-0 top-8 w-52 bg-surface-card rounded-xl shadow-lg border border-border-subtle p-1.5 z-10">
-                  {unassigned.map((s) => (
-                    <button
-                      key={s.specialty_id}
-                      type="button"
-                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface-subtle text-on-surface font-label-md text-label-md font-medium"
-                      onClick={() => addChip(s.name)}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            ) : (
+              assigned.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-card text-on-surface font-label-md text-label-md font-bold shadow-sm"
+                >
+                  <span className="w-2 h-2 rounded-full bg-primary" />
+                  <span>{name}</span>
+                  <button
+                    type="button"
+                    className="w-4 h-4 rounded-full hover:bg-surface-subtle text-outline flex items-center justify-center transition-colors"
+                    onClick={() => removeChip(name)}
+                    title={`Remove ${name}`}
+                  >
+                    <span className="material-symbols-outlined text-[14px]">close</span>
+                  </button>
+                </span>
+              ))
+            )}
           </div>
           <span className="font-label-sm text-label-sm text-outline mt-1 block">
-            Click "×" to detach any secondary specialty accreditation.
+            Click "×" to detach a specialty from this doctor.
           </span>
         </div>
 
-        {/* Primary selector */}
-        {assigned.length > 0 && (
-          <div className="pt-space-xs">
-            <label className="block font-label-md text-label-md text-on-surface font-bold mb-2">
-              Primary Specialty (Default for OPD Channelling)
-            </label>
-            <div className="space-y-2">
-              {assigned.map((name) => {
-                const sp = allSpecialties.find((s) => s.name === name);
-                const isCurrent = name === primary;
-                return (
-                  <label
-                    key={name}
-                    className="flex items-center justify-between p-3 rounded-xl bg-surface-subtle hover:bg-surface-container cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="primarySpecialty"
-                        value={name}
-                        checked={isCurrent}
-                        onChange={() => setPrimary(name)}
-                        className="w-4 h-4 text-primary focus:ring-primary"
-                      />
-                      <div>
-                        <span className="font-label-lg text-label-lg text-on-surface font-bold block">
-                          {name}
-                        </span>
-                        {sp && (
-                          <span className="font-body-sm text-body-sm text-on-surface-variant">
-                            {sp.doctor_count} doctor{sp.doctor_count !== 1 ? 's' : ''} in this specialty
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {isCurrent ? (
-                      <span className="px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold">
-                        Current
-                      </span>
-                    ) : (
-                      <span className="text-outline font-label-sm text-label-sm">Secondary</span>
-                    )}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Note */}
+        {/* Add Specialty Search Box & List */}
         <div>
-          <label className="block font-label-md text-label-md text-on-surface font-bold mb-1">
-            Administrative Endorsement Note
+          <label className="block font-label-md text-label-md text-on-surface font-bold mb-1.5">
+            Add Specialty
           </label>
-          <input
-            type="text"
-            className="w-full h-[40px] px-3 bg-surface-subtle rounded-lg text-on-surface font-body-sm text-body-sm focus:outline-none"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. Approved by Clinical Governance Board"
-          />
+          <div className="relative mb-2">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search available specialties..."
+              className="w-full h-[40px] pl-10 pr-8 bg-surface-subtle border border-border-subtle rounded-lg text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:border-primary"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            )}
+          </div>
+
+          {/* Scrollable list */}
+          <div className="border border-border-subtle rounded-xl max-h-48 overflow-y-auto divide-y divide-border-subtle bg-surface-subtle/50">
+            {filteredUnassigned.length === 0 ? (
+              <div className="p-4 text-center text-on-surface-variant font-body-sm text-body-sm">
+                {allSpecialties.filter((s) => !assigned.includes(s.name)).length === 0
+                  ? 'All available specialties are already assigned to this doctor.'
+                  : 'No specialties match your search.'}
+              </div>
+            ) : (
+              filteredUnassigned.map((s) => (
+                <div
+                  key={s.specialty_id}
+                  className="p-2.5 px-3 flex items-center justify-between hover:bg-surface-subtle transition-colors"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-label-md text-label-md text-on-surface font-bold">
+                      {s.name}
+                    </span>
+                    {s.description && (
+                      <span className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
+                        {s.description}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => addChip(s.name)}
+                    className="h-7 px-2.5 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-on-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-all shrink-0 ml-2"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">add</span>
+                    <span>Add</span>
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </Modal>
@@ -557,14 +582,12 @@ export const ManageDoctors: React.FC = () => {
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleModalSave = (
-    doctorId: number,
-    assigned: string[],
-    _primary: string,
-  ) => {
+  const handleModalSave = (doctorId: number, assigned: string[], licenseNumber: string) => {
     setDoctors((prev) =>
       prev.map((d) =>
-        d.doctor_id === doctorId ? { ...d, specialties: assigned } : d,
+        d.doctor_id === doctorId
+          ? { ...d, specialties: assigned, license_number: licenseNumber }
+          : d,
       ),
     );
   };
@@ -584,7 +607,7 @@ export const ManageDoctors: React.FC = () => {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
       {/* ── Stat ribbon ── */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-space-sm mb-space-md">
         <StatCard
@@ -692,12 +715,12 @@ export const ManageDoctors: React.FC = () => {
                 </div>
                 {/* Branch filter */}
                 {isAdmin ? (
-                  <div className="relative min-w-[200px]">
+                  <div className="relative min-w-[240px]">
                     <select
                       aria-label="Branch Filter"
                       value={branchFilter}
                       onChange={(e) => handleBranchFilter(e.target.value)}
-                      className="w-full h-[42px] px-3 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
+                      className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
                     >
                       <option value="all">All Branches (Islandwide)</option>
                       {branches.map((b) => (
@@ -716,7 +739,9 @@ export const ManageDoctors: React.FC = () => {
                       location_on
                     </span>
                     <span className="font-label-md text-label-md text-on-surface font-bold">
-                      {user?.branchName || 'Assigned Branch'}
+                      {branches.find((b) => b.branch_id === user?.branchId)?.name ||
+                        (user?.branchName && !user.branchName.startsWith('Branch #') ? user.branchName : null) ||
+                        (user?.branchId ? `Branch #${user.branchId}` : 'Assigned Branch')}
                     </span>
                   </div>
                 )}
@@ -828,8 +853,8 @@ export const ManageDoctors: React.FC = () => {
                                   None assigned
                                 </span>
                               ) : (
-                                sps.map((name, i) => (
-                                  <SpecialtyChip key={name} name={name} primary={i === 0} />
+                                sps.map((name) => (
+                                  <SpecialtyChip key={name} name={name} />
                                 ))
                               )}
                             </div>
@@ -849,18 +874,9 @@ export const ManageDoctors: React.FC = () => {
                                 className="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
                               >
                                 <span className="material-symbols-outlined text-[16px]">
-                                  edit_note
+                                  edit
                                 </span>
-                                <span>Manage Specialties</span>
-                              </button>
-                              <button
-                                type="button"
-                                title="View Schedule"
-                                className="w-8 h-8 rounded-lg bg-surface-subtle hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors"
-                              >
-                                <span className="material-symbols-outlined text-[18px]">
-                                  calendar_today
-                                </span>
+                                <span>Edit Doctor</span>
                               </button>
                             </div>
                           </td>
@@ -1050,9 +1066,9 @@ export const ManageDoctors: React.FC = () => {
         )}
       </div>
 
-      {/* Manage Specialties Modal */}
+      {/* Edit Doctor & Specialties Modal */}
       {modalDoctor && (
-        <ManageSpecialtiesModal
+        <EditDoctorModal
           doctor={modalDoctor}
           allSpecialties={specialties}
           onClose={() => setModalDoctor(null)}
