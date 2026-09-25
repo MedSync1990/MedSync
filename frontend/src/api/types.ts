@@ -296,20 +296,57 @@ export interface InsuranceVsOutOfPocketResponse {
 
 // ─── Patients ───────────────────────────────────────────────────────────────
 
+export interface AllergyItem {
+  allergy_id: number;
+  allergy_code: string;
+  name: string;
+}
+
 export interface PatientResponse {
   user_id: number;
   patient_code: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   id_number: string;
   date_of_birth: string;
+  gender: 'Male' | 'Female' | 'Other';
+  address?: string;
+  blood_group?: string;
+  emergency_contact?: string;
+  contact_name?: string;
+  registered_branch?: number;
+  branch_name?: string;
+  has_insurance?: boolean;
+  registered_date?: string;
+  is_active: boolean;
+  allergies?: AllergyItem[];
+}
+
+export interface PatientListItem {
+  patient_id: number;
+  patient_code: string;
+  first_name: string;
+  last_name: string;
+  id_number: string;
+  phone_number: string;
   gender: string;
-  phone: string;
-  email: string | null;
-  address: string | null;
-  blood_group: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
+  date_of_birth: string;
+  registered_branch?: number;
+  branch_name?: string;
+  has_insurance?: boolean;
+  is_active: boolean;
+}
+
+// ─── Branches (stub — admin pages fill in detail) ──────────────────────────
+
+export interface BranchResponse {
+  branch_id: number;
+  name: string;
+  address: string;
+  phone_number?: string;
+  branch_manager_name?: string;
+  staff_count: number;
   is_active: boolean;
 }
 

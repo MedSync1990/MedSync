@@ -53,19 +53,13 @@ export const Sidebar: React.FC = () => {
       header: 'EARNINGS & REPORTS',
       items: [
         { label: 'My Earnings', path: '/doctor/earnings', icon: 'account_balance_wallet', roles: ['Doctor'] },
-        { label: 'Reports Hub', path: '/reports', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
-        { label: 'Appointments', path: '/reports/appointments-summary', icon: 'calendar_today', roles: ['Administrator', 'Branch Manager'] },
-        { label: 'Doctor Revenue', path: '/reports/doctor-revenue', icon: 'payments', roles: ['Administrator', 'Branch Manager'] },
-        { label: 'Outstanding', path: '/reports/outstanding-balances', icon: 'warning', roles: ['Administrator', 'Branch Manager'] },
-        { label: 'Treatments', path: '/reports/treatment-categories', icon: 'pie_chart', roles: ['Administrator', 'Branch Manager'] },
-        { label: 'Insurance', path: '/reports/insurance-vs-out-of-pocket', icon: 'health_and_safety', roles: ['Administrator', 'Branch Manager'] },
+        { label: 'Reports', path: '/reports/appointments-summary', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
       ],
     },
     {
       header: 'REFERENCE',
       items: [
-        { label: 'Treatment Catalogue', path: '/doctor/treatment-catalogue', icon: 'menu_book', roles: ['Doctor'] },
-        { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'menu_book', roles: ['Administrator'] },
+        { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'menu_book' },
         { label: 'Manage Branches', path: '/admin/branches', icon: 'domain', roles: ['Administrator'] },
         { label: 'Manage Staff', path: '/admin/staff', icon: 'badge', roles: ['Administrator', 'Branch Manager'] },
         { label: 'Manage Doctors', path: '/admin/doctors', icon: 'medical_services', roles: ['Administrator'] },
