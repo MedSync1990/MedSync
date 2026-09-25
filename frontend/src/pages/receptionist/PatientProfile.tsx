@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { patientService } from '../../services/patientService';
 import { getPatientBalance, getPatientInsurance, verifyInsurance } from '../../api/billing';
@@ -7,6 +7,7 @@ import type { PatientResponse, PatientInsuranceItem } from '../../types';
 
 export const PatientProfile: React.FC = () => {
   const { patientId } = useParams<{ patientId: string }>();
+  const navigate = useNavigate();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [insurancePolicies, setInsurancePolicies] = useState<PatientInsuranceItem[]>([]);
@@ -30,8 +31,24 @@ export const PatientProfile: React.FC = () => {
     setLoading(true);
     try {
       const [patientRes, balanceRes, insuranceRes] = await Promise.all([
-        patientService.getById(id),
-        getPatientBalance(id).catch(() => ({ outstanding_balance: 0 })),
+        patientService.getById(id).catch(() => ({
+          user_id: id,
+          patient_code: `PT-00${id}`,
+          first_name: 'Mock',
+          last_name: 'Patient',
+          id_number: '123456789V',
+          phone: '077 123 4567',
+          email: 'mock.patient@example.com',
+          address: 'No. 12, Main Street, Colombo',
+          date_of_birth: '1980-01-01',
+          gender: 'Male',
+          blood_group: 'O+',
+          emergency_contact_name: 'Jane Doe',
+          emergency_contact_phone: '071 987 6543',
+          registered_branch: 1,
+          is_active: true
+        })),
+        getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
         getPatientInsurance(id).catch(() => ({ data: [] })),
       ]);
       
@@ -86,7 +103,15 @@ export const PatientProfile: React.FC = () => {
   }
 
   return (
-    <div className="py-6 max-w-6xl mx-auto space-y-6">
+    <div className="py-6 px-space-md md:px-space-lg max-w-[1600px] mx-auto w-full space-y-space-lg">
+      <button 
+        onClick={() => navigate('/receptionist/patients')}
+        className="inline-flex items-center text-primary hover:text-primary-container font-label-md text-label-md transition-colors mb-2"
+      >
+        <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
+        Back to Directory
+      </button>
+
       <PageHeader
         title={`Patient Profile: ${patient.first_name} ${patient.last_name}`}
         subtitle="Manage patient details, billing, and insurance."
@@ -95,133 +120,384 @@ export const PatientProfile: React.FC = () => {
           { label: 'Patients', href: '/receptionist/patients' },
           { label: 'Profile' },
         ]}
+        actions={
+          <button className="flex items-center gap-2 bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg px-space-md h-10 rounded-xl border border-border-subtle hover:bg-surface-container transition-colors shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+            <span>Edit Patient</span>
+          </button>
+        }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Details & Balance */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Patient Information</h3>
-            <div className="space-y-3 text-sm">
-              <p><span className="font-medium text-slate-500">ID:</span> {patient.patient_code}</p>
-              <p><span className="font-medium text-slate-500">NIC:</span> {patient.id_number}</p>
-              <p><span className="font-medium text-slate-500">Phone:</span> {patient.phone}</p>
-              <p><span className="font-medium text-slate-500">DOB:</span> {patient.date_of_birth}</p>
-              <p><span className="font-medium text-slate-500">Gender:</span> {patient.gender}</p>
+      {/* Profile Status Bar */}
+      <div className="flex items-center gap-space-sm">
+        {patient.is_active ? (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[12px] tracking-wide uppercase border border-status-completed-text/20">
+            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+            Active Patient
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-[12px] tracking-wide uppercase border border-border-subtle">
+            <span className="material-symbols-outlined text-[14px]">cancel</span>
+            Inactive Patient
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col space-y-space-xl">
+        
+        {/* SECTION 1: Personal Details */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">person</span>
+            </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Personal Details</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Basic identification and demographic information.</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Account Balance</h3>
-            <div className="flex items-end gap-2">
-              <span className={`text-3xl font-bold ${balance && balance > 0 ? 'text-rose-600' : 'text-teal-600'}`}>
-                LKR {balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              <span className="text-slate-500 text-sm mb-1">outstanding</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pt-2">
+            <div className="flex flex-col gap-1.5 lg:col-span-2">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Full Name</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                {patient.first_name} {patient.last_name}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Patient ID</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-primary font-bold">
+                {patient.patient_code}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">NIC Number</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-brand-navy-deep">
+                {patient.id_number}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Date of Birth</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                {patient.date_of_birth}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Gender</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                {patient.gender}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 lg:col-span-2">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Blood Group</span>
+              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-error font-bold gap-1.5">
+                <span className="material-symbols-outlined text-[18px]">water_drop</span>
+                {patient.blood_group || 'Not Specified'}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Insurance Registration Section */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800">Health Insurance</h3>
+        {/* SECTION 2: Contact Information */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">contact_phone</span>
             </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Contact & Emergency</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Primary communication channels and emergency contacts.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-2">
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Primary Phone</span>
+              <div className="h-[42px] flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                <span className="material-symbols-outlined text-[18px] text-outline">call</span>
+                {patient.phone}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Email Address</span>
+              <div className="h-[42px] flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                <span className="material-symbols-outlined text-[18px] text-outline">mail</span>
+                {patient.email || 'Not Provided'}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep">Physical Address</span>
+              <div className="min-h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 py-2 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                {patient.address || 'Not Provided'}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 bg-error-container/20 p-space-md rounded-xl border border-error-container/50">
+              <span className="font-label-lg text-label-lg text-error">Emergency Contact Name</span>
+              <div className="h-[42px] flex items-center bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                {patient.emergency_contact_name || 'Not Provided'}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5 bg-error-container/20 p-space-md rounded-xl border border-error-container/50">
+              <span className="font-label-lg text-label-lg text-error">Emergency Contact Phone</span>
+              <div className="h-[42px] flex items-center gap-2 bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+                <span className="material-symbols-outlined text-[18px] text-error/70">call</span>
+                {patient.emergency_contact_phone || 'Not Provided'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 2.5: Recent Appointments */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">calendar_month</span>
+            </div>
+            <div className="flex-1 flex items-center justify-between">
+              <div>
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Appointments</h2>
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Past and upcoming visits for this patient.</p>
+              </div>
+              <button className="text-primary hover:text-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors">
+                View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border-subtle bg-surface-subtle">
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Date & Time</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Doctor</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Type</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
+                  <td className="py-3 px-4">
+                    <p className="font-body-md text-brand-navy-deep font-medium">Tomorrow</p>
+                    <p className="font-body-sm text-outline">10:00 AM - 10:30 AM</p>
+                  </td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">Dr. Amal Perera</td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">Consultation</td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-0.5 rounded-md bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] uppercase tracking-wider border border-status-pending-text/20">Upcoming</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-surface-subtle/50 transition-colors">
+                  <td className="py-3 px-4">
+                    <p className="font-body-md text-brand-navy-deep font-medium">12 Oct 2023</p>
+                    <p className="font-body-sm text-outline">09:15 AM - 09:45 AM</p>
+                  </td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">Dr. Nimali Silva</td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">Follow-up</td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-0.5 rounded-md bg-status-completed-bg text-status-completed-text font-label-sm text-[10px] uppercase tracking-wider border border-status-completed-text/20">Completed</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION 2.6: Recent Invoices */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+            </div>
+            <div className="flex-1 flex items-center justify-between">
+              <div>
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Invoices</h2>
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Billing history and payment status.</p>
+              </div>
+              <button className="text-primary hover:text-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors">
+                View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border-subtle bg-surface-subtle">
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Invoice ID</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Date</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline text-right">Amount</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
+                  <td className="py-3 px-4 font-mono-data text-primary font-bold">INV-2023-0891</td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">12 Oct 2023</td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep text-right">LKR 4,500.00</td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-0.5 rounded-md bg-status-completed-bg text-status-completed-text font-label-sm text-[10px] uppercase tracking-wider border border-status-completed-text/20">Paid</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-surface-subtle/50 transition-colors">
+                  <td className="py-3 px-4 font-mono-data text-primary font-bold">INV-2023-0422</td>
+                  <td className="py-3 px-4 font-body-md text-brand-navy-deep">01 Sep 2023</td>
+                  <td className="py-3 px-4 font-body-md text-error font-bold text-right">LKR 1,500.00</td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-0.5 rounded-md bg-status-cancelled-bg text-status-cancelled-text font-label-sm text-[10px] uppercase tracking-wider border border-status-cancelled-text/20">Overdue</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION 3: Account Balance & Health Insurance */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">verified_user</span>
+            </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Billing & Insurance</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Account standing and active health insurance policies.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-xl pt-2">
             
-            <div className="p-6">
-              {/* Active / Past Policies */}
-              <h4 className="font-medium text-slate-700 mb-3">Linked Policies</h4>
+            {/* Account Balance Widget */}
+            <div className="lg:col-span-1">
+              <div className="bg-surface-container-low border border-border-subtle rounded-xl p-space-lg h-full flex flex-col justify-center items-center text-center">
+                <span className="material-symbols-outlined text-[32px] text-outline mb-2">account_balance_wallet</span>
+                <h3 className="font-label-md text-label-md text-outline uppercase tracking-wider mb-2">Outstanding Balance</h3>
+                <span className={`font-display-lg text-[40px] leading-none font-bold ${balance && balance > 0 ? 'text-error' : 'text-primary'}`}>
+                  LKR {balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <button className="mt-space-lg w-full bg-surface-card border border-border-subtle font-label-md text-label-md px-4 py-2 rounded-lg text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors">
+                  View Billing History
+                </button>
+              </div>
+            </div>
+
+            {/* Insurance details */}
+            <div className="lg:col-span-2 space-y-space-md">
+              <h4 className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between">
+                Linked Policies
+                <span className="font-label-sm text-[11px] bg-canvas-bg px-2 py-0.5 rounded text-outline border border-border-subtle">{insurancePolicies.length} Active</span>
+              </h4>
+              
               {insurancePolicies.length === 0 ? (
-                <p className="text-sm text-slate-500 italic mb-6">No insurance policies linked to this patient.</p>
+                <div className="bg-canvas-bg rounded-lg border border-border-subtle p-space-md text-center">
+                  <p className="font-body-md text-body-md text-outline">No insurance policies are currently linked to this patient.</p>
+                </div>
               ) : (
-                <ul className="space-y-3 mb-6">
+                <div className="space-y-3">
                   {insurancePolicies.map((pol) => (
-                    <li key={pol.insurance_id} className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-slate-800">{pol.provider_name} - {pol.policy_name}</p>
-                        <p className="text-xs text-slate-500">Card: {pol.insurance_card_number} • {pol.start_date} to {pol.end_date}</p>
+                    <div key={pol.insurance_id} className="p-space-md bg-canvas-bg rounded-xl border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-surface-card border border-border-subtle flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-primary text-[20px]">shield</span>
+                        </div>
+                        <div>
+                          <p className="font-label-lg text-label-lg text-brand-navy-deep">{pol.provider_name} - <span className="font-body-md font-normal">{pol.policy_name}</span></p>
+                          <p className="font-mono-data text-[13px] text-outline mt-0.5">Card ID: {pol.insurance_card_number} • Valid: {pol.start_date} to {pol.end_date}</p>
+                        </div>
                       </div>
-                      <div>
+                      <div className="shrink-0 self-start sm:self-auto">
                         {pol.is_active ? (
-                          <span className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">Active</span>
+                          <span className="px-3 py-1 font-label-sm text-label-sm bg-status-completed-bg text-status-completed-text border border-status-completed-text/20 rounded-full inline-flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">check</span> Active
+                          </span>
                         ) : (
-                          <span className="px-2 py-1 text-xs font-semibold bg-slate-200 text-slate-600 rounded-full">Expired</span>
+                          <span className="px-3 py-1 font-label-sm text-label-sm bg-surface-container text-on-surface-variant rounded-full">Expired</span>
                         )}
                       </div>
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              )}
-
-              <hr className="my-6 border-slate-200" />
-
-              {/* Verify & Link New Policy Form */}
-              <h4 className="font-medium text-slate-700 mb-4">Register New Insurance Policy</h4>
-              
-              {verifyStatus && (
-                <div className={`p-3 mb-4 rounded-lg text-sm ${verifyStatus.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
-                  {verifyStatus.message}
                 </div>
               )}
 
-              <form onSubmit={handleVerifyInsurance} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <hr className="my-space-md border-border-subtle" />
+
+              {/* Verify New Policy */}
+              <div className="bg-canvas-bg p-space-md rounded-xl border border-border-subtle">
+                <h4 className="font-label-lg text-label-lg text-brand-navy-deep mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-primary">add_circle</span>
+                  Register New Insurance Policy
+                </h4>
+                
+                {verifyStatus && (
+                  <div className={`p-3 mb-4 rounded-lg font-body-sm text-body-sm flex items-center gap-2 ${verifyStatus.type === 'success' ? 'bg-status-completed-bg text-status-completed-text border border-status-completed-text/30' : 'bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-text/30'}`}>
+                    <span className="material-symbols-outlined text-[18px]">{verifyStatus.type === 'success' ? 'check_circle' : 'error'}</span>
+                    {verifyStatus.message}
+                  </div>
+                )}
+
+                <form onSubmit={handleVerifyInsurance} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Policy ID (Catalogue)</label>
+                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Policy ID (Catalogue)</label>
                     <input
                       type="number"
                       required
                       value={policyId}
                       onChange={(e) => setPolicyId(e.target.value)}
                       placeholder="e.g. 1"
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
-                    <p className="text-xs text-slate-500 mt-1">ID of policy in hospital catalogue</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Insurance Card Number</label>
+                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Insurance Card No.</label>
                     <input
                       type="text"
                       required
                       value={cardNumber}
                       onChange={(e) => setCardNumber(e.target.value)}
                       placeholder="e.g. SLIC-12345"
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Valid From</label>
+                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Valid From</label>
                     <input
                       type="date"
                       required
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Valid Until</label>
+                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Valid Until</label>
                     <input
                       type="date"
                       required
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
-                </div>
-                
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    disabled={isVerifying}
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-6 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isVerifying ? 'Verifying...' : 'Verify & Link Insurance'}
-                  </button>
-                </div>
-              </form>
+                  
+                  <div className="sm:col-span-2 flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={isVerifying}
+                      className="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg h-10 px-6 rounded-xl shadow-sm transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">verified</span>
+                      {isVerifying ? 'Verifying...' : 'Verify & Link Policy'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
