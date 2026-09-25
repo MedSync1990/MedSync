@@ -9,8 +9,8 @@ import type {
 } from '../types';
 
 export const appointmentService = {
-  getAvailability: (doctorId: number, date: string) =>
-    get<DoctorSlotResponse[]>(`/doctors/${doctorId}/availability`, { date }),
+  getAvailability: (doctorId: number, date: string, includeBooked?: boolean) =>
+    get<DoctorSlotResponse[]>(`/doctors/${doctorId}/availability`, { date, include_booked: includeBooked }),
   list: (params?: { branch?: number; date?: string; status?: string; doctor?: number; page?: number; limit?: number }) =>
     get<AppointmentListResponse>('/appointments', params),
   getById: (id: number) => get<AppointmentResponse>(`/appointments/${id}`),

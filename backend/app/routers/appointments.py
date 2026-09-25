@@ -27,24 +27,33 @@ router = APIRouter()
 async def get_doctor_availability(
     id: int,
     date: date = Query(..., description="Availability date (YYYY-MM-DD)"),
+    include_booked: bool = Query(False, description="Include booked slots"),
     conn: Connection = Depends(get_db),
     user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
 ):
     """
-    Returns available open slots for the given doctor and date.
-    Drives Book Appointment step 4 time chips.
+    Returns available slots for the given doctor and date.
+    Drives Book Appointment step 4 time chips and schedule conflict avoidance.
     """
     # Verify doctor exists
     doctor = await conn.fetchrow("SELECT user_id FROM doctor WHERE user_id = $1;", id)
     if not doctor:
         raise NotFoundError("Doctor not found.")
 
-    query = """
-        SELECT slot_id, doctor_id, date, start_time, end_time, status
-        FROM doctor_availability_slots
-        WHERE doctor_id = $1 AND date = $2 AND status = 'Open'
-        ORDER BY start_time ASC;
-    """
+    if include_booked:
+        query = """
+            SELECT slot_id, doctor_id, date, start_time, end_time, status
+            FROM doctor_availability_slots
+            WHERE doctor_id = $1 AND date = $2
+            ORDER BY start_time ASC;
+        """
+    else:
+        query = """
+            SELECT slot_id, doctor_id, date, start_time, end_time, status
+            FROM doctor_availability_slots
+            WHERE doctor_id = $1 AND date = $2 AND status = 'Open'
+            ORDER BY start_time ASC;
+        """
     rows = await conn.fetch(query, id, date)
     return [
         DoctorSlotResponse(
