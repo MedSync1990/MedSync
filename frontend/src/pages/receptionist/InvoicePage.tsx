@@ -113,14 +113,7 @@ export default function InvoicePage() {
               Search and view invoice details and treatment breakdowns.
             </p>
           </div>
-          <button
-            className="inline-flex items-center gap-2 h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg transition-all cursor-pointer self-start sm:self-auto"
-            type="button"
-            onClick={() => window.print()}
-          >
-            <span className="material-symbols-outlined text-[20px] text-outline">ios_share</span>
-            <span>Export Invoices</span>
-          </button>
+
         </div>
       </div>
 

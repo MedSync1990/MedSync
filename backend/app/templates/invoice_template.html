@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        body { font-family: 'Nunito', sans-serif; color: #1f2937; margin: 0; padding: 0; }
+        .container { padding: 50px; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .logo-text { font-size: 20px; font-weight: bold; color: #0284c7; }
+        .invoice-title { font-size: 26px; font-weight: bold; color: #111827; text-transform: uppercase; }
+        .date-row { text-align: right; font-size: 13px; margin-top: 5px; }
+        
+        /* Info Blocks */
+        .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+        .info-col { width: 48%; }
+        .section-title { font-weight: bold; font-size: 15px; color: #111827; margin-bottom: 8px; }
+        .bold-label { font-weight: bold; width: 120px; display: inline-block; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px; }
+        th { background-color: #38bdf8; color: #111827; font-weight: bold; padding: 12px; border: 1px solid #94a3b8; text-align: center; }
+        td { padding: 12px; border: 1px solid #94a3b8; text-align: center; }
+        .text-left { text-align: left; }
+        
+        /* Bottom Section */
+        .bottom-wrapper {
+            position: absolute;
+            bottom: 130px;
+            left: 50px;
+            right: 50px;
+        }
+        .bottom-section { display: flex; justify-content: space-between; align-items: flex-start; }
+        .payment-info { width: 50%; font-size: 13px; line-height: 1.6; }
+        .totals-table { width: 45%; }
+        .totals-table td { font-weight: bold; border: 1px solid #94a3b8; padding: 10px; text-align:center}
+        .bg-light-blue { background-color: #bae6fd; text-align: right; width: 60%; }
+        
+        /* Footer */
+        .footer { background-color: #bae6fd; padding: 30px 50px; position: absolute; bottom: 0; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            
+            <img src="file:///app/medsync.jpg" alt="MedSync Logo" style="max-height: 150px;">
+
+            <div>
+                <div class="invoice-title">INVOICE - {{ invoice_code }}</div>
+                <div class="date-row"><span class="bold-label">Date of Issue:</span> {{ created_at }}</div>
+                <div class="date-row"><span class="bold-label">Due Date:</span> {{ created_at }}</div>
+            </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="section-title">Patient Information</div>
+        <div class="info-section">
+            <div class="info-col">
+                <div><span class="bold-label">Name:</span> {{ patient_name }}</div>
+                <div><span class="bold-label">Address:</span> {{ patient_address }}</div>
+            </div>
+            <div class="info-col">
+                <div><span class="bold-label">Contact:</span> {{ patient_phone }}</div>
+                <div><span class="bold-label">NIC/ID:</span> {{ patient_nic }}</div>
+            </div>
+        </div>
+
+        <!-- Doctor Info -->
+        <div class="section-title">Physician Information</div>
+        <div class="info-section" style="margin-bottom: 30px;">
+            <div class="info-col">
+                <div><span class="bold-label">Name:</span> Dr. {{ doctor_name }}</div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-left">Service / Procedure</th>
+                    <th>Treatment Code</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="text-left">{{ item.treatment_name }}</td>
+                    <td>{{ item.treatment_code }}</td>
+                    <td>1</td>
+                    <td>LKR {{ item.total_price }}</td>
+                    <td>LKR {{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals & Payment -->
+        <div class="bottom-wrapper">
+            <div class="bottom-section">
+                <div class="payment-info">
+                    <div class="section-title">Payment Instructions</div>
+                    <div><span class="bold-label">Payment Method:</span> Bank Transfer / Card / Cash</div>
+                    <div><span class="bold-label">Bank:</span> MedSync & Co</div>
+                    <div><span class="bold-label">Account No.</span> 0123 4567 8901</div>
+                </div>
+                <table class="totals-table">
+                    <tr><td class="bg-light-blue">Subtotal:</td><td>LKR {{ subtotal }}</td></tr>
+                    <tr><td class="bg-light-blue">Insurance Coverage:</td><td>LKR {{ insurance_coverage }}</td></tr>
+                    <tr><td class="bg-light-blue">Total Amount Due:</td><td>LKR {{ total_due }}</td></tr>
+                </table>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px; font-size: 12px;">This invoice has been generated by MedSync & Co. No Signature is required.</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div>Includes consult, tests, and meds. Extras<br>billed separately. For billing inquiries,<br>contact hello@medsync.com</div>
+        <div style="text-align: right;">+94 11 234 5678<br>Colombo Central Branch<br>www.medsync.com</div>
+    </div>
+</body>
+</html>
