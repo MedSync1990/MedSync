@@ -30,6 +30,16 @@ export const PatientDirectory: React.FC = () => {
     { key: 'first_name', header: 'Name', render: (r) => `${r.first_name} ${r.last_name}` },
     { key: 'id_number', header: 'NIC' },
     { key: 'phone_number', header: 'Phone' },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (r) => (
+        <a href={`/receptionist/patients/${r.user_id}`} className="text-teal-600 hover:underline">
+          View Profile
+        </a>
+      ),
+    },
   ];
 
   return (
@@ -51,7 +61,7 @@ export const PatientDirectory: React.FC = () => {
       <DataTable
         columns={columns}
         data={patients}
-        keyExtractor={(r) => r.patient_id}
+        keyExtractor={(r) => r.user_id}
         emptyMessage={loading ? 'Loading patients...' : 'No patients found.'}
       />
     </div>
