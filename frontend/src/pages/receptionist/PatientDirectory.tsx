@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
+import type { PatientResponse } from '../../types';
 
 interface PatientRecord {
   id: string;
@@ -148,9 +149,26 @@ export const PatientDirectory: React.FC = () => {
   const [patients, setPatients] = useState<PatientRecord[]>(DEFAULT_PATIENTS);
   const [totalCount, setTotalCount] = useState<number>(1428);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [activeBranch, setActiveBranch] = useState<string>('all');
   const [insuranceFilter, setInsuranceFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasBackendData, setHasBackendData] = useState<boolean>(false);
+
+  // Selected patient for View Profile modal
   const [selectedPatientForView, setSelectedPatientForView] = useState<PatientRecord | null>(null);
+  const [profileDetail, setProfileDetail] = useState<PatientResponse | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(false);
+
+  // Debounce search query changes (250ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   // Keyboard shortcut: ESC to clear search
   useEffect(() => {
@@ -163,94 +181,133 @@ export const PatientDirectory: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Fetch live backend data if available, merging with default list
-  useEffect(() => {
-    let isMounted = true;
-    patientService
-      .list({ limit: 50 })
-      .then((res) => {
-        if (!isMounted) return;
-        if (res && res.data && res.data.length > 0) {
-          const mapped: PatientRecord[] = res.data.map((p, idx) => {
-            const initials = `${p.first_name?.[0] || 'P'}${p.last_name?.[0] || 'T'}`.toUpperCase();
-            const branchMap: Record<number, { name: string; slug: string; color: string }> = {
-              1: { name: 'Colombo Central Branch', slug: 'colombo', color: 'bg-primary' },
-              2: { name: 'Kandy General Branch', slug: 'kandy', color: 'bg-status-pending-text' },
-              3: { name: 'Galle Branch', slug: 'galle', color: 'bg-tertiary' },
-            };
-            const b = branchMap[p.registered_branch || 1] || {
-              name: 'Colombo Central Branch',
-              slug: 'colombo',
-              color: 'bg-primary',
-            };
+  // Map backend item to PatientRecord
+  const mapBackendItem = (p: any, idx: number): PatientRecord => {
+    const initials = `${p.first_name?.[0] || 'P'}${p.last_name?.[0] || 'T'}`.toUpperCase();
+    const branchMap: Record<number, { name: string; slug: string; color: string }> = {
+      1: { name: 'Colombo Central Branch', slug: 'colombo', color: 'bg-primary' },
+      2: { name: 'Kandy General Branch', slug: 'kandy', color: 'bg-status-pending-text' },
+      3: { name: 'Galle Branch', slug: 'galle', color: 'bg-tertiary' },
+    };
+    const b = branchMap[p.registered_branch || 1] || {
+      name: p.branch_name || 'Colombo Central Branch',
+      slug: (p.branch_name || '').toLowerCase().includes('kandy')
+        ? 'kandy'
+        : (p.branch_name || '').toLowerCase().includes('galle')
+        ? 'galle'
+        : 'colombo',
+      color: (p.branch_name || '').toLowerCase().includes('kandy')
+        ? 'bg-status-pending-text'
+        : (p.branch_name || '').toLowerCase().includes('galle')
+        ? 'bg-tertiary'
+        : 'bg-primary',
+    };
 
-            let ageStr = '';
-            if (p.date_of_birth) {
-              const birth = new Date(p.date_of_birth);
-              const age = new Date().getFullYear() - birth.getFullYear();
-              ageStr = !isNaN(age) ? `${age} yrs · ` : '';
-            }
+    let ageStr = '';
+    if (p.date_of_birth) {
+      const birth = new Date(p.date_of_birth);
+      const age = new Date().getFullYear() - birth.getFullYear();
+      ageStr = !isNaN(age) ? `${age} yrs · ` : '';
+    }
 
-            return {
-              id: p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`,
-              internalId: p.patient_id,
-              initials,
-              name: `${p.first_name} ${p.last_name}`.trim(),
-              ageGender: `${ageStr}${p.gender || 'Unknown'}`,
-              nic: p.id_number,
-              phone: p.phone_number || 'N/A',
-              branch: b.slug,
-              branchName: b.name,
-              branchColor: b.color,
-              avatarBg: idx % 2 === 0 ? 'bg-surface-container-low text-primary' : 'bg-secondary-container text-secondary',
-              insurance: 'yes',
-              isAltRow: idx % 2 === 1,
-            };
-          });
+    return {
+      id: p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`,
+      internalId: p.patient_id,
+      initials,
+      name: `${p.first_name} ${p.last_name}`.trim(),
+      ageGender: `${ageStr}${p.gender || 'Unknown'}`,
+      nic: p.id_number,
+      phone: p.phone_number || 'N/A',
+      branch: b.slug,
+      branchName: b.name,
+      branchColor: b.color,
+      avatarBg:
+        idx % 2 === 0
+          ? 'bg-surface-container-low text-primary'
+          : 'bg-secondary-container text-secondary',
+      insurance: p.has_insurance ? 'yes' : 'no',
+      isAltRow: idx % 2 === 1,
+    };
+  };
 
-          // Prepend new records and avoid duplicates
-          setPatients((prev) => {
-            const existingCodes = new Set(mapped.map((m) => m.id));
-            const filteredDefaults = prev.filter((d) => !existingCodes.has(d.id));
-            return [...mapped, ...filteredDefaults];
-          });
-          if (res.total) {
-            setTotalCount(res.total);
-          }
-        }
-      })
-      .catch(() => {
-        // Fallback to default mock records without disruption
+  // Primary API fetch function connected to backend
+  const fetchDirectory = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await patientService.list({
+        search: debouncedSearch.trim() || undefined,
+        branch: activeBranch !== 'all' ? activeBranch : undefined,
+        insurance: insuranceFilter !== 'all' ? insuranceFilter : undefined,
+        page: currentPage,
+        limit: 8,
       });
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+      if (res && res.data && Array.isArray(res.data)) {
+        if (res.data.length > 0) {
+          const mapped = res.data.map(mapBackendItem);
+          setPatients(mapped);
+          setTotalCount(res.total || mapped.length);
+          setHasBackendData(true);
+        } else if (debouncedSearch || activeBranch !== 'all' || insuranceFilter !== 'all') {
+          // Explicit filter with 0 results
+          setPatients([]);
+          setTotalCount(0);
+          setHasBackendData(true);
+        } else {
+          // Empty initial database: keep default mock list so UI stays rich
+          setPatients(DEFAULT_PATIENTS);
+          setTotalCount(1428);
+          setHasBackendData(false);
+        }
+      }
+    } catch {
+      // Backend offline or error: fall back to local client filter over DEFAULT_PATIENTS
+      setHasBackendData(false);
+      const q = debouncedSearch.trim().toLowerCase();
+      const cleanQ = q.replace(/\s+/g, '');
+      const filtered = DEFAULT_PATIENTS.filter((item) => {
+        const nameMatch = !q || item.name.toLowerCase().includes(q) || item.nic.toLowerCase().includes(q) || item.phone.replace(/\s+/g, '').includes(cleanQ);
+        const branchMatch = activeBranch === 'all' || item.branch === activeBranch;
+        const insMatch = insuranceFilter === 'all' || item.insurance === insuranceFilter;
+        return nameMatch && branchMatch && insMatch;
+      });
+      setPatients(filtered);
+      setTotalCount(filtered.length);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearch, activeBranch, insuranceFilter, currentPage]);
 
-  // Filtered patients calculation
-  const filteredPatients = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    const cleanQuery = query.replace(/\s+/g, '');
+  useEffect(() => {
+    fetchDirectory();
+  }, [fetchDirectory]);
 
-    return patients.filter((patient) => {
-      const name = patient.name.toLowerCase();
-      const nic = patient.nic.toLowerCase();
-      const phone = patient.phone.replace(/\s+/g, '').toLowerCase();
-
-      const matchesQuery =
-        !query || name.includes(query) || nic.includes(query) || phone.includes(cleanQuery);
-      const matchesBranch = activeBranch === 'all' || patient.branch === activeBranch;
-      const matchesInsurance = insuranceFilter === 'all' || patient.insurance === insuranceFilter;
-
-      return matchesQuery && matchesBranch && matchesInsurance;
-    });
-  }, [patients, searchQuery, activeBranch, insuranceFilter]);
+  // Load detailed patient profile when View Profile is clicked
+  const handleOpenProfileModal = async (patient: PatientRecord) => {
+    setSelectedPatientForView(patient);
+    setProfileDetail(null);
+    setLoadingProfile(true);
+    try {
+      const full = await patientService.getById(patient.id);
+      if (full) {
+        setProfileDetail(full);
+      }
+    } catch {
+      // fallback: use the patient record data
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
 
   const handleResetFilters = () => {
     setSearchQuery('');
+    setDebouncedSearch('');
     setActiveBranch('all');
     setInsuranceFilter('all');
+    setCurrentPage(1);
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
 
   const handleRecentClick = (val: string) => {
@@ -259,6 +316,8 @@ export const PatientDirectory: React.FC = () => {
       searchInputRef.current.focus();
     }
   };
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / 8));
 
   return (
     <div className="flex flex-col w-full">
@@ -385,7 +444,10 @@ export const PatientDirectory: React.FC = () => {
                       ? 'bg-surface-card text-primary shadow-sm'
                       : 'text-on-surface-variant hover:text-brand-navy-deep'
                   }`}
-                  onClick={() => setActiveBranch('all')}
+                  onClick={() => {
+                    setActiveBranch('all');
+                    setCurrentPage(1);
+                  }}
                   type="button"
                 >
                   All Branches
@@ -396,7 +458,10 @@ export const PatientDirectory: React.FC = () => {
                       ? 'bg-surface-card text-primary shadow-sm'
                       : 'text-on-surface-variant hover:text-brand-navy-deep'
                   }`}
-                  onClick={() => setActiveBranch('colombo')}
+                  onClick={() => {
+                    setActiveBranch('colombo');
+                    setCurrentPage(1);
+                  }}
                   type="button"
                 >
                   Colombo Central
@@ -407,7 +472,10 @@ export const PatientDirectory: React.FC = () => {
                       ? 'bg-surface-card text-primary shadow-sm'
                       : 'text-on-surface-variant hover:text-brand-navy-deep'
                   }`}
-                  onClick={() => setActiveBranch('kandy')}
+                  onClick={() => {
+                    setActiveBranch('kandy');
+                    setCurrentPage(1);
+                  }}
                   type="button"
                 >
                   Kandy General
@@ -418,7 +486,10 @@ export const PatientDirectory: React.FC = () => {
                       ? 'bg-surface-card text-primary shadow-sm'
                       : 'text-on-surface-variant hover:text-brand-navy-deep'
                   }`}
-                  onClick={() => setActiveBranch('galle')}
+                  onClick={() => {
+                    setActiveBranch('galle');
+                    setCurrentPage(1);
+                  }}
                   type="button"
                 >
                   Galle
@@ -430,7 +501,10 @@ export const PatientDirectory: React.FC = () => {
                   className="h-9 px-3 pr-8 bg-canvas-bg border border-border-subtle rounded-xl font-label-md text-label-md text-on-surface-variant appearance-none cursor-pointer focus:outline-none shadow-sm"
                   id="insuranceFilter"
                   value={insuranceFilter}
-                  onChange={(e) => setInsuranceFilter(e.target.value as 'all' | 'yes' | 'no')}
+                  onChange={(e) => {
+                    setInsuranceFilter(e.target.value as 'all' | 'yes' | 'no');
+                    setCurrentPage(1);
+                  }}
                 >
                   <option value="all">Insurance: All</option>
                   <option value="yes">Insured Only</option>
@@ -455,8 +529,12 @@ export const PatientDirectory: React.FC = () => {
 
           <div className="flex items-center justify-between pt-2 border-t border-border-subtle text-body-sm text-body-sm">
             <div className="flex items-center gap-2 text-on-surface-variant">
-              <span className="w-2 h-2 rounded-full bg-status-completed-text animate-pulse"></span>
-              <span>Live directory query: showing matching patients across all connected branches</span>
+              <span className={`w-2 h-2 rounded-full ${isLoading ? 'bg-primary animate-ping' : 'bg-status-completed-text animate-pulse'}`}></span>
+              <span>
+                {isLoading
+                  ? 'Querying MedSync directory records...'
+                  : 'Live directory query: showing matching patients across all connected branches'}
+              </span>
             </div>
             <button
               className="text-primary hover:text-primary-container font-label-sm text-label-sm flex items-center gap-1 transition-colors"
@@ -485,7 +563,7 @@ export const PatientDirectory: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y-0 text-on-surface font-body-md text-body-md" id="patientTableBody">
-                {filteredPatients.map((patient) => (
+                {patients.map((patient) => (
                   <tr
                     key={patient.id}
                     className={`patient-row hover:bg-surface-subtle transition-colors group ${
@@ -546,7 +624,7 @@ export const PatientDirectory: React.FC = () => {
                       <div className="inline-flex items-center gap-1.5 justify-end">
                         <button
                           className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
-                          onClick={() => setSelectedPatientForView(patient)}
+                          onClick={() => handleOpenProfileModal(patient)}
                           title="View Profile"
                           type="button"
                         >
@@ -578,7 +656,7 @@ export const PatientDirectory: React.FC = () => {
           </div>
 
           {/* Empty State Container */}
-          {filteredPatients.length === 0 && (
+          {patients.length === 0 && !isLoading && (
             <div className="p-space-2xl text-center flex flex-col items-center justify-center space-y-2">
               <div className="w-12 h-12 rounded-full bg-surface-subtle flex items-center justify-center text-outline">
                 <span className="material-symbols-outlined text-[28px]">search_off</span>
@@ -597,7 +675,7 @@ export const PatientDirectory: React.FC = () => {
             <div className="font-body-sm text-body-sm text-on-surface-variant">
               Showing{' '}
               <span className="font-semibold text-brand-navy-deep">
-                {filteredPatients.length > 0 ? `1 to ${filteredPatients.length}` : '0'}
+                {patients.length > 0 ? `${(currentPage - 1) * 8 + 1} to ${(currentPage - 1) * 8 + patients.length}` : '0'}
               </span>{' '}
               of{' '}
               <span className="font-semibold text-brand-navy-deep">
@@ -606,41 +684,51 @@ export const PatientDirectory: React.FC = () => {
               patients
             </div>
             <div className="flex items-center gap-space-xs">
-              <span className="font-body-sm text-body-sm text-outline mr-2">Page 1 of 179</span>
+              <span className="font-body-sm text-body-sm text-outline mr-2">
+                Page {currentPage} of {totalPages}
+              </span>
               <button
                 className="w-8 h-8 rounded-lg bg-surface-card text-outline hover:text-brand-navy-deep hover:bg-surface-subtle flex items-center justify-center shadow-sm disabled:opacity-50 transition-colors"
-                disabled
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">chevron_left</span>
               </button>
+              {[1, 2, 3].filter((p) => p <= totalPages).map((p) => (
+                <button
+                  key={p}
+                  className={`w-8 h-8 rounded-lg font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors ${
+                    currentPage === p
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle'
+                  }`}
+                  onClick={() => setCurrentPage(p)}
+                  type="button"
+                >
+                  {p}
+                </button>
+              ))}
+              {totalPages > 3 && (
+                <>
+                  <span className="text-outline px-1">...</span>
+                  <button
+                    className={`w-8 h-8 rounded-lg font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors ${
+                      currentPage === totalPages
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle'
+                    }`}
+                    onClick={() => setCurrentPage(totalPages)}
+                    type="button"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
               <button
-                className="w-8 h-8 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center shadow-sm"
-                type="button"
-              >
-                1
-              </button>
-              <button
-                className="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors"
-                type="button"
-              >
-                2
-              </button>
-              <button
-                className="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors"
-                type="button"
-              >
-                3
-              </button>
-              <span className="text-outline px-1">...</span>
-              <button
-                className="w-8 h-8 rounded-lg bg-surface-card text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-subtle font-label-sm text-label-sm flex items-center justify-center shadow-sm transition-colors"
-                type="button"
-              >
-                179
-              </button>
-              <button
-                className="w-8 h-8 rounded-lg bg-surface-card text-outline hover:text-brand-navy-deep hover:bg-surface-subtle flex items-center justify-center shadow-sm transition-colors"
+                className="w-8 h-8 rounded-lg bg-surface-card text-outline hover:text-brand-navy-deep hover:bg-surface-subtle flex items-center justify-center shadow-sm disabled:opacity-50 transition-colors"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">chevron_right</span>
@@ -650,7 +738,7 @@ export const PatientDirectory: React.FC = () => {
         </div>
       </div>
 
-      {/* Patient Profile Quick View Modal */}
+      {/* Patient Profile Detailed View Modal */}
       {selectedPatientForView && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-surface-card w-full max-w-lg rounded-2xl shadow-xl border border-border-subtle overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -663,7 +751,7 @@ export const PatientDirectory: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                    {selectedPatientForView.name}
+                    {profileDetail ? `${profileDetail.first_name} ${profileDetail.last_name}` : selectedPatientForView.name}
                   </h3>
                   <p className="font-mono-data text-mono-data text-primary text-xs">
                     {selectedPatientForView.id}
@@ -671,7 +759,10 @@ export const PatientDirectory: React.FC = () => {
                 </div>
               </div>
               <button
-                onClick={() => setSelectedPatientForView(null)}
+                onClick={() => {
+                  setSelectedPatientForView(null);
+                  setProfileDetail(null);
+                }}
                 className="w-8 h-8 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
@@ -679,62 +770,113 @@ export const PatientDirectory: React.FC = () => {
             </div>
 
             <div className="p-space-lg space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
-                  <span className="text-outline text-xs block mb-0.5">Demographics</span>
-                  <span className="font-semibold text-brand-navy-deep">
-                    {selectedPatientForView.ageGender}
+              {loadingProfile ? (
+                <div className="py-8 flex flex-col items-center justify-center gap-2 text-outline">
+                  <span className="material-symbols-outlined text-[24px] animate-spin text-primary">
+                    refresh
                   </span>
+                  <span className="text-xs">Loading patient medical profile...</span>
                 </div>
-                <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
-                  <span className="text-outline text-xs block mb-0.5">NIC Number</span>
-                  <span className="font-mono-data font-semibold text-brand-navy-deep">
-                    {selectedPatientForView.nic}
-                  </span>
-                </div>
-                <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
-                  <span className="text-outline text-xs block mb-0.5">Contact Phone</span>
-                  <span className="font-semibold text-brand-navy-deep flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-outline">call</span>
-                    {selectedPatientForView.phone}
-                  </span>
-                </div>
-                <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
-                  <span className="text-outline text-xs block mb-0.5">Registered Branch</span>
-                  <span className="font-semibold text-brand-navy-deep">
-                    {selectedPatientForView.branchName}
-                  </span>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                      <span className="text-outline text-xs block mb-0.5">Demographics</span>
+                      <span className="font-semibold text-brand-navy-deep">
+                        {profileDetail ? `${profileDetail.gender} · DOB: ${profileDetail.date_of_birth}` : selectedPatientForView.ageGender}
+                      </span>
+                    </div>
+                    <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                      <span className="text-outline text-xs block mb-0.5">NIC Number</span>
+                      <span className="font-mono-data font-semibold text-brand-navy-deep">
+                        {profileDetail ? profileDetail.id_number : selectedPatientForView.nic}
+                      </span>
+                    </div>
+                    <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                      <span className="text-outline text-xs block mb-0.5">Contact Phone</span>
+                      <span className="font-semibold text-brand-navy-deep flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-outline">call</span>
+                        {profileDetail ? profileDetail.phone_number : selectedPatientForView.phone}
+                      </span>
+                    </div>
+                    <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                      <span className="text-outline text-xs block mb-0.5">Registered Branch</span>
+                      <span className="font-semibold text-brand-navy-deep">
+                        {profileDetail?.branch_name || selectedPatientForView.branchName}
+                      </span>
+                    </div>
+                  </div>
 
-              <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50 flex items-center justify-between">
-                <div>
-                  <span className="text-outline text-xs block mb-0.5">Insurance Coverage</span>
-                  <span className="font-semibold text-brand-navy-deep">
-                    {selectedPatientForView.insurance === 'yes'
-                      ? 'SLIC Health Cover Policy Verified'
-                      : 'Self-Pay Account'}
-                  </span>
-                </div>
-                {selectedPatientForView.insurance === 'yes' ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text text-xs font-semibold">
-                    <span className="material-symbols-outlined text-[12px]">check</span> Insured
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline text-xs font-semibold">
-                    Self-Pay
-                  </span>
-                )}
-              </div>
+                  {profileDetail?.blood_group && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                        <span className="text-outline text-xs block mb-0.5">Blood Group</span>
+                        <span className="font-semibold text-brand-navy-deep">
+                          {profileDetail.blood_group}
+                        </span>
+                      </div>
+                      <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                        <span className="text-outline text-xs block mb-0.5">Emergency Contact</span>
+                        <span className="font-semibold text-brand-navy-deep">
+                          {profileDetail.contact_name || 'Emergency'}: {profileDetail.emergency_contact || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {profileDetail?.address && (
+                    <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                      <span className="text-outline text-xs block mb-0.5">Residential Address</span>
+                      <span className="font-semibold text-brand-navy-deep">
+                        {profileDetail.address}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50 flex items-center justify-between">
+                    <div>
+                      <span className="text-outline text-xs block mb-0.5">Insurance Coverage</span>
+                      <span className="font-semibold text-brand-navy-deep">
+                        {(profileDetail?.has_insurance ?? selectedPatientForView.insurance === 'yes')
+                          ? 'Active Policy Coverage'
+                          : 'Self-Pay Account'}
+                      </span>
+                    </div>
+                    {(profileDetail?.has_insurance ?? selectedPatientForView.insurance === 'yes') ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text text-xs font-semibold">
+                        <span className="material-symbols-outlined text-[12px]">check</span> Insured
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline text-xs font-semibold">
+                        Self-Pay
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="p-space-md bg-canvas-bg/40 border-t border-border-subtle flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setSelectedPatientForView(null)}
+                onClick={() => {
+                  setSelectedPatientForView(null);
+                  setProfileDetail(null);
+                }}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-subtle transition-colors"
               >
                 Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const id = selectedPatientForView.id;
+                  setSelectedPatientForView(null);
+                  navigate(`/receptionist/register-patient?edit=${id}`);
+                }}
+                className="px-4 py-2 rounded-xl text-sm font-semibold border border-border-subtle text-brand-navy-deep hover:bg-surface-subtle transition-colors"
+              >
+                Edit Record
               </button>
               <button
                 type="button"

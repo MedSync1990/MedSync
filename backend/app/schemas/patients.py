@@ -82,6 +82,22 @@ class PatientCreateRequest(BaseModel):
         return (self.contact_name or self.emergency_contact_name or "").strip() or "Emergency Contact"
 
 
+class PatientUpdateRequest(BaseModel):
+    first_name: Optional[str] = Field(None, min_length=1, max_length=60)
+    middle_name: Optional[str] = Field(None, max_length=60)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=60)
+    address: Optional[str] = Field(None, min_length=3, max_length=255)
+    email: Optional[str] = None
+    phone_numbers: Optional[List[str]] = None
+    phone_number: Optional[str] = None
+    blood_group: Optional[str] = None
+    emergency_contact: Optional[str] = None
+    emergency_contact_phone: Optional[str] = None
+    contact_name: Optional[str] = None
+    emergency_contact_name: Optional[str] = None
+    emergency_contact_relationship: Optional[str] = None
+
+
 class PatientResponse(BaseModel):
     patient_id: int
     patient_code: str
@@ -98,6 +114,8 @@ class PatientResponse(BaseModel):
     emergency_contact: Optional[str] = None
     contact_name: Optional[str] = None
     registered_branch: Optional[int] = None
+    branch_name: Optional[str] = None
+    has_insurance: bool = False
     registered_date: Optional[str] = None
     is_active: bool = True
 
@@ -112,6 +130,8 @@ class PatientListItem(BaseModel):
     gender: str
     date_of_birth: str
     registered_branch: Optional[int] = None
+    branch_name: Optional[str] = None
+    has_insurance: bool = False
     is_active: bool = True
 
 
@@ -120,3 +140,4 @@ class PatientListResponse(BaseModel):
     total: int
     page: int
     limit: int
+

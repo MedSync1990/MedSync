@@ -9,6 +9,7 @@ from app.dependencies import CurrentUser, require_roles
 from app.errors import AppValidationError, NotFoundError
 from app.schemas.patients import (
     PatientCreateRequest,
+    PatientUpdateRequest,
     PatientResponse,
     PatientListItem,
     PatientListResponse,
@@ -182,28 +183,63 @@ async def register_patient(
 )
 async def list_patients(
     search: Optional[str] = Query(None, description="Search by NIC, name, or phone (FR-PM-04)"),
+    branch: Optional[str] = Query(None, description="Filter by branch ('all', 'colombo', 'kandy', 'galle', or ID)"),
+    insurance: Optional[str] = Query(None, description="Filter by insurance status ('all', 'yes', 'no')"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     conn: Connection = Depends(get_conn),
 ):
     """
-    Search / list patients across all branches (FR-PM-04, FR-PM-06).
+    Search / list patients across all branches (FR-PM-04, FR-PM-06) with branch and insurance filtering.
     """
     offset = (page - 1) * limit
     search_term = f"%{search.strip()}%" if search and search.strip() else None
+
+    clean_branch = None
+    if branch and branch.strip().lower() != "all":
+        b_val = branch.strip().lower()
+        if b_val == "colombo":
+            clean_branch = "Colombo"
+        elif b_val == "kandy":
+            clean_branch = "Kandy"
+        elif b_val == "galle":
+            clean_branch = "Galle"
+        else:
+            clean_branch = branch.strip()
+
+    clean_insurance = None
+    if insurance and insurance.strip().lower() != "all":
+        clean_insurance = insurance.strip().lower()
 
     count_query = """
         SELECT COUNT(DISTINCT p.user_id)
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
+        LEFT JOIN branch b ON p.registered_branch = b.branch_id
         LEFT JOIN contact c ON u.user_id = c.user_id
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
            OR p.patient_code ILIKE $1
            OR c.phone_number ILIKE $1)
+          AND ($2::text IS NULL
+           OR b.name ILIKE ('%' || $2 || '%')
+           OR p.registered_branch::text = $2)
+          AND ($3::text IS NULL
+           OR ($3 IN ('yes', 'insured') AND EXISTS(
+               SELECT 1 FROM patient_insurance pi 
+               WHERE pi.patient_id = p.user_id 
+                 AND pi.is_active = TRUE 
+                 AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+           ))
+           OR ($3 IN ('no', 'self-pay') AND NOT EXISTS(
+               SELECT 1 FROM patient_insurance pi 
+               WHERE pi.patient_id = p.user_id 
+                 AND pi.is_active = TRUE 
+                 AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+           )))
     """
-    total = await conn.fetchval(count_query, search_term) or 0
+    total = await conn.fetchval(count_query, search_term, clean_branch, clean_insurance) or 0
 
     data_query = """
         SELECT 
@@ -216,20 +252,44 @@ async def list_patients(
             u.gender::text AS gender,
             u.birthdate::text AS date_of_birth,
             p.registered_branch,
+            b.name AS branch_name,
+            EXISTS(
+                SELECT 1 FROM patient_insurance pi 
+                WHERE pi.patient_id = p.user_id 
+                  AND pi.is_active = TRUE 
+                  AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+            ) AS has_insurance,
             p.is_active
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
+        LEFT JOIN branch b ON p.registered_branch = b.branch_id
         LEFT JOIN contact c ON u.user_id = c.user_id
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
            OR p.patient_code ILIKE $1
            OR c.phone_number ILIKE $1)
-        GROUP BY p.user_id, p.patient_code, u.first_name, u.last_name, u.id_number, u.gender, u.birthdate, p.registered_branch, p.is_active
+          AND ($2::text IS NULL
+           OR b.name ILIKE ('%' || $2 || '%')
+           OR p.registered_branch::text = $2)
+          AND ($3::text IS NULL
+           OR ($3 IN ('yes', 'insured') AND EXISTS(
+               SELECT 1 FROM patient_insurance pi 
+               WHERE pi.patient_id = p.user_id 
+                 AND pi.is_active = TRUE 
+                 AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+           ))
+           OR ($3 IN ('no', 'self-pay') AND NOT EXISTS(
+               SELECT 1 FROM patient_insurance pi 
+               WHERE pi.patient_id = p.user_id 
+                 AND pi.is_active = TRUE 
+                 AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+           )))
+        GROUP BY p.user_id, p.patient_code, u.first_name, u.last_name, u.id_number, u.gender, u.birthdate, p.registered_branch, b.name, p.is_active
         ORDER BY p.user_id DESC
-        LIMIT $2 OFFSET $3
+        LIMIT $4 OFFSET $5
     """
-    rows = await conn.fetch(data_query, search_term, limit, offset)
+    rows = await conn.fetch(data_query, search_term, clean_branch, clean_insurance, limit, offset)
 
     items = [
         PatientListItem(
@@ -242,6 +302,8 @@ async def list_patients(
             gender=r["gender"],
             date_of_birth=r["date_of_birth"],
             registered_branch=r["registered_branch"],
+            branch_name=r["branch_name"] or ("Colombo Central Branch" if r["registered_branch"] == 1 else f"Branch {r['registered_branch']}"),
+            has_insurance=bool(r["has_insurance"]),
             is_active=r["is_active"],
         )
         for r in rows
@@ -282,10 +344,18 @@ async def get_patient(
             p.emergency_contact,
             p.contact_name,
             p.registered_branch,
+            b.name AS branch_name,
+            EXISTS(
+                SELECT 1 FROM patient_insurance pi 
+                WHERE pi.patient_id = p.user_id 
+                  AND pi.is_active = TRUE 
+                  AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+            ) AS has_insurance,
             p.registered_date::text AS registered_date,
             p.is_active
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
+        LEFT JOIN branch b ON p.registered_branch = b.branch_id
         WHERE ($1::boolean AND p.user_id = $2::int)
            OR UPPER(p.patient_code) = UPPER($3::text)
            OR UPPER(u.id_number) = UPPER($3::text)
@@ -311,6 +381,122 @@ async def get_patient(
         emergency_contact=row["emergency_contact"],
         contact_name=row["contact_name"],
         registered_branch=row["registered_branch"],
+        branch_name=row["branch_name"] or ("Colombo Central Branch" if row["registered_branch"] == 1 else None),
+        has_insurance=bool(row["has_insurance"]),
         registered_date=row["registered_date"],
         is_active=row["is_active"],
     )
+
+
+@router.put(
+    "/{identifier}",
+    response_model=PatientResponse,
+    dependencies=[Depends(require_roles("Receptionist", "Administrator", "Branch Manager"))],
+)
+async def update_patient(
+    identifier: str,
+    payload: PatientUpdateRequest,
+    conn: Connection = Depends(get_conn),
+):
+    """
+    Update patient details (personal, contact, emergency contact).
+    Preserves historical appointments, treatments, and billing (FR-PM-05).
+    """
+    is_num = identifier.isdigit()
+    num_val = int(identifier) if is_num and int(identifier) <= 2147483647 else 0
+
+    patient_id = await conn.fetchval(
+        """
+        SELECT p.user_id
+        FROM patient p
+        JOIN app_user u ON p.user_id = u.user_id
+        WHERE ($1::boolean AND p.user_id = $2::int)
+           OR UPPER(p.patient_code) = UPPER($3::text)
+           OR UPPER(u.id_number) = UPPER($3::text)
+        LIMIT 1
+        """,
+        is_num,
+        num_val,
+        identifier,
+    )
+    if not patient_id:
+        raise NotFoundError("Patient not found.")
+
+    async with conn.transaction():
+        # 1. Update app_user fields
+        user_updates = []
+        user_params = [patient_id]
+        if payload.first_name is not None:
+            user_params.append(payload.first_name.strip())
+            user_updates.append(f"first_name = ${len(user_params)}")
+        if payload.middle_name is not None:
+            user_params.append(payload.middle_name.strip() if payload.middle_name else None)
+            user_updates.append(f"middle_name = ${len(user_params)}")
+        if payload.last_name is not None:
+            user_params.append(payload.last_name.strip())
+            user_updates.append(f"last_name = ${len(user_params)}")
+        if payload.address is not None:
+            user_params.append(payload.address.strip())
+            user_updates.append(f"address = ${len(user_params)}")
+        if payload.email is not None:
+            user_params.append(payload.email.strip() if payload.email else None)
+            user_updates.append(f"email = ${len(user_params)}")
+
+        if user_updates:
+            update_sql = f"UPDATE app_user SET {', '.join(user_updates)} WHERE user_id = $1"
+            await conn.execute(update_sql, *user_params)
+
+        # 2. Update contact phone number
+        phone = payload.phone_number or (payload.phone_numbers[0] if payload.phone_numbers else None)
+        if phone:
+            digits = "".join(filter(str.isdigit, phone))
+            if len(digits) == 11 and digits.startswith("94"):
+                digits = "0" + digits[2:]
+            elif len(digits) == 9:
+                digits = "0" + digits
+            if len(digits) == 10:
+                # Update existing or insert
+                existing_contact = await conn.fetchval(
+                    "SELECT contact_id FROM contact WHERE user_id = $1 LIMIT 1",
+                    patient_id,
+                )
+                if existing_contact:
+                    await conn.execute(
+                        "UPDATE contact SET phone_number = $1 WHERE contact_id = $2",
+                        digits,
+                        existing_contact,
+                    )
+                else:
+                    await conn.execute(
+                        "INSERT INTO contact (user_id, phone_number) VALUES ($1, $2)",
+                        patient_id,
+                        digits,
+                    )
+
+        # 3. Update patient fields
+        pt_updates = []
+        pt_params = [patient_id]
+        if payload.blood_group is not None:
+            pt_params.append(payload.blood_group.strip() if payload.blood_group else None)
+            pt_updates.append(f"blood_group = ${len(pt_params)}")
+        em_phone = payload.emergency_contact or payload.emergency_contact_phone
+        if em_phone is not None:
+            digits = "".join(filter(str.isdigit, em_phone))
+            if len(digits) == 11 and digits.startswith("94"):
+                digits = "0" + digits[2:]
+            elif len(digits) == 9:
+                digits = "0" + digits
+            val = digits if len(digits) == 10 else None
+            pt_params.append(val)
+            pt_updates.append(f"emergency_contact = ${len(pt_params)}")
+        c_name = payload.contact_name or payload.emergency_contact_name
+        if c_name is not None:
+            pt_params.append(c_name.strip() if c_name else None)
+            pt_updates.append(f"contact_name = ${len(pt_params)}")
+
+        if pt_updates:
+            update_sql = f"UPDATE patient SET {', '.join(pt_updates)} WHERE user_id = $1"
+            await conn.execute(update_sql, *pt_params)
+
+    return await get_patient(str(patient_id), conn)
+

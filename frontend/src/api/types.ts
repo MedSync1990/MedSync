@@ -287,12 +287,36 @@ export interface PatientResponse {
   patient_id: number;
   patient_code: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
   id_number: string;
   phone_number: string;
   email?: string;
   date_of_birth: string;
   gender: 'Male' | 'Female' | 'Other';
+  address?: string;
+  blood_group?: string;
+  emergency_contact?: string;
+  contact_name?: string;
+  registered_branch?: number;
+  branch_name?: string;
+  has_insurance?: boolean;
+  registered_date?: string;
+  is_active: boolean;
+}
+
+export interface PatientListItem {
+  patient_id: number;
+  patient_code: string;
+  first_name: string;
+  last_name: string;
+  id_number: string;
+  phone_number: string;
+  gender: string;
+  date_of_birth: string;
+  registered_branch?: number;
+  branch_name?: string;
+  has_insurance?: boolean;
   is_active: boolean;
 }
 
