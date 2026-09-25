@@ -89,9 +89,10 @@ async def get_recent_invoices(
         JOIN patient pat ON a.patient_id = pat.user_id
         JOIN app_user pu ON pat.user_id = pu.user_id
         LEFT JOIN payments p ON i.invoice_id = p.invoice_id
+        WHERE i.status != 'Paid'
         GROUP BY i.invoice_id, i.invoice_code, patient_name, i.created_at, i.total_amount, i.insurance_amount, i.status
         ORDER BY i.created_at DESC
-        LIMIT 5
+        LIMIT 10
     """
     rows = await conn.fetch(query)
     items = []

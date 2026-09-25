@@ -12,6 +12,7 @@ import { Login } from '../pages/Login';
 import ReceptionistDashboard from '../pages/receptionist/Dashboard';
 import RegisterPatient from '../pages/receptionist/RegisterPatient';
 import PatientDirectory from '../pages/receptionist/PatientDirectory';
+import PatientProfile from '../pages/receptionist/PatientProfile';
 import BookAppointment from '../pages/receptionist/BookAppointment';
 import ManageAppointments from '../pages/receptionist/ManageAppointments';
 import Invoices from '../pages/receptionist/Invoices';
@@ -36,6 +37,7 @@ import ManageDoctors from '../pages/admin/ManageDoctors';
 import ManageTreatmentCatalogue from '../pages/admin/ManageTreatmentCatalogue';
 
 // Reports
+import { ReportsIndex } from '../pages/reports/ReportsIndex';
 import BranchAppointmentSummary from '../pages/reports/BranchAppointmentSummary';
 import { DoctorRevenue } from '../pages/reports/DoctorRevenue';
 import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
@@ -72,6 +74,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
           <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
           <Route path="/receptionist/patients" element={<PatientDirectory />} />
+          <Route path="/receptionist/patients/:patientId" element={<PatientProfile />} />
           <Route path="/receptionist/book-appointment" element={<BookAppointment />} />
           <Route path="/receptionist/appointments" element={<ManageAppointments />} />
           <Route path="/receptionist/invoices" element={<Invoices />} />
@@ -95,6 +98,7 @@ export const AppRoutes: React.FC = () => {
         <Route element={<RoleGuard allowedRoles={['Branch Manager', 'Administrator']} />}>
           <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
           <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
+          <Route path="/branch-manager/doctors" element={<ManageDoctors />} />
         </Route>
 
         {/* Admin Routes */}
@@ -108,6 +112,7 @@ export const AppRoutes: React.FC = () => {
 
         {/* Reports Routes */}
         <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
+          <Route path="/reports" element={<ReportsIndex />} />
           <Route path="/reports/appointments-summary" element={<BranchAppointmentSummary />} />
           <Route path="/reports/doctor-revenue" element={<DoctorRevenue />} />
           <Route path="/reports/outstanding-balances" element={<OutstandingBalances />} />

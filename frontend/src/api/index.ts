@@ -17,7 +17,7 @@ export { ApiError } from './client';
 export type { ApiErrorBody } from './client';
 
 // All shared TypeScript interfaces
-export * from './types';
+export type * from './types';
 
 // Auth endpoints
 export { login, logout, getMe } from './auth';
@@ -61,12 +61,14 @@ export {
   deactivatePatient,
 } from './patients';
 
-// Billing / Payment endpoints
+// Billing / Payment / Insurance endpoints
 export {
   getInvoice,
   getPatientInvoices,
   recordPayment,
   getPatientBalance,
+  getPatientInsurance,
+  verifyInsurance,
 } from './billing';
 
 // Stats / Dashboard endpoints

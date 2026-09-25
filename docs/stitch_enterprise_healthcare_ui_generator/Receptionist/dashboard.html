@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>MedSync — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      primary:"#006194", "primary-container":"#007bb9", "teal-light":"#38BDF8",
+      "navy-deep":"#0F172A", "canvas-bg":"#E9EEF5", "surface-card":"#FFFFFF",
+      "surface-subtle":"#F1F5F9", outline:"#707881", "on-surface-variant":"#3f4850",
+      "border-subtle":"#E2E8F0", "border-focus":"#0284C7",
+      "status-scheduled-bg":"#E0F2FE","status-scheduled-text":"#0369A1",
+      "status-completed-bg":"#D1FAE5","status-completed-text":"#047857",
+      "status-pending-bg":"#FEF3C7","status-pending-text":"#B45309",
+      "status-cancelled-bg":"#FFE4E6","status-cancelled-text":"#BE123C",
+      error:"#ba1a1a"
+    },
+    fontFamily: {
+      "label-sm":["Roboto"],"headline-md":["Roboto"],"headline-sm":["Roboto"],"display-lg":["Roboto"],
+      "body-sm":["Roboto"],"label-md":["Roboto"],"body-md":["Roboto"],"mono-data":["Roboto"],
+      "label-lg":["Roboto"],"headline-lg":["Roboto"]
+    },
+    fontSize: {
+      "label-sm":["12px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],
+      "body-sm":["14px",{lineHeight:"19px",fontWeight:"400"}],
+      "label-md":["14px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"600"}],
+      "body-md":["16px",{lineHeight:"23px",fontWeight:"400"}],
+      "mono-data":["14px",{lineHeight:"19px",letterSpacing:"0.01em",fontWeight:"500"}],
+      "label-lg":["16px",{lineHeight:"22px",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+};
+</script>
+<style>
+  html,body{margin:0;padding:0;}
+  body{overscroll-behavior:none;}
+  ::-webkit-scrollbar{display:none;}
+  :focus-visible{outline:2px solid #0284C7;outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;}}
+  .content-shell{box-shadow: inset 1px 0 0 rgba(15,23,42,0.06);}
+  .topbar-shell{transition: box-shadow 150ms ease;}
+</style>
+</head>
+<body class="bg-canvas-bg font-body-md text-navy-deep antialiased">
+
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-[#0F172A] z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
+  <div class="flex flex-col flex-1 overflow-y-auto">
+    <div class="h-[68px] px-4 flex items-center gap-3 border-b border-white/10">
+      <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-teal-light"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div>
+      <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-white leading-none">MedSync</span><span class="font-label-sm text-[10px] text-white/50 tracking-wider uppercase mt-1">Healthcare System</span></div>
+    </div>
+    <div class="p-4 flex-1">
+      <nav class="space-y-1 mb-6" aria-label="Primary">
+        <a aria-current="page" class="flex items-center gap-3 px-4 h-10 rounded-lg bg-white/10 text-white font-label-lg relative before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-teal-light before:rounded-r-full" href="#"><span class="material-symbols-outlined text-[20px] text-teal-light">dashboard</span><span>Dashboard</span></a>
+      </nav>
+      <div class="mb-6">
+        <div class="px-4 mb-1 font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Patients</div>
+        <nav class="space-y-1" aria-label="Patients">
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">person_add</span><span>Register Patient</span></a>
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">contact_page</span><span>Patient Directory</span></a>
+        </nav>
+      </div>
+      <div class="mb-6">
+        <div class="px-4 mb-1 font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Appointments</div>
+        <nav class="space-y-1" aria-label="Appointments">
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">event_available</span><span>Book Appointment</span></a>
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">calendar_month</span><span>Manage Appointments</span></a>
+        </nav>
+      </div>
+      <div class="mb-6">
+        <div class="px-4 mb-1 font-label-sm text-label-sm text-white/40 uppercase tracking-wider">Billing &amp; Payments</div>
+        <nav class="space-y-1" aria-label="Billing and payments">
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">receipt_long</span><span>Invoices</span></a>
+          <a class="flex items-center gap-3 px-4 h-10 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-label-lg" href="#"><span class="material-symbols-outlined text-[20px] text-white/50 group-hover:text-white">payments</span><span>Collect Payment</span></a>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 border-t border-white/10">
+    <nav class="space-y-1" aria-label="Account">
+      <a class="flex items-center gap-3 px-4 h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-sm text-body-sm" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white">settings</span><span>Settings</span></a>
+      <a class="flex items-center gap-3 px-4 h-9 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all group font-body-sm text-body-sm" href="#"><span class="material-symbols-outlined text-[18px] text-white/50 group-hover:text-white">help</span><span>Help Center</span></a>
+      <a class="flex items-center gap-3 px-4 h-9 rounded-lg text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all group font-body-sm text-body-sm" href="#"><span class="material-symbols-outlined text-[18px] text-rose-300 group-hover:text-rose-200">logout</span><span>Logout</span></a>
+    </nav>
+  </div>
+</aside>
+
+<div class="pl-[260px]">
+  <header id="app-topbar" class="topbar-shell fixed top-0 left-[260px] right-0 h-[68px] bg-surface-card/95 backdrop-blur-md border-b border-border-subtle z-40 px-6 flex items-center justify-between shadow-[0_1px_4px_rgba(15,23,42,0.04)]">
+    <div class="flex items-center gap-3 font-label-md text-label-md text-on-surface-variant">
+      <span class="font-headline-sm text-headline-sm text-navy-deep">MedSync</span><span class="text-outline">/</span><span>Reception Desk</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="font-label-md text-label-md text-navy-deep">Good morning, Sarah</span>
+      <img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4"/>
+    </div>
+  </header>
+
+  <main class="content-shell relative pt-[68px] min-h-screen bg-canvas-bg w-full">
+    <div class="flex flex-col w-full px-6 py-6 space-y-6 max-w-[1400px] mx-auto">
+
+      <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 font-body-sm text-body-sm text-outline">
+        <a class="hover:text-primary transition-colors" href="#">MedSync</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-navy-deep font-medium">Dashboard</span>
+      </nav>
+
+      <!-- Quick Action Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <button class="group text-left bg-surface-card p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3" type="button">
+          <div class="w-11 h-11 rounded-xl bg-status-scheduled-bg text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">person_add</span></div>
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-navy-deep group-hover:text-primary transition-colors">Register Patient</h2>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">Register a new patient</p>
+          </div>
+        </button>
+        <button class="group text-left bg-surface-card p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3" type="button">
+          <div class="w-11 h-11 rounded-xl bg-status-completed-bg text-status-completed-text flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">event_available</span></div>
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-navy-deep group-hover:text-primary transition-colors">Book Appointment</h2>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">Schedule a patient with a doctor</p>
+          </div>
+        </button>
+        <button class="group text-left bg-surface-card p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3" type="button">
+          <div class="w-11 h-11 rounded-xl bg-status-pending-bg text-status-pending-text flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">edit_calendar</span></div>
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-navy-deep group-hover:text-primary transition-colors">Reschedule Appointment</h2>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">Change an existing appointment</p>
+          </div>
+        </button>
+        <button class="group text-left bg-surface-card p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3" type="button">
+          <div class="w-11 h-11 rounded-xl bg-status-cancelled-bg text-error flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">emergency</span></div>
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-navy-deep group-hover:text-primary transition-colors">Emergency Walk-in</h2>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">Register urgent walk-in patient</p>
+          </div>
+        </button>
+        <button class="group text-left bg-surface-card p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3" type="button">
+          <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">payments</span></div>
+          <div>
+            <h2 class="font-headline-sm text-headline-sm text-navy-deep group-hover:text-primary transition-colors">Collect Payment</h2>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">Record an invoice payment</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Two column: Today's Appointments + Today's Overview -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <section class="lg:col-span-8 bg-surface-card rounded-xl shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-border-subtle">
+            <h2 class="font-headline-md text-headline-md text-navy-deep font-bold">Today's Appointments</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-subtle font-label-sm text-label-sm text-outline uppercase tracking-wider">
+                  <th class="py-3 px-5">Time</th>
+                  <th class="py-3 px-5">Patient</th>
+                  <th class="py-3 px-5">Doctor</th>
+                  <th class="py-3 px-5 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border-subtle font-body-md text-body-md">
+                <tr class="hover:bg-surface-subtle/60 transition-colors">
+                  <td class="py-3.5 px-5 font-mono-data text-mono-data text-navy-deep font-semibold">09:00</td>
+                  <td class="py-3.5 px-5 text-navy-deep font-medium">Patient A</td>
+                  <td class="py-3.5 px-5 text-on-surface-variant">Dr. Silva</td>
+                  <td class="py-3.5 px-5 text-right">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+                      <span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text"></span>Scheduled
+                    </span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-subtle/60 transition-colors">
+                  <td class="py-3.5 px-5 font-mono-data text-mono-data text-navy-deep font-semibold">09:30</td>
+                  <td class="py-3.5 px-5 text-navy-deep font-medium">Patient B</td>
+                  <td class="py-3.5 px-5 text-on-surface-variant">Dr. Perera</td>
+                  <td class="py-3.5 px-5 text-right">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+                      <span class="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>Completed
+                    </span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-subtle/60 transition-colors">
+                  <td class="py-3.5 px-5 font-mono-data text-mono-data text-navy-deep font-semibold">10:00</td>
+                  <td class="py-3.5 px-5 text-navy-deep font-medium">Patient C</td>
+                  <td class="py-3.5 px-5 text-on-surface-variant">Dr. Fernando</td>
+                  <td class="py-3.5 px-5 text-right">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+                      <span class="w-1.5 h-1.5 rounded-full bg-status-scheduled-text"></span>Scheduled
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 bg-surface-subtle/50 text-right">
+            <a class="font-label-md text-label-md text-primary hover:text-primary-container inline-flex items-center gap-1" href="#">View All Appointments <span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+          </div>
+        </section>
+
+        <aside class="lg:col-span-4 bg-surface-card rounded-xl shadow-sm p-5">
+          <h2 class="font-headline-md text-headline-md text-navy-deep font-bold mb-4">Today's Overview</h2>
+          <div class="divide-y divide-border-subtle">
+            <div class="flex items-center justify-between py-3">
+              <span class="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">calendar_today</span>Appointments</span>
+              <span class="font-headline-sm text-headline-sm text-navy-deep">18</span>
+            </div>
+            <div class="flex items-center justify-between py-3">
+              <span class="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-status-pending-text">hourglass_top</span>Waiting</span>
+              <span class="font-headline-sm text-headline-sm text-status-pending-text">3</span>
+            </div>
+            <div class="flex items-center justify-between py-3">
+              <span class="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-status-completed-text">check_circle</span>Completed</span>
+              <span class="font-headline-sm text-headline-sm text-status-completed-text">9</span>
+            </div>
+            <div class="flex items-center justify-between py-3">
+              <span class="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-error">receipt_long</span>Pending Payments</span>
+              <span class="font-headline-sm text-headline-sm text-error">4</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  (function scrollShadow() {
+    const topbar = document.getElementById('app-topbar');
+    if (!topbar) return;
+    const onScroll = () => {
+      topbar.style.boxShadow = window.scrollY > 4
+        ? '0 4px 12px rgba(15,23,42,0.08)'
+        : '0 1px 4px rgba(15,23,42,0.04)';
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+</body>
+</html>

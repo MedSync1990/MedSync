@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type UserProfile, type UserRole } from '../context/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+const cleanedBase = rawBase.replace(/\/+$/, '');
+const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   'Administrator': '/admin/dashboard',
@@ -16,6 +18,7 @@ export const Login = () => {
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,7 +28,7 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -42,7 +45,7 @@ export const Login = () => {
         throw new Error(errorData.detail || 'Invalid email or password.');
       }
 
-      const meResponse = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: 'include',
       });
 
@@ -57,7 +60,7 @@ export const Login = () => {
           role: userData.role as UserRole,
           roleTitle: `${userData.role} Portal`,
           branchId: userData.branch_id,
-          branchName: userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch',
+          branchName: userData.branch_name || (userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch'),
         };
         setUser(userProfile);
         role = userData.role;
@@ -123,14 +126,33 @@ export const Login = () => {
               </span>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter Password"
                 autoComplete="current-password"
                 required
-                className="h-12 w-full rounded-full border border-[#E2E8F0] bg-[#F1F5F9] pl-11 pr-4 text-sm text-[#0F172A] placeholder:text-[#707881] focus:border-[#0284C7] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0284C7]/15"
+                className="h-12 w-full rounded-full border border-[#E2E8F0] bg-[#F1F5F9] pl-11 pr-12 text-sm text-[#0F172A] placeholder:text-[#707881] focus:border-[#0284C7] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0284C7]/15"
               />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/70 text-[#707881] shadow-sm transition hover:bg-white hover:text-[#0F172A]"
+              >
+                {showPassword ? (
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current" style={{ strokeWidth: 1.8 }}>
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M3 3l18 18" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current" style={{ strokeWidth: 1.8 }}>
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
             </div>
 
             <div className="text-right">
