@@ -19,16 +19,18 @@ body {
 }
 
 @media print {
+
   /* Hide absolutely everything by default */
   body * {
     visibility: hidden;
   }
-  
+
   /* Only show elements inside the print-invoice-area */
-  .print-invoice-area, .print-invoice-area * {
+  .print-invoice-area,
+  .print-invoice-area * {
     visibility: visible;
   }
-  
+
   /* Reset the positioning so it prints neatly on the paper */
   .print-invoice-area {
     position: absolute;
@@ -43,7 +45,8 @@ body {
   }
 
   /* Explicitly hide buttons/UI inside the printable area */
-  .no-print, .no-print * {
+  .no-print,
+  .no-print * {
     display: none !important;
   }
 }
@@ -68,8 +71,8 @@ body {
   display: none;
 }
 
-  /* Explicitly hide buttons/UI inside the printable area */
-  .no-print, .no-print * {
-    display: none !important;
-  }
+/* Explicitly hide buttons/UI inside the printable area */
+.no-print,
+.no-print * {
+  display: none !important;
 }
