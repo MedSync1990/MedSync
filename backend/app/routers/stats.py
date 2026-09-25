@@ -4,7 +4,7 @@ import asyncpg
 from datetime import date
 
 from app.db import get_conn
-from app.dependencies import get_current_user, require_roles, CurrentUser, get_branch_scope
+from app.dependencies import get_current_user, require_roles, CurrentUser, get_effective_branch_id
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -40,12 +40,9 @@ async def get_stats_overview(
     Returns high-level aggregate counts for the dashboard.
     Branch Manager implicitly scoped to their own branch via get_branch_scope.
     """
-    # Enforce scope if Branch Manager
-    effective_branch = branch
-    scope = get_branch_scope(current_user)
-    if scope is not None:
-        effective_branch = scope
-        
+    # Enforce scope if Branch Manager; ignore any conflicting client-supplied branch.
+    effective_branch = get_effective_branch_id(current_user, branch)
+    
     where_clause = ""
     args = []
     if effective_branch is not None:
@@ -118,12 +115,9 @@ async def get_recent_activity(
     """
     Returns recent activity from the audit_log.
     """
-    # Enforce scope if Branch Manager
-    effective_branch = branch
-    scope = get_branch_scope(current_user)
-    if scope is not None:
-        effective_branch = scope
-        
+    # Enforce scope if Branch Manager; ignore any conflicting client-supplied branch.
+    effective_branch = get_effective_branch_id(current_user, branch)
+    
     query = """
         SELECT 
             audit_id as id,

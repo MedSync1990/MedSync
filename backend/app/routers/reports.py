@@ -3,7 +3,7 @@ from asyncpg import Connection
 from typing import Optional
 from datetime import date, datetime
 from app.db import get_conn
-from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user
+from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user, get_effective_branch_id
 from app.schemas.reports import (
     AppointmentsSummaryResponse, AppointmentSummaryItem,
     DoctorRevenueResponse, DoctorRevenueItem,
@@ -24,8 +24,8 @@ async def get_appointments_summary(
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
     conn: Connection = Depends(get_conn)
 ):
-    # Branch Manager is locked to their own branch
-    actual_branch_id = get_branch_scope(current_user) or branch_id
+    # Branch Manager is locked to their own branch even if the client sends a different one.
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
     query = """
         SELECT a.status, a.appointment_type, COUNT(*) as count
@@ -58,7 +58,7 @@ async def get_doctor_revenue(
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
     conn: Connection = Depends(get_conn)
 ):
-    actual_branch_id = get_branch_scope(current_user) or branch_id
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
     actual_doctor_id = doctor_id if current_user.role != "Doctor" else current_user.user_id
     
     query = """
@@ -110,7 +110,7 @@ async def get_doctor_itemized_payments(
     if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
         raise ForbiddenError("Doctors can only view their own itemized payments.")
         
-    actual_branch_id = get_branch_scope(current_user)
+    actual_branch_id = get_effective_branch_id(current_user, None)
     
     count_query = """
         SELECT COUNT(*)
@@ -177,7 +177,7 @@ async def get_outstanding_balances(
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
     conn: Connection = Depends(get_conn)
 ):
-    actual_branch_id = get_branch_scope(current_user) or branch_id
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
     # We sum outstanding balance per patient across all their non-Paid invoices
     query = """
@@ -231,7 +231,7 @@ async def get_treatment_categories(
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
     conn: Connection = Depends(get_conn)
 ):
-    actual_branch_id = get_branch_scope(current_user) or branch_id
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
     query = """
         SELECT 
@@ -269,7 +269,7 @@ async def get_insurance_vs_out_of_pocket(
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
     conn: Connection = Depends(get_conn)
 ):
-    actual_branch_id = get_branch_scope(current_user) or branch_id
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
     query = """
         SELECT 
