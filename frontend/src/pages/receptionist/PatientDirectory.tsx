@@ -180,6 +180,11 @@ export const PatientDirectory: React.FC = () => {
   const [editEmergencyPhone, setEditEmergencyPhone] = useState('');
   const [editEmergencyRelation, setEditEmergencyRelation] = useState('');
   const [editSelectedAllergies, setEditSelectedAllergies] = useState<number[]>([]);
+  const [showAddMasterModal, setShowAddMasterModal] = useState<boolean>(false);
+  const [newAllergyCode, setNewAllergyCode] = useState<string>('');
+  const [newAllergyName, setNewAllergyName] = useState<string>('');
+  const [isCreatingMasterAllergy, setIsCreatingMasterAllergy] = useState<boolean>(false);
+  const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
 
   // Debounce search query changes (250ms)
   useEffect(() => {
@@ -407,6 +412,32 @@ export const PatientDirectory: React.FC = () => {
     setEditSelectedAllergies((prev) =>
       prev.includes(allergyId) ? prev.filter((id) => id !== allergyId) : [...prev, allergyId]
     );
+  };
+
+  const handleCreateMasterAllergy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAllergyCode.trim() || !newAllergyName.trim()) {
+      setMasterAllergyError('Both allergy code and name are required.');
+      return;
+    }
+    setIsCreatingMasterAllergy(true);
+    setMasterAllergyError(null);
+    try {
+      const created = await patientService.createAllergy({
+        allergy_code: newAllergyCode.trim().toUpperCase(),
+        name: newAllergyName.trim(),
+      });
+      setMasterAllergies((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setEditSelectedAllergies((prev) => [...prev, created.allergy_id]);
+      setShowAddMasterModal(false);
+      setNewAllergyCode('');
+      setNewAllergyName('');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Failed to add allergy to master catalogue.';
+      setMasterAllergyError(msg);
+    } finally {
+      setIsCreatingMasterAllergy(false);
+    }
   };
 
   const handleResetFilters = () => {
@@ -1303,11 +1334,75 @@ export const PatientDirectory: React.FC = () => {
                           <span className="material-symbols-outlined text-[18px] text-status-cancelled-text">warning</span>
                           Known Allergies & Clinical Alerts
                         </h4>
-                        <span className="text-xs text-outline">Click chip to toggle</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-outline hidden sm:inline">Click chip to toggle</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowAddMasterModal(!showAddMasterModal)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">add</span>
+                            <span>New Allergy</span>
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-on-surface-variant mb-3">
+                      <p className="text-xs text-on-surface-variant mb-2">
                         Assigned allergies appear as prominent red alerts on the Doctor's Consultation and Treatment screens.
                       </p>
+
+                      {/* Inline Master Allergy Creator */}
+                      {showAddMasterModal && (
+                        <div className="mb-3 p-3 rounded-xl bg-canvas-bg border border-border-subtle shadow-xs space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-brand-navy-deep">
+                              Add New Allergy to Hospital Catalogue
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setShowAddMasterModal(false)}
+                              className="text-outline hover:text-brand-navy-deep"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                          </div>
+                          {masterAllergyError && (
+                            <span className="text-xs text-rose-600 block">{masterAllergyError}</span>
+                          )}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              placeholder="Code (e.g. ALG-CIPRO)"
+                              value={newAllergyCode}
+                              onChange={(e) => setNewAllergyCode(e.target.value)}
+                              className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-surface-card font-mono-data"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Name (e.g. Ciprofloxacin)"
+                              value={newAllergyName}
+                              onChange={(e) => setNewAllergyName(e.target.value)}
+                              className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-surface-card"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setShowAddMasterModal(false)}
+                              className="px-2.5 py-1 text-xs rounded-md text-secondary hover:bg-surface-card"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isCreatingMasterAllergy}
+                              onClick={handleCreateMasterAllergy}
+                              className="px-3 py-1 text-xs rounded-md bg-primary text-on-primary font-semibold hover:bg-primary-container disabled:opacity-50"
+                            >
+                              {isCreatingMasterAllergy ? 'Adding...' : 'Add to Catalogue & Select'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap gap-2">
                         {masterAllergies.length > 0 ? (

@@ -85,6 +85,8 @@ export const AppRoutes: React.FC = () => {
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/schedule" element={<MySchedule />} />
           <Route path="/doctor/consultation" element={<Consultation />} />
+          <Route path="/doctor/consultation/:patientId" element={<Consultation />} />
+          <Route path="/consultation" element={<Navigate to="/doctor/consultation" replace />} />
           <Route path="/doctor/treatment-catalogue" element={<TreatmentCatalogue />} />
           <Route path="/doctor/earnings" element={<MyEarnings />} />
         </Route>

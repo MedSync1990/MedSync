@@ -16,6 +16,8 @@ export const patientService = {
   getPatientAllergies: (id: string | number) => get<AllergyItem[]>(`/patients/${id}/allergies`),
   updatePatientAllergies: (id: string | number, allergy_ids: number[]) =>
     put<AllergyItem[]>(`/patients/${id}/allergies`, { allergy_ids }),
+  createAllergy: (data: { allergy_code: string; name: string }) =>
+    post<AllergyItem>('/allergies', data),
 };
 
 

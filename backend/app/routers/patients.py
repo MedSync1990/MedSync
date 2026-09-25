@@ -586,7 +586,7 @@ async def get_patient_allergies(
 @router.put(
     "/{identifier}/allergies",
     response_model=List[PatientAllergyItem],
-    dependencies=[Depends(require_roles("Receptionist", "Administrator", "Branch Manager"))],
+    dependencies=[Depends(require_roles("Receptionist", "Administrator", "Branch Manager", "Doctor"))],
     summary="Replace patient's assigned allergies",
 )
 async def update_patient_allergies(
