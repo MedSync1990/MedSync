@@ -18,6 +18,7 @@ export const Login = () => {
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -125,14 +126,24 @@ export const Login = () => {
               </span>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter Password"
                 autoComplete="current-password"
                 required
-                className="h-12 w-full rounded-full border border-[#E2E8F0] bg-[#F1F5F9] pl-11 pr-4 text-sm text-[#0F172A] placeholder:text-[#707881] focus:border-[#0284C7] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0284C7]/15"
+                className="h-12 w-full rounded-full border border-[#E2E8F0] bg-[#F1F5F9] pl-11 pr-12 text-sm text-[#0F172A] placeholder:text-[#707881] focus:border-[#0284C7] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0284C7]/15"
               />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full text-[#707881] transition hover:text-[#0F172A]"
+              >
+                <span className="material-symbols-outlined text-[20px] leading-none">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
             </div>
 
             <div className="text-right">
