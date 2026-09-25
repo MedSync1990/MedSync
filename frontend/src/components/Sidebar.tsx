@@ -63,6 +63,7 @@ export const Sidebar: React.FC = () => {
         { label: 'Manage Branches', path: '/admin/branches', icon: 'domain', roles: ['Administrator'] },
         { label: 'Manage Staff', path: '/admin/staff', icon: 'badge', roles: ['Administrator', 'Branch Manager'] },
         { label: 'Manage Doctors', path: '/admin/doctors', icon: 'medical_services', roles: ['Administrator'] },
+        { label: 'Manage Doctors', path: '/branch-manager/doctors', icon: 'medical_services', roles: ['Branch Manager'] },
       ],
     },
   ];

@@ -92,12 +92,23 @@ async def logout(response: Response):
 
 
 @router.get("/me", response_model=MeResponse)
-async def get_me(current_user: CurrentUser = Depends(get_current_user)):
+async def get_me(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn),
+):
+    branch_name = None
+    if current_user.branch_id:
+        row = await db.fetchrow(
+            "SELECT name FROM branch WHERE branch_id = $1;", current_user.branch_id
+        )
+        if row:
+            branch_name = row["name"]
     return MeResponse(
         user_id=current_user.user_id,
         username=current_user.username,
         role=current_user.role,
         branch_id=current_user.branch_id,
+        branch_name=branch_name,
     )
 
 @router.get("/admin-only-dashboard", dependencies=[Depends(require_roles("Administrator", "Branch Manager"))])
