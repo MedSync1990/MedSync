@@ -14,6 +14,13 @@ export interface PaginatedResponse<T> {
   limit: number;
 }
 
+export const Gender = {
+  Male: 'Male',
+  Female: 'Female',
+} as const;
+
+export type Gender = (typeof Gender)[keyof typeof Gender];
+
 // ─── Auth ───────────────────────────────────────────────────────────────────
 
 export interface LoginRequest {
@@ -124,7 +131,7 @@ export interface DoctorBase {
   address: string;
   marital_status?: string | null;
   birthdate: string;
-  gender: 'Male' | 'Female' | 'Other';
+  gender: Gender;
   phone_numbers: string[];
   email?: string | null;
   branch_id: number;
@@ -294,7 +301,55 @@ export interface InsuranceVsOutOfPocketResponse {
   total: number;
 }
 
-// ─── Patients ───────────────────────────────────────────────────────────────
+// ─── Patients (schemas/patients.py) ─────────────────────────────────────────
+
+export interface PatientInsuranceCreate {
+  provider_name: string;
+  insurance_card_number: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  corporate_affiliation?: string | null;
+}
+
+export interface PatientCreateRequest {
+  first_name: string;
+  middle_name?: string | null;
+  last_name: string;
+  id_number: string;
+  birthdate?: string | null;
+  date_of_birth?: string | null;
+  gender: Gender;
+  address: string;
+  email?: string | null;
+  phone_numbers?: string[] | null;
+  phone_number?: string | null;
+  blood_group?: string | null;
+  emergency_contact?: string | null;
+  emergency_contact_phone?: string | null;
+  contact_name?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_relationship?: string | null;
+  registered_branch?: number | null;
+  insurance?: PatientInsuranceCreate | null;
+  allergy_ids?: number[] | null;
+}
+
+export interface PatientUpdateRequest {
+  first_name?: string | null;
+  middle_name?: string | null;
+  last_name?: string | null;
+  address?: string | null;
+  email?: string | null;
+  phone_numbers?: string[] | null;
+  phone_number?: string | null;
+  blood_group?: string | null;
+  emergency_contact?: string | null;
+  emergency_contact_phone?: string | null;
+  contact_name?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_relationship?: string | null;
+  allergy_ids?: number[] | null;
+}
 
 export interface AllergyItem {
   allergy_id: number;
@@ -303,24 +358,26 @@ export interface AllergyItem {
 }
 
 export interface PatientResponse {
-  user_id: number;
+  patient_id: number;
   patient_code: string;
   first_name: string;
-  middle_name?: string;
+  middle_name?: string | null;
   last_name: string;
   id_number: string;
+  phone_number: string;
+  email?: string | null;
   date_of_birth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  address?: string;
-  blood_group?: string;
-  emergency_contact?: string;
-  contact_name?: string;
-  registered_branch?: number;
-  branch_name?: string;
-  has_insurance?: boolean;
-  registered_date?: string;
+  gender: Gender;
+  address: string;
+  blood_group?: string | null;
+  emergency_contact?: string | null;
+  contact_name?: string | null;
+  registered_branch?: number | null;
+  branch_name?: string | null;
+  has_insurance: boolean;
+  registered_date?: string | null;
   is_active: boolean;
-  allergies?: AllergyItem[];
+  allergies: AllergyItem[];
 }
 
 export interface PatientListItem {
@@ -330,24 +387,19 @@ export interface PatientListItem {
   last_name: string;
   id_number: string;
   phone_number: string;
-  gender: string;
+  gender: Gender;
   date_of_birth: string;
-  registered_branch?: number;
-  branch_name?: string;
-  has_insurance?: boolean;
+  registered_branch?: number | null;
+  branch_name?: string | null;
+  has_insurance: boolean;
   is_active: boolean;
 }
 
-// ─── Branches (stub — admin pages fill in detail) ──────────────────────────
-
-export interface BranchResponse {
-  branch_id: number;
-  name: string;
-  address: string;
-  phone_number?: string;
-  branch_manager_name?: string;
-  staff_count: number;
-  is_active: boolean;
+export interface PatientListResponse {
+  data: PatientListItem[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ─── Stats / Dashboard ─────────────────────────────────────────────────────

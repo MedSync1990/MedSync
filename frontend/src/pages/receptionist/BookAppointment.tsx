@@ -11,7 +11,7 @@ import type {
   DoctorResponse,
   SpecialtyResponse,
   DoctorSlotResponse,
-  PatientResponse,
+  PatientListItem,
   AppointmentType,
 } from '../../types';
 
@@ -44,8 +44,8 @@ export const BookAppointment: React.FC = () => {
 
   // ─── Step 1: Patient Search & Selection State ──────────────────────────────
   const [patientSearch, setPatientSearch] = useState('');
-  const [patientResults, setPatientResults] = useState<PatientResponse[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
+  const [patientResults, setPatientResults] = useState<PatientListItem[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<PatientListItem | null>(null);
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
 
@@ -164,7 +164,7 @@ export const BookAppointment: React.FC = () => {
   }, [allDoctors, selectedSpecialty, doctorSearch]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
-  const handleSelectPatient = (patient: PatientResponse) => {
+  const handleSelectPatient = (patient: PatientListItem) => {
     setSelectedPatient(patient);
     setPatientSearch('');
     setShowPatientDropdown(false);
@@ -197,7 +197,7 @@ export const BookAppointment: React.FC = () => {
     setSubmitting(true);
     try {
       await appointmentService.book({
-        patient_id: selectedPatient.user_id,
+        patient_id: selectedPatient.patient_id,
         doctor_id: selectedDoctor.doctor_id,
         slot_id: selectedSlot.slot_id,
         appointment_type: category,
@@ -316,7 +316,7 @@ export const BookAppointment: React.FC = () => {
                 <div className="absolute z-20 left-0 right-0 mt-2 bg-surface-card rounded-xl border border-border-subtle shadow-lg divide-y divide-border-subtle overflow-hidden max-h-64 overflow-y-auto">
                   {patientResults.map((p) => (
                     <div
-                      key={p.user_id}
+                      key={p.patient_id}
                       onClick={() => handleSelectPatient(p)}
                       className="p-3 px-4 hover:bg-surface-subtle cursor-pointer flex items-center justify-between transition-colors"
                     >
@@ -332,12 +332,12 @@ export const BookAppointment: React.FC = () => {
                           <div className="text-outline text-body-sm flex items-center gap-2">
                             <span>NIC: {p.id_number}</span>
                             <span>•</span>
-                            <span>{p.phone}</span>
+                            <span>{p.phone_number}</span>
                           </div>
                         </div>
                       </div>
                       <span className="px-2.5 py-1 rounded-full bg-surface border border-border-subtle font-mono-data text-[12px] text-secondary font-medium">
-                        {p.patient_code || `PT-${String(p.user_id).padStart(6, '0')}`}
+                        {p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`}
                       </span>
                     </div>
                   ))}
@@ -358,7 +358,7 @@ export const BookAppointment: React.FC = () => {
                       {selectedPatient.first_name} {selectedPatient.last_name}
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-mono-data text-[11px] text-secondary">
-                      {selectedPatient.patient_code || `PT-${String(selectedPatient.user_id).padStart(6, '0')}`}
+                      {selectedPatient.patient_code || `PT-${String(selectedPatient.patient_id).padStart(6, '0')}`}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[11px] font-semibold">
                       <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
@@ -378,7 +378,7 @@ export const BookAppointment: React.FC = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">call</span>
-                      {selectedPatient.phone}
+                      {selectedPatient.phone_number}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
@@ -796,7 +796,7 @@ export const BookAppointment: React.FC = () => {
                     ? `${getAge(selectedPatient.date_of_birth)} yrs, ${selectedPatient.gender}`
                     : 'Age / Gender'}
                 </p>
-                <p>{selectedPatient?.phone || 'Contact number'}</p>
+                <p>{selectedPatient?.phone_number || 'Contact number'}</p>
                 <p className="text-status-completed-text font-semibold flex items-center gap-1 mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
                   SLIC Insured
@@ -903,7 +903,7 @@ export const BookAppointment: React.FC = () => {
             <span className="material-symbols-outlined text-[20px] text-primary">sms</span>
             <span className="font-body-sm text-body-sm">
               A confirmation SMS with e-Token will be automatically sent to patient's mobile{' '}
-              <strong>{selectedPatient?.phone || '(No phone number)'}</strong> upon booking.
+              <strong>{selectedPatient?.phone_number || '(No phone number)'}</strong> upon booking.
             </span>
           </div>
 
