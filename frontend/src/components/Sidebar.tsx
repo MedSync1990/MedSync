@@ -38,7 +38,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { label: 'Register Patient', path: '/receptionist/register-patient', icon: 'person_add', roles: ['Receptionist', 'Administrator'] },
         { label: 'Patient Directory', path: '/receptionist/patients', icon: 'folder_shared', roles: ['Receptionist', 'Administrator'] },
-        { label: 'Book Appointment', path: '/receptionist/book-appointment', icon: 'calendar_today', roles: ['Receptionist', 'Patient', 'Administrator'] },
+        { label: 'Book Appointment', path: '/receptionist/book-appointment', icon: 'calendar_today', roles: ['Receptionist', 'Administrator'] },
         { label: 'Manage Appointments', path: '/receptionist/appointments', icon: 'event_note', roles: ['Receptionist', 'Administrator', 'Branch Manager'] },
       ],
     },
