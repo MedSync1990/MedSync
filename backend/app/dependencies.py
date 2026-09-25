@@ -58,17 +58,10 @@ async def get_db(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     """
-    Administrator connection selection (database.md §3.1). Routes that use
-    Depends(get_db) instead of Depends(get_conn) directly automatically get
-    the catms_admin pool when the caller is an Administrator, and the
-    catms_app pool otherwise. get_current_user has already run and set
-    request.state.user by the time this executes, so get_conn/get_admin_conn's
-    existing RLS session-context logic (which reads request.state.user)
-    still works unchanged.
+    Administrator connection selection (database.md §3.1). Routes that depend on
+    get_db automatically pick the catms_admin pool when the caller is an Administrator,
+    and the catms_app pool otherwise. The role-aware pool selection happens in get_conn,
+    while the transaction-local RLS values are still set from the authenticated user.
     """
-    if current_user.role == "Administrator":
-        async for conn in get_admin_conn(request):
-            yield conn
-    else:
-        async for conn in get_conn(request):
-            yield conn
+    async for conn in get_conn(request):
+        yield conn
