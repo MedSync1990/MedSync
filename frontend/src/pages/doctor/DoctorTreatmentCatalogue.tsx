@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { treatmentService } from '../../services/treatmentService';
+import type { TreatmentItem as ApiTreatmentItem } from '../../types';
 
-interface TreatmentItem {
+interface DisplayTreatmentItem {
   code: string;
+  treatment_code: number;
   name: string;
   description: string;
   category: string;
@@ -9,71 +12,81 @@ interface TreatmentItem {
   insuranceEligible: boolean;
 }
 
+const FALLBACK_TREATMENTS: DisplayTreatmentItem[] = [
+  {
+    code: 'SRV-CRD-01',
+    treatment_code: 1,
+    name: 'Cardiology Specialist Consultation',
+    description: 'Initial or follow-up physical examination with hemodynamics review',
+    category: 'Consultation',
+    price: '3,500.00',
+    insuranceEligible: true,
+  },
+  {
+    code: 'SRV-DIA-04',
+    treatment_code: 8,
+    name: '12-Lead Electrocardiogram (ECG)',
+    description: 'Standard digital resting rhythm trace with computer interpretation',
+    category: 'Diagnostic',
+    price: '4,500.00',
+    insuranceEligible: true,
+  },
+  {
+    code: 'SRV-LAB-12',
+    treatment_code: 7,
+    name: 'Blood Sugar Test (RBS)',
+    description: 'Immediate capillary blood glucose evaluation stat testing',
+    category: 'Laboratory',
+    price: '800.00',
+    insuranceEligible: true,
+  },
+];
+
 export const DoctorTreatmentCatalogue: React.FC = () => {
+  const [treatments, setTreatments] = useState<DisplayTreatmentItem[]>(FALLBACK_TREATMENTS);
+  const [categories, setCategories] = useState<string[]>(['All', 'Consultation', 'Diagnostic', 'Laboratory', 'Preventive', 'Procedure']);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  const treatments: TreatmentItem[] = [
-    {
-      code: 'SRV-CRD-01',
-      name: 'Cardiology Specialist Consultation',
-      description: 'Initial or follow-up physical examination with hemodynamics review',
-      category: 'Consultation',
-      price: '3,500.00',
-      insuranceEligible: true,
-    },
-    {
-      code: 'SRV-DIA-04',
-      name: '12-Lead Electrocardiogram (ECG)',
-      description: 'Standard digital resting rhythm trace with computer interpretation',
-      category: 'Diagnostics',
-      price: '1,800.00',
-      insuranceEligible: true,
-    },
-    {
-      code: 'SRV-CRD-08',
-      name: '2D Transthoracic Echocardiogram',
-      description: 'Complete spectral and color Doppler structural valve imaging',
-      category: 'Cardiology',
-      price: '8,500.00',
-      insuranceEligible: true,
-    },
-    {
-      code: 'SRV-LAB-12',
-      name: 'Blood Glucose Random (RBS)',
-      description: 'Immediate capillary blood glucose evaluation stat testing',
-      category: 'Laboratory',
-      price: '450.00',
-      insuranceEligible: false,
-    },
-    {
-      code: 'SRV-LAB-22',
-      name: 'Lipid Profile Full Panel',
-      description: 'Total cholesterol, HDL, LDL, VLDL, and serum triglycerides',
-      category: 'Laboratory',
-      price: '2,200.00',
-      insuranceEligible: true,
-    },
-    {
-      code: 'SRV-RAD-03',
-      name: 'Chest X-Ray (PA View)',
-      description: 'Standard digital thoracic radiographic exposure',
-      category: 'Radiology',
-      price: '2,400.00',
-      insuranceEligible: true,
-    },
-    {
-      code: 'SRV-PRC-09',
-      name: 'Emergency Defibrillation & Cardioversion',
-      description: 'Direct current synchronous restoration of sinus rhythm',
-      category: 'Procedures',
-      price: '12,000.00',
-      insuranceEligible: true,
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
 
-  const categories = ['All', 'Cardiology', 'Consultation', 'Diagnostics', 'Laboratory', 'Radiology', 'Procedures'];
+    Promise.all([
+      treatmentService.list({ active_only: true }),
+      treatmentService.getCategories(),
+    ])
+      .then(([items, cats]) => {
+        if (!isMounted) return;
+        if (Array.isArray(items) && items.length > 0) {
+          const mapped: DisplayTreatmentItem[] = items.map((t: ApiTreatmentItem) => ({
+            code: `SRV-${(t.category || 'GEN').slice(0, 3).toUpperCase()}-${String(t.treatment_code).padStart(2, '0')}`,
+            treatment_code: t.treatment_code,
+            name: t.treatment_name,
+            description: `${t.category} clinical service pre-approved under hospital tariff`,
+            category: t.category,
+            price: Number(t.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            insuranceEligible: Boolean(t.is_eligible_for_insurance),
+          }));
+          setTreatments(mapped);
+        }
+        if (Array.isArray(cats) && cats.length > 0) {
+          setCategories(['All', ...cats]);
+        }
+      })
+      .catch(() => {
+        // Fallback already set
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredTreatments = treatments.filter((item) => {
     const matchesCat = selectedCategory === 'All' || item.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -150,7 +163,7 @@ export const DoctorTreatmentCatalogue: React.FC = () => {
           {/* Meta Controls (Print & View Count) */}
           <div className="flex items-center gap-space-sm justify-between lg:justify-end">
             <div className="text-secondary font-label-md text-label-md">
-              Showing <span className="font-bold text-brand-navy-deep">{filteredTreatments.length}</span> items
+              Showing <span className="font-bold text-brand-navy-deep">{filteredTreatments.length}</span> of {treatments.length} items
             </div>
             <div className="h-5 w-[1px] bg-surface-variant hidden sm:block"></div>
             <button
@@ -186,62 +199,75 @@ export const DoctorTreatmentCatalogue: React.FC = () => {
 
         {/* Treatment Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11 border-b border-border-subtle">
-                <th className="px-space-md py-2 w-36 font-semibold" scope="col">Code</th>
-                <th className="px-space-md py-2 font-semibold" scope="col">Treatment / Service Name</th>
-                <th className="px-space-md py-2 w-40 font-semibold" scope="col">Category</th>
-                <th className="px-space-md py-2 w-44 text-right font-semibold" scope="col">Price (LKR)</th>
-                <th className="px-space-md py-2 w-48 text-center font-semibold" scope="col">Insurance-Eligible</th>
-                <th className="px-space-md py-2 w-28 text-center font-semibold" scope="col">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-subtle font-body-md text-body-md text-on-surface">
-              {filteredTreatments.map((item) => (
-                <tr key={item.code} className="hover:bg-surface-subtle/70 transition-colors group">
-                  <td className="px-space-md py-3.5 font-mono-data text-mono-data font-semibold text-primary">
-                    {item.code}
-                  </td>
-                  <td className="px-space-md py-3.5">
-                    <div className="font-headline-sm text-headline-sm text-brand-navy-deep leading-snug">{item.name}</div>
-                    <div className="font-body-sm text-body-sm text-secondary">{item.description}</div>
-                  </td>
-                  <td className="px-space-md py-3.5">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-label-md text-label-md bg-surface-subtle text-secondary border border-border-subtle">
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-semibold text-brand-navy-deep">
-                    {item.price}
-                  </td>
-                  <td className="px-space-md py-3.5 text-center">
-                    {item.insuranceEligible ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-status-completed-bg text-status-completed-text font-semibold">
-                        <span className="material-symbols-outlined text-[14px]">check_circle</span> Yes
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-slate-100 text-slate-600 font-semibold">
-                        No
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-space-md py-3.5 text-center">
-                    <button
-                      className="p-1 rounded-md text-secondary hover:text-primary hover:bg-surface-variant transition-colors"
-                      onClick={() => handleCopyCode(item.code)}
-                      title="Copy Service Code"
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {copiedCode === item.code ? 'check' : 'content_copy'}
-                      </span>
-                    </button>
-                  </td>
+          {isLoading ? (
+            <div className="p-12 flex flex-col items-center justify-center gap-3">
+              <span className="material-symbols-outlined text-3xl animate-spin text-primary">progress_activity</span>
+              <span className="text-xs text-secondary font-medium">Loading live treatment catalogue from database...</span>
+            </div>
+          ) : filteredTreatments.length === 0 ? (
+            <div className="p-12 text-center text-secondary">
+              <span className="material-symbols-outlined text-4xl mb-2 text-slate-400">search_off</span>
+              <p className="text-sm font-semibold text-brand-navy-deep">No treatments found</p>
+              <p className="text-xs text-secondary mt-1">Try modifying your category filter or search keywords.</p>
+            </div>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11 border-b border-border-subtle">
+                  <th className="px-space-md py-2 w-36 font-semibold" scope="col">Code</th>
+                  <th className="px-space-md py-2 font-semibold" scope="col">Treatment / Service Name</th>
+                  <th className="px-space-md py-2 w-40 font-semibold" scope="col">Category</th>
+                  <th className="px-space-md py-2 w-44 text-right font-semibold" scope="col">Price (LKR)</th>
+                  <th className="px-space-md py-2 w-48 text-center font-semibold" scope="col">Insurance-Eligible</th>
+                  <th className="px-space-md py-2 w-28 text-center font-semibold" scope="col">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-surface-subtle font-body-md text-body-md text-on-surface">
+                {filteredTreatments.map((item) => (
+                  <tr key={item.code} className="hover:bg-surface-subtle/70 transition-colors group">
+                    <td className="px-space-md py-3.5 font-mono-data text-mono-data font-semibold text-primary">
+                      {item.code}
+                    </td>
+                    <td className="px-space-md py-3.5">
+                      <div className="font-headline-sm text-headline-sm text-brand-navy-deep leading-snug">{item.name}</div>
+                      <div className="font-body-sm text-body-sm text-secondary">{item.description}</div>
+                    </td>
+                    <td className="px-space-md py-3.5">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-label-md text-label-md bg-surface-subtle text-secondary border border-border-subtle">
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-semibold text-brand-navy-deep">
+                      {item.price}
+                    </td>
+                    <td className="px-space-md py-3.5 text-center">
+                      {item.insuranceEligible ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+                          <span className="material-symbols-outlined text-[14px]">check_circle</span> Yes
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-slate-100 text-slate-600 font-semibold">
+                          No
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-space-md py-3.5 text-center">
+                      <button
+                        className="p-1 rounded-md text-secondary hover:text-primary hover:bg-surface-variant transition-colors"
+                        onClick={() => handleCopyCode(item.code)}
+                        title="Copy Service Code"
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {copiedCode === item.code ? 'check' : 'content_copy'}
+                        </span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
