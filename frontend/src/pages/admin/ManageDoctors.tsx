@@ -716,9 +716,7 @@ export const ManageDoctors: React.FC = () => {
                       location_on
                     </span>
                     <span className="font-label-md text-label-md text-on-surface font-bold">
-                      {branches.find((b) => b.branch_id === user?.branchId)?.name ||
-                        (user?.branchName && !user.branchName.startsWith('Branch #') ? user.branchName : null) ||
-                        (user?.branchId ? `Branch #${user.branchId}` : 'Assigned Branch')}
+                      {user?.branchName || 'Assigned Branch'}
                     </span>
                   </div>
                 )}
