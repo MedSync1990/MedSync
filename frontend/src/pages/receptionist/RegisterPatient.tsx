@@ -134,8 +134,11 @@ export const RegisterPatient: React.FC = () => {
         name: trimmedName,
         nic: nicNumber.trim().toUpperCase(),
       });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to register patient';
+    } catch (err: any) {
+      const message =
+        err?.body?.errors?.[0]?.message ||
+        err?.body?.message ||
+        (err instanceof Error ? err.message : 'Failed to register patient');
       setError(message);
     } finally {
       setSubmitting(false);
