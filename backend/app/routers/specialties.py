@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, status
 from asyncpg import Connection
 
 from app.dependencies import get_db, require_roles, CurrentUser
-from app.schemas.specialties import SpecialtyCreate, SpecialtyResponse
-from app.errors import ConflictError
+from app.schemas.specialties import SpecialtyCreate, SpecialtyUpdate, SpecialtyResponse
+from app.errors import ConflictError, NotFoundError
 
 router = APIRouter()
 
@@ -41,7 +41,8 @@ async def list_specialties(
                 for r in rows
             ]
 
-@router.post("",response_model=SpecialtyResponse, 
+@router.post("",response_model=SpecialtyResponse,
+# default HTTP response status to 201 Created upon successful execution. 
 status_code=status.HTTP_201_CREATED)
 async def create_specialty(
     payload: SpecialtyCreate,
@@ -71,7 +72,91 @@ async def create_specialty(
         name=record["name"],
         description=record["description"],
         doctor_count=0
-    ) 
+    )
+
+
+@router.put("/{specialty_id}", response_model=SpecialtyResponse)
+async def update_specialty(
+    specialty_id: int,
+    payload: SpecialtyUpdate,
+    conn: Connection = Depends(get_db),
+    admin: CurrentUser = Depends(require_roles("Administrator")),
+):
+    """
+    Updates an existing specialty name or description. Admin only.
+    """
+    existing = await conn.fetchrow(
+        "SELECT specialty_id, name, description FROM specialty WHERE specialty_id = $1;",
+        specialty_id
+    )
+    if not existing:
+        raise NotFoundError(f"Specialty with ID {specialty_id} not found.")
+
+    new_name = payload.name.strip() if payload.name is not None else existing["name"]
+    new_desc = payload.description if payload.description is not None else existing["description"]
+
+    if new_name.lower() != existing["name"].lower():
+        name_check = await conn.fetchrow(
+            "SELECT specialty_id FROM specialty WHERE LOWER(name) = LOWER($1) AND specialty_id != $2;",
+            new_name,
+            specialty_id
+        )
+        if name_check:
+            raise ConflictError(f"Specialty '{new_name}' already exists.")
+
+    updated_rec = await conn.fetchrow(
+        """
+        UPDATE specialty
+        SET name = $1, description = $2
+        WHERE specialty_id = $3
+        RETURNING specialty_id, name, description;
+        """,
+        new_name,
+        new_desc,
+        specialty_id
+    )
+
+    count_row = await conn.fetchrow(
+        "SELECT COUNT(*)::int as count FROM doctor_specialty WHERE specialty_id = $1;",
+        specialty_id
+    )
+    doctor_count = count_row["count"] if count_row else 0
+
+    return SpecialtyResponse(
+        specialty_id=updated_rec["specialty_id"],
+        name=updated_rec["name"],
+        description=updated_rec["description"],
+        doctor_count=doctor_count
+    )
+
+
+@router.delete("/{specialty_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_specialty(
+    specialty_id: int,
+    conn: Connection = Depends(get_db),
+    admin: CurrentUser = Depends(require_roles("Administrator")),
+):
+    """
+    Deletes a specialty if no doctors are assigned to it. Admin only.
+    """
+    existing = await conn.fetchrow(
+        "SELECT specialty_id, name FROM specialty WHERE specialty_id = $1;",
+        specialty_id
+    )
+    if not existing:
+        raise NotFoundError(f"Specialty with ID {specialty_id} not found.")
+
+    doc_count = await conn.fetchval(
+        "SELECT COUNT(*) FROM doctor_specialty WHERE specialty_id = $1;",
+        specialty_id
+    )
+    if doc_count > 0:
+        raise ConflictError(
+            f"Cannot delete specialty '{existing['name']}' because it is currently assigned to {doc_count} doctor(s). Reassign them first."
+        )
+
+    await conn.execute("DELETE FROM specialty WHERE specialty_id = $1;", specialty_id)
+    return None
         
 
         

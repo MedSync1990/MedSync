@@ -59,7 +59,7 @@ export const Login = () => {
           role: userData.role as UserRole,
           roleTitle: `${userData.role} Portal`,
           branchId: userData.branch_id,
-          branchName: userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch',
+          branchName: userData.branch_name || (userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch'),
         };
         setUser(userProfile);
         role = userData.role;

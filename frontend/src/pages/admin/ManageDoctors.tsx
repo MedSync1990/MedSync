@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { get, put, post } from '../../services/api';
+import { get, put, post, del } from '../../services/api';
 import type {
   DoctorResponse,
   SpecialtyResponse,
@@ -9,6 +9,7 @@ import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/Modal';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -438,6 +439,59 @@ export const ManageDoctors: React.FC = () => {
   // Modal state
   const [modalDoctor, setModalDoctor] = useState<DoctorResponse | null>(null);
 
+  // Edit / Delete Specialty State
+  const [editingSpecialty, setEditingSpecialty] = useState<SpecialtyResponse | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const [deletingSpecialty, setDeletingSpecialty] = useState<SpecialtyResponse | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleOpenEditSpecialty = (sp: SpecialtyResponse) => {
+    setEditingSpecialty(sp);
+    setEditName(sp.name);
+    setEditDescription(sp.description ?? '');
+  };
+
+  const handleSaveEditSpecialty = async () => {
+    if (!editingSpecialty) return;
+    const trimmed = editName.trim();
+    if (trimmed.length < 2) {
+      showToast('Specialty name must be at least 2 characters long.', 'error');
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await put<SpecialtyResponse>(`/specialties/${editingSpecialty.specialty_id}`, {
+        name: trimmed,
+        description: editDescription.trim() || undefined,
+      });
+      showToast('Specialty updated successfully!', 'success');
+      setEditingSpecialty(null);
+      fetchSpecialties();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to update specialty', 'error');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleConfirmDeleteSpecialty = async () => {
+    if (!deletingSpecialty) return;
+    setDeleting(true);
+    try {
+      await del(`/specialties/${deletingSpecialty.specialty_id}`);
+      showToast(`Specialty '${deletingSpecialty.name}' deleted successfully!`, 'success');
+      setDeletingSpecialty(null);
+      fetchSpecialties();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete specialty', 'error');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // ─── Fetchers ───────────────────────────────────────────────────────────────
 
   const fetchDoctors = async () => {
@@ -487,8 +541,8 @@ export const ManageDoctors: React.FC = () => {
     const matchBranch = isAdmin
       ? branchFilter === 'all' || String(d.branch_id) === branchFilter
       : user?.branchId
-      ? d.branch_id === user.branchId
-      : true;
+        ? d.branch_id === user.branchId
+        : true;
     const matchSearch =
       !search ||
       d.full_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -577,7 +631,7 @@ export const ManageDoctors: React.FC = () => {
                 Manage Doctors &amp; Specialties
               </h1>
               <p className="font-body-md text-body-md text-on-surface-variant">
-                Assign specialties and manage doctor availability across regional branches.
+                Assign specialties and manage doctor availability.
               </p>
             </div>
 
@@ -598,23 +652,21 @@ export const ManageDoctors: React.FC = () => {
                   {doctors.length}
                 </span>
               </button>
-              {isAdmin && (
-                <button
-                  id="tabBtnSpecialties"
-                  type="button"
-                  onClick={() => setActiveTab('specialties')}
-                  className={`flex items-center gap-space-xs px-space-md py-2 rounded-lg font-label-lg text-label-lg font-bold transition-all ${activeTab === 'specialties'
-                    ? 'bg-surface-card text-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">category</span>
-                  <span>Specialties</span>
-                  <span className="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">
-                    {specialties.length}
-                  </span>
-                </button>
-              )}
+              <button
+                id="tabBtnSpecialties"
+                type="button"
+                onClick={() => setActiveTab('specialties')}
+                className={`flex items-center gap-space-xs px-space-md py-2 rounded-lg font-label-lg text-label-lg font-bold transition-all ${activeTab === 'specialties'
+                  ? 'bg-surface-card text-primary shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+              >
+                <span className="material-symbols-outlined text-[18px]">category</span>
+                <span>Specialties</span>
+                <span className="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">
+                  {specialties.length}
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -664,7 +716,9 @@ export const ManageDoctors: React.FC = () => {
                       location_on
                     </span>
                     <span className="font-label-md text-label-md text-on-surface font-bold">
-                      {user?.branchName || 'Assigned Branch'}
+                      {branches.find((b) => b.branch_id === user?.branchId)?.name ||
+                        (user?.branchName && !user.branchName.startsWith('Branch #') ? user.branchName : null) ||
+                        (user?.branchId ? `Branch #${user.branchId}` : 'Assigned Branch')}
                     </span>
                   </div>
                 )}
@@ -931,58 +985,60 @@ export const ManageDoctors: React.FC = () => {
                         specialties
                           .filter((s) => !specialtySearch || s.name.toLowerCase().includes(specialtySearch.toLowerCase()) || (s.description ?? '').toLowerCase().includes(specialtySearch.toLowerCase()))
                           .map((sp) => (
-                          <tr
-                            key={sp.specialty_id}
-                            className="hover:bg-surface-subtle transition-colors border-t border-border-subtle first:border-t-0"
-                          >
-                            <td className="py-3 px-space-md">
-                              <div className="flex items-center gap-space-xs">
-                                <div className="w-8 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
-                                  <span className="material-symbols-outlined text-[16px]">
-                                    healing
+                            <tr
+                              key={sp.specialty_id}
+                              className="hover:bg-surface-subtle transition-colors border-t border-border-subtle first:border-t-0"
+                            >
+                              <td className="py-3 px-space-md">
+                                <div className="flex items-center gap-space-xs">
+                                  <div className="w-8 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-[16px]">
+                                      healing
+                                    </span>
+                                  </div>
+                                  <span className="font-label-lg text-label-lg text-on-surface font-bold">
+                                    {sp.name}
                                   </span>
                                 </div>
-                                <span className="font-label-lg text-label-lg text-on-surface font-bold">
-                                  {sp.name}
-                                </span>
-                              </div>
-                              {sp.description && (
-                                <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 pl-10">
-                                  {sp.description}
-                                </p>
-                              )}
-                            </td>
-                            <td className="py-3 px-space-md">
-                              <span className="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">
-                                {sp.doctor_count} Doctor{sp.doctor_count !== 1 ? 's' : ''}
-                              </span>
-                            </td>
-                            {isAdmin && (
-                              <td className="py-3 px-space-md text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <button
-                                    type="button"
-                                    title="Edit Specialty"
-                                    className="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center transition-colors"
-                                  >
-                                    <span className="material-symbols-outlined text-[16px]">
-                                      edit
-                                    </span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    title="Deactivate"
-                                    className="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center transition-colors"
-                                  >
-                                    <span className="material-symbols-outlined text-[16px]">
-                                      block
-                                    </span>
-                                  </button>
-                                </div>
+                                {sp.description && (
+                                  <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 pl-10">
+                                    {sp.description}
+                                  </p>
+                                )}
                               </td>
-                            )}
-                          </tr>
-                        ))
+                              <td className="py-3 px-space-md">
+                                <span className="px-2 py-0.5 rounded-md bg-surface-container font-mono-data text-mono-data text-on-surface font-bold">
+                                  {sp.doctor_count} Doctor{sp.doctor_count !== 1 ? 's' : ''}
+                                </span>
+                              </td>
+                              {isAdmin && (
+                                <td className="py-3 px-space-md text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <button
+                                      type="button"
+                                      title="Edit Specialty"
+                                      onClick={() => handleOpenEditSpecialty(sp)}
+                                      className="w-7 h-7 rounded-md hover:bg-surface-container text-primary flex items-center justify-center transition-colors"
+                                    >
+                                      <span className="material-symbols-outlined text-[16px]">
+                                        edit
+                                      </span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      title="Delete Specialty"
+                                      onClick={() => setDeletingSpecialty(sp)}
+                                      className="w-7 h-7 rounded-md hover:bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center transition-colors"
+                                    >
+                                      <span className="material-symbols-outlined text-[16px]">
+                                        delete
+                                      </span>
+                                    </button>
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          ))
                       )}
                     </tbody>
                   </table>
@@ -1005,6 +1061,82 @@ export const ManageDoctors: React.FC = () => {
           onSave={handleModalSave}
         />
       )}
+
+      {/* Edit Specialty Modal */}
+      <Modal
+        isOpen={!!editingSpecialty}
+        onClose={() => setEditingSpecialty(null)}
+        title="Edit Specialty"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setEditingSpecialty(null)}
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveEditSpecialty}
+              disabled={savingEdit}
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <span className="material-symbols-outlined text-[18px]">save</span>
+              <span>{savingEdit ? 'Saving…' : 'Save Changes'}</span>
+            </button>
+          </>
+        }
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSaveEditSpecialty();
+          }}
+          className="space-y-space-md"
+        >
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface font-bold mb-1">
+              Specialty Name *
+            </label>
+            <input
+              required
+              minLength={2}
+              maxLength={100}
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full h-[42px] px-3 bg-surface-subtle border border-border-subtle rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:border-primary"
+            />
+          </div>
+          <div>
+            <label className="block font-label-md text-label-md text-on-surface font-bold mb-1">
+              Description
+            </label>
+            <textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              rows={4}
+              className="w-full p-3 bg-surface-subtle border border-border-subtle rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:border-primary resize-none"
+            />
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Specialty Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={!!deletingSpecialty}
+        onClose={() => setDeletingSpecialty(null)}
+        onConfirm={handleConfirmDeleteSpecialty}
+        isDestructive={true}
+        title="Delete Specialty"
+        message={
+          deletingSpecialty?.doctor_count && deletingSpecialty.doctor_count > 0
+            ? `Cannot delete '${deletingSpecialty.name}' because it is assigned to ${deletingSpecialty.doctor_count} doctor(s). Reassign them first.`
+            : `Are you sure you want to delete the specialty '${deletingSpecialty?.name}'? This action cannot be undone.`
+        }
+        confirmLabel={deleting ? 'Deleting…' : 'Delete Specialty'}
+      />
     </div>
   );
 };
