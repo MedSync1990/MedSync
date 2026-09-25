@@ -105,7 +105,7 @@ export const PatientProfile: React.FC = () => {
             <div className="space-y-3 text-sm">
               <p><span className="font-medium text-slate-500">ID:</span> {patient.patient_code}</p>
               <p><span className="font-medium text-slate-500">NIC:</span> {patient.id_number}</p>
-              <p><span className="font-medium text-slate-500">Phone:</span> {patient.phone}</p>
+              <p><span className="font-medium text-slate-500">Phone:</span> {patient.phone_number}</p>
               <p><span className="font-medium text-slate-500">DOB:</span> {patient.date_of_birth}</p>
               <p><span className="font-medium text-slate-500">Gender:</span> {patient.gender}</p>
             </div>

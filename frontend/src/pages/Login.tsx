@@ -87,9 +87,9 @@ export const Login = () => {
       <div className="relative z-10 w-full max-w-[480px] overflow-hidden rounded-[32px] bg-white shadow-[0_30px_70px_rgba(15,23,42,0.28)]">
         <div className="flex items-center justify-center bg-gradient-to-br from-[#38BDF8] via-[#007bb9] to-[#006194] px-6 py-8">
           <img
-            alt="Smiling nurse in scrubs with a stethoscope"
+            alt="MedSync Logo"
             className="h-28 w-28 rounded-full border-4 border-white object-cover object-center shadow-lg"
-            src="https://images.presentationgo.com/2025/07/female-nurse-blue-scrubs.jpg"
+            src="/logo.jpg"
           />
         </div>
 
