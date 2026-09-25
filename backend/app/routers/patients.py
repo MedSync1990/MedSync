@@ -206,11 +206,13 @@ async def list_patients(
         clean_insurance = insurance.strip().lower()
 
     count_query = """
-        SELECT COUNT(DISTINCT p.user_id)
+        SELECT COUNT(p.user_id)
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
-        LEFT JOIN contact c ON u.user_id = c.user_id
+        LEFT JOIN LATERAL (
+            SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1
+        ) c ON TRUE
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
@@ -242,7 +244,7 @@ async def list_patients(
             u.first_name,
             u.last_name,
             u.id_number,
-            COALESCE((SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1), '') AS phone_number,
+            COALESCE(c.phone_number, '') AS phone_number,
             u.gender::text AS gender,
             u.birthdate::text AS date_of_birth,
             p.registered_branch,
@@ -257,7 +259,9 @@ async def list_patients(
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
-        LEFT JOIN contact c ON u.user_id = c.user_id
+        LEFT JOIN LATERAL (
+            SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1
+        ) c ON TRUE
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
@@ -279,7 +283,6 @@ async def list_patients(
                  AND pi.is_active = TRUE 
                  AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
            )))
-        GROUP BY p.user_id, p.patient_code, u.first_name, u.last_name, u.id_number, u.gender, u.birthdate, p.registered_branch, b.name, p.is_active
         ORDER BY p.user_id DESC
         LIMIT $4 OFFSET $5
     """

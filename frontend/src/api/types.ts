@@ -362,3 +362,50 @@ export interface ActivityItem {
   performed_by: string;
   created_at: string; // ISO datetime
 }
+
+// ─── Treatments & Consultations ──────────────────────────────────────────
+
+export interface TreatmentItem {
+  treatment_code: number;
+  treatment_name: string;
+  category: string;
+  price: number;
+  is_eligible_for_insurance: boolean;
+  is_active: boolean;
+}
+
+export interface ConsultationTreatmentInput {
+  treatment_code: number;
+  quantity: number;
+}
+
+export interface AppointmentCompleteRequest {
+  diagnosis?: string;
+  consultation_notes: string;
+  treatments?: ConsultationTreatmentInput[];
+}
+
+export interface AppointmentCompleteResponse {
+  appointment_id: number;
+  invoice_id: number;
+  status: string;
+  message: string;
+}
+
+export interface AppointmentItem {
+  appointment_id: number;
+  appointment_code: string;
+  patient_id: number;
+  patient_name: string;
+  patient_code: string;
+  patient_id_number: string;
+  doctor_id?: number;
+  doctor_name?: string;
+  slot_date?: string;
+  start_time?: string;
+  end_time?: string;
+  room_number?: string;
+  appointment_type: string;
+  status: string;
+  created_at: string;
+}
