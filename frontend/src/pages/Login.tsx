@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type UserProfile, type UserRole } from '../context/AuthContext';
 
-const rawBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const cleanedBase = rawBase.replace(/\/+$/, '');
 const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
 

@@ -1,4 +1,5 @@
 # app/config.py
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -15,7 +16,17 @@ class Settings(BaseSettings):
     JWT_SECRET: str = ""
     JWT_EXPIRY_MINUTES: int = Field(default=60)
     COOKIE_SECURE: bool = True
-    CORS_ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80", "http://localhost"]
+    CORS_ALLOWED_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:4173",
+        "http://localhost:3000",
+        "http://localhost:80",
+        "http://localhost",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:4173",
+    ]
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),
@@ -43,7 +54,15 @@ class Settings(BaseSettings):
         if value is None:
             return []
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            value = value.strip()
+            if value.startswith("[") and value.endswith("]"):
+                try:
+                    parsed = json.loads(value)
+                    if isinstance(parsed, list):
+                        return [origin.strip().strip('"\'') for origin in parsed if isinstance(origin, str) and origin.strip()]
+                except json.JSONDecodeError:
+                    pass
+            return [origin.strip().strip('"\'') for origin in value.replace('[', '').replace(']', '').split(',') if origin.strip()]
         return value
 
     def get_admin_url(self) -> str:
