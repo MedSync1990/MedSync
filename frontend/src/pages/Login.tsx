@@ -138,11 +138,20 @@ export const Login = () => {
                 type="button"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full text-[#707881] transition hover:text-[#0F172A]"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/70 text-[#707881] shadow-sm transition hover:bg-white hover:text-[#0F172A]"
               >
-                <span className="material-symbols-outlined text-[20px] leading-none">
-                  {showPassword ? 'visibility_off' : 'visibility'}
-                </span>
+                {showPassword ? (
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current" style={{ strokeWidth: 1.8 }}>
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M3 3l18 18" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current" style={{ strokeWidth: 1.8 }}>
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
               </button>
             </div>
 
