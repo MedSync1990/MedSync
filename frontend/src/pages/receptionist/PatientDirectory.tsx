@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
-import type { PatientResponse } from '../../types';
+import type { PatientResponse, AllergyItem } from '../../types';
 
 interface PatientRecord {
   id: string;
@@ -154,12 +154,32 @@ export const PatientDirectory: React.FC = () => {
   const [insuranceFilter, setInsuranceFilter] = useState<'all' | 'yes' | 'no'>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasBackendData, setHasBackendData] = useState<boolean>(false);
 
   // Selected patient for View Profile modal
   const [selectedPatientForView, setSelectedPatientForView] = useState<PatientRecord | null>(null);
   const [profileDetail, setProfileDetail] = useState<PatientResponse | null>(null);
   const [loadingProfile, setLoadingProfile] = useState<boolean>(false);
+
+  // Selected patient for Edit modal
+  const [editingPatient, setEditingPatient] = useState<PatientRecord | null>(null);
+  const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
+  const [loadingEdit, setLoadingEdit] = useState<boolean>(false);
+  const [savingEdit, setSavingEdit] = useState<boolean>(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState<string | null>(null);
+
+  // Edit form fields
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editMiddleName, setEditMiddleName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editBloodGroup, setEditBloodGroup] = useState('');
+  const [editContactName, setEditContactName] = useState('');
+  const [editEmergencyPhone, setEditEmergencyPhone] = useState('');
+  const [editEmergencyRelation, setEditEmergencyRelation] = useState('');
+  const [editSelectedAllergies, setEditSelectedAllergies] = useState<number[]>([]);
 
   // Debounce search query changes (250ms)
   useEffect(() => {
@@ -246,23 +266,14 @@ export const PatientDirectory: React.FC = () => {
         if (res.data.length > 0) {
           const mapped = res.data.map(mapBackendItem);
           setPatients(mapped);
-          setTotalCount(res.total || mapped.length);
-          setHasBackendData(true);
-        } else if (debouncedSearch || activeBranch !== 'all' || insuranceFilter !== 'all') {
-          // Explicit filter with 0 results
+          setTotalCount(typeof res.total === 'number' ? res.total : mapped.length);
+        } else {
           setPatients([]);
           setTotalCount(0);
-          setHasBackendData(true);
-        } else {
-          // Empty initial database: keep default mock list so UI stays rich
-          setPatients(DEFAULT_PATIENTS);
-          setTotalCount(1428);
-          setHasBackendData(false);
         }
       }
     } catch {
       // Backend offline or error: fall back to local client filter over DEFAULT_PATIENTS
-      setHasBackendData(false);
       const q = debouncedSearch.trim().toLowerCase();
       const cleanQ = q.replace(/\s+/g, '');
       const filtered = DEFAULT_PATIENTS.filter((item) => {
@@ -297,6 +308,105 @@ export const PatientDirectory: React.FC = () => {
     } finally {
       setLoadingProfile(false);
     }
+  };
+
+  // Open Edit Modal and prefill form
+  const handleOpenEditModal = async (patient: PatientRecord) => {
+    setEditingPatient(patient);
+    setEditError(null);
+    setEditSuccess(null);
+    setLoadingEdit(true);
+
+    // Fetch master allergies list if not cached
+    if (masterAllergies.length === 0) {
+      try {
+        const al = await patientService.getAllergies();
+        if (Array.isArray(al)) setMasterAllergies(al);
+      } catch {
+        // ignore
+      }
+    }
+
+    try {
+      const full = await patientService.getById(patient.id);
+      if (full) {
+        setEditFirstName(full.first_name || '');
+        setEditMiddleName(full.middle_name || '');
+        setEditLastName(full.last_name || '');
+        setEditPhone(full.phone_number || '');
+        setEditEmail(full.email || '');
+        setEditAddress(full.address || '');
+        setEditBloodGroup(full.blood_group || '');
+        setEditContactName(full.contact_name || '');
+        setEditEmergencyPhone(full.emergency_contact || '');
+        setEditEmergencyRelation('');
+        const activeIds = (full.allergies || []).map((a) => a.allergy_id);
+        setEditSelectedAllergies(activeIds);
+      } else {
+        const parts = patient.name.split(' ');
+        setEditFirstName(parts[0] || '');
+        setEditLastName(parts.slice(1).join(' ') || '');
+        setEditPhone(patient.phone || '');
+        setEditAddress('');
+        setEditSelectedAllergies([]);
+      }
+    } catch {
+      const parts = patient.name.split(' ');
+      setEditFirstName(parts[0] || '');
+      setEditLastName(parts.slice(1).join(' ') || '');
+      setEditPhone(patient.phone || '');
+      setEditAddress('');
+      setEditSelectedAllergies([]);
+    } finally {
+      setLoadingEdit(false);
+    }
+  };
+
+  const handleSavePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPatient) return;
+    if (!editFirstName.trim() || !editLastName.trim()) {
+      setEditError('First name and last name are required.');
+      return;
+    }
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      const updated = await patientService.update(editingPatient.id, {
+        first_name: editFirstName.trim(),
+        middle_name: editMiddleName.trim() || undefined,
+        last_name: editLastName.trim(),
+        phone_number: editPhone.trim(),
+        email: editEmail.trim() || undefined,
+        address: editAddress.trim(),
+        blood_group: editBloodGroup.trim() || undefined,
+        contact_name: editContactName.trim() || undefined,
+        emergency_contact: editEmergencyPhone.trim() || undefined,
+        emergency_contact_relationship: editEmergencyRelation.trim() || undefined,
+        allergy_ids: editSelectedAllergies,
+      });
+
+      setEditSuccess('Patient profile updated successfully.');
+      if (selectedPatientForView && selectedPatientForView.id === editingPatient.id) {
+        setProfileDetail(updated);
+      }
+      await fetchDirectory();
+
+      setTimeout(() => {
+        setEditingPatient(null);
+        setEditSuccess(null);
+      }, 700);
+    } catch (err: any) {
+      setEditError(err?.message || 'Failed to update patient profile. Please try again.');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const toggleAllergySelection = (allergyId: number) => {
+    setEditSelectedAllergies((prev) =>
+      prev.includes(allergyId) ? prev.filter((id) => id !== allergyId) : [...prev, allergyId]
+    );
   };
 
   const handleResetFilters = () => {
@@ -563,110 +673,160 @@ export const PatientDirectory: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y-0 text-on-surface font-body-md text-body-md" id="patientTableBody">
-                {patients.map((patient) => (
-                  <tr
-                    key={patient.id}
-                    className={`patient-row hover:bg-surface-subtle transition-colors group ${
-                      patient.isAltRow ? 'bg-canvas-bg/30' : ''
-                    }`}
-                  >
-                    <td className="px-space-md py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono-data text-label-sm font-semibold ${patient.avatarBg}`}
-                        >
-                          {patient.initials}
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr
+                      key={`skeleton-row-${idx}`}
+                      className={`animate-pulse border-b border-border-subtle/30 ${idx % 2 === 1 ? 'bg-canvas-bg/30' : ''}`}
+                    >
+                      <td className="px-space-md py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-surface-container-low" />
+                          <div className="w-20 h-4 rounded bg-surface-subtle" />
                         </div>
-                        <span className="font-mono-data text-mono-data font-semibold text-primary">
-                          {patient.id}
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="w-36 h-4 rounded bg-surface-subtle" />
+                          <div className="w-24 h-3 rounded bg-surface-subtle" />
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="w-28 h-4 rounded bg-surface-subtle" />
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="w-28 h-4 rounded bg-surface-subtle" />
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="w-32 h-6 rounded-md bg-surface-subtle" />
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="w-16 h-6 rounded-full bg-surface-subtle" />
+                      </td>
+                      <td className="px-space-md py-3.5 text-right">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <div className="w-8 h-8 rounded-lg bg-surface-subtle" />
+                          <div className="w-8 h-8 rounded-lg bg-surface-subtle" />
+                          <div className="w-16 h-8 rounded-lg bg-surface-subtle" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : patients.length > 0 ? (
+                  patients.map((patient) => (
+                    <tr
+                      key={patient.id}
+                      className={`patient-row hover:bg-surface-subtle transition-colors group ${
+                        patient.isAltRow ? 'bg-canvas-bg/30' : ''
+                      }`}
+                    >
+                      <td className="px-space-md py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono-data text-label-sm font-semibold ${patient.avatarBg}`}
+                          >
+                            {patient.initials}
+                          </div>
+                          <span className="font-mono-data text-mono-data font-semibold text-primary">
+                            {patient.id}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="flex flex-col">
+                          <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">
+                            {patient.name}
+                          </span>
+                          <span className="font-body-sm text-body-sm text-outline">
+                            {patient.ageGender}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <span className="font-mono-data text-mono-data text-on-surface-variant">
+                          {patient.nic}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-space-md py-3.5">
-                      <div className="flex flex-col">
-                        <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">
-                          {patient.name}
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+                          <span className="material-symbols-outlined text-[16px] text-outline">call</span>
+                          <span>{patient.phone}</span>
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
+                          <span className={`w-1.5 h-1.5 rounded-full ${patient.branchColor}`}></span>{' '}
+                          {patient.branchName}
                         </span>
-                        <span className="font-body-sm text-body-sm text-outline">
-                          {patient.ageGender}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-space-md py-3.5">
-                      <span className="font-mono-data text-mono-data text-on-surface-variant">
-                        {patient.nic}
-                      </span>
-                    </td>
-                    <td className="px-space-md py-3.5">
-                      <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
-                        <span className="material-symbols-outlined text-[16px] text-outline">call</span>
-                        <span>{patient.phone}</span>
-                      </div>
-                    </td>
-                    <td className="px-space-md py-3.5">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-canvas-bg text-on-surface-variant font-label-sm text-label-sm">
-                        <span className={`w-1.5 h-1.5 rounded-full ${patient.branchColor}`}></span>{' '}
-                        {patient.branchName}
-                      </span>
-                    </td>
-                    <td className="px-space-md py-3.5">
-                      {patient.insurance === 'yes' ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
-                          <span className="material-symbols-outlined text-[12px]">check</span> Insured
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm">
-                          Self-Pay
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-space-md py-3.5 text-right">
-                      <div className="inline-flex items-center gap-1.5 justify-end">
-                        <button
-                          className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
-                          onClick={() => handleOpenProfileModal(patient)}
-                          title="View Profile"
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">visibility</span>
-                        </button>
-                        <button
-                          className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
-                          onClick={() => navigate(`/receptionist/register-patient?edit=${patient.id}`)}
-                          title="Edit Record"
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">edit</span>
-                        </button>
-                        <button
-                          className="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1"
-                          onClick={() => navigate(`/receptionist/book-appointment?patientId=${patient.id}`)}
-                          title="Book Appointment"
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">event_available</span>
-                          <span>Book</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-space-md py-3.5">
+                        {patient.insurance === 'yes' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm">
+                            <span className="material-symbols-outlined text-[12px]">check</span> Insured
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-outline font-label-sm text-label-sm">
+                            Self-Pay
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-space-md py-3.5 text-right">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <button
+                            className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
+                            onClick={() => handleOpenProfileModal(patient)}
+                            title="View Profile"
+                            type="button"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                          </button>
+                          <button
+                            className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
+                            onClick={() => handleOpenEditModal(patient)}
+                            title="Edit Record"
+                            type="button"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                          </button>
+                          <button
+                            className="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1"
+                            onClick={() => navigate(`/receptionist/book-appointment?patientId=${patient.id}`)}
+                            title="Book Appointment"
+                            type="button"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">event_available</span>
+                            <span>Book</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : null}
               </tbody>
             </table>
           </div>
 
           {/* Empty State Container */}
           {patients.length === 0 && !isLoading && (
-            <div className="p-space-2xl text-center flex flex-col items-center justify-center space-y-2">
+            <div className="p-space-2xl text-center flex flex-col items-center justify-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-surface-subtle flex items-center justify-center text-outline">
                 <span className="material-symbols-outlined text-[28px]">search_off</span>
               </div>
-              <p className="font-headline-sm text-headline-sm text-brand-navy-deep">
-                No matching patient records found
+              <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                No patients found. Try a different search, or register a new patient.
               </p>
               <p className="font-body-md text-body-md text-outline max-w-sm">
-                Try modifying your search query by NIC, patient full name, or adjusting the branch filter.
+                Check your search query or add a new patient record to the system.
               </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/receptionist/register-patient')}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container shadow-xs transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person_add</span>
+                  <span>Register New Patient</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -852,6 +1012,30 @@ export const PatientDirectory: React.FC = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Allergies / Clinical Alerts Section */}
+                  <div className="bg-canvas-bg/60 p-3 rounded-xl border border-border-subtle/50">
+                    <span className="text-outline text-xs block mb-1.5 font-medium">
+                      Known Drug & Environmental Allergies
+                    </span>
+                    {profileDetail?.allergies && profileDetail.allergies.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {profileDetail.allergies.map((alg) => (
+                          <span
+                            key={alg.allergy_id}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-cancelled-bg text-status-cancelled-text text-xs font-semibold border border-status-cancelled-border/40"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">warning</span>
+                            Allergy: {alg.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-outline italic">
+                        No known drug or environmental allergies recorded.
+                      </span>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -870,13 +1054,14 @@ export const PatientDirectory: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const id = selectedPatientForView.id;
+                  const target = selectedPatientForView;
                   setSelectedPatientForView(null);
-                  navigate(`/receptionist/register-patient?edit=${id}`);
+                  handleOpenEditModal(target);
                 }}
-                className="px-4 py-2 rounded-xl text-sm font-semibold border border-border-subtle text-brand-navy-deep hover:bg-surface-subtle transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-semibold border border-border-subtle text-brand-navy-deep hover:bg-surface-subtle transition-colors flex items-center gap-1.5"
               >
-                Edit Record
+                <span className="material-symbols-outlined text-[16px]">edit</span>
+                <span>Edit Record</span>
               </button>
               <button
                 type="button"
@@ -885,11 +1070,312 @@ export const PatientDirectory: React.FC = () => {
                   setSelectedPatientForView(null);
                   navigate(`/receptionist/book-appointment?patientId=${id}`);
                 }}
-                className="px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container shadow-sm transition-all"
+                className="px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container shadow-sm transition-all flex items-center gap-1.5"
               >
-                Book Appointment
+                <span className="material-symbols-outlined text-[16px]">event_available</span>
+                <span>Book Appointment</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Edit Record Modal */}
+      {editingPatient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-surface-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border-subtle overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-space-lg border-b border-border-subtle flex items-center justify-between bg-canvas-bg/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[22px]">manage_accounts</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                    Edit Patient Record
+                  </h3>
+                  <p className="font-mono-data text-mono-data text-primary text-xs">
+                    {editingPatient.id} · {editingPatient.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingPatient(null);
+                  setEditError(null);
+                  setEditSuccess(null);
+                }}
+                className="w-8 h-8 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSavePatient}>
+              <div className="p-space-lg space-y-5 max-h-[72vh] overflow-y-auto">
+                {editError && (
+                  <div className="p-3.5 rounded-xl bg-status-cancelled-bg/60 border border-status-cancelled-border/40 text-status-cancelled-text text-sm flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">error</span>
+                    <span>{editError}</span>
+                  </div>
+                )}
+                {editSuccess && (
+                  <div className="p-3.5 rounded-xl bg-status-completed-bg/60 border border-status-completed-border/40 text-status-completed-text text-sm flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    <span>{editSuccess}</span>
+                  </div>
+                )}
+
+                {loadingEdit ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-2 text-outline">
+                    <span className="material-symbols-outlined text-[28px] animate-spin text-primary">refresh</span>
+                    <span className="text-xs">Loading patient details...</span>
+                  </div>
+                ) : (
+                  <>
+                    {/* Section 1: Personal Details */}
+                    <div>
+                      <h4 className="font-label-lg text-label-lg text-brand-navy-deep font-semibold mb-3 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[18px] text-primary">person</span>
+                        Personal Information
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            First Name *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editFirstName}
+                            onChange={(e) => setEditFirstName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Middle Name
+                          </label>
+                          <input
+                            type="text"
+                            value={editMiddleName}
+                            onChange={(e) => setEditMiddleName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Last Name *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editLastName}
+                            onChange={(e) => setEditLastName(e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Primary Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editPhone}
+                            onChange={(e) => setEditPhone(e.target.value)}
+                            placeholder="077 123 4567"
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-mono-data"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            value={editEmail}
+                            onChange={(e) => setEditEmail(e.target.value)}
+                            placeholder="patient@example.com"
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+                        <div className="sm:col-span-2">
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Residential Address *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editAddress}
+                            onChange={(e) => setEditAddress(e.target.value)}
+                            placeholder="Street, City"
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Blood Group
+                          </label>
+                          <select
+                            value={editBloodGroup}
+                            onChange={(e) => setEditBloodGroup(e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          >
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Emergency Contact */}
+                    <div className="pt-2 border-t border-border-subtle/70">
+                      <h4 className="font-label-lg text-label-lg text-brand-navy-deep font-semibold mb-3 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[18px] text-primary">emergency</span>
+                        Emergency Contact Details
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Contact Person Name
+                          </label>
+                          <input
+                            type="text"
+                            value={editContactName}
+                            onChange={(e) => setEditContactName(e.target.value)}
+                            placeholder="e.g. Anoma Dharmasena"
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Relationship
+                          </label>
+                          <select
+                            value={editEmergencyRelation}
+                            onChange={(e) => setEditEmergencyRelation(e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-body-md"
+                          >
+                            <option value="">Select relationship</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Child">Child</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+                            Emergency Phone Number
+                          </label>
+                          <input
+                            type="text"
+                            value={editEmergencyPhone}
+                            onChange={(e) => setEditEmergencyPhone(e.target.value)}
+                            placeholder="077 129 4811"
+                            className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-canvas-bg/50 focus:bg-surface-card focus:outline-none focus:border-primary transition-all font-mono-data"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Allergies Multi-Select Selector */}
+                    <div className="pt-2 border-t border-border-subtle/70">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <h4 className="font-label-lg text-label-lg text-brand-navy-deep font-semibold flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[18px] text-status-cancelled-text">warning</span>
+                          Known Allergies & Clinical Alerts
+                        </h4>
+                        <span className="text-xs text-outline">Click chip to toggle</span>
+                      </div>
+                      <p className="text-xs text-on-surface-variant mb-3">
+                        Assigned allergies appear as prominent red alerts on the Doctor's Consultation and Treatment screens.
+                      </p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {masterAllergies.length > 0 ? (
+                          masterAllergies.map((alg) => {
+                            const isSelected = editSelectedAllergies.includes(alg.allergy_id);
+                            return (
+                              <button
+                                key={alg.allergy_id}
+                                type="button"
+                                onClick={() => toggleAllergySelection(alg.allergy_id)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                                  isSelected
+                                    ? 'bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border shadow-xs'
+                                    : 'bg-canvas-bg text-on-surface-variant hover:bg-surface-subtle border border-border-subtle'
+                                }`}
+                              >
+                                <span className="material-symbols-outlined text-[14px]">
+                                  {isSelected ? 'check_circle' : 'add_circle'}
+                                </span>
+                                <span>{alg.name}</span>
+                                <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <div className="text-xs text-outline italic">
+                            Loading master allergies catalogue...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-space-md bg-canvas-bg/50 border-t border-border-subtle flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={savingEdit}
+                  onClick={() => {
+                    setEditingPatient(null);
+                    setEditError(null);
+                    setEditSuccess(null);
+                  }}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-subtle transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit || loadingEdit}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {savingEdit ? (
+                    <>
+                      <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+                      <span>Saving Changes...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[16px]">save</span>
+                      <span>Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

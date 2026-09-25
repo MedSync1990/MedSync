@@ -33,6 +33,7 @@ class PatientCreateRequest(BaseModel):
     emergency_contact_relationship: Optional[str] = None
     registered_branch: Optional[int] = None
     insurance: Optional[PatientInsuranceCreate] = None
+    allergy_ids: Optional[List[int]] = None
 
     @field_validator("id_number")
     @classmethod
@@ -82,6 +83,12 @@ class PatientCreateRequest(BaseModel):
         return (self.contact_name or self.emergency_contact_name or "").strip() or "Emergency Contact"
 
 
+class PatientAllergyItem(BaseModel):
+    allergy_id: int
+    allergy_code: str
+    name: str
+
+
 class PatientUpdateRequest(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=60)
     middle_name: Optional[str] = Field(None, max_length=60)
@@ -96,6 +103,7 @@ class PatientUpdateRequest(BaseModel):
     contact_name: Optional[str] = None
     emergency_contact_name: Optional[str] = None
     emergency_contact_relationship: Optional[str] = None
+    allergy_ids: Optional[List[int]] = None
 
 
 class PatientResponse(BaseModel):
@@ -118,6 +126,7 @@ class PatientResponse(BaseModel):
     has_insurance: bool = False
     registered_date: Optional[str] = None
     is_active: bool = True
+    allergies: List[PatientAllergyItem] = Field(default_factory=list)
 
 
 class PatientListItem(BaseModel):

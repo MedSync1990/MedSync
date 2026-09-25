@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
+import type { AllergyItem } from '../../types';
 
 type Gender = 'Male' | 'Female';
 
@@ -11,16 +12,24 @@ interface SecondaryPhone {
 
 export const RegisterPatient: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const isEditMode = Boolean(editId);
 
   // Form states matching register_patient.html
-  const [fullName, setFullName] = useState('Priyantha Dharmasena');
-  const [nicNumber, setNicNumber] = useState('198821400293');
-  const [dateOfBirth, setDateOfBirth] = useState('1988-04-12');
+  const [fullName, setFullName] = useState(editId ? '' : 'Priyantha Dharmasena');
+  const [nicNumber, setNicNumber] = useState(editId ? '' : '198821400293');
+  const [dateOfBirth, setDateOfBirth] = useState(editId ? '' : '1988-04-12');
   const [gender, setGender] = useState<Gender>('Male');
-  const [bloodGroup, setBloodGroup] = useState('A+');
-  const [emailAddress, setEmailAddress] = useState('priyantha.dharmasena@outlook.com');
-  const [streetAddress, setStreetAddress] = useState('No. 54/2, Dharmapala Mawatha');
-  const [cityDistrict, setCityDistrict] = useState('Colombo 07');
+  const [bloodGroup, setBloodGroup] = useState(editId ? '' : 'A+');
+  const [emailAddress, setEmailAddress] = useState(editId ? '' : 'priyantha.dharmasena@outlook.com');
+  const [streetAddress, setStreetAddress] = useState(editId ? '' : 'No. 54/2, Dharmapala Mawatha');
+  const [cityDistrict, setCityDistrict] = useState(editId ? '' : 'Colombo 07');
+
+  // Allergy states
+  const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
+  const [selectedAllergies, setSelectedAllergies] = useState<number[]>([]);
+  const [loadingEditData, setLoadingEditData] = useState<boolean>(false);
 
   // Phone numbers
   const [primaryPhone, setPrimaryPhone] = useState('077 482 9104');
@@ -48,6 +57,48 @@ export const RegisterPatient: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ id: string; name: string; nic: string } | null>(null);
+
+  // Load master allergies catalogue
+  useEffect(() => {
+    patientService
+      .getAllergies()
+      .then((al) => {
+        if (Array.isArray(al)) setMasterAllergies(al);
+      })
+      .catch(() => {});
+  }, []);
+
+  // If in edit mode, fetch patient profile and populate fields
+  useEffect(() => {
+    if (!editId) return;
+    setLoadingEditData(true);
+    patientService
+      .getById(editId)
+      .then((p) => {
+        if (p) {
+          setFullName(`${p.first_name || ''} ${p.last_name || ''}`.trim());
+          setNicNumber(p.id_number || '');
+          setDateOfBirth(p.date_of_birth || '');
+          setGender((p.gender as Gender) || 'Male');
+          setBloodGroup(p.blood_group || '');
+          setEmailAddress(p.email || '');
+          setStreetAddress(p.address || '');
+          setCityDistrict('');
+          setPrimaryPhone(p.phone_number || '');
+          setEmergencyName(p.contact_name || '');
+          setEmergencyPhone(p.emergency_contact || '');
+          if (p.allergies && Array.isArray(p.allergies)) {
+            setSelectedAllergies(p.allergies.map((a) => a.allergy_id));
+          }
+        }
+      })
+      .catch(() => {
+        setError('Failed to load patient profile for editing.');
+      })
+      .finally(() => {
+        setLoadingEditData(false);
+      });
+  }, [editId]);
 
   // Age calculation badge
   const age = useMemo(() => {
@@ -99,46 +150,69 @@ export const RegisterPatient: React.FC = () => {
       .filter(Boolean);
 
     try {
-      const response = (await patientService.create({
-        first_name: firstName,
-        middle_name: null,
-        last_name: lastName,
-        id_number: nicNumber.trim().toUpperCase(),
-        address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
-        birthdate: dateOfBirth,
-        gender: gender,
-        email: emailAddress || null,
-        phone_numbers: allPhones,
-        blood_group: bloodGroup || null,
-        emergency_contact: emergencyPhone.replace(/\D/g, ''),
-        contact_name: emergencyName,
-        registered_branch: 1,
-        insurance:
-          insuranceEnabled && policyNumber
-            ? {
-                provider_name: insuranceProvider,
-                insurance_card_number: policyNumber,
-                start_date: policyStartDate || null,
-                end_date: policyEndDate || null,
-                corporate_affiliation: corporateAffiliation || null,
-              }
-            : null,
-      })) as { patient_code?: string; patient_id?: number };
+      if (isEditMode && editId) {
+        const response = await patientService.update(editId, {
+          first_name: firstName,
+          last_name: lastName,
+          address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
+          birthdate: dateOfBirth,
+          gender: gender,
+          email: emailAddress || null,
+          phone_number: primaryPhone.replace(/\D/g, ''),
+          blood_group: bloodGroup || null,
+          emergency_contact: emergencyPhone.replace(/\D/g, ''),
+          contact_name: emergencyName,
+          allergy_ids: selectedAllergies,
+        });
 
-      const assignedId =
-        response.patient_code ||
-        (response.patient_id ? `MS-2025-${String(response.patient_id).padStart(5, '0')}` : 'MS-2025-08492');
+        setSuccess({
+          id: response.patient_code || editId,
+          name: `${response.first_name} ${response.last_name}`,
+          nic: response.id_number,
+        });
+      } else {
+        const response = (await patientService.create({
+          first_name: firstName,
+          middle_name: null,
+          last_name: lastName,
+          id_number: nicNumber.trim().toUpperCase(),
+          address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
+          birthdate: dateOfBirth,
+          gender: gender,
+          email: emailAddress || null,
+          phone_numbers: allPhones,
+          blood_group: bloodGroup || null,
+          emergency_contact: emergencyPhone.replace(/\D/g, ''),
+          contact_name: emergencyName,
+          registered_branch: 1,
+          allergy_ids: selectedAllergies,
+          insurance:
+            insuranceEnabled && policyNumber
+              ? {
+                  provider_name: insuranceProvider,
+                  insurance_card_number: policyNumber,
+                  start_date: policyStartDate || null,
+                  end_date: policyEndDate || null,
+                  corporate_affiliation: corporateAffiliation || null,
+                }
+              : null,
+        })) as { patient_code?: string; patient_id?: number };
 
-      setSuccess({
-        id: assignedId,
-        name: trimmedName,
-        nic: nicNumber.trim().toUpperCase(),
-      });
+        const assignedId =
+          response.patient_code ||
+          (response.patient_id ? `MS-2025-${String(response.patient_id).padStart(5, '0')}` : 'MS-2025-08492');
+
+        setSuccess({
+          id: assignedId,
+          name: trimmedName,
+          nic: nicNumber.trim().toUpperCase(),
+        });
+      }
     } catch (err: any) {
       const message =
         err?.body?.errors?.[0]?.message ||
         err?.body?.message ||
-        (err instanceof Error ? err.message : 'Failed to register patient');
+        (err instanceof Error ? err.message : 'Failed to save patient profile');
       setError(message);
     } finally {
       setSubmitting(false);
@@ -165,17 +239,33 @@ export const RegisterPatient: React.FC = () => {
             Patients
           </Link>
           <span className="text-outline/50">/</span>
-          <span className="text-primary font-bold">Register Patient</span>
+          <span className="text-primary font-bold">
+            {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
+          </span>
         </nav>
         <div className="flex items-center gap-3 mt-1">
           <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
-            Register Patient
+            {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
           </h1>
+          {isEditMode && editId && (
+            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono-data font-semibold">
+              ID: {editId}
+            </span>
+          )}
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant">
-          Add a new patient record accessible across all island branches with centralized synchronization.
+          {isEditMode
+            ? 'Update personal, contact, emergency, and allergy information for this patient record.'
+            : 'Add a new patient record accessible across all island branches with centralized synchronization.'}
         </p>
       </div>
+
+      {loadingEditData && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 px-space-lg py-3 text-primary font-label-md text-label-md flex items-center gap-2 animate-pulse">
+          <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+          <span>Loading patient profile for editing...</span>
+        </div>
+      )}
 
       {error && (
         <div
@@ -394,6 +484,53 @@ export const RegisterPatient: React.FC = () => {
               </div>
               <span className="font-body-sm text-body-sm text-outline">
                 Useful for outpatient emergency intake
+              </span>
+            </div>
+
+            {/* Known Allergies Multi-select */}
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-status-cancelled-text text-[18px]">warning</span>
+                  Known Allergies & Clinical Alerts
+                </span>
+                <span className="text-outline text-body-sm font-normal">Click chips to toggle</span>
+              </label>
+              <div className="p-3 bg-surface-subtle rounded-lg flex flex-wrap gap-2 min-h-[46px] items-center border border-border-subtle/60">
+                {masterAllergies.length > 0 ? (
+                  masterAllergies.map((alg) => {
+                    const isSelected = selectedAllergies.includes(alg.allergy_id);
+                    return (
+                      <button
+                        key={alg.allergy_id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedAllergies((prev) =>
+                            prev.includes(alg.allergy_id)
+                              ? prev.filter((id) => id !== alg.allergy_id)
+                              : [...prev, alg.allergy_id]
+                          )
+                        }
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                          isSelected
+                            ? 'bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border shadow-xs'
+                            : 'bg-surface-card text-on-surface-variant hover:bg-surface-subtle border border-border-subtle'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[14px]">
+                          {isSelected ? 'check_circle' : 'add_circle'}
+                        </span>
+                        <span>{alg.name}</span>
+                        <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <span className="text-xs text-outline italic">Loading master allergies catalogue...</span>
+                )}
+              </div>
+              <span className="font-body-sm text-body-sm text-outline">
+                Selected allergies display as high-priority alert badges on doctor consultation and treatment screens.
               </span>
             </div>
           </div>
@@ -993,9 +1130,17 @@ export const RegisterPatient: React.FC = () => {
               className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60"
             >
               <span className="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">
-                person_add
+                {isEditMode ? 'save' : 'person_add'}
               </span>
-              <span>{submitting ? 'Registering...' : 'Register Patient'}</span>
+              <span>
+                {submitting
+                  ? isEditMode
+                    ? 'Updating Profile...'
+                    : 'Registering...'
+                  : isEditMode
+                  ? 'Update Patient Record'
+                  : 'Register Patient'}
+              </span>
             </button>
           </div>
         </div>
@@ -1013,10 +1158,12 @@ export const RegisterPatient: React.FC = () => {
             </div>
             <div className="space-y-1">
               <h3 className="font-headline-md text-headline-md text-brand-navy-deep">
-                Patient Registered Successfully!
+                {isEditMode ? 'Patient Profile Updated!' : 'Patient Registered Successfully!'}
               </h3>
               <p className="font-body-md text-body-md text-on-surface-variant">
-                Medical record file generated and synced across MedSync clinical nodes.
+                {isEditMode
+                  ? 'Medical record updated and changes synced across MedSync clinical nodes.'
+                  : 'Medical record file generated and synced across MedSync clinical nodes.'}
               </p>
             </div>
             <div className="bg-surface-container-low p-4 rounded-xl text-left space-y-2 font-body-sm text-body-sm">

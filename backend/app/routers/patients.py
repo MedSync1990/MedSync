@@ -1,18 +1,19 @@
-# backend/app/routers/patients.py
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, status
 from asyncpg import Connection
 
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles
 from app.errors import AppValidationError, NotFoundError
+from app.schemas.allergies import PatientAllergiesUpdateRequest
 from app.schemas.patients import (
     PatientCreateRequest,
     PatientUpdateRequest,
     PatientResponse,
     PatientListItem,
     PatientListResponse,
+    PatientAllergyItem,
 )
 
 router = APIRouter()
@@ -153,27 +154,20 @@ async def register_patient(
                 end_d,
             )
 
-    primary_phone = phones[0] if phones else (emergency_phone or "")
+        # 5. Insert patient allergies if provided
+        if payload.allergy_ids:
+            for aid in payload.allergy_ids:
+                await conn.execute(
+                    """
+                    INSERT INTO patient_allergy (patient_id, allergy_id)
+                    VALUES ($1, $2)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    user_id,
+                    aid,
+                )
 
-    return PatientResponse(
-        patient_id=user_id,
-        patient_code=patient_code or f"PT-{str(user_id).zfill(6)}",
-        first_name=payload.first_name.strip(),
-        middle_name=payload.middle_name.strip() if payload.middle_name else None,
-        last_name=payload.last_name.strip(),
-        id_number=nic,
-        phone_number=primary_phone,
-        email=payload.email,
-        date_of_birth=str(birthdate),
-        gender=payload.gender,
-        address=payload.address.strip(),
-        blood_group=payload.blood_group,
-        emergency_contact=emergency_phone,
-        contact_name=contact_name,
-        registered_branch=branch_id,
-        registered_date=str(date.today()),
-        is_active=True,
-    )
+    return await get_patient(str(user_id), conn)
 
 
 @router.get(
@@ -365,6 +359,25 @@ async def get_patient(
     if not row:
         raise NotFoundError("Patient not found.")
 
+    allergies_rows = await conn.fetch(
+        """
+        SELECT a.allergy_id, a.allergy_code, a.name
+        FROM allergy a
+        JOIN patient_allergy pa ON a.allergy_id = pa.allergy_id
+        WHERE pa.patient_id = $1
+        ORDER BY a.name ASC
+        """,
+        row["patient_id"],
+    )
+    allergies = [
+        PatientAllergyItem(
+            allergy_id=ar["allergy_id"],
+            allergy_code=ar["allergy_code"],
+            name=ar["name"],
+        )
+        for ar in allergies_rows
+    ]
+
     return PatientResponse(
         patient_id=row["patient_id"],
         patient_code=row["patient_code"],
@@ -385,6 +398,7 @@ async def get_patient(
         has_insurance=bool(row["has_insurance"]),
         registered_date=row["registered_date"],
         is_active=row["is_active"],
+        allergies=allergies,
     )
 
 
@@ -498,5 +512,138 @@ async def update_patient(
             update_sql = f"UPDATE patient SET {', '.join(pt_updates)} WHERE user_id = $1"
             await conn.execute(update_sql, *pt_params)
 
+        # 4. Update allergies if provided
+        if payload.allergy_ids is not None:
+            await conn.execute(
+                "DELETE FROM patient_allergy WHERE patient_id = $1",
+                patient_id,
+            )
+            for aid in payload.allergy_ids:
+                await conn.execute(
+                    """
+                    INSERT INTO patient_allergy (patient_id, allergy_id)
+                    VALUES ($1, $2)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    patient_id,
+                    aid,
+                )
+
     return await get_patient(str(patient_id), conn)
+
+
+@router.get(
+    "/{identifier}/allergies",
+    response_model=List[PatientAllergyItem],
+    dependencies=[Depends(require_roles("Administrator", "Branch Manager", "Receptionist", "Doctor"))],
+    summary="Get patient's active allergies",
+)
+async def get_patient_allergies(
+    identifier: str,
+    conn: Connection = Depends(get_conn),
+):
+    """
+    Returns list of assigned allergies for a patient (FR-CTM, api-routes.md §4).
+    """
+    is_num = identifier.isdigit()
+    num_val = int(identifier) if is_num and int(identifier) <= 2147483647 else 0
+    patient_id = await conn.fetchval(
+        """
+        SELECT p.user_id FROM patient p
+        JOIN app_user u ON p.user_id = u.user_id
+        WHERE ($1::boolean AND p.user_id = $2::int)
+           OR UPPER(p.patient_code) = UPPER($3::text)
+           OR UPPER(u.id_number) = UPPER($3::text)
+        LIMIT 1
+        """,
+        is_num,
+        num_val,
+        identifier,
+    )
+    if not patient_id:
+        raise NotFoundError("Patient not found.")
+
+    rows = await conn.fetch(
+        """
+        SELECT a.allergy_id, a.allergy_code, a.name
+        FROM allergy a
+        JOIN patient_allergy pa ON a.allergy_id = pa.allergy_id
+        WHERE pa.patient_id = $1
+        ORDER BY a.name ASC
+        """,
+        patient_id,
+    )
+    return [
+        PatientAllergyItem(
+            allergy_id=r["allergy_id"],
+            allergy_code=r["allergy_code"],
+            name=r["name"],
+        )
+        for r in rows
+    ]
+
+
+@router.put(
+    "/{identifier}/allergies",
+    response_model=List[PatientAllergyItem],
+    dependencies=[Depends(require_roles("Receptionist", "Administrator", "Branch Manager"))],
+    summary="Replace patient's assigned allergies",
+)
+async def update_patient_allergies(
+    identifier: str,
+    payload: PatientAllergiesUpdateRequest,
+    conn: Connection = Depends(get_conn),
+):
+    """
+    Replaces patient's assigned allergy set (add/remove in one call).
+    """
+    is_num = identifier.isdigit()
+    num_val = int(identifier) if is_num and int(identifier) <= 2147483647 else 0
+    patient_id = await conn.fetchval(
+        """
+        SELECT p.user_id FROM patient p
+        JOIN app_user u ON p.user_id = u.user_id
+        WHERE ($1::boolean AND p.user_id = $2::int)
+           OR UPPER(p.patient_code) = UPPER($3::text)
+           OR UPPER(u.id_number) = UPPER($3::text)
+        LIMIT 1
+        """,
+        is_num,
+        num_val,
+        identifier,
+    )
+    if not patient_id:
+        raise NotFoundError("Patient not found.")
+
+    async with conn.transaction():
+        await conn.execute("DELETE FROM patient_allergy WHERE patient_id = $1", patient_id)
+        for aid in payload.allergy_ids:
+            await conn.execute(
+                """
+                INSERT INTO patient_allergy (patient_id, allergy_id)
+                VALUES ($1, $2)
+                ON CONFLICT DO NOTHING
+                """,
+                patient_id,
+                aid,
+            )
+
+    rows = await conn.fetch(
+        """
+        SELECT a.allergy_id, a.allergy_code, a.name
+        FROM allergy a
+        JOIN patient_allergy pa ON a.allergy_id = pa.allergy_id
+        WHERE pa.patient_id = $1
+        ORDER BY a.name ASC
+        """,
+        patient_id,
+    )
+    return [
+        PatientAllergyItem(
+            allergy_id=r["allergy_id"],
+            allergy_code=r["allergy_code"],
+            name=r["name"],
+        )
+        for r in rows
+    ]
 

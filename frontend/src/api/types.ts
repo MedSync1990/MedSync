@@ -283,6 +283,12 @@ export interface SpecialtyResponse {
 
 // ─── Patients (stub — Chenith fills in detail) ─────────────────────────────
 
+export interface AllergyItem {
+  allergy_id: number;
+  allergy_code: string;
+  name: string;
+}
+
 export interface PatientResponse {
   patient_id: number;
   patient_code: string;
@@ -303,6 +309,7 @@ export interface PatientResponse {
   has_insurance?: boolean;
   registered_date?: string;
   is_active: boolean;
+  allergies?: AllergyItem[];
 }
 
 export interface PatientListItem {
