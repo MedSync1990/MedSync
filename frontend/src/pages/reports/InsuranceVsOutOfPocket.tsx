@@ -62,8 +62,11 @@ export const InsuranceVsOutOfPocket: React.FC = () => {
       {hasData && (
         <div className="space-y-space-lg">
           {/* Chart */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-space-md shadow-xs h-[400px] flex flex-col items-center">
-            <h3 className="font-headline-sm text-brand-navy-deep self-start mb-2">Overall Revenue Split</h3>
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm h-[400px] flex flex-col justify-center">
+            <div className="flex flex-col mb-space-lg">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">Overall Revenue Split</h2>
+              <p className="font-body-sm text-body-sm text-secondary">Progression of Insurance vs Out-of-Pocket disbursement</p>
+            </div>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -90,51 +93,51 @@ export const InsuranceVsOutOfPocket: React.FC = () => {
           </div>
 
           {/* Table */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-surface-subtle border-b border-border-subtle">
-                    <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Branch</th>
-                    <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Insurance Covered</th>
-                    <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Out-of-Pocket</th>
-                    <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Total Revenue</th>
-                    <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">% Covered</th>
+          <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-left" id="insurance-table">
+                <thead className="bg-canvas-bg font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3.5 px-space-lg font-bold" scope="col">Branch</th>
+                    <th className="py-3.5 px-space-md font-bold text-right" scope="col">Insurance Covered</th>
+                    <th className="py-3.5 px-space-md font-bold text-right" scope="col">Out-of-Pocket</th>
+                    <th className="py-3.5 px-space-md font-bold text-right" scope="col">Total Revenue</th>
+                    <th className="py-3.5 px-space-lg font-bold text-right" scope="col">% Covered</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle">
+                <tbody className="divide-y divide-surface-container">
                   {data.data.map((item, idx) => {
                     const coveragePercent = item.total_revenue > 0 ? (item.total_insurance_covered / item.total_revenue) * 100 : 0;
                     return (
-                      <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
-                        <td className="py-3 px-space-md font-body-sm text-brand-navy-deep font-medium">{item.branch_name}</td>
-                        <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">
+                      <tr key={idx} className="border-b border-surface-container hover:bg-canvas-bg transition-colors">
+                        <td className="py-3.5 px-space-lg font-body-sm text-on-surface font-medium">{item.branch_name}</td>
+                        <td className="py-3.5 px-space-md font-mono-data text-on-surface text-right">
                           {item.total_insurance_covered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
-                        <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">
+                        <td className="py-3.5 px-space-md font-mono-data text-on-surface text-right">
                           {item.total_out_of_pocket.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
-                        <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right font-medium">
+                        <td className="py-3.5 px-space-md font-mono-data text-on-surface text-right font-medium">
                           {item.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
-                        <td className="py-3 px-space-md font-mono-data text-brand-teal-light text-right font-bold">
+                        <td className="py-3.5 px-space-lg font-mono-data text-brand-teal-light text-right font-bold">
                           {coveragePercent.toFixed(1)}%
                         </td>
                       </tr>
                     );
                   })}
-                  <tr className="bg-surface-subtle font-label-md text-brand-navy-deep border-t-2 border-border-subtle">
-                    <td className="py-3 px-space-md">Overall Total</td>
-                    <td className="py-3 px-space-md text-right">
+                  <tr className="bg-canvas-bg font-label-md text-on-surface border-t-2 border-surface-container">
+                    <td className="py-3.5 px-space-lg">Overall Total</td>
+                    <td className="py-3.5 px-space-md text-right">
                       {totalInsurance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className="py-3 px-space-md text-right">
+                    <td className="py-3.5 px-space-md text-right">
                       {totalOutOfPocket.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className="py-3 px-space-md text-right font-bold text-primary">
+                    <td className="py-3.5 px-space-md text-right font-bold text-primary">
                       LKR {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
-                    <td className="py-3 px-space-md text-right text-brand-teal-light font-bold">
+                    <td className="py-3.5 px-space-lg text-right text-brand-teal-light font-bold">
                       {grandTotal > 0 ? ((totalInsurance / grandTotal) * 100).toFixed(1) : '0.0'}%
                     </td>
                   </tr>

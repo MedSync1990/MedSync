@@ -61,8 +61,8 @@ export const TreatmentCategories: React.FC = () => {
       {hasData && (
         <div className="space-y-space-lg">
           {/* Chart */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-space-md shadow-xs h-[400px]">
-            <h3 className="font-headline-sm text-brand-navy-deep mb-4">Usage by Category</h3>
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm h-[400px] flex flex-col justify-center">
+            <h3 className="font-headline-sm text-on-surface mb-4">Usage by Category</h3>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
@@ -78,31 +78,31 @@ export const TreatmentCategories: React.FC = () => {
           </div>
 
           {/* Table */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-xs overflow-hidden">
+          <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-subtle border-b border-border-subtle">
+                  <tr className="bg-canvas-bg font-label-sm text-label-sm text-secondary uppercase tracking-wider">
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Category</th>
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Usage Count</th>
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">% of Total Usage</th>
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Revenue (LKR)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle">
+                <tbody className="divide-y divide-surface-container">
                   {data.data.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
-                      <td className="py-3 px-space-md font-body-sm text-brand-navy-deep font-medium">{item.category}</td>
-                      <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">{item.usage_count}</td>
-                      <td className="py-3 px-space-md font-mono-data text-on-surface-variant text-right">
+                    <tr key={idx} className="hover:bg-canvas-bg transition-colors">
+                      <td className="py-3 px-space-md font-body-sm text-on-surface font-medium">{item.category}</td>
+                      <td className="py-3 px-space-md font-mono-data text-on-surface text-right">{item.usage_count}</td>
+                      <td className="py-3 px-space-md font-mono-data text-secondary text-right">
                         {totalUsageCount > 0 ? ((item.usage_count / totalUsageCount) * 100).toFixed(1) : '0.0'}%
                       </td>
-                      <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">
+                      <td className="py-3 px-space-md font-mono-data text-on-surface text-right">
                         {item.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
                   ))}
-                  <tr className="bg-surface-subtle font-label-md text-brand-navy-deep border-t-2 border-border-subtle">
+                  <tr className="bg-surface-subtle font-label-md text-on-surface border-t-2 border-surface-container">
                     <td className="py-3 px-space-md">Total</td>
                     <td className="py-3 px-space-md text-right">{totalUsageCount}</td>
                     <td className="py-3 px-space-md text-right">100%</td>
