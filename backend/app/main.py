@@ -1,4 +1,20 @@
+import sys
+import ssl
+import asyncio
+import socket
 from contextlib import asynccontextmanager
+
+# 1. Windows: Fix asyncpg ProactorEventLoop SSL dropping
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+# 2. Docker (WSL2): Force IPv4 resolution to prevent IPv6 "Network unreachable" crash
+old_getaddrinfo = socket.getaddrinfo
+def ipv4_getaddrinfo(*args, **kwargs):
+    responses = old_getaddrinfo(*args, **kwargs)
+    # Filter to only return IPv4 addresses (AF_INET)
+    return [r for r in responses if r[0] == socket.AF_INET]
+socket.getaddrinfo = ipv4_getaddrinfo
 import asyncpg
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
