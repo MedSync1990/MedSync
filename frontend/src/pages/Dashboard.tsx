@@ -97,9 +97,9 @@ export const Dashboard: React.FC = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {user?.role === 'Receptionist' ? (
                     <>
-                      <QuickActionCard title="Register Patient" icon="person_add" to="/patients/register" />
-                      <QuickActionCard title="Book Appt" icon="calendar_today" to="/appointments/book" />
-                      <QuickActionCard title="Invoices" icon="receipt_long" to="/billing/invoices" />
+                      <QuickActionCard title="Register Patient" icon="person_add" to="/receptionist/register-patient" />
+                      <QuickActionCard title="Book Appt" icon="calendar_today" to="/receptionist/book-appointment" />
+                      <QuickActionCard title="Invoices" icon="receipt_long" to="/receptionist/invoices" />
                     </>
                   ) : (
                     <>

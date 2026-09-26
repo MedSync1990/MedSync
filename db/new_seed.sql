@@ -288,36 +288,14 @@ SELECT setval('patient_insurance_insurance_id_seq',
               (SELECT MAX(insurance_id) FROM patient_insurance));
 
 -- =============================================================================
--- SECTION 7: DOCTOR AVAILABILITY SLOTS (non-overlapping per doctor)
+-- SECTION 7: DOCTOR AVAILABILITY SLOTS (standalone generator)
 -- =============================================================================
--- EXCLUDE constraint (excl_slot_overlap) prevents overlaps per doctor.
--- All slots below are on distinct dates or non-overlapping time ranges.
+-- Doctor availability slots are maintained in db/generate_slots.sql so they
+-- can be populated during initial seed AND re-executed repeatedly as time
+-- advances or when testing appointment scheduling.
 -- =============================================================================
 
-INSERT INTO doctor_availability_slots
-    (slot_id, doctor_id, date, start_time, end_time, status)
-OVERRIDING SYSTEM VALUE VALUES
-    -- Doctor 1 (Colombo) — 3 slots
-    (1,  6, CURRENT_DATE,                 '09:00', '09:30', 'Open'),
-    (2,  6, CURRENT_DATE,                 '10:00', '10:30', 'Open'),
-    (3,  6, CURRENT_DATE,                 '11:00', '11:30', 'Open'),
-    (4,  6, CURRENT_DATE + 1,             '09:00', '09:30', 'Open'),
-    -- Doctor 2 (Colombo) — 2 slots
-    (5,  7, CURRENT_DATE,                 '14:00', '14:30', 'Open'),
-    (6,  7, CURRENT_DATE + 1,             '15:00', '15:30', 'Open'),
-    -- Doctor 3 (Kandy) — 3 slots
-    (7,  8, CURRENT_DATE,                 '08:30', '09:00', 'Open'),
-    (8,  8, CURRENT_DATE,                 '09:30', '10:00', 'Open'),
-    (9,  8, CURRENT_DATE + 2,             '10:00', '10:30', 'Open'),
-    -- Doctor 4 (Kandy) — 2 slots
-    (10, 9, CURRENT_DATE,                 '13:00', '13:30', 'Open'),
-    (11, 9, CURRENT_DATE + 1,             '14:00', '14:30', 'Open'),
-    -- Doctor 5 (Galle) — 2 slots
-    (12, 10, CURRENT_DATE,                '11:00', '11:30', 'Open'),
-    (13, 10, CURRENT_DATE + 3,            '09:00', '09:30', 'Open');
-
-SELECT setval('doctor_availability_slots_slot_id_seq',
-              (SELECT MAX(slot_id) FROM doctor_availability_slots));
+\ir generate_slots.sql
 
 -- =============================================================================
 -- SECTION 8: APPOINTMENTS

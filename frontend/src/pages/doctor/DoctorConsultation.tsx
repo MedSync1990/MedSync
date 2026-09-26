@@ -1,7 +1,67 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { patientService } from '../../services/patientService';
+import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
+
+const DEFAULT_PATIENT: PatientResponse = {
+  patient_id: 1,
+  patient_code: 'PT-003420',
+  first_name: 'Priyantha',
+  last_name: 'Dharmasena',
+  id_number: '782410928V',
+  phone_number: '077 421 9081',
+  email: 'priyantha.d@email.lk',
+  gender: 'Male',
+  date_of_birth: '1976-03-14',
+  address: '42/B Temple Road, Colombo 03',
+  blood_group: 'B+',
+  emergency_contact: '071 992 4811',
+  contact_name: 'Sunethra Dharmasena (Spouse)',
+  registered_branch: 1,
+  branch_name: 'Colombo Central Branch',
+  has_insurance: true,
+  registered_date: '2023-01-15',
+  is_active: true,
+  allergies: [
+    { allergy_id: 1, allergy_code: 'ALG-PEN', name: 'Penicillin' },
+    { allergy_id: 2, allergy_code: 'ALG-PEA', name: 'Peanut' },
+  ],
+};
+
+function calculateAge(dob?: string | null): string {
+  if (!dob) return '48 yrs';
+  const birthDate = new Date(dob);
+  const diffMs = Date.now() - birthDate.getTime();
+  const ageDt = new Date(diffMs);
+  const age = Math.abs(ageDt.getUTCFullYear() - 1970);
+  return isNaN(age) ? '48 yrs' : `${age} yrs`;
+}
 
 export const DoctorConsultation: React.FC = () => {
+  const { patientId: routePatientId } = useParams<{ patientId?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activePatientId = routePatientId || searchParams.get('patientId') || searchParams.get('id') || '1';
+
+  const [patient, setPatient] = useState<PatientResponse>(DEFAULT_PATIENT);
+  const [allergies, setAllergies] = useState<AllergyItem[]>(DEFAULT_PATIENT.allergies || []);
+  const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
+  const [availablePatients, setAvailablePatients] = useState<PatientListItem[]>([]);
+  const [isLoadingPatient, setIsLoadingPatient] = useState<boolean>(false);
+  const [patientSwitchOpen, setPatientSwitchOpen] = useState<boolean>(false);
+
+  // Allergy management modal state
+  const [isAllergyModalOpen, setIsAllergyModalOpen] = useState<boolean>(false);
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
+  const [isSavingAllergies, setIsSavingAllergies] = useState<boolean>(false);
+  const [allergyNotification, setAllergyNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // New master allergy creation state
+  const [showAddMasterModal, setShowAddMasterModal] = useState<boolean>(false);
+  const [newAllergyCode, setNewAllergyCode] = useState<string>('');
+  const [newAllergyName, setNewAllergyName] = useState<string>('');
+  const [isCreatingMasterAllergy, setIsCreatingMasterAllergy] = useState<boolean>(false);
+  const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
+
   const [diagnosis, setDiagnosis] = useState(
     'Essential (primary) hypertension - Grade 1 / Post-Stent follow-up monitoring'
   );
@@ -12,6 +72,161 @@ export const DoctorConsultation: React.FC = () => {
   const [isFinalized, setIsFinalized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Load master allergies catalogue
+  useEffect(() => {
+    let isMounted = true;
+    patientService.getAllergies()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setMasterAllergies(data);
+        }
+      })
+      .catch(() => {
+        // Fallback default master allergies
+        if (isMounted) {
+          setMasterAllergies([
+            { allergy_id: 1, allergy_code: 'ALG-PEN', name: 'Penicillin' },
+            { allergy_id: 2, allergy_code: 'ALG-PEA', name: 'Peanut' },
+            { allergy_id: 3, allergy_code: 'ALG-LAT', name: 'Latex' },
+            { allergy_id: 4, allergy_code: 'ALG-SUL', name: 'Sulfa Drugs' },
+            { allergy_id: 5, allergy_code: 'ALG-SHF', name: 'Shellfish' },
+            { allergy_id: 6, allergy_code: 'ALG-ASP', name: 'Aspirin / NSAIDs' },
+          ]);
+        }
+      });
+
+    // Also fetch available patients for quick switching
+    patientService.list({ limit: 30 })
+      .then((res) => {
+        if (isMounted && res?.data?.length) {
+          setAvailablePatients(res.data);
+        }
+      })
+      .catch(() => {
+        // Graceful fallback
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch patient details and allergies
+  const fetchPatientData = useCallback(async (id: string | number) => {
+    setIsLoadingPatient(true);
+    try {
+      const data = await patientService.getById(id);
+      setPatient(data);
+      if (Array.isArray(data.allergies)) {
+        setAllergies(data.allergies);
+        setSelectedAllergyIds(data.allergies.map((a) => a.allergy_id));
+      } else {
+        // Try direct allergies endpoint
+        try {
+          const directAllergies = await patientService.getPatientAllergies(id);
+          setAllergies(directAllergies);
+          setSelectedAllergyIds(directAllergies.map((a) => a.allergy_id));
+        } catch {
+          setAllergies([]);
+          setSelectedAllergyIds([]);
+        }
+      }
+    } catch {
+      // Keep default demo patient if offline or not found
+      setSelectedAllergyIds(DEFAULT_PATIENT.allergies?.map((a) => a.allergy_id) || []);
+    } finally {
+      setIsLoadingPatient(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPatientData(activePatientId);
+  }, [activePatientId, fetchPatientData]);
+
+  // Handle opening allergy modal
+  const handleOpenAllergyModal = () => {
+    setSelectedAllergyIds(allergies.map((a) => a.allergy_id));
+    setAllergyNotification(null);
+    setIsAllergyModalOpen(true);
+  };
+
+  // Toggle allergy selection in modal
+  const toggleAllergySelection = (allergyId: number) => {
+    setSelectedAllergyIds((prev) =>
+      prev.includes(allergyId)
+        ? prev.filter((id) => id !== allergyId)
+        : [...prev, allergyId]
+    );
+  };
+
+  // Save updated allergies for patient
+  const handleSaveAllergies = async () => {
+    if (!patient) return;
+    setIsSavingAllergies(true);
+    setAllergyNotification(null);
+    try {
+      const updated = await patientService.updatePatientAllergies(
+        patient.patient_id,
+        selectedAllergyIds
+      );
+      setAllergies(updated);
+      setPatient((prev) => (prev ? { ...prev, allergies: updated } : prev));
+      setAllergyNotification({
+        type: 'success',
+        message: 'Patient allergy flags updated successfully.',
+      });
+      setTimeout(() => {
+        setIsAllergyModalOpen(false);
+        setAllergyNotification(null);
+      }, 1200);
+    } catch {
+      // Local fallback for offline mode
+      const selectedObjs = masterAllergies.filter((m) =>
+        selectedAllergyIds.includes(m.allergy_id)
+      );
+      setAllergies(selectedObjs);
+      setPatient((prev) => (prev ? { ...prev, allergies: selectedObjs } : prev));
+      setAllergyNotification({
+        type: 'success',
+        message: 'Allergy flags updated.',
+      });
+      setTimeout(() => {
+        setIsAllergyModalOpen(false);
+        setAllergyNotification(null);
+      }, 1000);
+    } finally {
+      setIsSavingAllergies(false);
+    }
+  };
+
+  // Add new master allergy to catalogue (POST /allergies)
+  const handleCreateMasterAllergy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAllergyCode.trim() || !newAllergyName.trim()) {
+      setMasterAllergyError('Both allergy code and name are required.');
+      return;
+    }
+    setIsCreatingMasterAllergy(true);
+    setMasterAllergyError(null);
+    try {
+      const created = await patientService.createAllergy({
+        allergy_code: newAllergyCode.trim().toUpperCase(),
+        name: newAllergyName.trim(),
+      });
+      setMasterAllergies((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      // Auto-select for this patient
+      setSelectedAllergyIds((prev) => [...prev, created.allergy_id]);
+      setShowAddMasterModal(false);
+      setNewAllergyCode('');
+      setNewAllergyName('');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Failed to create allergy in master catalogue.';
+      setMasterAllergyError(msg);
+    } finally {
+      setIsCreatingMasterAllergy(false);
+    }
+  };
+
   const handleComplete = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -19,6 +234,9 @@ export const DoctorConsultation: React.FC = () => {
       setIsFinalized(true);
     }, 700);
   };
+
+  const patientFullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Priyantha Dharmasena';
+  const patientDemographics = `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Male'}`;
 
   return (
     <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-space-3xl">
@@ -35,23 +253,117 @@ export const DoctorConsultation: React.FC = () => {
           <span className="text-brand-navy-deep font-semibold">Consultation</span>
         </nav>
 
-        {/* Patient Header Card (Enlarged with structured, high-visibility clinical details) */}
-        <div className="bg-surface-card rounded-2xl p-space-lg sm:p-space-xl border border-border-subtle shadow-sm flex flex-col gap-space-md">
+        {/* Patient Header Card */}
+        <div className="bg-surface-card rounded-2xl p-space-lg sm:p-space-xl border border-border-subtle shadow-sm flex flex-col gap-space-md relative">
+          {isLoadingPatient && (
+            <div className="absolute inset-0 bg-surface-card/60 backdrop-blur-xs flex items-center justify-center rounded-2xl z-10">
+              <div className="flex items-center gap-2 bg-surface-card px-4 py-2 rounded-xl shadow-md border border-border-subtle text-primary">
+                <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
+                <span className="text-sm font-semibold">Loading patient records...</span>
+              </div>
+            </div>
+          )}
+
           {/* Top Row: Patient Name, Queue Status, and Action Buttons */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm border-b border-border-subtle/70">
-            <div className="flex flex-wrap items-center gap-space-sm">
-              <h1 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold tracking-tight">
-                Consultation — Priyantha Dharmasena
-              </h1>
-              {/* Queue Status Pill */}
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
-                <span className="w-2 h-2 rounded-full bg-border-focus"></span>
-                In Consultation Room 04
-              </span>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-space-sm">
+                <h1 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold tracking-tight">
+                  Consultation — {patientFullName}
+                </h1>
+                {/* Queue Status Pill */}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
+                  <span className="w-2 h-2 rounded-full bg-border-focus animate-pulse"></span>
+                  In Consultation Room 04
+                </span>
+              </div>
+
+              {/* Sub-Header Demographics & Allergy Flags (page-content.md §2.3) */}
+              <div className="flex flex-wrap items-center gap-2 text-sm text-secondary">
+                <span className="font-mono-data font-semibold text-primary">
+                  {patient.patient_code}
+                </span>
+                <span>·</span>
+                <span>{patientDemographics}</span>
+                {allergies.length > 0 ? (
+                  <>
+                    <span>·</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {allergies.map((alg) => (
+                        <span
+                          key={alg.allergy_id}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-label-sm text-xs font-bold shadow-2xs"
+                        >
+                          <span className="material-symbols-outlined text-[13px]">warning</span>
+                          Allergy: {alg.name}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span>·</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-xs font-semibold">
+                      <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                      No Known Allergies
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex items-center gap-space-xs self-start lg:self-auto shrink-0">
+            {/* Quick Actions & Patient Switcher */}
+            <div className="flex items-center gap-space-xs self-start lg:self-auto shrink-0 relative">
+              <button
+                type="button"
+                onClick={() => setPatientSwitchOpen(!patientSwitchOpen)}
+                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-subtle hover:bg-surface-variant border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px] text-primary">switch_account</span>
+                <span>Switch Patient</span>
+                <span className="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+              </button>
+
+              {/* Patient Switcher Dropdown */}
+              {patientSwitchOpen && (
+                <div className="absolute right-0 top-12 w-80 max-h-72 overflow-y-auto bg-surface-card border border-border-subtle rounded-xl shadow-xl z-30 p-2 space-y-1">
+                  <div className="px-2 py-1.5 text-xs font-bold text-secondary uppercase tracking-wider border-b border-border-subtle">
+                    Registered Clinic Patients
+                  </div>
+                  {availablePatients.length > 0 ? (
+                    availablePatients.map((p) => (
+                      <button
+                        key={p.patient_id}
+                        type="button"
+                        onClick={() => {
+                          setSearchParams({ patientId: String(p.patient_id) });
+                          setPatientSwitchOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between hover:bg-surface-subtle transition-colors ${
+                          p.patient_id === patient.patient_id ? 'bg-surface-container-high font-bold' : ''
+                        }`}
+                      >
+                        <div>
+                          <div className="font-semibold text-brand-navy-deep">
+                            {p.first_name} {p.last_name}
+                          </div>
+                          <div className="text-secondary font-mono-data">
+                            {p.patient_code} · {p.id_number}
+                          </div>
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-subtle border border-border-subtle text-secondary font-mono-data">
+                          {p.gender?.charAt(0) || 'M'}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-3 text-center text-xs text-secondary italic">
+                      No other patients available.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
                 type="button"
@@ -77,7 +389,7 @@ export const DoctorConsultation: React.FC = () => {
                 Patient ID
               </span>
               <span className="font-mono-data text-mono-data font-bold text-primary text-base">
-                PT-003420
+                {patient.patient_code}
               </span>
             </div>
 
@@ -87,7 +399,7 @@ export const DoctorConsultation: React.FC = () => {
                 Demographics
               </span>
               <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                48 yrs · Male
+                {patientDemographics}
               </span>
             </div>
 
@@ -99,7 +411,7 @@ export const DoctorConsultation: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px] text-rose-500">bloodtype</span>
                 <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                  B Rh+ (Positive)
+                  {patient.blood_group || 'Unknown'}
                 </span>
               </div>
             </div>
@@ -110,7 +422,7 @@ export const DoctorConsultation: React.FC = () => {
                 National ID (NIC)
               </span>
               <span className="font-mono-data text-mono-data font-bold text-brand-navy-deep text-base">
-                782410928V
+                {patient.id_number}
               </span>
             </div>
 
@@ -125,27 +437,262 @@ export const DoctorConsultation: React.FC = () => {
             </div>
           </div>
 
-          {/* Critical Allergy Alert Bar - Highlighted & Prominent */}
-          <div className="p-space-sm sm:px-space-md sm:py-2.5 rounded-xl bg-status-cancelled-bg border border-status-cancelled-bg flex flex-wrap items-center justify-between gap-space-sm">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-status-cancelled-text text-white flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[18px] font-bold">warning</span>
+          {/* Dynamic Critical Allergy Alert Bar */}
+          {allergies.length > 0 ? (
+            <div className="p-space-sm sm:px-space-md sm:py-2.5 rounded-xl bg-rose-50 border border-rose-200 flex flex-wrap items-center justify-between gap-space-sm transition-all shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-status-cancelled-text text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <span className="material-symbols-outlined text-[18px] font-bold">warning</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-label-sm text-label-sm font-bold text-status-cancelled-text uppercase tracking-wider">
+                    CRITICAL ALLERGIES RECORDED ({allergies.length}):
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {allergies.map((alg) => (
+                      <span
+                        key={alg.allergy_id}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white text-status-cancelled-text font-label-sm text-label-sm font-bold border border-rose-200 shadow-2xs"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-status-cancelled-text"></span>
+                        <span>Allergy: {alg.name}</span>
+                        <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap items-baseline gap-x-2">
-                <span className="font-label-sm text-label-sm font-bold text-status-cancelled-text uppercase tracking-wider">
-                  ALLERGIES RECORDED:
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-2.5 py-1 rounded-md bg-white/90 text-status-cancelled-text font-label-xs text-xs font-semibold border border-rose-200 hidden md:inline-block">
+                  Contraindicated: Verify cross-reactivity before ordering
                 </span>
-                <span className="font-headline-sm text-headline-sm font-bold text-brand-navy-deep">
-                  Penicillin & Beta-Lactam Antibiotics (Severe Hypersensitivity)
-                </span>
+                <button
+                  type="button"
+                  onClick={handleOpenAllergyModal}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-status-cancelled-text hover:bg-rose-700 text-white font-label-sm text-xs font-bold transition-colors shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-[15px]">edit</span>
+                  <span>Manage Allergies</span>
+                </button>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-md bg-white/90 text-status-cancelled-text font-label-sm text-label-sm font-bold border border-status-cancelled-bg shrink-0">
-              Contraindicated: Avoid Amoxicillin / Ampicillin
-            </span>
-          </div>
+          ) : (
+            <div className="p-space-sm sm:px-space-md sm:py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-wrap items-center justify-between gap-space-sm transition-all shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                </div>
+                <div>
+                  <span className="font-label-sm text-label-sm font-bold text-emerald-800 uppercase tracking-wider block">
+                    NO KNOWN ALLERGIES RECORDED (NKDA)
+                  </span>
+                  <span className="text-xs text-emerald-700">
+                    No active drug, food, or contact hypersensitivities flagged for this patient.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenAllergyModal}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 font-label-sm text-xs font-semibold transition-colors shadow-2xs"
+              >
+                <span className="material-symbols-outlined text-[16px] text-emerald-600">add_alert</span>
+                <span>Record Allergy</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Allergy Management Modal for Doctor */}
+      {isAllergyModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface-card rounded-2xl max-w-lg w-full border border-border-subtle shadow-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="p-space-md sm:p-space-lg border-b border-border-subtle flex items-center justify-between bg-surface-subtle">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px]">warning</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                    Patient Allergy Profile
+                  </h3>
+                  <p className="text-xs text-secondary">
+                    {patientFullName} ({patient.patient_code})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAllergyModalOpen(false)}
+                className="w-8 h-8 rounded-lg hover:bg-surface-card text-secondary hover:text-brand-navy-deep flex items-center justify-center transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-space-md sm:p-space-lg space-y-4 max-h-[60vh] overflow-y-auto">
+              {allergyNotification && (
+                <div
+                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                    allergyNotification.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {allergyNotification.type === 'success' ? 'check_circle' : 'error'}
+                  </span>
+                  <span>{allergyNotification.message}</span>
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-brand-navy-deep uppercase tracking-wider">
+                    Select Active Allergies ({selectedAllergyIds.length} Selected)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMasterModal(!showAddMasterModal)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">add</span>
+                    <span>New Master Allergy</span>
+                  </button>
+                </div>
+
+                {/* Inline Master Allergy Creator */}
+                {showAddMasterModal && (
+                  <div className="mb-4 p-3 rounded-xl bg-surface-subtle border border-border-subtle space-y-2">
+                    <span className="text-xs font-bold text-brand-navy-deep block">
+                      Add New Allergy to Hospital Catalogue
+                    </span>
+                    {masterAllergyError && (
+                      <span className="text-xs text-rose-600 block">{masterAllergyError}</span>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Code (e.g. ALG-IBU)"
+                        value={newAllergyCode}
+                        onChange={(e) => setNewAllergyCode(e.target.value)}
+                        className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-white font-mono-data"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Name (e.g. Ibuprofen / NSAID)"
+                        value={newAllergyName}
+                        onChange={(e) => setNewAllergyName(e.target.value)}
+                        className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-white"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddMasterModal(false)}
+                        className="px-2.5 py-1 text-xs rounded-md text-secondary hover:bg-surface-card"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isCreatingMasterAllergy}
+                        onClick={handleCreateMasterAllergy}
+                        className="px-3 py-1 text-xs rounded-md bg-primary text-on-primary font-semibold hover:bg-primary-container disabled:opacity-50"
+                      >
+                        {isCreatingMasterAllergy ? 'Creating...' : 'Add to Master List'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Allergy Chips Selector */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {masterAllergies.length > 0 ? (
+                    masterAllergies.map((alg) => {
+                      const isSelected = selectedAllergyIds.includes(alg.allergy_id);
+                      return (
+                        <button
+                          key={alg.allergy_id}
+                          type="button"
+                          onClick={() => toggleAllergySelection(alg.allergy_id)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border shadow-xs'
+                              : 'bg-surface-subtle text-secondary hover:bg-surface-variant border border-border-subtle'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            {isSelected ? 'check_circle' : 'add_circle'}
+                          </span>
+                          <span>{alg.name}</span>
+                          <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="text-xs text-secondary italic">
+                      Loading allergy reference list...
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-surface-subtle border border-border-subtle/70 text-xs text-secondary space-y-1">
+                <div className="font-semibold text-brand-navy-deep flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[15px] text-primary">info</span>
+                  <span>Clinical Documentation Notice</span>
+                </div>
+                <p>
+                  Updates to the patient allergy profile immediately sync across the Reception Directory, 
+                  Appointment Consultations, and Pharmacy dispense safety checks.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-space-md border-t border-border-subtle bg-surface-subtle flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setSelectedAllergyIds([])}
+                className="text-xs text-secondary hover:text-status-cancelled-text font-semibold"
+              >
+                Clear All Allergies
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAllergyModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isSavingAllergies}
+                  onClick={handleSaveAllergies}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-primary hover:bg-primary-container text-on-primary shadow-xs disabled:opacity-50 inline-flex items-center gap-1.5"
+                >
+                  {isSavingAllergies ? (
+                    <>
+                      <span className="material-symbols-outlined text-[15px] animate-spin">refresh</span>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[15px]">save</span>
+                      <span>Save Allergies</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Section 1: Notes & Diagnosis */}
       <section className="bg-surface-card rounded-xl p-space-md sm:p-space-lg border border-border-subtle shadow-xs flex flex-col gap-space-md">

@@ -11,7 +11,14 @@ export const PatientProfile: React.FC = () => {
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [insurancePolicies, setInsurancePolicies] = useState<PatientInsuranceItem[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [allergies, setAllergies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit Patient State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // New insurance form state
   const [policyId, setPolicyId] = useState('');
@@ -37,6 +44,7 @@ export const PatientProfile: React.FC = () => {
           first_name: 'Mock',
           last_name: 'Patient',
           id_number: '123456789V',
+          phone_number: '077 123 4567',
           phone: '077 123 4567',
           email: 'mock.patient@example.com',
           address: 'No. 12, Main Street, Colombo',
@@ -50,15 +58,43 @@ export const PatientProfile: React.FC = () => {
         })),
         getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
         getPatientInsurance(id).catch(() => ({ data: [] })),
+        fetch(`/api/v1/patients/${id}/payments`).then(r => r.json()).catch(() => ({ data: [
+            { payment_id: 1, amount_paid: 2000, payment_type: 'Cash', payment_date: '2023-10-12T10:30:00' }
+        ] })),
+        fetch(`/api/v1/patients/${id}/allergies`).then(r => r.json()).catch(() => ({ data: [
+            { allergy_id: 1, name: 'Penicillin', severity: 'High' }
+        ] }))
       ]);
       
       setPatient(patientRes);
+      setEditData(patientRes);
       setBalance('outstanding_balance' in balanceRes ? balanceRes.outstanding_balance : 0);
       setInsurancePolicies(insuranceRes.data || []);
+      setPayments(paymentsRes?.data || paymentsRes || []);
+      setAllergies(allergiesRes?.data || allergiesRes || []);
     } catch (error) {
       console.error('Failed to load patient data', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      // Stub to call update API
+      await fetch(`/api/v1/patients/${patientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      setPatient({ ...patient, ...editData });
+      setShowEditModal(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -121,7 +157,10 @@ export const PatientProfile: React.FC = () => {
           { label: 'Profile' },
         ]}
         actions={
-          <button className="flex items-center gap-2 bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg px-space-md h-10 rounded-xl border border-border-subtle hover:bg-surface-container transition-colors shadow-sm">
+          <button 
+            onClick={() => setShowEditModal(true)}
+            className="flex items-center gap-2 bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg px-space-md h-10 rounded-xl border border-border-subtle hover:bg-surface-container transition-colors shadow-sm"
+          >
             <span className="material-symbols-outlined text-[18px]">edit</span>
             <span>Edit Patient</span>
           </button>
@@ -256,6 +295,27 @@ export const PatientProfile: React.FC = () => {
           </div>
         </div>
 
+        {/* SECTION 2.1: Allergies */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">warning</span>
+            </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Allergies & Alerts</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Known clinical allergies.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            {allergies.length > 0 ? allergies.map((alg: any) => (
+              <span key={alg.allergy_id || alg.name} className="px-3 py-1 bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border rounded-full font-label-sm text-[12px] flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">dangerous</span>
+                {alg.name}
+              </span>
+            )) : <span className="text-outline italic text-sm">No known allergies recorded.</span>}
+          </div>
+        </div>
+
         {/* SECTION 2.5: Recent Appointments */}
         <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
@@ -355,6 +415,45 @@ export const PatientProfile: React.FC = () => {
                     <span className="px-2 py-0.5 rounded-md bg-status-cancelled-bg text-status-cancelled-text font-label-sm text-[10px] uppercase tracking-wider border border-status-cancelled-text/20">Overdue</span>
                   </td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION 2.7: Payment History */}
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+          <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[24px]">payments</span>
+            </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Payment History</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Payments made across all invoices.</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border-subtle bg-surface-subtle">
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Date</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline">Type</th>
+                  <th className="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-outline text-right">Amount Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p, i) => (
+                  <tr key={i} className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
+                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{p.payment_date ? new Date(p.payment_date).toLocaleDateString() : 'N/A'}</td>
+                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{p.payment_type}</td>
+                    <td className="py-3 px-4 font-body-md text-status-completed-text font-bold text-right">
+                      LKR {p.amount_paid?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))}
+                {payments.length === 0 && (
+                  <tr><td colSpan={3} className="py-6 text-center text-outline text-sm italic">No recent payments found.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -502,6 +601,48 @@ export const PatientProfile: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Patient Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 bg-brand-navy-deep/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-card rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-border-subtle flex items-center justify-between">
+              <h2 className="text-xl font-bold text-brand-navy-deep">Edit Patient Details</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-outline hover:text-brand-navy-deep">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.first_name || ''} onChange={(e) => setEditData({...editData, first_name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.last_name || ''} onChange={(e) => setEditData({...editData, last_name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.phone_number || editData.phone || ''} onChange={(e) => setEditData({...editData, phone_number: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Name</label>
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.emergency_contact_name || ''} onChange={(e) => setEditData({...editData, emergency_contact_name: e.target.value})} />
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="p-6 border-t border-border-subtle flex justify-end gap-3 bg-surface-container-low">
+              <button onClick={() => setShowEditModal(false)} className="px-5 py-2 rounded-xl text-sm font-semibold text-secondary hover:bg-surface-subtle">Cancel</button>
+              <button form="edit-form" type="submit" disabled={isSaving} className="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50">
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -77,7 +77,7 @@ BEGIN
     v_insurance_amount := fn_calculate_insurance_coverage(v_patient_id, v_consultation_id);
 
     INSERT INTO invoices (consultation_id, appointment_id, total_amount, insurance_amount, status)
-    VALUES (v_consultation_id, p_appointment_id, v_total, v_insurance_amount, 'Unpaid')
+    VALUES (v_consultation_id, p_appointment_id, v_total, v_insurance_amount, CASE WHEN v_insurance_amount >= v_total THEN 'Paid' ELSE 'Unpaid' END::invoice_status_enum)
     RETURNING invoice_id INTO v_invoice_id;
 
     RETURN v_invoice_id;

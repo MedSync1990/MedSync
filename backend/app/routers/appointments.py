@@ -27,24 +27,33 @@ router = APIRouter()
 async def get_doctor_availability(
     id: int,
     date: date = Query(..., description="Availability date (YYYY-MM-DD)"),
+    include_booked: bool = Query(False, description="Include booked slots"),
     conn: Connection = Depends(get_db),
     user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
 ):
     """
-    Returns available open slots for the given doctor and date.
-    Drives Book Appointment step 4 time chips.
+    Returns available slots for the given doctor and date.
+    Drives Book Appointment step 4 time chips and schedule conflict avoidance.
     """
     # Verify doctor exists
     doctor = await conn.fetchrow("SELECT user_id FROM doctor WHERE user_id = $1;", id)
     if not doctor:
         raise NotFoundError("Doctor not found.")
 
-    query = """
-        SELECT slot_id, doctor_id, date, start_time, end_time, status
-        FROM doctor_availability_slots
-        WHERE doctor_id = $1 AND date = $2 AND status = 'Open'
-        ORDER BY start_time ASC;
-    """
+    if include_booked:
+        query = """
+            SELECT slot_id, doctor_id, date, start_time, end_time, status
+            FROM doctor_availability_slots
+            WHERE doctor_id = $1 AND date = $2
+            ORDER BY start_time ASC;
+        """
+    else:
+        query = """
+            SELECT slot_id, doctor_id, date, start_time, end_time, status
+            FROM doctor_availability_slots
+            WHERE doctor_id = $1 AND date = $2 AND status = 'Open'
+            ORDER BY start_time ASC;
+        """
     rows = await conn.fetch(query, id, date)
     return [
         DoctorSlotResponse(
@@ -128,7 +137,7 @@ async def list_appointments(
     """
     List appointments with filters. Branch Manager is locked to their own branch.
     """
-    scoped_branch_id = get_branch_scope(user) or branch
+    scoped_branch_id = user.branch_id if user.role == "Branch Manager" else branch
     offset = (page - 1) * limit
 
     base_where = """
@@ -213,12 +222,11 @@ async def get_appointment(
     Get full appointment detail.
     BM gets 404 for appointments in other branches.
     """
-    scoped_branch_id = get_branch_scope(user)
     appt = await _fetch_appointment_detail(conn, id)
     if not appt:
         raise NotFoundError("Appointment not found.")
 
-    if scoped_branch_id is not None and appt.branch_id != scoped_branch_id:
+    if user.role == "Branch Manager" and user.branch_id is not None and appt.branch_id != user.branch_id:
         raise NotFoundError("Appointment not found.")
 
     return appt
