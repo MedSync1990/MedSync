@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
       header: 'EARNINGS & REPORTS',
       items: [
         { label: 'My Earnings', path: '/doctor/earnings', icon: 'account_balance_wallet', roles: ['Doctor'] },
-        { label: 'Reports', path: '/reports/appointments-summary', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
+        { label: 'Reports', path: '/reports', icon: 'monitoring', roles: ['Administrator', 'Branch Manager'] },
       ],
     },
     {

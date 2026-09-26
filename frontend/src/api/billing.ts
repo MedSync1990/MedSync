@@ -15,7 +15,7 @@ import type {
   PatientInsuranceResponse,
   VerifyInsuranceRequest,
   VerifyInsuranceResponse,
-} from './types.ts';
+} from './types';
 
 /** Get a single invoice by code or patient NIC */
 export function getInvoice(
@@ -42,12 +42,12 @@ export function recordPayment(
 }
 
 /** Get a patient's total outstanding balance */
-export function getPatientBalance(patientId: number): Promise<PatientBalanceResponse> {
+export function getPatientBalance(patientId: number | string): Promise<PatientBalanceResponse> {
   return get<PatientBalanceResponse>(`/patients/${patientId}/balance`);
 }
 
 /** Get a patient's insurance policy details (api-routes.md §9) */
-export function getPatientInsurance(patientId: number): Promise<PatientInsuranceResponse> {
+export function getPatientInsurance(patientId: number | string): Promise<PatientInsuranceResponse> {
   return get<PatientInsuranceResponse>(`/insurance/patient/${patientId}`);
 }
 
