@@ -3,9 +3,11 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { patientService } from '../../services/patientService';
 import { getPatientBalance, getPatientInsurance, verifyInsurance } from '../../api/billing';
+import { useAuth } from '../../context/AuthContext';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
 
 export const PatientProfile: React.FC = () => {
+  const { user } = useAuth();
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
