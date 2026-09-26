@@ -66,101 +66,111 @@ export const ReportPageShell: React.FC<ReportPageShellProps> = ({
   return (
     <div className="flex flex-col w-full px-space-md md:px-space-xl py-space-lg max-w-content-max-width mx-auto space-y-space-lg">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-xl">
         <div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
+          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">
             {title}
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          <p className="font-body-md text-body-md text-secondary mt-1">
             {subtitle}
           </p>
         </div>
         <button
-          className="inline-flex items-center gap-2 bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md px-4 py-2 rounded-xl border border-border-subtle shadow-sm transition-all"
+          className="flex items-center gap-2 h-[42px] px-4 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all shadow-sm"
           onClick={() => window.print()}
           type="button"
         >
-          <span className="material-symbols-outlined text-[20px] text-outline">
+          <span className="material-symbols-outlined text-[18px] text-secondary">
             print
           </span>
-          <span>Print Report</span>
+          <span className="font-label-lg text-label-lg">Print Report</span>
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle p-space-md shadow-xs flex flex-col sm:flex-row items-end gap-space-md">
+      <div className="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm mb-space-xl">
         {!isBranchManager && (
-          <div className="flex-1 w-full sm:w-auto">
-            <label className="block font-label-sm text-secondary mb-1">Branch</label>
-            <select
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-border-subtle bg-white text-brand-navy-deep focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-            >
-              <option value="">All Branches</option>
-              {branches.map((b) => (
-                <option key={b.branch_id} value={b.branch_id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+          <div className="flex-1 w-full flex flex-col gap-1.5">
+            <label className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">Branch</label>
+            <div className="relative">
+              <select
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                className="w-full h-[42px] px-3.5 pr-9 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest transition-all appearance-none outline-none cursor-pointer"
+              >
+                <option value="">All Branches</option>
+                {branches.map((b) => (
+                  <option key={b.branch_id} value={b.branch_id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary text-[20px]">expand_more</span>
+            </div>
           </div>
         )}
 
         {showDateRange && (
           <>
-            <div className="flex-1 w-full sm:w-auto">
-              <label className="block font-label-sm text-secondary mb-1">From Date</label>
-              <input
-                type="date"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg border border-border-subtle bg-white text-brand-navy-deep focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              />
+            <div className="flex-1 w-full flex flex-col gap-1.5">
+              <label className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">From Date</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="w-full h-[42px] px-3.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest transition-all outline-none"
+                />
+              </div>
             </div>
-            <div className="flex-1 w-full sm:w-auto">
-              <label className="block font-label-sm text-secondary mb-1">To Date</label>
-              <input
-                type="date"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg border border-border-subtle bg-white text-brand-navy-deep focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              />
+            <div className="flex-1 w-full flex flex-col gap-1.5">
+              <label className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">To Date</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="w-full h-[42px] px-3.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest transition-all outline-none"
+                />
+              </div>
             </div>
           </>
         )}
 
-        <button
-          onClick={handleApplyFilters}
-          className="h-10 px-6 rounded-lg bg-primary hover:bg-primary-container text-white font-label-md transition-colors w-full sm:w-auto shrink-0"
-          type="button"
-        >
-          Apply Filters
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleApplyFilters}
+            className="h-[42px] px-6 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container active:scale-[0.99] transition-all flex items-center gap-2 shadow-sm"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+            Apply Filters
+          </button>
+        </div>
       </div>
 
       {/* Content Area */}
       <div className="w-full">
         {loading ? (
-          <div className="bg-surface-card rounded-2xl border border-border-subtle p-12 text-center flex flex-col items-center justify-center space-y-3 shadow-sm">
+          <div className="bg-surface-container-lowest rounded-xl p-12 text-center flex flex-col items-center justify-center space-y-3 shadow-sm">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="font-body-lg text-brand-navy-deep">Loading report data...</p>
+            <p className="font-body-lg text-on-surface">Loading report data...</p>
           </div>
         ) : error ? (
-          <div className="bg-error-container/50 border border-error/20 text-error rounded-2xl p-8 text-center space-y-3 shadow-sm">
+          <div className="bg-error-container/50 text-error rounded-xl p-8 text-center space-y-3 shadow-sm">
             <span className="material-symbols-outlined text-[42px]">error</span>
             <h3 className="font-headline-md">Error Loading Report</h3>
             <p className="font-body-md">{error}</p>
           </div>
         ) : !hasData ? (
-          <div className="bg-surface-card rounded-2xl border border-dashed border-border-subtle p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-secondary">
+          <div className="bg-surface-container-lowest rounded-xl p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-secondary">
               <span className="material-symbols-outlined text-[36px]">search_off</span>
             </div>
-            <h3 className="font-headline-md text-brand-navy-deep">
+            <h3 className="font-headline-md text-on-surface">
               No data available for the selected criteria.
             </h3>
-            <p className="font-body-md text-on-surface-variant max-w-md mx-auto">
+            <p className="font-body-md text-secondary max-w-md mx-auto">
               Try adjusting your filters (branch or date range) and applying again.
             </p>
           </div>

@@ -296,9 +296,36 @@ export interface TreatmentCategoriesResponse {
   total: number;
 }
 
+export interface MonthlyLedgerItem {
+  period: string;
+  total_insurance_covered: number;
+  total_out_of_pocket: number;
+  total_revenue: number;
+  volume: number;
+}
+
+export interface ProviderSplitItem {
+  provider_name: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface ClaimSlaItem {
+  provider_name: string;
+  avg_days: number;
+}
+
+export interface PaymentModeItem {
+  payment_type: string;
+  amount: number;
+  percentage: number;
+}
+
 export interface InsuranceVsOutOfPocketResponse {
-  data: Array<Record<string, any>>;
-  total: number;
+  ledger: MonthlyLedgerItem[];
+  provider_split: ProviderSplitItem[];
+  claim_slas: ClaimSlaItem[];
+  payment_modes: PaymentModeItem[];
 }
 
 // ─── Patients (schemas/patients.py) ─────────────────────────────────────────

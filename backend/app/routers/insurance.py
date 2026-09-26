@@ -7,11 +7,34 @@ from app.schemas.insurance import (
     VerifyInsuranceResponse,
     PatientInsuranceItem,
     PatientInsuranceResponse,
+    InsurancePolicyItem,
+    InsurancePolicyListResponse
 )
 from app.errors import NotFoundError, AppValidationError
 
 
 router = APIRouter()
+
+@router.get("/policies", response_model=InsurancePolicyListResponse)
+async def get_insurance_policies(
+    current_user: CurrentUser = Depends(
+        require_roles("Administrator", "Branch Manager", "Receptionist", "Doctor")
+    ),
+    conn: Connection = Depends(get_conn),
+):
+    """
+    GET /insurance/policies — returns the hospital's insurance policy catalogue.
+    """
+    rows = await conn.fetch("SELECT policy_id, provider_name, policy_name FROM insurance_policy_details ORDER BY provider_name ASC, policy_name ASC")
+    items = [
+        InsurancePolicyItem(
+            policy_id=r["policy_id"],
+            provider_name=r["provider_name"],
+            policy_name=r["policy_name"],
+        )
+        for r in rows
+    ]
+    return InsurancePolicyListResponse(data=items)
 
 
 @router.get("/patient/{patient_id}", response_model=PatientInsuranceResponse)

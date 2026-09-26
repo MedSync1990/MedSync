@@ -62,8 +62,8 @@ export const AppointmentSummary: React.FC = () => {
       {hasData && (
         <div className="space-y-space-lg">
           {/* Chart */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-space-md shadow-xs h-[400px]">
-            <h3 className="font-headline-sm text-brand-navy-deep mb-4">Appointments Overview</h3>
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm h-[400px] flex flex-col justify-center">
+            <h3 className="font-headline-sm text-on-surface mb-4">Appointments Overview</h3>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
@@ -80,20 +80,20 @@ export const AppointmentSummary: React.FC = () => {
           </div>
 
           {/* Table */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-xs overflow-hidden">
+          <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-subtle border-b border-border-subtle">
+                  <tr className="bg-canvas-bg font-label-sm text-label-sm text-secondary uppercase tracking-wider">
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Status</th>
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Type</th>
                     <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Count</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle">
+                <tbody className="divide-y divide-surface-container">
                   {data.data.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
-                      <td className="py-3 px-space-md font-body-sm text-brand-navy-deep">
+                    <tr key={idx} className="hover:bg-canvas-bg transition-colors">
+                      <td className="py-3 px-space-md font-body-sm text-on-surface">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-md font-label-sm ${item.status === 'Completed'
                               ? 'bg-status-completed-bg text-status-completed-text'
@@ -105,11 +105,11 @@ export const AppointmentSummary: React.FC = () => {
                           {item.status}
                         </span>
                       </td>
-                      <td className="py-3 px-space-md font-body-sm text-on-surface-variant">{item.appointment_type}</td>
-                      <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">{item.count}</td>
+                      <td className="py-3 px-space-md font-body-sm text-secondary">{item.appointment_type}</td>
+                      <td className="py-3 px-space-md font-mono-data text-on-surface text-right">{item.count}</td>
                     </tr>
                   ))}
-                  <tr className="bg-surface-subtle font-label-md text-brand-navy-deep border-t-2 border-border-subtle">
+                  <tr className="bg-surface-subtle font-label-md text-on-surface border-t-2 border-surface-container">
                     <td className="py-3 px-space-md" colSpan={2}>Total Appointments</td>
                     <td className="py-3 px-space-md text-right">{data.data.reduce((sum, item) => sum + item.count, 0)}</td>
                   </tr>
