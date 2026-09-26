@@ -19,7 +19,7 @@ export function listPatients(params?: {
 }
 
 /** Get a single patient by ID */
-export function getPatient(patientId: number): Promise<PatientResponse> {
+export function getPatient(patientId: number | string): Promise<PatientResponse> {
   return get<PatientResponse>(`/patients/${patientId}`);
 }
 

@@ -17,7 +17,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const userName = user ? `Dr. ${user.lastName}` : 'Guest';
+  const userName = user ? (user.role === 'Doctor' ? `Dr. ${user.lastName}` : user.firstName || user.lastName) : 'Guest';
   const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
   const branchName = user?.branchName || 'Colombo Central Branch';
   const avatarUrl =

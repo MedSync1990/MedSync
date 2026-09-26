@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingState } from '../../components/LoadingState';
@@ -80,6 +80,31 @@ export const BookAppointment: React.FC = () => {
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const prefillPatientId = searchParams.get('patient_id');
+
+  useEffect(() => {
+    if (prefillPatientId) {
+      patientService.getById(prefillPatientId).then((res) => {
+        const p: PatientListItem = {
+          patient_id: res.patient_id,
+          patient_code: res.patient_code,
+          first_name: res.first_name,
+          last_name: res.last_name,
+          id_number: res.id_number,
+          phone_number: res.phone_number,
+          gender: res.gender,
+          date_of_birth: res.date_of_birth,
+          has_insurance: res.has_insurance,
+          is_active: res.is_active,
+        };
+        setSelectedPatient(p);
+        setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
+      }).catch(err => {
+        showToast('Failed to load pre-filled patient', 'error');
+      });
+    }
+  }, [prefillPatientId]);
 
   // Close dropdown on outside click
   useEffect(() => {
