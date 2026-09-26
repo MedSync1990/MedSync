@@ -20,37 +20,9 @@ export const PatientDirectory: React.FC = () => {
     try {
       const res = await patientService.list({ search });
       setPatients(res.data || []);
-    } catch {
-      // MOCK DATA FALLBACK (because backend patients.py is missing)
-      setPatients([
-        {
-          user_id: 1,
-          patient_code: 'PT-003420',
-          first_name: 'Priyantha',
-          last_name: 'Dharmasena',
-          id_number: '881920391V',
-          phone_number: '077 123 4567',
-          date_of_birth: '1975-04-12',
-          gender: 'Male',
-          blood_group: 'O+',
-          registered_branch: 1,
-          is_active: true
-        },
-        {
-          user_id: 2,
-          patient_code: 'PT-003419',
-          first_name: 'Dinuka',
-          last_name: 'Senanayake',
-          id_number: '199283019283',
-          phone_number: '071 892 3451',
-          date_of_birth: '1992-11-20',
-          gender: 'Female',
-          blood_group: 'A+',
-          registered_branch: 1,
-          is_active: true
-        }
-      ] as any);
-    } finally {
+    } catch (e) {
+      console.error('Error fetching patients:', e);
+      setPatients([]);
       setLoading(false);
     }
   };

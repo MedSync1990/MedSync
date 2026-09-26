@@ -38,24 +38,10 @@ export const PatientProfile: React.FC = () => {
     setLoading(true);
     try {
       const [patientRes, balanceRes, insuranceRes] = await Promise.all([
-        patientService.getById(id).catch(() => ({
-          user_id: id,
-          patient_code: `PT-00${id}`,
-          first_name: 'Mock',
-          last_name: 'Patient',
-          id_number: '123456789V',
-          phone_number: '077 123 4567',
-          phone: '077 123 4567',
-          email: 'mock.patient@example.com',
-          address: 'No. 12, Main Street, Colombo',
-          date_of_birth: '1980-01-01',
-          gender: 'Male',
-          blood_group: 'O+',
-          emergency_contact_name: 'Jane Doe',
-          emergency_contact_phone: '071 987 6543',
-          registered_branch: 1,
-          is_active: true
-        })),
+        patientService.getById(id).then(r => r.data || r).catch((e) => {
+          console.error("Patient not found", e);
+          return null;
+        }),
         getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
         getPatientInsurance(id).catch(() => ({ data: [] })),
         fetch(`/api/v1/patients/${id}/payments`).then(r => r.json()).catch(() => ({ data: [
@@ -613,24 +599,54 @@ export const PatientProfile: React.FC = () => {
               </button>
             </div>
             <div className="p-6 overflow-y-auto flex-1">
-              <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.first_name || ''} onChange={(e) => setEditData({...editData, first_name: e.target.value})} />
+                    <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.first_name || ''} onChange={(e) => setEditData({...editData, first_name: e.target.value})} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.last_name || ''} onChange={(e) => setEditData({...editData, last_name: e.target.value})} />
+                    <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.last_name || ''} onChange={(e) => setEditData({...editData, last_name: e.target.value})} />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                    <input required type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.phone_number || editData.phone || ''} onChange={(e) => setEditData({...editData, phone_number: e.target.value, phone: e.target.value})} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.phone_number || editData.phone || ''} onChange={(e) => setEditData({...editData, phone_number: e.target.value})} />
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                    <input type="email" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.email || ''} onChange={(e) => setEditData({...editData, email: e.target.value})} />
                   </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Physical Address</label>
+                    <textarea rows={2} className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.address || ''} onChange={(e) => setEditData({...editData, address: e.target.value})}></textarea>
+                  </div>
+
+                  <div className="sm:col-span-2 pt-2 pb-1">
+                    <h3 className="text-sm font-bold text-brand-navy-deep border-b border-border-subtle pb-1">Emergency Contact Info</h3>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Name</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm" value={editData.emergency_contact_name || ''} onChange={(e) => setEditData({...editData, emergency_contact_name: e.target.value})} />
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_name || ''} onChange={(e) => setEditData({...editData, emergency_contact_name: e.target.value})} />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Phone</label>
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_phone || ''} onChange={(e) => setEditData({...editData, emergency_contact_phone: e.target.value})} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Relationship</label>
+                    <input type="text" placeholder="e.g. Spouse, Parent, Sibling" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_relationship || ''} onChange={(e) => setEditData({...editData, emergency_contact_relationship: e.target.value})} />
+                  </div>
+                </div>
+                
+                <div className="bg-surface-subtle p-3 rounded-lg border border-border-subtle flex items-start gap-2 mt-4">
+                   <span className="material-symbols-outlined text-outline text-[18px]">info</span>
+                   <p className="text-xs text-on-surface-variant leading-relaxed">
+                     Core identity fields (NIC, Date of Birth, Gender) cannot be edited here to prevent medical record fraud. If these must be corrected, please contact the System Administrator.
+                   </p>
                 </div>
               </form>
             </div>
