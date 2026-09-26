@@ -58,14 +58,25 @@ export interface InsuranceVsOutOfPocketParams {
 export function getAppointmentsSummary(
   params?: AppointmentsSummaryParams,
 ): Promise<AppointmentsSummaryResponse> {
-  return get<AppointmentsSummaryResponse>('/reports/appointments-summary', params as Record<string, any>);
+  const query = params ? {
+    branch_id: params.branch,
+    start_date: params.date, // frontend passes single 'date' string
+    end_date: params.date,
+  } : undefined;
+  return get<AppointmentsSummaryResponse>('/reports/appointments-summary', query);
 }
 
 /** Doctor Revenue aggregate report (A, BM, D) */
 export function getDoctorRevenue(
   params?: DoctorRevenueParams,
 ): Promise<DoctorRevenueResponse> {
-  return get<DoctorRevenueResponse>('/reports/doctor-revenue', params as Record<string, any>);
+  const query = params ? {
+    branch_id: params.branch,
+    doctor_id: params.doctor,
+    start_date: params.from,
+    end_date: params.to,
+  } : undefined;
+  return get<DoctorRevenueResponse>('/reports/doctor-revenue', query);
 }
 
 /** Doctor Itemized Payments — line-by-line payment detail (A, BM own branch, D self) */
@@ -73,26 +84,43 @@ export function getDoctorItemizedPayments(
   doctorId: number,
   params?: ItemizedPaymentParams,
 ): Promise<ItemizedPaymentResponse> {
-  return get<ItemizedPaymentResponse>(`/reports/doctor-revenue/${doctorId}/payments`, params as Record<string, any>);
+  const query = params ? {
+    start_date: params.from,
+    end_date: params.to,
+    page: params.page,
+    limit: params.limit,
+  } : undefined;
+  return get<ItemizedPaymentResponse>(`/reports/doctor-revenue/${doctorId}/payments`, query);
 }
 
 /** Outstanding Balances report (A, BM) */
 export function getOutstandingBalances(
   params?: OutstandingBalancesParams,
 ): Promise<OutstandingBalancesResponse> {
-  return get<OutstandingBalancesResponse>('/reports/outstanding-balances', params as Record<string, any>);
+  const query = params ? { branch_id: params.branch } : undefined;
+  return get<OutstandingBalancesResponse>('/reports/outstanding-balances', query);
 }
 
 /** Treatment Category Breakdown report (A, BM) */
 export function getTreatmentCategories(
   params?: TreatmentCategoriesParams,
 ): Promise<TreatmentCategoriesResponse> {
-  return get<TreatmentCategoriesResponse>('/reports/treatment-categories', params as Record<string, any>);
+  const query = params ? {
+    branch_id: params.branch,
+    start_date: params.from,
+    end_date: params.to,
+  } : undefined;
+  return get<TreatmentCategoriesResponse>('/reports/treatment-categories', query);
 }
 
 /** Insurance vs Out-of-Pocket report (A, BM) */
 export function getInsuranceVsOutOfPocket(
   params?: InsuranceVsOutOfPocketParams,
 ): Promise<InsuranceVsOutOfPocketResponse> {
-  return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', params as Record<string, any>);
+  const query = params ? {
+    branch_id: params.branch,
+    start_date: params.from,
+    end_date: params.to,
+  } : undefined;
+  return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', query);
 }
