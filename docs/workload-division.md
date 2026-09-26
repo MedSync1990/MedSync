@@ -191,6 +191,8 @@ Goal: every route in `docs/api-routes.md` and every page in `docs/page-content.m
 following `docs/ui-guidelines.md` — built feature-by-feature, not layer-by-layer, so each item
 below is a route immediately followed by the page(s) that call it.
 
+> **Note:** The task lists below are high-level summaries of **who** is doing **what**. For the actual implementation details (request/response shapes, validation rules, HTTP status codes, and exact business logic), you **must** strictly follow the specifications detailed in `docs/api-routes.md`.
+
 **Ashen Silva — land these first, they unblock everyone else**
 - [ ] FastAPI project scaffolding — app structure, DB session/connection handling, global error
       handler returning the `{field, message}` validation shape (`api-routes.md` §0.2).
