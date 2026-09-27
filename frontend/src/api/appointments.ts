@@ -60,6 +60,7 @@ export function cancelAppointment(appointmentId: number): Promise<AppointmentRes
 export function getDoctorSlots(
   doctorId: number,
   date: string,
+  includeBooked?: boolean,
 ): Promise<DoctorSlotResponse[]> {
-  return get<DoctorSlotResponse[]>(`/doctors/${doctorId}/availability`, { date });
+  return get<DoctorSlotResponse[]>(`/doctors/${doctorId}/availability`, { date, include_booked: includeBooked });
 }

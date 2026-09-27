@@ -37,29 +37,29 @@ export const DoctorRevenue: React.FC = () => {
       onFilterChange={handleFilterChange}
     >
       {hasData && (
-        <div className="bg-surface-card rounded-xl border border-border-subtle shadow-xs overflow-hidden">
+        <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-subtle border-b border-border-subtle">
+                <tr className="bg-canvas-bg font-label-sm text-label-sm text-secondary uppercase tracking-wider">
                   <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Doctor</th>
                   <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Branch</th>
                   <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Appointments Completed</th>
                   <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Revenue (LKR)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle">
+              <tbody className="divide-y divide-surface-container">
                 {data.data.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
-                    <td className="py-3 px-space-md font-body-sm text-brand-navy-deep font-medium">{item.doctor_name}</td>
-                    <td className="py-3 px-space-md font-body-sm text-on-surface-variant">{item.branch_name}</td>
-                    <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">{item.total_appointments}</td>
-                    <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right font-medium">
+                  <tr key={idx} className="hover:bg-canvas-bg transition-colors">
+                    <td className="py-3 px-space-md font-body-sm text-on-surface font-medium">{item.doctor_name}</td>
+                    <td className="py-3 px-space-md font-body-sm text-secondary">{item.branch_name}</td>
+                    <td className="py-3 px-space-md font-mono-data text-on-surface text-right">{item.total_appointments}</td>
+                    <td className="py-3 px-space-md font-mono-data text-on-surface text-right font-medium">
                       {item.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
                 ))}
-                <tr className="bg-surface-subtle font-label-md text-brand-navy-deep border-t-2 border-border-subtle">
+                <tr className="bg-surface-subtle font-label-md text-on-surface border-t-2 border-surface-container">
                   <td className="py-3 px-space-md" colSpan={2}>Total</td>
                   <td className="py-3 px-space-md text-right">{data.data.reduce((sum, item) => sum + item.total_appointments, 0)}</td>
                   <td className="py-3 px-space-md text-right font-bold text-primary">

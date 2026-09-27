@@ -210,14 +210,11 @@ async def list_patients(
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
-        LEFT JOIN LATERAL (
-            SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1
-        ) c ON TRUE
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
            OR p.patient_code ILIKE $1
-           OR c.phone_number ILIKE $1)
+           OR EXISTS (SELECT 1 FROM contact c WHERE c.user_id = u.user_id AND c.phone_number ILIKE $1))
           AND ($2::text IS NULL
            OR b.name ILIKE ('%' || $2 || '%')
            OR p.registered_branch::text = $2)
@@ -259,14 +256,11 @@ async def list_patients(
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
-        LEFT JOIN LATERAL (
-            SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1
-        ) c ON TRUE
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
            OR p.patient_code ILIKE $1
-           OR c.phone_number ILIKE $1)
+           OR EXISTS (SELECT 1 FROM contact c WHERE c.user_id = u.user_id AND c.phone_number ILIKE $1))
           AND ($2::text IS NULL
            OR b.name ILIKE ('%' || $2 || '%')
            OR p.registered_branch::text = $2)

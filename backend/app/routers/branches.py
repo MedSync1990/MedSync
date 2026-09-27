@@ -50,7 +50,7 @@ async def _fetch_branch(db: asyncpg.Connection, branch_id: int) -> dict:
 @router.get("/", response_model=List[BranchResponse])
 async def list_branches(
     db: asyncpg.Connection = Depends(get_conn),
-    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist")),
 ):
     """
     List branches. Admin sees all branches; Branch Manager sees only their own branch.

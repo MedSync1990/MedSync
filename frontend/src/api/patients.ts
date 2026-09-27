@@ -6,7 +6,7 @@
  */
 
 import { get, post, put } from './client';
-import type { PaginatedResponse, PatientResponse } from './types';
+import type { PaginatedResponse, PatientResponse, Gender } from './types';
 
 /** List / search patients (paginated) */
 export function listPatients(params?: {
@@ -19,7 +19,7 @@ export function listPatients(params?: {
 }
 
 /** Get a single patient by ID */
-export function getPatient(patientId: number): Promise<PatientResponse> {
+export function getPatient(patientId: number | string): Promise<PatientResponse> {
   return get<PatientResponse>(`/patients/${patientId}`);
 }
 
@@ -34,7 +34,7 @@ export function createPatient(data: {
   last_name: string;
   id_number: string;
   date_of_birth: string;
-  gender: 'Male' | 'Female' | 'Other';
+  gender: Gender;
   address: string;
   phone_number: string;
   email?: string;

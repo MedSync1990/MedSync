@@ -35,4 +35,10 @@ class PatientBalanceResponse(BaseModel):
     patient_id: int
     outstanding_balance: float
 
-    
+class InsurancePolicyItem(BaseModel):
+    policy_id: int
+    provider_name: str
+    policy_name: str
+
+class InsurancePolicyListResponse(BaseModel):
+    data: List[InsurancePolicyItem]

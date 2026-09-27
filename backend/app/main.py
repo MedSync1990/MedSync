@@ -1,4 +1,13 @@
+import sys
+import ssl
+import asyncio
+import socket
 from contextlib import asynccontextmanager
+
+# 1. Windows: Fix asyncpg ProactorEventLoop SSL dropping
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 import asyncpg
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,8 +28,8 @@ from app.routers import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL)
-    app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url())
+    app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL, min_size=1, max_size=5)
+    app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url(), min_size=1, max_size=5)
     yield
     await app.state.pool.close()
     await app.state.admin_pool.close()

@@ -59,12 +59,29 @@ class TreatmentCategoriesResponse(BaseModel):
     total: int
 
 # 6. Insurance vs Out-of-Pocket
-class InsuranceVsOutOfPocketItem(BaseModel):
-    branch_name: str
+class MonthlyLedgerItem(BaseModel):
+    period: str
     total_insurance_covered: float
     total_out_of_pocket: float
     total_revenue: float
+    volume: int
+
+class ProviderSplitItem(BaseModel):
+    provider_name: str
+    amount: float
+    percentage: float
+
+class ClaimSlaItem(BaseModel):
+    provider_name: str
+    avg_days: float
+
+class PaymentModeItem(BaseModel):
+    payment_type: str
+    amount: float
+    percentage: float
 
 class InsuranceVsOutOfPocketResponse(BaseModel):
-    data: list[InsuranceVsOutOfPocketItem]
-    total: int
+    ledger: list[MonthlyLedgerItem]
+    provider_split: list[ProviderSplitItem]
+    claim_slas: list[ClaimSlaItem]
+    payment_modes: list[PaymentModeItem]

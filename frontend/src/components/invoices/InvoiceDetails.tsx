@@ -111,10 +111,25 @@ export default function InvoiceDetails({ invoiceData, onPrint, onRecordPayment }
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-border-subtle no-print">
-        <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" onClick={onPrint} type="button">
-          <span className="material-symbols-outlined text-[22px]">print</span>
-          <span>Print Invoice</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" onClick={onPrint} type="button">
+            <span className="material-symbols-outlined text-[22px]">print</span>
+            <span>Print</span>
+          </button>
+          
+          <button 
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" 
+            onClick={() => {
+              // Points directly to the FastAPI PDF route we just built!
+              window.location.href = `http://localhost:8000/api/v1/invoices/${invoiceData.invoice_code}/pdf`;
+            }} 
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[22px]">download</span>
+            <span>Download PDF</span>
+          </button>
+        </div>
+
         {invoiceData.outstanding_balance > 0 ? (
           <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-[17px] font-extrabold shadow-md transition-all cursor-pointer" type="button" onClick={onRecordPayment}>
             <span className="material-symbols-outlined text-[22px]">add_card</span>

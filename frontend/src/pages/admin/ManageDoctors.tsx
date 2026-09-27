@@ -14,7 +14,8 @@ import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function initials(name: string) {
+function initials(name?: string) {
+  if (!name) return 'DR';
   return name
     .split(' ')
     .filter(Boolean)

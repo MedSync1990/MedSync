@@ -10,7 +10,7 @@ from app.schemas.reports import (
     ItemizedPaymentResponse, ItemizedPaymentItem,
     OutstandingBalancesResponse, OutstandingBalanceItem,
     TreatmentCategoriesResponse, TreatmentCategoryItem,
-    InsuranceVsOutOfPocketResponse, InsuranceVsOutOfPocketItem
+    InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem
 )
 from app.schemas.common import PaginationParams
 
@@ -271,30 +271,106 @@ async def get_insurance_vs_out_of_pocket(
 ):
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
-    query = """
+    # 1. Monthly Ledger
+    ledger_query = """
         SELECT 
-            b.name as branch_name,
+            TO_CHAR(DATE_TRUNC('month', i.created_at), 'Mon YYYY') as period,
+            DATE_TRUNC('month', i.created_at) as sort_date,
             COALESCE(SUM(i.insurance_amount), 0) as total_insurance_covered,
             COALESCE(SUM(i.total_amount - i.insurance_amount), 0) as total_out_of_pocket,
-            COALESCE(SUM(i.total_amount), 0) as total_revenue
+            COALESCE(SUM(i.total_amount), 0) as total_revenue,
+            COUNT(i.invoice_id) as volume
         FROM invoices i
         JOIN appointments a ON i.appointment_id = a.appointment_id
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
-        JOIN branch b ON s.branch_id = b.branch_id
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND ($2::date IS NULL OR das.date >= $2)
           AND ($3::date IS NULL OR das.date <= $3)
-        GROUP BY b.branch_id, b.name
+        GROUP BY DATE_TRUNC('month', i.created_at)
+        ORDER BY sort_date DESC
     """
-    records = await conn.fetch(query, actual_branch_id, start_date, end_date)
+    ledger_records = await conn.fetch(ledger_query, actual_branch_id, start_date, end_date)
     
-    data = [
-        InsuranceVsOutOfPocketItem(
-            branch_name=r["branch_name"],
+    ledger = [
+        MonthlyLedgerItem(
+            period=r["period"],
             total_insurance_covered=float(r["total_insurance_covered"]),
             total_out_of_pocket=float(r["total_out_of_pocket"]),
-            total_revenue=float(r["total_revenue"])
-        ) for r in records
+            total_revenue=float(r["total_revenue"]),
+            volume=r["volume"]
+        ) for r in ledger_records
     ]
-    return InsuranceVsOutOfPocketResponse(data=data, total=len(data))
+    
+    # 2. Provider Split
+    provider_query = """
+        SELECT 
+            ipd.provider_name,
+            COALESCE(SUM(i.insurance_amount), 0) as amount
+        FROM invoices i
+        JOIN appointments a ON i.appointment_id = a.appointment_id
+        JOIN patient p ON a.patient_id = p.user_id
+        JOIN patient_insurance pi ON p.user_id = pi.patient_id
+        JOIN insurance_policy_details ipd ON pi.policy_id = ipd.policy_id
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        WHERE ($1::int IS NULL OR s.branch_id = $1)
+          AND ($2::date IS NULL OR das.date >= $2)
+          AND ($3::date IS NULL OR das.date <= $3)
+          AND i.insurance_amount > 0
+          AND pi.is_active = TRUE
+        GROUP BY ipd.provider_name
+        ORDER BY amount DESC
+    """
+    provider_records = await conn.fetch(provider_query, actual_branch_id, start_date, end_date)
+    total_prov = sum(r["amount"] for r in provider_records)
+    
+    provider_split = [
+        ProviderSplitItem(
+            provider_name=r["provider_name"],
+            amount=float(r["amount"]),
+            percentage=float(r["amount"] / total_prov * 100) if total_prov > 0 else 0
+        ) for r in provider_records
+    ]
+    
+    # 3. Claim SLAs (Mocked for UI demo purposes)
+    claim_slas = [
+        ClaimSlaItem(provider_name="Sri Lanka Insurance (SLIC)", avg_days=3.4),
+        ClaimSlaItem(provider_name="Ceylinco General Insurance", avg_days=4.1),
+        ClaimSlaItem(provider_name="AIA Health & Softlogic", avg_days=5.2),
+    ]
+    
+    # 4. Payment Modes
+    payment_query = """
+        SELECT 
+            pay.payment_type,
+            COALESCE(SUM(pay.amount_paid), 0) as amount
+        FROM payments pay
+        JOIN invoices i ON pay.invoice_id = i.invoice_id
+        JOIN appointments a ON i.appointment_id = a.appointment_id
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        WHERE ($1::int IS NULL OR s.branch_id = $1)
+          AND ($2::date IS NULL OR das.date >= $2)
+          AND ($3::date IS NULL OR das.date <= $3)
+          AND pay.payment_type != 'Insurance Settlement'
+        GROUP BY pay.payment_type
+        ORDER BY amount DESC
+    """
+    payment_records = await conn.fetch(payment_query, actual_branch_id, start_date, end_date)
+    total_pay = sum(r["amount"] for r in payment_records)
+    
+    payment_modes = [
+        PaymentModeItem(
+            payment_type=r["payment_type"],
+            amount=float(r["amount"]),
+            percentage=float(r["amount"] / total_pay * 100) if total_pay > 0 else 0
+        ) for r in payment_records
+    ]
+    
+    return InsuranceVsOutOfPocketResponse(
+        ledger=ledger,
+        provider_split=provider_split,
+        claim_slas=claim_slas,
+        payment_modes=payment_modes
+    )
