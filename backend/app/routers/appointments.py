@@ -1,25 +1,39 @@
-from datetime import date
+import json
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 from asyncpg import Connection, PostgresError
 
-from app.dependencies import get_db, require_roles, get_branch_scope, CurrentUser
-from app.schemas.appointments import (
-    AppointmentBookRequest,
-    WalkInAppointmentRequest,
-    AppointmentRescheduleRequest,
-    AppointmentResponse,
-    AppointmentListResponse,
-    DoctorSlotResponse,
-    SlotStatusEnum,
-    AppointmentTypeEnum,
-    AppointmentStatusEnum,
+from app.db import get_conn
+from app.dependencies import require_roles
+from app.errors import NotFoundError, ConflictError, AppValidationError
+from app.schemas.consultations import (
+    AppointmentCompleteRequest,
+    AppointmentCompleteResponse,
+    ConsultationDetailResponse,
+    ConsultationTreatmentItem,
 )
-from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidationError
 
 router = APIRouter()
 
 
+@router.get(
+    "",
+    summary="List appointments",
+    dependencies=[Depends(require_roles("Doctor", "Receptionist", "Administrator", "Branch Manager"))],
+)
+async def list_appointments(
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (e.g. Scheduled, Completed, Cancelled)"),
+    patient_id: Optional[int] = Query(None, description="Filter by patient user_id"),
+    doctor_id: Optional[int] = Query(None, description="Filter by doctor user_id"),
+    limit: int = Query(50, ge=1, le=100),
+    conn: Connection = Depends(get_conn),
+):
+    conditions = []
+    params = []
+
+    if status_filter and status_filter.strip().lower() != "all":
+        params.append(status_filter.strip())
+        conditions.append(f"a.status::text = ${len(params)}")
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. GET /doctors/{id}/availability?date=
 # ─────────────────────────────────────────────────────────────────────────────
@@ -67,57 +81,64 @@ async def get_doctor_availability(
         for r in rows
     ]
 
+    if patient_id:
+        params.append(patient_id)
+        conditions.append(f"a.patient_id = ${len(params)}")
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Helper to fetch full appointment detail
-# ─────────────────────────────────────────────────────────────────────────────
-async def _fetch_appointment_detail(conn: Connection, appointment_id: int) -> Optional[AppointmentResponse]:
-    query = """
-        SELECT
+    if doctor_id:
+        params.append(doctor_id)
+        conditions.append(f"d.user_id = ${len(params)}")
+
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    query = f"""
+        SELECT 
             a.appointment_id,
             a.appointment_code,
             a.patient_id,
-            TRIM(CONCAT(pu.first_name, ' ', COALESCE(pu.middle_name || ' ', ''), pu.last_name)) AS patient_name,
-            das.doctor_id,
-            TRIM(CONCAT(du.first_name, ' ', COALESCE(du.middle_name || ' ', ''), du.last_name)) AS doctor_name,
-            s.branch_id,
-            b.name AS branch_name,
             a.slot_id,
-            das.date AS appointment_date,
-            das.start_time,
-            das.end_time,
-            a.appointment_type,
-            a.status,
-            a.created_at
+            a.appointment_type::text AS appointment_type,
+            a.status::text AS status,
+            a.created_at,
+            pu.first_name AS patient_first_name,
+            pu.last_name AS patient_last_name,
+            pu.id_number AS patient_id_number,
+            p.patient_code,
+            s.date AS slot_date,
+            s.start_time,
+            s.end_time,
+            d.user_id AS doctor_id,
+            du.first_name AS doctor_first_name,
+            du.last_name AS doctor_last_name
         FROM appointments a
-        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-        JOIN staff s ON das.doctor_id = s.user_id
-        JOIN branch b ON s.branch_id = b.branch_id
-        JOIN app_user pu ON a.patient_id = pu.user_id
-        JOIN app_user du ON das.doctor_id = du.user_id
-        WHERE a.appointment_id = $1;
+        JOIN patient p ON a.patient_id = p.user_id
+        JOIN app_user pu ON p.user_id = pu.user_id
+        LEFT JOIN doctor_availability_slots s ON a.slot_id = s.slot_id
+        LEFT JOIN doctor d ON s.doctor_id = d.user_id
+        LEFT JOIN app_user du ON d.user_id = du.user_id
+        {where_clause}
+        ORDER BY a.appointment_id DESC
+        LIMIT {limit}
     """
-    r = await conn.fetchrow(query, appointment_id)
-    if not r:
-        return None
-
-    return AppointmentResponse(
-        appointment_id=r["appointment_id"],
-        appointment_code=r["appointment_code"],
-        patient_id=r["patient_id"],
-        patient_name=r["patient_name"],
-        doctor_id=r["doctor_id"],
-        doctor_name=r["doctor_name"],
-        branch_id=r["branch_id"],
-        branch_name=r["branch_name"],
-        slot_id=r["slot_id"],
-        appointment_date=r["appointment_date"],
-        start_time=r["start_time"],
-        end_time=r["end_time"],
-        appointment_type=AppointmentTypeEnum(r["appointment_type"]),
-        status=AppointmentStatusEnum(r["status"]),
-        created_at=r["created_at"],
-    )
+    rows = await conn.fetch(query, *params)
+    return [
+        {
+            "appointment_id": r["appointment_id"],
+            "appointment_code": r["appointment_code"],
+            "patient_id": r["patient_id"],
+            "patient_name": f"{r['patient_first_name']} {r['patient_last_name']}".strip(),
+            "patient_code": r["patient_code"],
+            "patient_id_number": r["patient_id_number"],
+            "doctor_id": r["doctor_id"],
+            "doctor_name": f"Dr. {r['doctor_first_name']} {r['doctor_last_name']}".strip() if r["doctor_first_name"] else None,
+            "slot_date": str(r["slot_date"]) if r["slot_date"] else None,
+            "start_time": str(r["start_time"]) if r["start_time"] else None,
+            "end_time": str(r["end_time"]) if r["end_time"] else None,
+            "appointment_type": r["appointment_type"],
+            "status": r["status"],
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -163,18 +184,20 @@ async def list_appointments(
             a.appointment_id,
             a.appointment_code,
             a.patient_id,
-            TRIM(CONCAT(pu.first_name, ' ', COALESCE(pu.middle_name || ' ', ''), pu.last_name)) AS patient_name,
-            das.doctor_id,
-            TRIM(CONCAT(du.first_name, ' ', COALESCE(du.middle_name || ' ', ''), du.last_name)) AS doctor_name,
-            s.branch_id,
-            b.name AS branch_name,
             a.slot_id,
-            das.date AS appointment_date,
-            das.start_time,
-            das.end_time,
-            a.appointment_type,
-            a.status,
-            a.created_at
+            a.appointment_type::text AS appointment_type,
+            a.status::text AS status,
+            a.created_at,
+            pu.first_name AS patient_first_name,
+            pu.last_name AS patient_last_name,
+            pu.id_number AS patient_id_number,
+            p.patient_code,
+            s.date AS slot_date,
+            s.start_time,
+            s.end_time,
+            d.user_id AS doctor_id,
+            du.first_name AS doctor_first_name,
+            du.last_name AS doctor_last_name
         FROM appointments a
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
@@ -244,137 +267,117 @@ async def book_appointment(
     user: CurrentUser = Depends(require_roles("Receptionist")),
 ):
     """
-    Book an appointment against an open slot.
-    Calls fn_book_appointment() inside a transaction and translates slot conflicts into a clean 409.
+    Completes a scheduled appointment by executing the PostgreSQL stored procedure fn_complete_appointment().
+    Validates notes, transitions status to 'Completed', records clinical consultation and treatment snapshot lines,
+    computes insurance coverage, and generates the final billing invoice.
+    (FR-CTM-06/07/08, api-routes.md §6.2, database.md §7.5).
     """
-    # Verify patient exists
-    patient = await conn.fetchval("SELECT user_id FROM patient WHERE user_id = $1;", payload.patient_id)
-    if not patient:
-        raise NotFoundError("Patient not found.")
+    notes = (payload.consultation_notes or "").strip()
+    if not notes:
+        raise AppValidationError([
+            {
+                "field": "consultation_notes",
+                "message": "Add consultation notes before completing this appointment.",
+            }
+        ])
+
+    treatments_payload = [
+        {"treatment_code": t.treatment_code, "quantity": t.quantity}
+        for t in (payload.treatments or [])
+    ]
+    treatments_json = json.dumps(treatments_payload)
 
     try:
-        appt_id = await conn.fetchval(
-            "SELECT fn_book_appointment($1, $2, $3::appointment_type_enum);",
-            payload.patient_id,
-            payload.slot_id,
-            payload.appointment_type.value,
+        invoice_id = await conn.fetchval(
+            "SELECT fn_complete_appointment($1, $2, $3, $4::jsonb)",
+            appointment_id,
+            payload.diagnosis.strip() if payload.diagnosis else "General Clinical Consultation",
+            notes,
+            treatments_json,
         )
-    except PostgresError as e:
-        err_msg = str(e)
-        if "is no longer available" in err_msg or "does not exist" in err_msg:
-            raise ConflictError("This doctor is no longer available at the selected time. Please choose another slot.")
-        raise ConflictError(err_msg)
+    except PostgresError as exc:
+        msg = str(exc)
+        if "consultation notes are required" in msg:
+            raise AppValidationError([
+                {
+                    "field": "consultation_notes",
+                    "message": "Add consultation notes before completing this appointment.",
+                }
+            ])
+        if "does not exist" in msg:
+            raise NotFoundError(f"Appointment {appointment_id} does not exist.")
+        if "only a Scheduled appointment can be completed" in msg:
+            raise ConflictError(f"Cannot complete appointment: {msg}")
+        if "not a valid active catalogue entry" in msg or "treatment quantity" in msg:
+            raise ConflictError(f"Invalid treatment order: {msg}")
+        raise ConflictError(f"Encounter completion failed: {msg}")
 
-    created = await _fetch_appointment_detail(conn, appt_id)
-    if not created:
-        raise NotFoundError("Failed to retrieve created appointment.")
-    return created
+    return AppointmentCompleteResponse(
+        appointment_id=appointment_id,
+        invoice_id=invoice_id,
+        status="Completed",
+        message="Appointment completed. Invoice generated.",
+    )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 5. POST /appointments/walk-in (Walk-in emergency booking)
-# ─────────────────────────────────────────────────────────────────────────────
-@router.post("/walk-in", response_model=AppointmentResponse, status_code=status.HTTP_201_CREATED)
-async def create_walk_in_appointment(
-    payload: WalkInAppointmentRequest,
-    conn: Connection = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Receptionist")),
+@router.get(
+    "/{appointment_id}/consultation",
+    response_model=ConsultationDetailResponse,
+    dependencies=[Depends(require_roles("Doctor", "Receptionist", "Administrator", "Branch Manager"))],
+    summary="Get consultation clinical notes and attached treatments",
+)
+async def get_appointment_consultation(
+    appointment_id: int,
+    conn: Connection = Depends(get_conn),
 ):
     """
-    Create an emergency walk-in appointment.
-    Calls fn_create_walk_in() and checks for overlap via exclusion constraint.
+    Returns consultation notes, diagnosis, and snapshotted treatment lines for an appointment (api-routes.md §6.2).
     """
-    # Verify patient and doctor exist
-    patient = await conn.fetchval("SELECT user_id FROM patient WHERE user_id = $1;", payload.patient_id)
-    if not patient:
-        raise NotFoundError("Patient not found.")
+    consult_row = await conn.fetchrow(
+        """
+        SELECT consultation_id, appointment_id, diagnosis, consultation_notes, created_date AS created_at
+        FROM consultations
+        WHERE appointment_id = $1
+        """,
+        appointment_id,
+    )
+    if not consult_row:
+        raise NotFoundError(f"No consultation recorded for appointment {appointment_id}.")
 
-    doctor = await conn.fetchval("SELECT user_id FROM doctor WHERE user_id = $1;", payload.doctor_id)
-    if not doctor:
-        raise NotFoundError("Doctor not found.")
+    treatments_rows = await conn.fetch(
+        """
+        SELECT 
+            ct.treatment_code,
+            tc.treatment_name,
+            tc.category,
+            ct.quantity,
+            ct.unit_price,
+            (ct.quantity * ct.unit_price) AS subtotal
+        FROM consultation_treatments ct
+        LEFT JOIN treatment_catalogue tc ON ct.treatment_code = tc.treatment_code
+        WHERE ct.consultation_id = $1
+        ORDER BY ct.treatment_code ASC
+        """,
+        consult_row["consultation_id"],
+    )
 
-    try:
-        appt_id = await conn.fetchval(
-            "SELECT fn_create_walk_in($1, $2, $3, $4, $5);",
-            payload.doctor_id,
-            payload.patient_id,
-            payload.date,
-            payload.start_time,
-            payload.end_time,
+    treatments = [
+        ConsultationTreatmentItem(
+            treatment_code=tr["treatment_code"],
+            treatment_name=tr["treatment_name"] or f"Treatment #{tr['treatment_code']}",
+            category=tr["category"] or "General",
+            quantity=tr["quantity"],
+            unit_price=float(tr["unit_price"]),
+            subtotal=float(tr["subtotal"]),
         )
-    except PostgresError as e:
-        err_msg = str(e)
-        if "is already booked over this time range" in err_msg or "excl_slot_overlap" in err_msg:
-            raise ConflictError("This doctor is already booked over this time range. Please choose another time.")
-        raise ConflictError(err_msg)
+        for tr in treatments_rows
+    ]
 
-    created = await _fetch_appointment_detail(conn, appt_id)
-    if not created:
-        raise NotFoundError("Failed to retrieve created appointment.")
-    return created
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6. PUT /appointments/{id}/reschedule
-# ─────────────────────────────────────────────────────────────────────────────
-@router.put("/{id}/reschedule", response_model=AppointmentResponse)
-async def reschedule_appointment(
-    id: int,
-    payload: AppointmentRescheduleRequest,
-    conn: Connection = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Receptionist")),
-):
-    """
-    Reschedule an existing scheduled appointment to a new slot.
-    Re-opens previous slot and books the new slot.
-    """
-    try:
-        await conn.execute(
-            "SELECT fn_reschedule_appointment($1, $2);",
-            id,
-            payload.new_slot_id,
-        )
-    except PostgresError as e:
-        err_msg = str(e)
-        if "does not exist" in err_msg:
-            raise NotFoundError(err_msg)
-        if "is no longer available" in err_msg:
-            raise ConflictError("The selected new slot is no longer available.")
-        if "only a Scheduled appointment can be rescheduled" in err_msg:
-            raise ConflictError("Only Scheduled appointments can be rescheduled.")
-        if "must belong to the same doctor" in err_msg:
-            raise ConflictError("The new slot must belong to the same doctor as the appointment.")
-        raise ConflictError(err_msg)
-
-    updated = await _fetch_appointment_detail(conn, id)
-    if not updated:
-        raise NotFoundError("Appointment not found.")
-    return updated
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 7. PUT /appointments/{id}/cancel
-# ─────────────────────────────────────────────────────────────────────────────
-@router.put("/{id}/cancel", response_model=AppointmentResponse)
-async def cancel_appointment(
-    id: int,
-    conn: Connection = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Receptionist")),
-):
-    """
-    Cancel a scheduled appointment and re-open its slot.
-    """
-    try:
-        await conn.execute("SELECT fn_cancel_appointment($1);", id)
-    except PostgresError as e:
-        err_msg = str(e)
-        if "does not exist" in err_msg:
-            raise NotFoundError("Appointment not found.")
-        if "only a Scheduled appointment can be cancelled" in err_msg:
-            raise ConflictError("Only Scheduled appointments can be cancelled.")
-        raise ConflictError(err_msg)
-
-    cancelled = await _fetch_appointment_detail(conn, id)
-    if not cancelled:
-        raise NotFoundError("Appointment not found.")
-    return cancelled
+    return ConsultationDetailResponse(
+        consultation_id=consult_row["consultation_id"],
+        appointment_id=consult_row["appointment_id"],
+        diagnosis=consult_row["diagnosis"],
+        consultation_notes=consult_row["consultation_notes"],
+        created_at=consult_row["created_at"],
+        treatments=treatments,
+    )
