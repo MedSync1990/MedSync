@@ -178,6 +178,14 @@ async def list_appointments(
           AND ($5::int IS NULL OR a.patient_id = $5)
     """
 
+    count_where = """
+        WHERE ($1::int IS NULL OR s.branch_id = $1)
+          AND ($2::date IS NULL OR das.date = $2)
+          AND ($3::text IS NULL OR a.status::text = $3)
+          AND ($4::int IS NULL OR das.doctor_id = $4)
+          AND ($5::int IS NULL OR a.patient_id = $5)
+    """
+
     count_query = f"""
         SELECT COUNT(*)
         FROM appointments a
