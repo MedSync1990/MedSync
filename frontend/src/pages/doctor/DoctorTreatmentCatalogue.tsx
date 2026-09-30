@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Link } from 'react-router-dom';
 interface TreatmentItem {
   code: string;
   name: string;
@@ -91,18 +91,25 @@ export const DoctorTreatmentCatalogue: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-content-max-width mx-auto py-space-lg space-y-space-lg">
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg flex flex-col">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-label-sm text-label-sm font-semibold uppercase tracking-wider mb-space-xs">
+        <Link className="text-secondary hover:text-primary transition-colors" to="/dashboard">HOME</Link>
+        <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
+        <span className="text-secondary">REFERENCE</span>
+        <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
+        <span className="text-primary">TREATMENT CATALOGUE</span>
+      </nav>
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
         <div>
           <div className="flex items-center gap-space-xs mb-space-2xs">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Treatment Catalogue</h1>
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Treatment Catalogue</h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md">
               <span className="material-symbols-outlined text-[14px]">lock</span>
               Reference Only
             </span>
           </div>
-          <p className="font-body-md text-body-md text-secondary">
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
             Reference list of available treatments and prices. Pre-configured for clinical consultations.
           </p>
         </div>

@@ -344,9 +344,7 @@ export const BookAppointment: React.FC = () => {
           'success',
         );
 
-        setTimeout(() => {
-          navigate('/receptionist/appointments');
-        }, 1200);
+
       } catch (err: any) {
         const msg = err?.message || '';
         if (err?.isConflict || msg.includes('already booked') || msg.includes('overlap')) {
@@ -382,9 +380,7 @@ export const BookAppointment: React.FC = () => {
           'success',
         );
 
-        setTimeout(() => {
-          navigate('/receptionist/appointments');
-        }, 1200);
+
       } catch (err: any) {
         const msg = err?.message || '';
         if (err?.isConflict || msg.includes('no longer available') || msg.includes('exclusion')) {

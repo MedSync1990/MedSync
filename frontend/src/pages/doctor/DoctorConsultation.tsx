@@ -239,19 +239,21 @@ export const DoctorConsultation: React.FC = () => {
   const patientDemographics = `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Male'}`;
 
   return (
-    <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-space-3xl">
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg flex flex-col">
       {/* Breadcrumb & Patient Context Header */}
       <div className="flex flex-col gap-space-sm">
-        <nav className="flex items-center gap-space-2xs font-label-md text-label-md text-secondary">
-          <Link className="hover:text-primary transition-colors flex items-center gap-1" to="/dashboard">
-            <span className="material-symbols-outlined text-[16px]">home</span>
-            <span>Home</span>
-          </Link>
-          <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
-          <span>My Work</span>
-          <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
-          <span className="text-brand-navy-deep font-semibold">Consultation</span>
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-label-sm text-label-sm font-semibold uppercase tracking-wider mb-space-xs">
+          <Link className="text-secondary hover:text-primary transition-colors" to="/dashboard">HOME</Link>
+          <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
+          <span className="text-secondary">MY WORK</span>
+          <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
+          <span className="text-primary">CONSULTATION</span>
         </nav>
+
+        <div>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Active Consultation</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Review patient history, prescribe medication, and add clinical notes</p>
+        </div>
 
         {/* Patient Header Card */}
         <div className="bg-surface-card rounded-2xl p-space-lg sm:p-space-xl border border-border-subtle shadow-sm flex flex-col gap-space-md relative">

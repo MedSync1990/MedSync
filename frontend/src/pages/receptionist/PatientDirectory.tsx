@@ -6,6 +6,7 @@ import type { PatientListItem } from '../../api/types';
 
 export const PatientDirectory: React.FC = () => {
   const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [totalPatients, setTotalPatients] = useState<number>(0);
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState('all');
   const [insuranceFilter, setInsuranceFilter] = useState('all');
@@ -21,10 +22,12 @@ export const PatientDirectory: React.FC = () => {
     try {
       const res = await patientService.list({ search, branch: branchFilter, insurance: insuranceFilter });
       setPatients(res.data || []);
+      setTotalPatients(res.total || 0);
       setLoading(false);
     } catch (e) {
       console.error('Error fetching patients:', e);
       setPatients([]);
+      setTotalPatients(0);
       setLoading(false);
     }
   };
@@ -171,7 +174,7 @@ export const PatientDirectory: React.FC = () => {
               <span className="material-symbols-outlined text-[20px]">groups</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">1,428</span>
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">{totalPatients.toLocaleString()}</span>
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Registered Patients</span>
             </div>
           </div>

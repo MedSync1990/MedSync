@@ -17,14 +17,14 @@ export const RegisterPatient: React.FC = () => {
   const isEditMode = Boolean(editId);
 
   // Form states matching register_patient.html
-  const [fullName, setFullName] = useState(editId ? '' : 'Priyantha Dharmasena');
-  const [nicNumber, setNicNumber] = useState(editId ? '' : '198821400293');
-  const [dateOfBirth, setDateOfBirth] = useState(editId ? '' : '1988-04-12');
+  const [fullName, setFullName] = useState('');
+  const [nicNumber, setNicNumber] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<Gender>('Male');
-  const [bloodGroup, setBloodGroup] = useState(editId ? '' : 'A+');
-  const [emailAddress, setEmailAddress] = useState(editId ? '' : 'priyantha.dharmasena@outlook.com');
-  const [streetAddress, setStreetAddress] = useState(editId ? '' : 'No. 54/2, Dharmapala Mawatha');
-  const [cityDistrict, setCityDistrict] = useState(editId ? '' : 'Colombo 07');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [streetAddress, setStreetAddress] = useState('');
+  const [cityDistrict, setCityDistrict] = useState('');
 
   // Allergy states
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
@@ -37,26 +37,26 @@ export const RegisterPatient: React.FC = () => {
   const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
 
   // Phone numbers
-  const [primaryPhone, setPrimaryPhone] = useState('077 482 9104');
+  const [primaryPhone, setPrimaryPhone] = useState('');
   const [primaryPhoneType, setPrimaryPhoneType] = useState('mobile');
   const [secondaryPhones, setSecondaryPhones] = useState<SecondaryPhone[]>([]);
 
   // Emergency contact
-  const [emergencyName, setEmergencyName] = useState('Anoma Dharmasena');
-  const [emergencyRelation, setEmergencyRelation] = useState('Spouse');
-  const [emergencyPhone, setEmergencyPhone] = useState('077 129 4811');
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyRelation, setEmergencyRelation] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
   const [showAlternateContact, setShowAlternateContact] = useState(false);
   const [altContactName, setAltContactName] = useState('');
   const [altRelation, setAltRelation] = useState('');
   const [altPhone, setAltPhone] = useState('');
 
   // Insurance
-  const [insuranceEnabled, setInsuranceEnabled] = useState(true);
-  const [insuranceProvider, setInsuranceProvider] = useState('SLIC');
-  const [policyNumber, setPolicyNumber] = useState('POL-SLIC-8491024');
-  const [policyStartDate, setPolicyStartDate] = useState('2023-01-01');
-  const [policyEndDate, setPolicyEndDate] = useState('2025-12-31');
-  const [corporateAffiliation, setCorporateAffiliation] = useState('Hayleys Group PLC');
+  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
+  const [insuranceProvider, setInsuranceProvider] = useState('');
+  const [policyNumber, setPolicyNumber] = useState('');
+  const [policyStartDate, setPolicyStartDate] = useState('');
+  const [policyEndDate, setPolicyEndDate] = useState('');
+  const [corporateAffiliation, setCorporateAffiliation] = useState('');
 
   // Submission / feedback state
   const [submitting, setSubmitting] = useState(false);
