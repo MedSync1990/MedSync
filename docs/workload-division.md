@@ -191,6 +191,8 @@ Goal: every route in `docs/api-routes.md` and every page in `docs/page-content.m
 following `docs/ui-guidelines.md` — built feature-by-feature, not layer-by-layer, so each item
 below is a route immediately followed by the page(s) that call it.
 
+> **Note:** The task lists below are high-level summaries of **who** is doing **what**. For the actual implementation details (request/response shapes, validation rules, HTTP status codes, and exact business logic), you **must** strictly follow the specifications detailed in `docs/api-routes.md`. **Global UI requirement:** Use shared components or shadcn whenever required across all pages.
+
 **Ashen Silva — land these first, they unblock everyone else**
 - [ ] FastAPI project scaffolding — app structure, DB session/connection handling, global error
       handler returning the `{field, message}` validation shape (`api-routes.md` §0.2).
@@ -218,11 +220,6 @@ below is a route immediately followed by the page(s) that call it.
       `app.current_role = 'Administrator'` for RLS.
 
 **Kalana Jayawardena**
-- [ ] `/doctors`, `/specialties` CRUD + specialty-assignment endpoint → **Manage Doctors &
-      Specialties admin page.** **(updated)** `/doctors` CRUD is no longer Admin-only —
-      `api-routes.md` §3 grants Branch Manager the same create/update, scoped to their own branch;
-      the page needs to render for BM too (role-filtered actions, no cross-branch view, no
-      specialty-catalogue edits for BM). `/specialties` itself stays Admin-only.
 - [ ] `GET /doctors/{id}/availability`, `POST /appointments` → `fn_book_appointment()`,
       `POST /appointments/walk-in` → `fn_create_walk_in()` (`database.md` §7.1/§7.2) →
       **Book Appointment page** (multi-step: Find Patient → Category → Specialty → Doctor/Slot →
@@ -234,8 +231,6 @@ below is a route immediately followed by the page(s) that call it.
       **Manage Appointments page** (filters, reschedule, cancel, create walk-in).
 
 **Chenith Garusinghe**
-- [ ] `/patients` CRUD + `GET /patients?search=` (NIC/name/contact) → **Register Patient, Patient
-      Directory pages.**
 - [ ] **(new)** `GET/PUT /patients/{id}/allergies`, `GET/POST /allergies` (`api-routes.md` §4) →
       **allergy selector** folded into the registration/profile-edit form — `page-content.md`
       doesn't spec a dedicated screen for this, so it lives alongside emergency contact/insurance
@@ -251,8 +246,6 @@ below is a route immediately followed by the page(s) that call it.
       "Complete Appointment" — no per-field autosave to build. Button stays disabled until notes
       are filled in (FR-CTM-07). If product wants the old incremental-save behavior back, that's
       the open question flagged in `database.md` §0 — don't silently build both.
-- [ ] `/treatments` CRUD → `fn_deactivate_treatment()` for soft-delete (FR-TCM-05) →
-      **Treatment Catalogue admin page.**
 
 **Shavinda**
 - [ ] `GET /invoices/{id}`, `GET /patients/{id}/invoices` → **Invoices list + detail view**
@@ -264,16 +257,35 @@ below is a route immediately followed by the page(s) that call it.
       **Insurance registration section** on the patient profile.
 
 **Ashen Silva — remaining routes/pages, after the two blockers above land**
-- [ ] `/reports/*` — all 5 report endpoints, plus the **(new)** itemized doctor payment report
-      (`GET /reports/doctor-revenue/{doctor_id}/payments`, `api-routes.md` §10 — Doctor may only
-      request their own `doctor_id`, BM locked to own branch, Admin unrestricted) → **all 5 report
-      pages** (filters + table/chart + empty state per FR-RA-06; BM's pages locked to their own
-      branch, no selector shown) **plus a second tab on Doctor's "My Earnings" page** for the
-      itemized payment report alongside the existing aggregate revenue view.
-- [ ] **Dashboard page** (today's summary widgets, quick actions) — no single dedicated backend
-      route; composes data from the reports/appointments endpoints above.
+- [ ] `GET /reports/doctor-revenue/{doctor_id}/payments` → **Itemized Payments tab** on Doctor's "My Earnings" page.
 - [ ] Pass over responsive layout + empty/loading/error states across all pages once the rest of
       the team's pages exist.
+
+### Branch Manager Pages (Backend & Frontend)
+*All backend endpoints and corresponding frontend pages for the Branch Manager dashboard are consolidated here. Each member builds the full stack for their assigned feature.*
+
+**Shavinda**
+- [ ] `GET /reports/outstanding-balances` → **Outstanding Balances page** (Filters, tables/charts, empty state FR-RA-06).
+
+**Kalana Jayawardena**
+- [ ] `/doctors`, `/specialties` CRUD + specialty-assignment endpoint → **Manage Doctors & Specialties admin page**. **(updated)** `/doctors` CRUD is no longer Admin-only —
+      `api-routes.md` §3 grants Branch Manager the same create/update, scoped to their own branch;
+      the page needs to render for BM too (role-filtered actions, no cross-branch view, no
+      specialty-catalogue edits for BM). `/specialties` itself stays Admin-only.
+- [ ] `GET /reports/doctor-revenue` → **Doctor Revenue page** (Filters, tables/charts, empty state FR-RA-06).
+
+**Chenith Garusinghe**
+- [ ] `/patients` CRUD + `GET /patients?search=` (NIC/name/contact) → **Register Patient, Patient Directory pages.**
+- [ ] `/treatments` CRUD → `fn_deactivate_treatment()` for soft-delete (FR-TCM-05) → **Treatment Catalogue admin page.**
+- [ ] `GET /reports/treatment-categories` → **Treatment Breakdown page** (Filters, tables/charts, empty state FR-RA-06).
+
+**Dilantha Thilakarathna**
+- [ ] `GET /reports/insurance-vs-out-of-pocket` → **Insurance vs. Cash page** (Filters, tables/charts, empty state FR-RA-06).
+
+**Ashen Silva**
+- [ ] **Dashboard page** (today's summary widgets, quick actions) — composes data from the reports/appointments endpoints.
+- [ ] `GET /reports/appointments-summary` → **Branch Appointments page** (Filters, tables/charts, empty state FR-RA-06).
+- [ ] `/staff`, `/branch` CRUD → **Manage Staff page**.
 
 ---
 

@@ -28,8 +28,8 @@ from app.routers import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL, min_size=1, max_size=5)
-    app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url(), min_size=1, max_size=5)
+    app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL, min_size=1, max_size=5, timeout=120.0, command_timeout=120.0)
+    app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url(), min_size=1, max_size=5, timeout=120.0, command_timeout=120.0)
     yield
     await app.state.pool.close()
     await app.state.admin_pool.close()

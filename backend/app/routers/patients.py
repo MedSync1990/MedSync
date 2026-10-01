@@ -241,7 +241,7 @@ async def list_patients(
             u.first_name,
             u.last_name,
             u.id_number,
-            COALESCE((SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1), '') AS phone_number,
+            COALESCE(c.phone_number, '') AS phone_number,
             u.gender::text AS gender,
             u.birthdate::text AS date_of_birth,
             p.registered_branch,
