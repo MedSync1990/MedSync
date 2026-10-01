@@ -6,17 +6,26 @@ export default function TreatmentCategoryBreakdownReport() {
   const [data, setData] = useState<TreatmentCategoriesResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [periodFilter, setPeriodFilter] = useState('current');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
 
-  useEffect(() => {
-    getTreatmentCategories().then(res => {
+  const fetchReport = () => {
+    setLoading(true);
+    getTreatmentCategories({
+      from: startDate || undefined,
+      to: endDate || undefined,
+    }).then(res => {
       setData(res);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchReport();
   }, []);
 
   const handleExport = () => {
@@ -30,16 +39,20 @@ export default function TreatmentCategoryBreakdownReport() {
   };
 
   const handleReset = () => {
-    setPeriodFilter('current');
+    setStartDate('');
+    setEndDate('');
     setSearchQuery('');
+    setTimeout(() => {
+      setLoading(true);
+      getTreatmentCategories({}).then(res => { setData(res); setLoading(false); });
+    }, 0);
   };
 
   const fmt = (n: number) => `LKR ${(Number(n) || 0).toLocaleString('en-US')}`;
 
-  const isEmpty = periodFilter === 'empty_test';
   const q = searchQuery.toLowerCase().trim();
 
-  const filteredData = (!data || isEmpty) ? [] : (data?.data || []).filter(item => {
+  const filteredData = (!data) ? [] : (data?.data || []).filter(item => {
     if (!q) return true;
     return (item.treatment_item || '').toLowerCase().includes(q) || (item.category || '').toLowerCase().includes(q);
   });
@@ -112,17 +125,17 @@ export default function TreatmentCategoryBreakdownReport() {
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
         <div className="flex flex-wrap items-center gap-space-md flex-1">
-          <div className="flex flex-col gap-1 min-w-[260px]">
-            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="periodSelector">Reporting Period</label>
-            <div className="relative flex items-center">
-              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
-              <select id="periodSelector" value={periodFilter} onChange={e => setPeriodFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
-                <option value="current">Current Month — Sep 2026</option>
-                <option value="last_month">Last Month — Aug 2026</option>
-                <option value="last_quarter">Last Quarter — Q2 2026</option>
-                <option value="empty_test">Previous Year — 2025 (Empty)</option>
-              </select>
-              <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+          <div className="flex flex-col gap-1 min-w-[280px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Reporting Period</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
+              <span className="text-secondary">-</span>
+              <div className="relative flex-1">
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-1 min-w-[240px]">
@@ -137,10 +150,7 @@ export default function TreatmentCategoryBreakdownReport() {
           <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
           </button>
-          <button onClick={() => {
-            setLoading(true);
-            getTreatmentCategories().then(res => { setData(res); setLoading(false); });
-          }} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
+          <button onClick={fetchReport} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">filter_alt</span>Apply Filters
           </button>
         </div>

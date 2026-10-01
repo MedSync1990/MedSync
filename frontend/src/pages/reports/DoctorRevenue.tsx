@@ -7,7 +7,8 @@ export default function DoctorRevenueReport() {
   const [loading, setLoading] = useState(true);
   
   // Filters
-  const [dateRange] = useState('Sep 01, 2026 – Sep 30, 2026');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('All Specialties');
   const [searchDoctor, setSearchDoctor] = useState('');
   
@@ -15,16 +16,30 @@ export default function DoctorRevenueReport() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<DoctorRevenueItem | null>(null);
 
-  useEffect(() => {
-    getDoctorRevenue().then(res => {
+  const fetchReport = () => {
+    setLoading(true);
+    getDoctorRevenue({
+      from: startDate || undefined,
+      to: endDate || undefined,
+    }).then(res => {
       setData(res);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchReport();
   }, []);
 
   const handleResetFilters = () => {
+    setStartDate('');
+    setEndDate('');
     setSpecialtyFilter('All Specialties');
     setSearchDoctor('');
+    setTimeout(() => {
+      setLoading(true);
+      getDoctorRevenue({}).then(res => { setData(res); setLoading(false); });
+    }, 0);
   };
 
   const handleOpenModal = (doc: DoctorRevenueItem) => {
@@ -94,11 +109,17 @@ export default function DoctorRevenueReport() {
       {/* Operational Filter Toolbar */}
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
         <div className="flex flex-wrap items-center gap-space-md flex-1">
-          <div className="flex flex-col gap-1 min-w-[240px]">
-            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="date-range-input">Date Range</label>
-            <div className="relative flex items-center">
-              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
-              <input readOnly className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer" id="date-range-input" type="text" value={dateRange}/>
+          <div className="flex flex-col gap-1 min-w-[280px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Date Range</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
+              <span className="text-secondary">-</span>
+              <div className="relative flex-1">
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-1 min-w-[200px]">
@@ -129,10 +150,7 @@ export default function DoctorRevenueReport() {
           <button onClick={handleResetFilters} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5" id="reset-filters-btn">
             <span className="material-symbols-outlined text-[18px]">restart_alt</span> Reset
           </button>
-          <button onClick={() => {
-            setLoading(true);
-            getDoctorRevenue().then(res => { setData(res); setLoading(false); });
-          }} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5" id="apply-filters-btn">
+          <button onClick={fetchReport} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5" id="apply-filters-btn">
             <span className="material-symbols-outlined text-[18px]">filter_alt</span> Apply Filters
           </button>
         </div>

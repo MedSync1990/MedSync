@@ -7,18 +7,27 @@ export function InsuranceVsOutOfPocket() {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [dateRange, setDateRange] = useState('last6');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [providerFilter, setProviderFilter] = useState('all');
   const [searchPeriod, setSearchPeriod] = useState('');
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
 
-  useEffect(() => {
-    getInsuranceVsOutOfPocket().then(res => {
+  const fetchReport = () => {
+    setLoading(true);
+    getInsuranceVsOutOfPocket({
+      from: startDate || undefined,
+      to: endDate || undefined,
+    }).then(res => {
       setData(res);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchReport();
   }, []);
 
   const handleExport = () => {
@@ -32,16 +41,20 @@ export function InsuranceVsOutOfPocket() {
   };
 
   const handleReset = () => {
-    setDateRange('last6');
+    setStartDate('');
+    setEndDate('');
     setProviderFilter('all');
     setSearchPeriod('');
+    setTimeout(() => {
+      setLoading(true);
+      getInsuranceVsOutOfPocket({}).then(res => { setData(res); setLoading(false); });
+    }, 0);
   };
 
   const fmt = (n: number) => `LKR ${(Number(n) || 0).toLocaleString('en-US')}`;
 
   const q = searchPeriod.toLowerCase().trim();
   const filteredData = (data?.ledger || []).filter(item => {
-    if (dateRange === 'custom') return false; // mock empty state
     return !q || item.period.toLowerCase().includes(q);
   });
 
@@ -60,8 +73,8 @@ export function InsuranceVsOutOfPocket() {
   const sc = 150 / maxVal;
   const yLabels = [0, maxVal * 0.33, maxVal * 0.66, maxVal];
 
-  const prov = data?.provider_split || [];
-  const sla = data?.claim_slas || [];
+  const prov = (data?.provider_split || []).filter(p => providerFilter === 'all' || p.provider_name.toLowerCase().includes(providerFilter.toLowerCase()));
+  const sla = (data?.claim_slas || []).filter(p => providerFilter === 'all' || p.provider_name.toLowerCase().includes(providerFilter.toLowerCase()));
   const modes = data?.payment_modes || [];
 
   const totalInvoices = (data?.ledger || []).reduce((acc, curr) => acc + curr.volume, 0) || 0;
@@ -92,16 +105,17 @@ export function InsuranceVsOutOfPocket() {
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
         <div className="flex flex-wrap items-center gap-space-md flex-1">
-          <div className="flex flex-col gap-1 min-w-[240px]">
-            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="date-range-filter">Date Range</label>
-            <div className="relative flex items-center">
-              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
-              <select id="date-range-filter" value={dateRange} onChange={e => setDateRange(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
-                <option value="last6">Last 6 Months (Apr – Sep 2026)</option>
-                <option value="current">This Month (Sep 2026)</option>
-                <option value="custom">Custom Range...</option>
-              </select>
-              <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+          <div className="flex flex-col gap-1 min-w-[280px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Date Range</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
+              <span className="text-secondary">-</span>
+              <div className="relative flex-1">
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-1 min-w-[240px]">
@@ -130,10 +144,7 @@ export function InsuranceVsOutOfPocket() {
           <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
           </button>
-          <button onClick={() => {
-            setLoading(true);
-            getInsuranceVsOutOfPocket().then(res => { setData(res); setLoading(false); });
-          }} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
+          <button onClick={fetchReport} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">filter_alt</span>Apply Filters
           </button>
         </div>
