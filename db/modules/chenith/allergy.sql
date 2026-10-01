@@ -1,4 +1,4 @@
-CREATE TABLE allergy (
+CREATE TABLE IF NOT EXISTS allergy (
     allergy_id   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     allergy_code VARCHAR(20) NOT NULL UNIQUE,
     name         VARCHAR(100) NOT NULL

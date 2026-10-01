@@ -1,4 +1,4 @@
-CREATE TABLE patient (
+CREATE TABLE IF NOT EXISTS patient (
     user_id           INT PRIMARY KEY REFERENCES app_user(user_id) ON DELETE RESTRICT,
     patient_code      VARCHAR(9) GENERATED ALWAYS AS
                       ('PT-' || lpad(user_id::text, 6, '0')) STORED,
@@ -12,4 +12,4 @@ CREATE TABLE patient (
 );
 
 CREATE UNIQUE INDEX uq_patient_code ON patient(patient_code);
-CREATE INDEX idx_patient_registered_branch ON patient(registered_branch);
+CREATE INDEX IF NOT EXISTS idx_patient_registered_branch ON patient(registered_branch);
