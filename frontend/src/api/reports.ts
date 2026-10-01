@@ -20,6 +20,7 @@ import type {
 export interface AppointmentsSummaryParams {
   branch?: number;
   date?: string;   // ISO date (YYYY-MM-DD)
+  appointment_type?: string;
 }
 
 export interface DoctorRevenueParams {
@@ -62,6 +63,7 @@ export function getAppointmentsSummary(
     branch_id: params.branch,
     start_date: params.date, // frontend passes single 'date' string
     end_date: params.date,
+    appointment_type: params.appointment_type,
   } : undefined;
   return get<AppointmentsSummaryResponse>('/reports/appointments-summary', query);
 }
@@ -124,6 +126,32 @@ export function getInsuranceVsOutOfPocket(
   } : undefined;
   return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', query);
 }
+/**
+ * Utility function to trigger a CSV file download from an array of objects
+ */
+export function exportToCSV(data: any[], filename: string) {
+  if (!data || !data.length) return;
+  const headers = Object.keys(data[0]);
+  const rows = data.map(row => 
+    headers.map(header => {
+      let cell = row[header] === null || row[header] === undefined ? '' : row[header];
+      cell = String(cell).replace(/"/g, '""');
+      return `"${cell}"`;
+    }).join(',')
+  );
+  
+  const csvContent = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 // ─── Doctor Earnings & Payouts ──────────────────────────────────────────────
 
 export interface DoctorEarningsOverviewResponse {

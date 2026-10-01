@@ -40,7 +40,7 @@ import ManageTreatmentCatalogue from '../pages/admin/ManageTreatmentCatalogue';
 // Reports
 import { ReportsIndex } from '../pages/reports/ReportsIndex';
 import BranchAppointmentSummary from '../pages/reports/BranchAppointmentSummary';
-import { DoctorRevenue } from '../pages/reports/DoctorRevenue';
+import DoctorRevenue from '../pages/reports/DoctorRevenue';
 import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
 import TreatmentCategoryBreakdown from '../pages/reports/TreatmentCategoryBreakdown';
 import { InsuranceVsOutOfPocket } from '../pages/reports/InsuranceVsOutOfPocket';

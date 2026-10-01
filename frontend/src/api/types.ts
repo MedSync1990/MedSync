@@ -269,13 +269,34 @@ export interface VerifyInsuranceResponse {
 
 // ─── Reports ────────────────────────────────────────────────────────────────
 
+export interface AppointmentDailySummaryItem {
+  date: string;
+  scheduled: number;
+  completed: number;
+  cancelled: number;
+}
+
 export interface AppointmentsSummaryResponse {
-  data: Array<Record<string, any>>;
-  total: number;
+  daily_data: AppointmentDailySummaryItem[];
+  total_scheduled: number;
+  total_completed: number;
+  total_cancelled: number;
+  total_walkins: number;
+}
+
+export interface DoctorRevenueItem {
+  doctor_id: number;
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  total_appointments: number;
+  consult_revenue: number;
+  procedure_revenue: number;
+  total_revenue: number;
 }
 
 export interface DoctorRevenueResponse {
-  data: Array<Record<string, any>>;
+  data: DoctorRevenueItem[];
   total: number;
 }
 
@@ -286,14 +307,38 @@ export interface ItemizedPaymentResponse {
   limit: number;
 }
 
+export interface OutstandingBalanceItem {
+  invoice_id: string;
+  patient_id: number;
+  patient_name: string;
+  contact_number: string;
+  total_amount: number;
+  paid_amount: number;
+  due_amount: number;
+  last_payment_date: string | null;
+  aging_days: number;
+  status: string;
+}
+
 export interface OutstandingBalancesResponse {
-  data: Array<Record<string, any>>;
+  data: OutstandingBalanceItem[];
   total: number;
 }
 
+export interface TreatmentCategoryItem {
+  treatment_code: string;
+  treatment_item: string;
+  category: string;
+  is_active: boolean;
+  usage_count: number;
+  total_revenue: number;
+}
+
 export interface TreatmentCategoriesResponse {
-  data: Array<Record<string, any>>;
+  data: TreatmentCategoryItem[];
   total: number;
+  total_catalog_items: number;
+  active_catalog_items: number;
 }
 
 export interface MonthlyLedgerItem {
@@ -326,6 +371,7 @@ export interface InsuranceVsOutOfPocketResponse {
   provider_split: ProviderSplitItem[];
   claim_slas: ClaimSlaItem[];
   payment_modes: PaymentModeItem[];
+  avg_claim_days: number;
 }
 
 // ─── Patients (schemas/patients.py) ─────────────────────────────────────────

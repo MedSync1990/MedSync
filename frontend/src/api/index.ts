@@ -22,6 +22,9 @@ export type * from './types';
 // Auth endpoints
 export { login, logout, getMe } from './auth';
 
+// Branch endpoints
+export { listBranches } from './branches';
+
 // Report endpoints
 export {
   getAppointmentsSummary,
