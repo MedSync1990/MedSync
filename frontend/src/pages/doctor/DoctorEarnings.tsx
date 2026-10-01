@@ -360,7 +360,7 @@ export const DoctorEarnings: React.FC = () => {
                     <td className="px-space-md py-3.5 whitespace-nowrap text-center">
                       <button
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
-                        onClick={() => alert('Downloading remittance slip for PAY-00482 (PDF)')}
+                        onClick={() => window.print()}
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[15px] text-secondary">download</span>
@@ -382,7 +382,7 @@ export const DoctorEarnings: React.FC = () => {
                     <td className="px-space-md py-3.5 whitespace-nowrap text-center">
                       <button
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
-                        onClick={() => alert('Downloading remittance slip for PAY-00391 (PDF)')}
+                        onClick={() => window.print()}
                         type="button"
                       >
                         <span className="material-symbols-outlined text-[15px] text-secondary">download</span>

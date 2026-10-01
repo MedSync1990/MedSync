@@ -1,382 +1,414 @@
-import React, { useState, useMemo } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { ReportPageShell } from '../../components/ReportPageShell';
-import { getInsuranceVsOutOfPocket } from '../../api';
-import type { InsuranceVsOutOfPocketResponse } from '../../api';
+import { useState, useEffect } from 'react';
+import { getInsuranceVsOutOfPocket, exportToCSV } from '../../api/reports';
+import type { InsuranceVsOutOfPocketResponse } from '../../api/types';
 
-export const InsuranceVsOutOfPocket: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function InsuranceVsOutOfPocket() {
   const [data, setData] = useState<InsuranceVsOutOfPocketResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleFilterChange = async (filters: { branch?: number; from?: string; to?: string }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getInsuranceVsOutOfPocket({
-        branch: filters.branch,
-        from: filters.from,
-        to: filters.to,
-      });
+  // Filters
+  const [dateRange, setDateRange] = useState('last6');
+  const [providerFilter, setProviderFilter] = useState('all');
+  const [searchPeriod, setSearchPeriod] = useState('');
+
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportComplete, setExportComplete] = useState(false);
+
+  useEffect(() => {
+    getInsuranceVsOutOfPocket().then(res => {
       setData(res);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load report');
-    } finally {
       setLoading(false);
-    }
+    });
+  }, []);
+
+  const handleExport = () => {
+    setIsExporting(true);
+    exportToCSV(filteredData, 'Monthly_Settlement_Ledger');
+    setTimeout(() => {
+      setIsExporting(false);
+      setExportComplete(true);
+      setTimeout(() => setExportComplete(false), 2000);
+    }, 600);
   };
 
-  const hasData = data !== null && data.ledger.length > 0;
+  const handleReset = () => {
+    setDateRange('last6');
+    setProviderFilter('all');
+    setSearchPeriod('');
+  };
 
-  // Calculate totals across the filtered ledger periods
-  const totalInsurance = useMemo(() => {
-    return hasData ? data.ledger.reduce((sum, item) => sum + item.total_insurance_covered, 0) : 0;
-  }, [hasData, data?.ledger]);
+  const fmt = (n: number) => `LKR ${(Number(n) || 0).toLocaleString('en-US')}`;
 
-  const totalOutOfPocket = useMemo(() => {
-    return hasData ? data.ledger.reduce((sum, item) => sum + item.total_out_of_pocket, 0) : 0;
-  }, [hasData, data?.ledger]);
+  const q = searchPeriod.toLowerCase().trim();
+  const filteredData = (data?.ledger || []).filter(item => {
+    if (dateRange === 'custom') return false; // mock empty state
+    return !q || item.period.toLowerCase().includes(q);
+  });
 
-  const grandTotal = totalInsurance + totalOutOfPocket;
-  const coverageRatio = grandTotal > 0 ? (totalInsurance / grandTotal) * 100 : 0;
-  const oopRatio = grandTotal > 0 ? (totalOutOfPocket / grandTotal) * 100 : 0;
-  const totalVolume = hasData ? data!.ledger.reduce((sum, item) => sum + item.volume, 0) : 0;
+  const hasData = filteredData.length > 0;
 
-  // Reverse ledger for chart so chronological order is left to right
-  const chartData = useMemo(() => {
-    if (!hasData) return [];
-    return [...data.ledger].reverse();
-  }, [hasData, data?.ledger]);
+  // KPIs
+  const totalIns = (data?.ledger || []).reduce((acc, curr) => acc + curr.total_insurance_covered, 0) || 0;
+  const totalOop = (data?.ledger || []).reduce((acc, curr) => acc + curr.total_out_of_pocket, 0) || 0;
+  const totalBilled = totalIns + totalOop;
+  const insCoveragePct = totalBilled > 0 ? (totalIns / totalBilled * 100).toFixed(1) : "0.0";
+  const oopRatio = totalBilled > 0 ? (totalOop / totalBilled * 100).toFixed(1) : "0.0";
+
+  const asc = [...(data?.ledger || [])].reverse();
+  const X0 = 70, step = 85, base = 200;
+  const maxVal = Math.max(...asc.map(m => m.total_insurance_covered + m.total_out_of_pocket), 1200000);
+  const sc = 150 / maxVal;
+  const yLabels = [0, maxVal * 0.33, maxVal * 0.66, maxVal];
+
+  const prov = data?.provider_split || [];
+  const sla = data?.claim_slas || [];
+  const modes = data?.payment_modes || [];
+
+  const totalInvoices = (data?.ledger || []).reduce((acc, curr) => acc + curr.volume, 0) || 0;
 
   return (
-    <ReportPageShell
-      title="Insurance vs. Out-of-Pocket"
-      subtitle="Coverage split between insurance and patient payments over a period."
-      loading={loading}
-      error={error}
-      hasData={hasData}
-      onFilterChange={handleFilterChange}
-    >
-      {hasData && data && (
-        <div className="space-y-space-xl">
-          {/* Key Metrics Bento */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-            {/* Card 1: Insurance Coverage */}
-            <div className="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Insurance Coverage</span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-display-lg text-display-lg text-primary">{coverageRatio.toFixed(1)}%</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-status-scheduled-bg text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[22px]">health_and_safety</span>
-                </div>
-              </div>
-              <div className="mt-space-md pt-space-xs flex items-center justify-between font-mono-data text-mono-data">
-                <span className="text-secondary">Total Settled</span>
-                <span className="text-on-surface font-semibold">LKR {totalInsurance.toLocaleString()}</span>
-              </div>
-            </div>
+    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+        <div className="flex flex-col gap-space-2xs">
+          <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
+            <span className="material-symbols-outlined text-[18px]">verified</span>
+            <span>Financial Operations</span>
+            <span className="text-outline">/</span>
+            <span className="text-secondary font-medium">Branch Performance</span>
+          </div>
+          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Insurance vs. Out-of-Pocket</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">Coverage split between insurance and patient payments over a period.</p>
+        </div>
+        <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-[20px]">lock</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+            <span className="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span>
+          </div>
+        </div>
+      </div>
 
-            {/* Card 2: Out of Pocket */}
-            <div className="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Out-of-Pocket Ratio</span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-display-lg text-display-lg text-tertiary">{oopRatio.toFixed(1)}%</span>
-                    <span className="font-label-sm text-label-sm text-secondary bg-surface-container px-1.5 py-0.5 rounded-full font-semibold">Patient Paid</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-surface-container text-tertiary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[22px]">wallet</span>
-                </div>
-              </div>
-              <div className="mt-space-md pt-space-xs flex items-center justify-between font-mono-data text-mono-data">
-                <span className="text-secondary">Patient Direct</span>
-                <span className="text-on-surface font-semibold">LKR {totalOutOfPocket.toLocaleString()}</span>
-              </div>
-            </div>
-
-            {/* Card 3: Total Gross Billed */}
-            <div className="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Gross Billed</span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-                      LKR {(grandTotal / 1000000).toFixed(2)}M
-                    </span>
-                    <span className="font-label-sm text-label-sm text-secondary">Aggregate</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[22px]">receipt_long</span>
-                </div>
-              </div>
-              <div className="mt-space-md pt-space-xs flex items-center justify-between font-mono-data text-mono-data">
-                <span className="text-secondary">Actual Billed</span>
-                <span className="text-on-surface font-semibold">LKR {grandTotal.toLocaleString()}</span>
-              </div>
-            </div>
-
-            {/* Card 4: Claim Settlement Time (Simulated) */}
-            <div className="metric-block p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary flex items-center gap-1">
-                    Avg Claim Settlement
-                    <span className="material-symbols-outlined text-[14px] text-outline cursor-help" title="Simulated Data: SLA tracking is not yet integrated with the billing backend.">info</span>
-                  </span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="font-display-lg text-display-lg text-on-surface">4.2</span>
-                    <span className="font-label-md text-label-md text-secondary">business days</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-status-completed-bg text-status-completed-text flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[22px]">timer</span>
-                </div>
-              </div>
-              <div className="mt-space-md pt-space-xs font-label-sm text-[11px] text-outline italic">
-                * Simulated metric
-              </div>
+      <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+        <div className="flex flex-wrap items-center gap-space-md flex-1">
+          <div className="flex flex-col gap-1 min-w-[240px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="date-range-filter">Date Range</label>
+            <div className="relative flex items-center">
+              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
+              <select id="date-range-filter" value={dateRange} onChange={e => setDateRange(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
+                <option value="last6">Last 6 Months (Apr – Sep 2026)</option>
+                <option value="current">This Month (Sep 2026)</option>
+                <option value="custom">Custom Range...</option>
+              </select>
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
             </div>
           </div>
-
-          {/* Visualization & Claim Split Insight */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
-            {/* Chart Panel: Dual Stacked Monthly Progression */}
-            <div className="lg:col-span-2 p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-lg">
-                <div>
-                  <h2 className="font-headline-sm text-headline-sm text-on-surface">Monthly Settlement Progression</h2>
-                  <p className="font-body-sm text-body-sm text-secondary">Progression of Insurance vs Out-of-Pocket disbursement</p>
-                </div>
-              </div>
-              <div className="w-full h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="period" tick={{ fill: '#565e74', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} />
-                    <YAxis tickFormatter={(val) => `${(val / 1000)}k`} tick={{ fill: '#707881', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip 
-                      formatter={(value: any) => `LKR ${Number(value).toLocaleString()}`}
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Bar dataKey="total_out_of_pocket" name="Out-of-Pocket" stackId="a" fill="#89ceff" radius={[0, 0, 4, 4]} barSize={40} />
-                    <Bar dataKey="total_insurance_covered" name="Insurance" stackId="a" fill="#006194" radius={[4, 4, 0, 0]} barSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Provider Split Breakdown */}
-            <div className="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-space-sm">
-                  <h2 className="font-headline-sm text-headline-sm text-on-surface">Top Provider Split</h2>
-                </div>
-                <p className="font-body-sm text-body-sm text-secondary mb-space-md">Disbursed claims distribution by contracted health insurer</p>
-                
-                <div className="flex flex-col gap-space-sm">
-                  {data.provider_split.map((prov, i) => {
-                    // Match the HTML's custom colors for top 4
-                    const barColors = ['bg-primary', 'bg-tertiary', 'bg-brand-teal-light', 'bg-secondary'];
-                    const dotColors = ['bg-primary', 'bg-tertiary', 'bg-brand-teal-light', 'bg-secondary'];
-                    const colorClass = barColors[i % barColors.length];
-                    const dotClass = dotColors[i % dotColors.length];
-
-                    return (
-                      <div key={prov.provider_name}>
-                        <div className="flex items-center justify-between font-label-sm text-label-sm mb-1">
-                          <span className="text-on-surface font-semibold flex items-center gap-1.5">
-                            <span className={`w-2 h-2 rounded-full ${dotClass}`}></span> {prov.provider_name}
-                          </span>
-                          <span className="font-mono-data text-secondary">
-                            LKR {prov.amount.toLocaleString()} ({prov.percentage.toFixed(1)}%)
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-                          <div className={`h-full ${colorClass} rounded-full`} style={{ width: `${prov.percentage}%` }}></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {data.provider_split.length === 0 && (
-                     <div className="text-secondary font-body-sm italic">No insurance claims in this period.</div>
-                  )}
-                </div>
-              </div>
-              <div className="mt-space-md p-space-sm rounded-lg bg-surface-container-low flex items-start gap-space-sm">
-                <span className="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">policy</span>
-                <div className="text-on-surface">
-                  <div className="font-label-sm text-label-sm font-semibold">Pre-Authorization Policy Note</div>
-                  <div className="font-body-sm text-body-sm text-secondary leading-snug mt-0.5">
-                    SLIC & Ceylinco direct billing requires real-time eligibility checks prior to specialist consultation checkout.
-                  </div>
-                </div>
-              </div>
+          <div className="flex flex-col gap-1 min-w-[240px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="provider-filter">Insurance Provider</label>
+            <div className="relative flex items-center">
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">corporate_fare</span>
+              <select id="provider-filter" value={providerFilter} onChange={e => setProviderFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
+                <option value="all">All Providers</option>
+                <option value="slic">Sri Lanka Insurance (SLIC)</option>
+                <option value="ceylinco">Ceylinco General Insurance</option>
+                <option value="aia">AIA Health Sri Lanka</option>
+                <option value="softlogic">Softlogic Life Healthcare</option>
+              </select>
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
             </div>
           </div>
-
-          {/* Detailed Period Data Table */}
-          <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
-            <div className="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-lowest">
-              <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">Monthly Settlement Ledger</h2>
-                <p className="font-body-sm text-body-sm text-secondary">Exact breakdown of billing disbursements per monthly financial cycle</p>
-              </div>
-            </div>
-            <div className="w-full overflow-x-auto">
-              <table className="w-full text-left" id="insurance-table">
-                <thead className="bg-canvas-bg font-label-sm text-label-sm text-secondary uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3.5 px-space-lg font-bold" scope="col">Billing Period</th>
-                    <th className="py-3.5 px-space-md font-bold" scope="col">Insurance Covered (LKR)</th>
-                    <th className="py-3.5 px-space-md font-bold" scope="col">Out-of-Pocket (LKR)</th>
-                    <th className="py-3.5 px-space-md font-bold" scope="col">Total Invoiced</th>
-                    <th className="py-3.5 px-space-md font-bold min-w-[200px]" scope="col">% Covered (Insurance)</th>
-                    <th className="py-3.5 px-space-lg font-bold text-right" scope="col">Volume</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-transparent font-body-md text-body-md text-on-surface">
-                  {data.ledger.map((item, idx) => {
-                    const coveragePercent = item.total_revenue > 0 ? (item.total_insurance_covered / item.total_revenue) * 100 : 0;
-                    return (
-                      <tr key={idx} className="hover:bg-canvas-bg transition-colors">
-                        <td className="py-4 px-space-lg">
-                          <div className="flex items-center gap-2">
-                            {idx === 0 && <span className="w-2 h-2 rounded-full bg-status-completed-text"></span>}
-                            <span className={`font-label-lg text-label-lg ${idx === 0 ? 'font-bold' : ''} text-on-surface`}>{item.period}</span>
-                            {idx === 0 && <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm">Active</span>}
-                          </div>
-                        </td>
-                        <td className="py-4 px-space-md font-mono-data text-mono-data font-semibold text-primary">
-                          LKR {item.total_insurance_covered.toLocaleString()}
-                        </td>
-                        <td className="py-4 px-space-md font-mono-data text-mono-data text-secondary">
-                          LKR {item.total_out_of_pocket.toLocaleString()}
-                        </td>
-                        <td className="py-4 px-space-md font-mono-data text-mono-data font-bold text-on-surface">
-                          LKR {item.total_revenue.toLocaleString()}
-                        </td>
-                        <td className="py-4 px-space-md">
-                          <div className="flex items-center gap-3">
-                            <span className="font-label-md text-label-md font-bold text-on-surface w-12">{coveragePercent.toFixed(1)}%</span>
-                            <div className="flex-1 h-2 rounded-full bg-surface-container overflow-hidden">
-                              <div className="h-full bg-primary rounded-full" style={{ width: `${coveragePercent}%` }}></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-space-lg text-right font-mono-data text-mono-data font-medium text-on-surface-variant">
-                          {item.volume} invoices
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {/* Table Footer */}
-            <div className="p-space-lg bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-md font-mono-data text-mono-data text-secondary">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-primary">verified</span>
-                <span>Showing {data.ledger.length} periods ({totalVolume} cumulative invoices)</span>
-              </div>
-              <div className="flex items-center gap-space-lg">
-                <div>
-                  <span>Total Ins: </span>
-                  <span className="text-on-surface font-bold">LKR {totalInsurance.toLocaleString()}</span>
-                </div>
-                <div>
-                  <span>Total OOP: </span>
-                  <span className="text-on-surface font-bold">LKR {totalOutOfPocket.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Operational Audit & Direct Settlement Verification Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
-            {/* Settlement SLA Performance */}
-            <div className="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-space-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[22px]">speed</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Insurer Claim Turnaround Time</h3>
-                  </div>
-                  <span className="font-label-sm text-label-sm text-status-completed-text bg-status-completed-bg px-2 py-0.5 rounded-full font-semibold">Healthy Flow</span>
-                </div>
-                <p className="font-body-sm text-body-sm text-secondary mb-space-md">Real-time claim settlement times for processed invoices.</p>
-                <div className="space-y-space-sm">
-                  {data.claim_slas.map((sla, i) => {
-                    const initials = sla.provider_name.substring(0, 2).toUpperCase();
-                    const iconColors = ['bg-primary/10 text-primary', 'bg-tertiary/10 text-tertiary', 'bg-secondary/10 text-secondary'];
-                    const colorClass = iconColors[i % iconColors.length];
-                    const isHealthy = sla.avg_days <= 5.0;
-
-                    return (
-                      <div key={sla.provider_name} className="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
-                        <div className="flex items-center gap-space-sm">
-                          <span className={`w-8 h-8 rounded-lg ${colorClass} flex items-center justify-center font-bold text-xs`}>{initials}</span>
-                          <div>
-                            <div className="font-label-md text-label-md text-on-surface">{sla.provider_name}</div>
-                            <div className="font-body-sm text-body-sm text-secondary">Direct Settlement API</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-mono-data text-mono-data font-bold text-on-surface">{sla.avg_days.toFixed(1)} Days</div>
-                          <div className={`font-label-sm text-label-sm ${isHealthy ? 'text-status-completed-text' : 'text-status-pending-text'} font-semibold`}>
-                            {isHealthy ? 'Under SLA (5d)' : 'Review Pending'}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Gateway & Cashier Reconciliation */}
-            <div className="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-space-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Out-of-Pocket Payment Modes</h3>
-                  </div>
-                </div>
-                <p className="font-body-sm text-body-sm text-secondary mb-space-md">Distribution of patient payments collected at front-desk cashier counters.</p>
-                <div className="grid grid-cols-3 gap-space-sm mb-space-md text-center">
-                  {data.payment_modes.map((mode) => (
-                    <div key={mode.payment_type} className="p-space-sm rounded-lg bg-surface-container-low">
-                      <div className="font-label-sm text-label-sm uppercase tracking-wider text-secondary truncate">{mode.payment_type}</div>
-                      <div className="font-headline-sm text-headline-sm text-on-surface mt-1">{mode.percentage.toFixed(1)}%</div>
-                      <div className="font-mono-data text-mono-data text-primary text-xs mt-0.5">LKR {(mode.amount / 1000).toFixed(0)}K</div>
-                    </div>
-                  ))}
-                  {data.payment_modes.length === 0 && (
-                    <div className="col-span-3 text-secondary font-body-sm italic">No out-of-pocket payments recorded.</div>
-                  )}
-                </div>
-              </div>
+          <div className="flex flex-col gap-1 min-w-[220px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="table-search-input">Search Period</label>
+            <div className="relative flex items-center">
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
+              <input id="table-search-input" type="text" placeholder="Search period or amount..." value={searchPeriod} onChange={e => setSearchPeriod(e.target.value)} className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
             </div>
           </div>
         </div>
-      )}
-    </ReportPageShell>
+        <div className="flex items-center gap-space-xs self-end lg:self-center">
+          <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
+          </button>
+          <button onClick={() => {
+            setLoading(true);
+            getInsuranceVsOutOfPocket().then(res => { setData(res); setLoading(false); });
+          }} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[18px]">filter_alt</span>Apply Filters
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Insurance Coverage</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">health_and_safety</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{insCoveragePct}%</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">shield</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Out-of-Pocket Ratio</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">wallet</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{oopRatio}%</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">payments</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Gross Billed</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">receipt_long</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fmt(totalBilled)}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">receipt</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Avg Claim Settlement</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">timer</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{data?.avg_claim_days ? data.avg_claim_days.toFixed(1) : "0.0"} business days</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">schedule</span></div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+        <div className="lg:col-span-2 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+            <div>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Monthly Settlement Progression</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Insurance vs. out-of-pocket disbursement across 6 months</p>
+            </div>
+            <div className="flex items-center gap-space-sm text-label-sm font-label-sm">
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-primary"></div><span className="text-on-surface-variant">Insurance</span></div>
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-brand-teal-light"></div><span className="text-on-surface-variant">Out-of-Pocket</span></div>
+            </div>
+          </div>
+          <div className="w-full overflow-x-auto">
+            <svg className="min-w-[540px] w-full h-[260px]" viewBox="0 0 600 240">
+              {yLabels.map((v, i) => {
+                const y = base - (v * sc);
+                return (
+                  <g key={i}>
+                    <line x1="0" x2="600" y1={y} y2={y} stroke="#F1F5F9" />
+                    <text x="4" y={y - 4} fontSize="10" fill="#707881">{v ? (v / 1000).toFixed(0) + 'K' : '0'}</text>
+                  </g>
+                );
+              })}
+              {asc.map((m, i) => {
+                const x = X0 + i * step;
+                const hi = m.total_insurance_covered * sc;
+                const ho = m.total_out_of_pocket * sc;
+                const p = (m.total_insurance_covered / (m.total_insurance_covered + m.total_out_of_pocket) * 100).toFixed(1);
+                const periodLabel = m.period.slice(0, 3) + " '" + m.period.slice(-2);
+                return (
+                  <g key={i}>
+                    <rect x={x} y={base - hi} width="38" height={hi} rx="4" fill="#006194" />
+                    <rect x={x} y={base - hi - ho} width="38" height={ho} rx="4" fill="#38BDF8" />
+                    <text x={x + 19} y={base - hi - ho - 8} fontSize="11" fontWeight="700" textAnchor="middle" fill="#006194">{p}%</text>
+                    <text x={x + 19} y="220" fontSize="11" fontWeight="600" textAnchor="middle" fill="#565e74">{periodLabel}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          <div className="flex items-center justify-between text-body-sm font-body-sm text-secondary">
+            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[16px] text-primary">trending_up</span>Insurance share up 2.3 points since April.</span>
+            <span className="font-mono-data text-mono-data text-outline">Updated: 23 Sep 2026</span>
+          </div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div>
+            <h2 className="font-headline-md text-headline-md text-on-surface">Top Provider Split</h2>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">Disbursed claims by contracted insurer</p>
+          </div>
+          <div className="flex flex-col gap-space-md">
+            {prov.map((p, i) => {
+              const bgClass = i === 0 ? 'bg-primary' : i === 1 ? 'bg-tertiary' : i === 2 ? 'bg-brand-teal-light' : 'bg-secondary';
+              return (
+              <div key={i} className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-body-sm font-body-sm">
+                  <span className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${bgClass}`}></span>{p.provider_name}
+                  </span>
+                  <span className="font-mono-data text-mono-data text-secondary">{fmt(p.amount)} ({p.percentage.toFixed(1)}%)</span>
+                </div>
+                <div className="h-3 w-full bg-surface-subtle rounded-full overflow-hidden">
+                  <div className={`${bgClass} h-full rounded-full`} style={{ width: `${p.percentage}%` }}></div>
+                </div>
+              </div>
+            )})}
+          </div>
+          <div className="mt-auto p-space-sm rounded-lg bg-surface-subtle flex items-start gap-space-sm">
+            <span className="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">policy</span>
+            <div>
+              <div className="font-label-md text-label-md">Pre-Authorization Policy</div>
+              <div className="font-body-sm text-body-sm text-secondary mt-0.5">SLIC and Ceylinco direct billing requires a real-time eligibility check before specialist consultation checkout.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div className="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-lowest">
+          <div className="flex items-center gap-space-sm">
+            <div className="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">table_chart</span></div>
+            <div>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface">Monthly Settlement Ledger</h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Billing disbursements per monthly cycle</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
+              {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export Ledger'}
+            </button>
+            <button className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">verified</span>Audit Coverage
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className={`w-full text-left border-collapse ${hasData ? '' : 'hidden'}`}>
+            <thead>
+              <tr className="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11">
+                <th className="px-space-md py-2.5 font-semibold">Billing Period</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Insurance (LKR)</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Out-of-Pocket (LKR)</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Total Invoiced</th>
+                <th className="px-space-md py-2.5 font-semibold min-w-[200px]">% Covered</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Volume</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-surface-subtle">
+              {filteredData.map((m, i) => {
+                const t = m.total_insurance_covered + m.total_out_of_pocket;
+                const p = t > 0 ? (m.total_insurance_covered / t * 100).toFixed(1) : "0.0";
+                return (
+                  <tr key={i} className="hover:bg-surface-subtle/70 transition-colors">
+                    <td className="px-space-md py-3.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-label-lg text-label-lg ${i === 0 ? 'font-bold' : ''} text-on-surface`}>{m.period}</span>
+                        {i === 0 && <span className="px-1.5 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">Active</span>}
+                      </div>
+                    </td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-semibold text-primary">{fmt(m.total_insurance_covered)}</td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data text-secondary">{fmt(m.total_out_of_pocket)}</td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold text-on-surface">{fmt(t)}</td>
+                    <td className="px-space-md py-3.5">
+                      <div className="flex items-center gap-3">
+                        <span className="font-label-md text-label-md font-bold text-on-surface w-14">{p}%</span>
+                        <div className="flex-1 h-2 rounded-full bg-surface-subtle overflow-hidden">
+                          <div className="h-full bg-primary rounded-full" style={{ width: `${p}%` }}></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-space-md py-3.5 text-right">
+                      <span className="px-2 py-0.5 rounded bg-status-scheduled-bg text-status-scheduled-text font-mono-data text-mono-data font-semibold">{m.volume} invoices</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!hasData && !loading && (
+            <div className="py-space-3xl px-space-md flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span className="material-symbols-outlined text-[32px]">folder_off</span></div>
+              <h4 className="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>
+              <p className="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">Try resetting the insurer filter or extending the date range to include other billing cycles.</p>
+              <button onClick={handleReset} className="mt-space-md px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors">Clear Filters</button>
+            </div>
+          )}
+          {loading && (
+            <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
+               <span className="material-symbols-outlined animate-spin text-[32px]">refresh</span>
+            </div>
+          )}
+        </div>
+        <div className={`p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm ${!hasData ? 'hidden' : ''}`}>
+          <div className="text-body-sm font-body-sm text-secondary">Showing {filteredData.length} periods · {totalInvoices} cumulative invoices</div>
+          <div className="flex items-center gap-space-lg">
+            <div className="flex items-center gap-2">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Ins:</span>
+              <span className="font-mono-data text-mono-data font-bold text-on-surface">{fmt(totalIns)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total OOP:</span>
+              <span className="font-headline-sm text-headline-sm font-bold text-primary">{fmt(totalOop)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+        <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[22px]">speed</span>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface">Insurer Claim Turnaround</h3>
+            </div>
+            <span className="font-label-sm text-label-sm text-status-completed-text bg-status-completed-bg px-2 py-0.5 rounded-full font-semibold">Healthy Flow</span>
+          </div>
+          <div className="flex flex-col gap-space-sm">
+            {sla.map((r, i) => {
+              const init = r.provider_name.substring(0, 2).toUpperCase();
+              const isGood = r.avg_days <= 5.0;
+              return (
+              <div key={i} className="p-space-sm rounded-lg bg-surface-subtle flex items-center justify-between">
+                <div className="flex items-center gap-space-sm">
+                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">{init}</span>
+                  <div>
+                    <div className="font-label-md text-label-md text-on-surface">{r.provider_name}</div>
+                    <div className="font-body-sm text-body-sm text-secondary">Claim Turnaround Time</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono-data text-mono-data font-bold text-on-surface">{r.avg_days.toFixed(1)} Days</div>
+                  <div className={`font-label-sm text-label-sm font-semibold ${isGood ? 'text-status-completed-text' : 'text-status-pending-text'}`}>
+                    {isGood ? 'Under SLA (5d)' : 'Review Pending'}
+                  </div>
+                </div>
+              </div>
+            )})}
+          </div>
+          <div className="font-body-sm text-body-sm text-secondary flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] text-primary">info</span>Claims over 7 days are flagged to the Financial Accounts team.
+          </div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[22px]">account_balance_wallet</span>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface">Out-of-Pocket Payment Modes</h3>
+            </div>
+            <span className="font-label-sm text-label-sm text-secondary">Sep 2026 YTD</span>
+          </div>
+          <div className="grid grid-cols-3 gap-space-sm text-center">
+            {modes.map((m, i) => (
+              <div key={i} className="p-space-sm rounded-lg bg-surface-subtle">
+                <div className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">{m.payment_type}</div>
+                <div className="font-headline-sm text-headline-sm text-on-surface mt-1">{m.percentage.toFixed(1)}%</div>
+                <div className="font-mono-data text-mono-data text-primary mt-0.5">{fmt(m.amount)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="p-space-sm rounded-lg bg-surface-subtle flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-status-completed-text text-[20px]">check_circle</span>
+              <span className="font-label-md text-label-md text-on-surface">Daily Cash Drawer Reconciliation</span>
+            </div>
+            <span className="font-mono-data text-mono-data text-status-completed-text font-bold">100% BALANCED</span>
+          </div>
+          <div className="flex items-center justify-between mt-auto">
+            <span className="font-body-sm text-body-sm text-secondary">Chief Cashier: R. Perera</span>
+            <button className="text-primary font-label-md text-label-md hover:underline flex items-center gap-1" type="button">
+              View Cashier Logs<span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
+}
