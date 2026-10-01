@@ -78,10 +78,10 @@ export function OutstandingBalances() {
   const hasData = filteredData.length > 0;
 
   // KPIs
-  const totalOutstanding = (data?.data || []).reduce((acc, curr) => acc + curr.due_amount, 0) || 0;
-  const overdueInvoices = data?.data?.length || 0;
-  const partiallyPaid = (data?.data || []).filter(i => i.paid_amount > 0 && i.due_amount > 0).length || 0;
-  const fullyUnpaid = (data?.data || []).filter(i => i.paid_amount === 0).length || 0;
+  const totalOutstanding = filteredData.reduce((acc, curr) => acc + curr.due_amount, 0) || 0;
+  const overdueInvoices = filteredData.length || 0;
+  const partiallyPaid = filteredData.filter(i => i.paid_amount > 0 && i.due_amount > 0).length || 0;
+  const fullyUnpaid = filteredData.filter(i => i.paid_amount === 0).length || 0;
 
   const handleView = (inv: any) => {
     setSelectedInv(inv);

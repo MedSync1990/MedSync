@@ -60,12 +60,12 @@ export default function TreatmentCategoryBreakdownReport() {
   const hasData = filteredData.length > 0;
 
   // KPIs
-  const totalTreatments = (data?.data || []).reduce((sum, item) => sum + item.usage_count, 0) || 0;
-  const totalRevenue = (data?.data || []).reduce((sum, item) => sum + item.total_revenue, 0) || 0;
+  const totalTreatments = filteredData.reduce((sum, item) => sum + item.usage_count, 0) || 0;
+  const totalRevenue = filteredData.reduce((sum, item) => sum + item.total_revenue, 0) || 0;
   
   // Categories grouping for Chart and Bars
   const catMap: Record<string, { count: number, rev: number }> = {};
-  (data?.data || []).forEach(item => {
+  filteredData.forEach(item => {
     const cat = item.category || 'Unknown';
     if (!catMap[cat]) catMap[cat] = { count: 0, rev: 0 };
     catMap[cat].count += item.usage_count;

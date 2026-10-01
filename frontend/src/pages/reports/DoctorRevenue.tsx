@@ -52,23 +52,6 @@ export default function DoctorRevenueReport() {
     setSelectedDoc(null);
   };
 
-  // KPIs
-  const totalClinicalRevenue = (data?.data || []).reduce((sum: number, d: any) => sum + d.total_revenue, 0) || 0;
-  const completedConsults = (data?.data || []).reduce((sum: number, d: any) => sum + d.total_appointments, 0) || 0;
-  const avgRevenue = (data?.data || []).length ? totalClinicalRevenue / (data?.data || []).length : 0;
-  
-  // Find top earning specialty
-  let topSpecialty = 'N/A';
-  let maxRev = 0;
-  const specMap: Record<string, number> = {};
-  (data?.data || []).forEach((d: any) => {
-    specMap[d.specialty] = (specMap[d.specialty] || 0) + d.total_revenue;
-    if (specMap[d.specialty] > maxRev) {
-      maxRev = specMap[d.specialty];
-      topSpecialty = d.specialty;
-    }
-  });
-
   // Filter Data
   const filteredDocs = (data?.data || []).filter((doc) => {
     const sMatch = specialtyFilter === 'All Specialties' || doc.specialty.toLowerCase().includes(specialtyFilter.toLowerCase());
@@ -76,6 +59,23 @@ export default function DoctorRevenueReport() {
     return sMatch && qMatch;
   }) || [];
   
+  // KPIs
+  const totalClinicalRevenue = filteredDocs.reduce((sum: number, d: any) => sum + d.total_revenue, 0) || 0;
+  const completedConsults = filteredDocs.reduce((sum: number, d: any) => sum + d.total_appointments, 0) || 0;
+  const avgRevenue = filteredDocs.length ? totalClinicalRevenue / filteredDocs.length : 0;
+  
+  // Find top earning specialty
+  let topSpecialty = 'N/A';
+  let maxRev = 0;
+  const specMap: Record<string, number> = {};
+  filteredDocs.forEach((d: any) => {
+    specMap[d.specialty] = (specMap[d.specialty] || 0) + d.total_revenue;
+    if (specMap[d.specialty] > maxRev) {
+      maxRev = specMap[d.specialty];
+      topSpecialty = d.specialty;
+    }
+  });
+
   const hasData = filteredDocs.length > 0;
   
   // Helper to format currency
@@ -218,8 +218,8 @@ export default function DoctorRevenueReport() {
           </div>
         </div>
         <div className="flex flex-col gap-space-md">
-          {(!data?.data || (data?.data || []).length === 0) && !loading && <div className="text-center text-secondary py-4">No data available</div>}
-          {(data?.data || []).map((doc: any, i: number) => {
+          {filteredDocs.length === 0 && !loading && <div className="text-center text-secondary py-4">No data available</div>}
+          {filteredDocs.map((doc: any, i: number) => {
             const consultRev = doc.consult_revenue || 0;
             const procRev = doc.procedure_revenue || 0;
             const maxBenchmark = 500000;
@@ -258,7 +258,7 @@ export default function DoctorRevenueReport() {
             </div>
             <div>
               <h3 className="font-headline-sm text-headline-sm text-on-surface">Physician Financial Summary</h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">{data?.data.length || 0} practicing physicians documented for this period</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{filteredDocs.length || 0} practicing physicians documented for this period</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
