@@ -10,7 +10,7 @@
 -- The contact table stores phone numbers for users (one-to-many).
 -- =============================================================================
 
-CREATE TABLE app_user (
+CREATE TABLE IF NOT EXISTS app_user (
     user_id        INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     role_id        INT NOT NULL REFERENCES role(role_id),
     first_name     VARCHAR(60) NOT NULL,
@@ -28,17 +28,17 @@ CREATE TABLE app_user (
 );
 
 -- Index for fast NIC lookups (patient search FR-PM-04)
-CREATE INDEX idx_app_user_id_number ON app_user(id_number);
+CREATE INDEX IF NOT EXISTS idx_app_user_id_number ON app_user(id_number);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Contact table — phone numbers for users
 -- Ref: database.md §2.1
 -- ─────────────────────────────────────────────────────────────────────────────
 
-CREATE TABLE contact (
+CREATE TABLE IF NOT EXISTS contact (
     contact_id    INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id       INT NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
     phone_number  VARCHAR(10) NOT NULL CHECK (phone_number ~ '^[0-9]{10}$')
 );
 
-CREATE INDEX idx_contact_user ON contact(user_id);
+CREATE INDEX IF NOT EXISTS idx_contact_user ON contact(user_id);

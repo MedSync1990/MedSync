@@ -38,7 +38,7 @@ shell-frontend:
 
 # Run database migrations against the local postgres container
 migrate:
-	docker compose exec backend python migrate.py
+	backend/.wsl_venv/bin/python db/migrate.py
 
 # Destroy the local DB volume and rebuild everything from scratch (fresh start)
 fresh:

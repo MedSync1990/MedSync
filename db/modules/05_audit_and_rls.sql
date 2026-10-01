@@ -1,4 +1,4 @@
-CREATE TABLE audit_log (
+CREATE TABLE IF NOT EXISTS audit_log (
     audit_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     table_name   VARCHAR(64) NOT NULL,
     operation    VARCHAR(10) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE audit_log (
     old_data     JSONB,
     new_data     JSONB
 );
-CREATE INDEX idx_audit_table_time ON audit_log(table_name, changed_at);
+CREATE INDEX IF NOT EXISTS idx_audit_table_time ON audit_log(table_name, changed_at);
 
 CREATE OR REPLACE FUNCTION fn_audit_trigger()
 RETURNS trigger
@@ -104,26 +104,26 @@ CREATE POLICY appointments_branch_manager_own_branch ON appointments
         )
     );
 
-CREATE TRIGGER trg_audit_staff
+CREATE OR REPLACE TRIGGER trg_audit_staff
     AFTER INSERT OR UPDATE OR DELETE ON staff
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('user_id');
 
-CREATE TRIGGER trg_audit_branch
+CREATE OR REPLACE TRIGGER trg_audit_branch
     AFTER INSERT OR UPDATE OR DELETE ON branch
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('branch_id');
 
-CREATE TRIGGER trg_audit_treatment_catalogue
+CREATE OR REPLACE TRIGGER trg_audit_treatment_catalogue
     AFTER INSERT OR UPDATE OR DELETE ON treatment_catalogue
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('treatment_code');
 
-CREATE TRIGGER trg_audit_invoices
+CREATE OR REPLACE TRIGGER trg_audit_invoices
     AFTER INSERT OR UPDATE ON invoices
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('invoice_id');
 
-CREATE TRIGGER trg_audit_payments
+CREATE OR REPLACE TRIGGER trg_audit_payments
     AFTER INSERT ON payments
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('payment_id');
 
-CREATE TRIGGER trg_audit_appointments
+CREATE OR REPLACE TRIGGER trg_audit_appointments
     AFTER INSERT OR UPDATE ON appointments
     FOR EACH ROW EXECUTE FUNCTION fn_audit_trigger('appointment_id');

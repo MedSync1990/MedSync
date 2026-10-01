@@ -1,4 +1,4 @@
-CREATE TABLE consultations (
+CREATE TABLE IF NOT EXISTS consultations (
     consultation_id    INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     appointment_id     INT NOT NULL UNIQUE REFERENCES appointments(appointment_id),
     diagnosis          VARCHAR(255),
@@ -6,4 +6,4 @@ CREATE TABLE consultations (
     created_date       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_consultations_appointment ON consultations(appointment_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_appointment ON consultations(appointment_id);
