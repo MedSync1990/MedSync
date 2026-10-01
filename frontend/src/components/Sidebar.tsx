@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 import type { UserRole } from '../context/AuthContext';
 
 export interface NavItem {
@@ -18,8 +19,8 @@ export interface NavSection {
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const { isCollapsed } = useSidebar();
   const userRole = user?.role;
-  const branchName = user?.branchName || 'Central Branch';
 
   const standaloneItem: NavItem = (() => {
     switch (userRole) {
@@ -161,40 +162,43 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-sidebar-width bg-[#0F172A] text-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.15)]">
+    <aside
+      className={`fixed left-0 top-0 h-screen transition-all duration-300 bg-[#0F172A] text-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.15)] ${
+        isCollapsed ? 'w-sidebar-collapsed-width' : 'w-sidebar-width'
+      }`}
+    >
       <div className="flex flex-col flex-1 min-h-0">
         {/* Brand Header */}
-        <div className="h-topbar-height px-space-lg flex items-center gap-space-sm border-b border-white/10">
-          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-sm shrink-0 p-0.5">
-            <img src="/logo.jpg" alt="MedSync Logo" className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-headline-sm text-headline-sm text-white leading-tight truncate">
-              MedSync
-            </span>
-            <span className="font-label-sm text-label-sm text-white/50 tracking-wider uppercase truncate">
-              {userRole ? `${userRole} Portal` : 'Healthcare System'}
-            </span>
-          </div>
-        </div>
-
-        {/* Branch Location Indicator */}
-        <div className="px-space-md py-space-sm">
-          <div className="flex items-center gap-space-2xs px-space-sm py-1.5 rounded-lg bg-white/5 border border-white/5">
-            <span className="material-symbols-outlined text-[16px] text-brand-teal-light">location_on</span>
-            <span className="font-label-md text-label-md text-white/70 truncate">{branchName}</span>
+        <div className={`h-topbar-height border-b border-white/10 flex items-center px-space-md shrink-0 ${
+          isCollapsed ? 'justify-center' : 'justify-start'
+        }`}>
+          <div className="flex items-center gap-space-sm min-w-0">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-sm shrink-0 p-0.5">
+              <img src="/logo.jpg" alt="MedSync Logo" className="w-full h-full object-contain" />
+            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <span className="font-headline-sm text-headline-sm text-white leading-tight truncate">
+                  MedSync
+                </span>
+                <span className="font-label-sm text-label-sm text-white/50 tracking-wider uppercase truncate">
+                  {userRole ? `${userRole} Portal` : 'Healthcare System'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Dynamic Navigation */}
-        <nav className="flex-1 overflow-y-auto px-space-md py-space-xs space-y-space-md">
+        <nav className={`flex-1 overflow-y-auto py-space-xs ${isCollapsed ? 'px-2 space-y-4' : 'px-space-md space-y-space-md'}`}>
           {/* Standalone Dashboard Item */}
           <div className="space-y-1">
             <NavLink
               to={standaloneItem.path}
               data-path={standaloneItem.dataPath}
+              title={isCollapsed ? standaloneItem.label : undefined}
               className={({ isActive }) =>
-                `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
+                `group flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-space-sm px-space-sm'} h-10 rounded-lg transition-all relative ${
                   isActive || isItemActive(standaloneItem.path)
                     ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
@@ -212,7 +216,9 @@ export const Sidebar: React.FC = () => {
                     >
                       {standaloneItem.icon}
                     </span>
-                    <span className="font-label-lg text-label-lg">{standaloneItem.label}</span>
+                    {!isCollapsed && (
+                      <span className="font-label-lg text-label-lg truncate">{standaloneItem.label}</span>
+                    )}
                   </>
                 );
               }}
@@ -222,16 +228,21 @@ export const Sidebar: React.FC = () => {
           {/* Grouped Sections */}
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              <div className="px-space-sm pb-space-2xs font-label-sm text-label-sm text-white/40 uppercase tracking-widest">
-                {section.header}
-              </div>
+              {isCollapsed ? (
+                <div className="my-2 border-t border-white/10" title={section.header} />
+              ) : (
+                <div className="px-space-sm pb-space-2xs font-label-sm text-label-sm text-white/40 uppercase tracking-widest truncate">
+                  {section.header}
+                </div>
+              )}
               {section.items.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   data-path={item.dataPath}
+                  title={isCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
+                    `group flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-space-sm px-space-sm'} h-10 rounded-lg transition-all relative ${
                       isActive || isItemActive(item.path)
                         ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
                         : "text-white/70 hover:bg-white/5 hover:text-white"
@@ -249,7 +260,9 @@ export const Sidebar: React.FC = () => {
                         >
                           {item.icon}
                         </span>
-                        <span className="font-label-lg text-label-lg">{item.label}</span>
+                        {!isCollapsed && (
+                          <span className="font-label-lg text-label-lg truncate">{item.label}</span>
+                        )}
                       </>
                     );
                   }}
@@ -261,17 +274,17 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Pinned Bottom Logout Action */}
-      <div className="p-space-md border-t border-white/10">
+      <div className={`border-t border-white/10 flex flex-col ${isCollapsed ? 'p-2 items-center' : 'p-space-md'}`}>
         <NavLink
           to="/logout"
           data-path="logout"
-          className="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left"
+          title={isCollapsed ? 'Logout' : undefined}
+          className={`group flex items-center ${isCollapsed ? 'justify-center w-full px-0' : 'gap-space-sm px-space-sm'} h-10 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left`}
         >
           <span className="material-symbols-outlined text-[20px] text-rose-400">logout</span>
-          <span className="font-label-lg text-label-lg font-semibold">Logout</span>
+          {!isCollapsed && <span className="font-label-lg text-label-lg font-semibold">Logout</span>}
         </NavLink>
       </div>
     </aside>
   );
 };
-
