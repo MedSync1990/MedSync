@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends,HTTPException
 from asyncpg import Connection
 from typing import Optional
+from app.errors import ForbiddenError
 from datetime import date, datetime
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user, get_effective_branch_id
@@ -10,7 +11,8 @@ from app.schemas.reports import (
     ItemizedPaymentResponse, ItemizedPaymentItem,
     OutstandingBalancesResponse, OutstandingBalanceItem,
     TreatmentCategoriesResponse, TreatmentCategoryItem,
-    InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem
+    InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem,
+    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate
 )
 from app.schemas.common import PaginationParams
 
@@ -374,3 +376,178 @@ async def get_insurance_vs_out_of_pocket(
         claim_slas=claim_slas,
         payment_modes=payment_modes
     )
+@router.get("/doctor-earnings/{target_doctor_id}", response_model=DoctorEarningsOverviewResponse)
+async def get_doctor_earnings(
+    target_doctor_id : int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager","Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own earnings overview.")
+
+    earned_query = """
+    SELECT COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_earned
+    FROM consultation_treatments ct
+    JOIN consultations c ON ct.consultation_id = c.consultation_id
+    JOIN appointments a ON c.appointment_id = a.appointment_id
+    JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+    WHERE das.doctor_id = $1 AND a.status = 'Completed'
+    """
+
+    total_earned = await conn.fetchval(earned_query, target_doctor_id)
+
+    paid_query = """
+    SELECT COALESCE(SUM(amount_paid), 0) as total_paid
+    FROM staff_payouts
+    WHERE user_id = $1
+    """
+    
+    paid_by_hospital = await conn.fetchval(paid_query, target_doctor_id)
+
+    outstanding = float(total_earned or 0) - float(paid_by_hospital or 0)   
+
+    return DoctorEarningsOverviewResponse(
+        total_earned=float(total_earned or 0),
+        paid_by_hospital=float(paid_by_hospital or 0),
+        outstanding=outstanding
+    )
+
+@router.get("/doctor-earnings/{target_doctor_id}/bank-accounts", response_model=BankAccountsResponse)
+async def get_doctor_bank_accounts(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager","Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own bank accounts.")
+
+    query = """
+    SELECT account_id, bank_name, account_number, branch_name, is_default
+    FROM staff_bank_accounts
+    WHERE user_id = $1
+    ORDER BY is_default DESC, created_at DESC    
+    """
+
+    records = await conn.fetch(query, target_doctor_id)
+    data = [BankAccountItem(**dict(r)) for r in records]
+    return BankAccountsResponse(data=data)  
+
+@router.get("/doctor-earnings/{target_doctor_id}/payout-requests", response_model=PayoutRequestsResponse)
+async def  get_doctor_payout_requests(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+    ):
+
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own payout requests.")
+
+    query = """
+    SELECT 
+        r.request_id, r.account_id, r.request_amount, r.status, 
+        r.request_date, r.processed_date, r.remarks,
+        b.bank_name, b.account_number
+    FROM staff_payout_requests r
+    JOIN staff_bank_accounts b ON r.account_id = b.account_id
+    WHERE r.user_id = $1
+    ORDER BY r.request_date DESC
+    """
+
+    records = await conn.fetch(query, target_doctor_id)
+    
+    data = [PayoutRequestItem(**dict(r)) for r in records]
+    return PayoutRequestsResponse(data=data)
+
+@router.get("/doctor-earnings/{target_doctor_id}/payouts", response_model=PayoutHistoryResponse)
+async def get_doctor_payouts(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own payout history.")
+
+    query = """
+    SELECT
+        p.payout_id, p.amount_paid, p.payment_reference,
+        p.payment_method, p.payment_date,
+        b.bank_name, b.account_number
+    FROM staff_payouts p
+    JOIN staff_bank_accounts b ON p.account_id = b.account_id
+    WHERE p.user_id = $1
+    ORDER BY p.payment_date DESC
+    """
+    
+    records = await conn.fetch(query, target_doctor_id)
+
+    data = [PayoutHistoryItem(**dict(r)) for r in records]
+    return PayoutHistoryResponse(data=data)
+
+@router.post("/doctor-earnings/{target_doctor_id}/payout-requests")
+async def create_doctor_payout_request(
+    target_doctor_id: int,
+    payload: PayoutRequestCreate,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only create payout requests for themselves.")
+
+    if payload.request_amount <= 0:
+        raise HTTPException(status_code=400, detail="Request amount must be greater than zero.")
+
+    earned_query = """
+    SELECT COALESCE(SUM(ct.unit_price * ct.quantity), 0)
+    FROM consultation_treatments ct
+    JOIN consultations c ON ct.consultation_id = c.consultation_id
+    JOIN appointments a ON c.appointment_id = a.appointment_id
+    JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+    WHERE das.doctor_id = $1 AND a.status = 'Completed'
+    """
+    
+    earned = await conn.fetchval(earned_query, target_doctor_id) or 0.0
+
+    paid_query = """
+    SELECT COALESCE(SUM(amount_paid), 0)
+    FROM staff_payouts
+    WHERE user_id = $1
+    """
+
+    paid = await conn.fetchval(paid_query, target_doctor_id) or 0.0
+    
+    pending_query = """
+    SELECT COALESCE(SUM(request_amount), 0)
+    FROM staff_payout_requests
+    WHERE user_id = $1 AND status IN ('Pending', 'Approved')
+    """
+    
+    pending = await conn.fetchval(pending_query, target_doctor_id) or 0.0
+
+    available = float(earned or 0.0) - float(paid or 0.0) - float(pending or 0.0)
+
+    if payload.request_amount > available:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Requested amount exceeds available balance. Available: Rs. {available:,.2f}"
+        )
+
+    insert_query = """
+    INSERT INTO staff_payout_requests (
+        user_id, account_id, request_amount, status
+    ) VALUES ($1, $2, $3, 'Pending')
+    RETURNING request_id
+    """
+
+    try:
+        request_id = await conn.fetchval(
+            insert_query,
+            target_doctor_id,
+            payload.account_id,
+            payload.request_amount,
+        )            
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to create payout request. Check if the bank account is valid.")
+    
+    return {"message": "Payout request created successfully", "request_id": request_id}
+    
