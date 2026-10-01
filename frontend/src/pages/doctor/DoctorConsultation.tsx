@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import { consultationService } from '../../services/consultationService';
 import { treatmentService } from '../../services/treatmentService';
-import type { PatientResponse, AllergyItem, PatientListItem, TreatmentItem, AppointmentItem } from '../../types';
+import type { PatientResponse, AllergyItem, PatientListItem, TreatmentItem } from '../../types';
 
 interface OrderItem {
   id: string;
@@ -111,8 +111,8 @@ export const DoctorConsultation: React.FC = () => {
   const [allergies, setAllergies] = useState<AllergyItem[]>(DEFAULT_PATIENT.allergies || []);
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
   const [availablePatients, setAvailablePatients] = useState<PatientListItem[]>([]);
-  const [scheduledAppointments, setScheduledAppointments] = useState<AppointmentItem[]>([]);
   const [isLoadingPatient, setIsLoadingPatient] = useState<boolean>(false);
+  const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
   const [patientSwitchOpen, setPatientSwitchOpen] = useState<boolean>(false);
 
   // Treatment Catalogue state
@@ -190,7 +190,6 @@ export const DoctorConsultation: React.FC = () => {
     consultationService.listAppointments({ status: 'Scheduled' })
       .then((appts) => {
         if (isMounted && Array.isArray(appts) && appts.length > 0) {
-          setScheduledAppointments(appts);
           if (!currentAppointmentId) {
             setCurrentAppointmentId(appts[0].appointment_id);
           }
@@ -219,6 +218,7 @@ export const DoctorConsultation: React.FC = () => {
   // Fetch patient details and allergies
   const fetchPatientData = useCallback(async (id: string | number) => {
     setIsLoadingPatient(true);
+    setPatientLoadError(null);
     try {
       const data = await patientService.getById(id);
       setPatient(data);
@@ -236,7 +236,9 @@ export const DoctorConsultation: React.FC = () => {
         }
       }
     } catch {
-      setSelectedAllergyIds(DEFAULT_PATIENT.allergies?.map((a) => a.allergy_id) || []);
+      setPatientLoadError('Unable to load this patient from the database.');
+      setAllergies([]);
+      setSelectedAllergyIds([]);
     } finally {
       setIsLoadingPatient(false);
     }
@@ -394,10 +396,13 @@ export const DoctorConsultation: React.FC = () => {
       return;
     }
 
+    if (!currentAppointmentId) {
+      setCompletionError('Select a scheduled appointment before completing the consultation.');
+      return;
+    }
+
     setIsLoading(true);
     setCompletionError(null);
-
-    const apptId = currentAppointmentId || (scheduledAppointments[0]?.appointment_id ?? 7);
 
     const payload = {
       diagnosis: diagnosis.trim() || 'General Clinical Consultation',
@@ -409,7 +414,7 @@ export const DoctorConsultation: React.FC = () => {
     };
 
     try {
-      const response = await consultationService.completeAppointment(apptId, payload);
+      const response = await consultationService.completeAppointment(currentAppointmentId, payload);
       setIsFinalized(true);
       setCompletionSuccessToast({
         invoiceId: response.invoice_id,
@@ -423,16 +428,7 @@ export const DoctorConsultation: React.FC = () => {
         err?.message ||
         'Encounter completion failed.';
 
-      // If already completed or local demo, still show completion
-      if (errorMsg.includes('only a Scheduled appointment can be completed') || errorMsg.includes('409')) {
-        setIsFinalized(true);
-        setCompletionSuccessToast({
-          invoiceId: 5,
-          message: 'Appointment completed. Invoice generated.',
-        });
-      } else {
-        setCompletionError(errorMsg);
-      }
+      setCompletionError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -485,6 +481,12 @@ export const DoctorConsultation: React.FC = () => {
           <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Active Consultation</h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">Review patient history, prescribe medication, and add clinical notes</p>
         </div>
+
+        {patientLoadError && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {patientLoadError}
+          </div>
+        )}
 
         {/* Patient Header Card */}
         <div className="bg-surface-card rounded-xl p-5 border border-border-subtle shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative">

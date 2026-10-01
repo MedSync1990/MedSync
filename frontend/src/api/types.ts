@@ -95,29 +95,6 @@ export interface AppointmentResponse {
   created_at: string;
 }
 
-export interface SpecialtyResponse {
-  specialty_id: number;
-  name: string;
-  description?: string;
-  doctor_count?: number;
-}
-
-export interface DoctorResponse {
-  doctor_id: number;
-  user_id?: number;
-  full_name: string;
-  first_name?: string;
-  last_name?: string;
-  license_number: string;
-  specialty?: string;
-  specialties?: string[];
-  branch_id?: number;
-  branch_name?: string;
-  id_number?: string;
-  phone_numbers?: string[];
-  phone?: string;
-  email?: string;
-  is_active?: boolean;
 export interface AppointmentListResponse {
   data: AppointmentResponse[];
   total: number;
@@ -409,7 +386,6 @@ export interface AllergyItem {
 
 export interface PatientResponse {
   user_id: number;
-  patient_id?: number;
   patient_id: number;
   patient_code: string;
   first_name: string;
@@ -420,15 +396,13 @@ export interface PatientResponse {
   email?: string | null;
   date_of_birth: string;
   gender: 'Male' | 'Female' | 'Other';
-  address?: string;
-  phone?: string;
-  phone_number?: string;
-  email?: string;
-  blood_group?: string;
-  emergency_contact?: string;
-  contact_name?: string;
-  registered_branch?: number;
-  branch_name?: string;
+  address?: string | null;
+  phone?: string | null;
+  blood_group?: string | null;
+  emergency_contact?: string | null;
+  contact_name?: string | null;
+  registered_branch?: number | null;
+  branch_name?: string | null;
   has_insurance?: boolean;
   registered_date?: string;
   is_active: boolean;
@@ -442,7 +416,7 @@ export interface PatientListItem {
   last_name: string;
   id_number: string;
   phone_number: string;
-  gender: Gender;
+  gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
   registered_branch?: number | null;
   branch_name?: string | null;
@@ -529,6 +503,8 @@ export interface AppointmentItem {
   appointment_type: string;
   status: string;
   created_at: string;
+}
+
 // ─── Branches (schemas/branches.py) ─────────────────────────────────────────
 
 export interface BranchResponse {

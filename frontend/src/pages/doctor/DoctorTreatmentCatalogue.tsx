@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { treatmentService } from '../../services/treatmentService';
 import type { TreatmentItem as ApiTreatmentItem } from '../../types';
 

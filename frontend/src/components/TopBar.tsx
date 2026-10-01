@@ -5,7 +5,7 @@ interface TopBarProps {
   onThemeToggle?: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
+export const TopBar: React.FC<TopBarProps> = () => {
   const { user } = useAuth();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -20,10 +20,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const userName = user ? (user.role === 'Doctor' ? `Dr. ${user.lastName}` : user.firstName || user.lastName) : 'Guest';
   const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
   const branchName = user?.branchName || 'Colombo Central Branch';
-  const avatarUrl =
-    user?.avatarUrl ||
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
-
   return (
     <header
       className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-shadow duration-200 ${isScrolled

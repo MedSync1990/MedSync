@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
@@ -69,7 +69,6 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 }
 
 export const BookAppointment: React.FC = () => {
-  const navigate = useNavigate();
   const { showToast } = useToast();
 
   // ─── Step 1: Patient Search & Selection State ──────────────────────────────
@@ -94,12 +93,12 @@ export const BookAppointment: React.FC = () => {
           phone_number: res.phone_number,
           gender: res.gender,
           date_of_birth: res.date_of_birth,
-          has_insurance: res.has_insurance,
+          has_insurance: Boolean(res.has_insurance),
           is_active: res.is_active,
         };
         setSelectedPatient(p);
         setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
-      }).catch(err => {
+      }).catch(() => {
         showToast('Failed to load pre-filled patient', 'error');
       });
     }

@@ -1,11 +1,13 @@
 import json
+from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 from asyncpg import Connection, PostgresError
 
 from app.db import get_conn
-from app.dependencies import require_roles
+from app.dependencies import CurrentUser, get_db, require_roles
 from app.errors import NotFoundError, ConflictError, AppValidationError
+from app.schemas.appointments import DoctorSlotResponse, SlotStatusEnum
 from app.schemas.consultations import (
     AppointmentCompleteRequest,
     AppointmentCompleteResponse,
@@ -327,6 +329,58 @@ async def book_appointment(
         if "not a valid active catalogue entry" in msg or "treatment quantity" in msg:
             raise ConflictError(f"Invalid treatment order: {msg}")
         raise ConflictError(f"Encounter completion failed: {msg}")
+
+    return AppointmentCompleteResponse(
+        appointment_id=appointment_id,
+        invoice_id=invoice_id,
+        status="Completed",
+        message="Appointment completed. Invoice generated.",
+    )
+
+
+@router.put(
+    "/{appointment_id}/complete",
+    response_model=AppointmentCompleteResponse,
+    dependencies=[Depends(require_roles("Doctor", "Administrator"))],
+    summary="Complete consultation appointment and generate invoice",
+)
+async def complete_appointment(
+    appointment_id: int,
+    payload: AppointmentCompleteRequest,
+    conn: Connection = Depends(get_conn),
+):
+    """Complete an appointment and persist its consultation and treatment snapshots."""
+    notes = payload.consultation_notes.strip()
+    if not notes:
+        raise AppValidationError([
+            {
+                "field": "consultation_notes",
+                "message": "Add consultation notes before completing this appointment.",
+            }
+        ])
+
+    treatments_json = json.dumps([
+        {"treatment_code": treatment.treatment_code, "quantity": treatment.quantity}
+        for treatment in (payload.treatments or [])
+    ])
+
+    try:
+        invoice_id = await conn.fetchval(
+            "SELECT fn_complete_appointment($1, $2, $3, $4::jsonb)",
+            appointment_id,
+            (payload.diagnosis or "General Clinical Consultation").strip(),
+            notes,
+            treatments_json,
+        )
+    except PostgresError as exc:
+        message = str(exc)
+        if "does not exist" in message:
+            raise NotFoundError(f"Appointment {appointment_id} does not exist.")
+        if "only a Scheduled appointment can be completed" in message:
+            raise ConflictError(f"Cannot complete appointment: {message}")
+        if "not a valid active catalogue entry" in message or "treatment quantity" in message:
+            raise ConflictError(f"Invalid treatment order: {message}")
+        raise ConflictError(f"Encounter completion failed: {message}")
 
     return AppointmentCompleteResponse(
         appointment_id=appointment_id,
