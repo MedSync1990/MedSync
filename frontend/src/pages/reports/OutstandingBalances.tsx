@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 import { getOutstandingBalances, exportToCSV } from '../../api/reports';
 import { recordPayment } from '../../api/billing';
-import type { OutstandingBalancesResponse } from '../../api/types';
+import type { OutstandingBalancesResponse, BranchResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { listBranches } from '../../api';
 
 export function OutstandingBalances() {
   const [data, setData] = useState<OutstandingBalancesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
+
+  useEffect(() => {
+    if (user?.role === 'Administrator') {
+      listBranches().then(setBranches);
+    }
+  }, [user?.role]);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,11 +32,16 @@ export function OutstandingBalances() {
   const [exportComplete, setExportComplete] = useState(false);
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
-  useEffect(() => {
-    getOutstandingBalances().then(res => {
+  const fetchReport = () => {
+    setLoading(true);
+    getOutstandingBalances({ branch: selectedBranch || undefined }).then(res => {
       setData(res);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchReport();
   }, []);
 
   const handleExport = () => {
@@ -106,15 +123,32 @@ export function OutstandingBalances() {
           <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Outstanding Balances</h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">Patients with unpaid or partially paid invoices. Monitor collection risks and invoice recovery status.</p>
         </div>
-        <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-          <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[20px]">lock</span>
+        {user?.role === 'Administrator' ? (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">domain</span>
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
+              <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-            <span className="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span>
+        ) : (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
@@ -149,10 +183,7 @@ export function OutstandingBalances() {
           <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
           </button>
-          <button onClick={() => {
-            setLoading(true);
-            getOutstandingBalances().then(res => { setData(res); setLoading(false); });
-          }} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
+          <button onClick={fetchReport} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
             {loading ? (
               <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
             ) : (

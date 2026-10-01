@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react';
 import { getDoctorRevenue, exportToCSV } from '../../api/reports';
-import type { DoctorRevenueResponse, DoctorRevenueItem } from '../../api/types';
+import type { DoctorRevenueResponse, DoctorRevenueItem, BranchResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { listBranches } from '../../api';
 
 export default function DoctorRevenueReport() {
   const [data, setData] = useState<DoctorRevenueResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const { user } = useAuth();
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
+
+  useEffect(() => {
+    if (user?.role === 'Administrator') {
+      listBranches().then(setBranches);
+    }
+  }, [user?.role]);
   
   // Filters
   const [startDate, setStartDate] = useState('');
@@ -21,6 +33,7 @@ export default function DoctorRevenueReport() {
     getDoctorRevenue({
       from: startDate || undefined,
       to: endDate || undefined,
+      branch: selectedBranch || undefined,
     }).then(res => {
       setData(res);
       setLoading(false);
@@ -95,15 +108,32 @@ export default function DoctorRevenueReport() {
           <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Doctor Revenue</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">Revenue generated per doctor over a date range.</p>
         </div>
-        <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-          <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[20px]">lock</span>
+        {user?.role === 'Administrator' ? (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">domain</span>
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
+              <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-            <span className="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span>
+        ) : (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Operational Filter Toolbar */}

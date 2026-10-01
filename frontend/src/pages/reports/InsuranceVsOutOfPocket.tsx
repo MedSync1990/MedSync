@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react';
 import { getInsuranceVsOutOfPocket, exportToCSV } from '../../api/reports';
-import type { InsuranceVsOutOfPocketResponse } from '../../api/types';
+import type { InsuranceVsOutOfPocketResponse, BranchResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { listBranches } from '../../api';
 
 export function InsuranceVsOutOfPocket() {
   const [data, setData] = useState<InsuranceVsOutOfPocketResponse | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
+
+  useEffect(() => {
+    if (user?.role === 'Administrator') {
+      listBranches().then(setBranches);
+    }
+  }, [user?.role]);
 
   // Filters
   const [startDate, setStartDate] = useState('');
@@ -20,6 +32,7 @@ export function InsuranceVsOutOfPocket() {
     getInsuranceVsOutOfPocket({
       from: startDate || undefined,
       to: endDate || undefined,
+      branch: selectedBranch || undefined,
     }).then(res => {
       setData(res);
       setLoading(false);
@@ -92,15 +105,32 @@ export function InsuranceVsOutOfPocket() {
           <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Insurance vs. Out-of-Pocket</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">Coverage split between insurance and patient payments over a period.</p>
         </div>
-        <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-          <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[20px]">lock</span>
+        {user?.role === 'Administrator' ? (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">domain</span>
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
+              <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-            <span className="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span>
+        ) : (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
