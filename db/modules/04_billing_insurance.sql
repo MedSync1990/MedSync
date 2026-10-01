@@ -12,4 +12,6 @@
 \i db/modules/shavinda/fn_calculate_invoice_total.sql
 \i db/modules/shavinda/fn_is_policy_active.sql
 \i db/modules/shavinda/fn_calculate_insurance_coverage.sql
-
+\i db/modules/shavinda/staff_bank_accounts.sql
+\i db/modules/shavinda/staff_payout_requests.sql
+\i db/modules/shavinda/staff_payouts.sql

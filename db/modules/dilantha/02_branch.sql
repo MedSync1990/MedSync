@@ -9,7 +9,7 @@
 -- hard deletes at the DB level.
 -- =============================================================================
 
-CREATE TABLE branch (
+CREATE TABLE IF NOT EXISTS branch (
     branch_id     INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name          VARCHAR(100) NOT NULL,
     address       VARCHAR(255) NOT NULL,

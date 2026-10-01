@@ -13,7 +13,7 @@
 --   - last_login_at:          Audit trail for last successful login (FR-UAC-06)
 -- =============================================================================
 
-CREATE TABLE staff (
+CREATE TABLE IF NOT EXISTS staff (
     user_id                INT PRIMARY KEY REFERENCES app_user(user_id) ON DELETE RESTRICT,
     branch_id              INT NOT NULL REFERENCES branch(branch_id),
     username               VARCHAR(50) NOT NULL UNIQUE,
@@ -24,4 +24,4 @@ CREATE TABLE staff (
     last_login_at          TIMESTAMPTZ
 );
 
-CREATE INDEX idx_staff_branch ON staff(branch_id);
+CREATE INDEX IF NOT EXISTS idx_staff_branch ON staff(branch_id);
