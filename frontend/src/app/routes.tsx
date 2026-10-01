@@ -87,7 +87,7 @@ export const AppRoutes: React.FC = () => {
       {/* Authenticated Application Routes */}
       <Route element={<AuthenticatedLayout />}>
         {/* Receptionist Routes */}
-        <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator']} />}>
+        <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator', 'Branch Manager']} />}>
           <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
           <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
           <Route path="/receptionist/patients" element={<PatientDirectory />} />
@@ -120,11 +120,15 @@ export const AppRoutes: React.FC = () => {
           <Route path="/branch-manager/treatment-catalogue" element={<TreatmentCatalogue />} />
         </Route>
 
+        {/* Shared Staff Management Route */}
+        <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
+          <Route path="/admin/staff" element={<ManageStaff />} />
+        </Route>
+
         {/* Admin Routes */}
         <Route element={<RoleGuard allowedRoles={['Administrator']} />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/branches" element={<ManageBranches />} />
-          <Route path="/admin/staff" element={<ManageStaff />} />
           <Route path="/admin/doctors" element={<ManageDoctors />} />
           <Route path="/admin/treatment-catalogue" element={<ManageTreatmentCatalogue />} />
         </Route>
@@ -138,6 +142,20 @@ export const AppRoutes: React.FC = () => {
           <Route path="/reports/treatment-categories" element={<TreatmentCategoryBreakdown />} />
           <Route path="/reports/insurance-vs-out-of-pocket" element={<InsuranceVsOutOfPocket />} />
         </Route>
+
+        {/* System & Global Routes */}
+        <Route path="/settings" element={
+          <div className="py-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Settings</h1>
+            <p className="text-slate-600">System settings and profile preferences.</p>
+          </div>
+        } />
+        <Route path="/help-center" element={
+          <div className="py-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Center</h1>
+            <p className="text-slate-600">User guides, documentation, and support resources.</p>
+          </div>
+        } />
 
         {/* Dynamic Role Dashboard & Treatment Catalogue redirects */}
         <Route path="/dashboard" element={<RoleDashboardRedirect />} />
