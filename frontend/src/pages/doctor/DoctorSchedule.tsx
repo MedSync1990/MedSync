@@ -14,21 +14,18 @@ export const DoctorSchedule: React.FC = () => {
   const currentDate = dates[currentDateIndex];
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg flex flex-col">
+    <div className="flex flex-col w-full py-space-md space-y-space-lg">
       {/* Breadcrumb & Schedule Mode Indicator */}
-      <div className="flex flex-col gap-space-sm mb-space-sm">
-        <div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">My Schedule</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">View your upcoming appointments and manage your daily roster</p>
-        </div>
-      </div>
       <div className="flex flex-wrap items-center justify-between gap-y-space-xs">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-label-sm text-label-sm font-semibold uppercase tracking-wider">
-          <Link className="text-secondary hover:text-primary transition-colors" to="/dashboard">HOME</Link>
-          <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-          <span className="text-secondary">MY WORK</span>
-          <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-          <span className="text-primary">MY SCHEDULE</span>
+        <nav aria-label="Breadcrumb" className="flex items-center gap-space-2xs text-secondary font-label-md text-label-md">
+          <Link className="hover:text-primary transition-colors flex items-center gap-1" to="/dashboard">
+            <span className="material-symbols-outlined text-[16px]">home</span>
+            <span>Home</span>
+          </Link>
+          <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+          <span className="text-secondary font-medium">My Work</span>
+          <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+          <span className="text-brand-navy-deep font-semibold">My Schedule</span>
         </nav>
         <div className="flex items-center gap-space-xs">
           <span className="text-secondary font-mono-data text-mono-data hidden lg:inline-block">Sync: 10:14 AM IST</span>

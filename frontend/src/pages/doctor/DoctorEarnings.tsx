@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { getDoctorItemizedPayments } from '../../api';
 import type { ItemizedPaymentResponse } from '../../api';
@@ -57,19 +56,12 @@ export const DoctorEarnings: React.FC = () => {
   }, [activeTab, user?.id]);
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg flex flex-col">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-label-sm text-label-sm font-semibold uppercase tracking-wider mb-space-xs">
-        <Link className="text-secondary hover:text-primary transition-colors" to="/dashboard">HOME</Link>
-        <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-        <span className="text-secondary">FINANCE</span>
-        <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-        <span className="text-primary">PAYMENTS & EARNINGS</span>
-      </nav>
+    <div className="flex flex-col w-full pb-space-3xl max-w-content-max-width mx-auto">
       {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pt-space-lg pb-space-md">
         <div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Payments & Earnings</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Payments & Earnings</h1>
+          <p className="font-body-md text-body-md text-secondary mt-0.5">
             View your hospital payments, monthly revenue share, and payout requests
           </p>
         </div>

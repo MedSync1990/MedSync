@@ -7,7 +7,6 @@ import { RoleGuard } from '../components/RoleGuard';
 
 // Auth
 import { Login } from '../pages/Login';
-import { Logout } from '../pages/Logout';
 
 // Receptionist
 import ReceptionistDashboard from '../pages/receptionist/Dashboard';
@@ -66,7 +65,6 @@ export const AppRoutes: React.FC = () => {
       {/* Public Auth Routes */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
-        <Route path="/logout" element={<Logout />} />
       </Route>
 
       {/* Authenticated Application Routes */}
