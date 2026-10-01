@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import type { UserRole } from '../auth/AuthContext';
 
@@ -16,9 +16,9 @@ export interface NavSection {
 }
 
 export const Sidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const userRole = user?.role;
-  const branchName = user?.branchName || 'Central Branch';
 
   const navSections: NavSection[] = [
     {
@@ -92,13 +92,7 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Branch Location Indicator */}
-        <div className="px-space-md py-space-sm">
-          <div className="flex items-center gap-space-2xs px-space-sm py-1.5 rounded-lg bg-white/5 border border-white/5">
-            <span className="material-symbols-outlined text-[16px] text-brand-teal-light">location_on</span>
-            <span className="font-label-md text-label-md text-white/70 truncate">{branchName}</span>
-          </div>
-        </div>
+
 
         {/* Dynamic Navigation */}
         <nav className="flex-1 overflow-y-auto px-space-md py-space-xs space-y-space-md">
@@ -165,11 +159,7 @@ export const Sidebar: React.FC = () => {
             <span className="font-label-md text-label-md">Help Center</span>
           </NavLink>
           <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to log out?')) {
-                logout();
-              }
-            }}
+            onClick={() => navigate('/logout')}
             className="w-full group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left"
             type="button"
           >

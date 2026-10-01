@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { DataTable, type Column } from '../../components/DataTable';
 import { patientService } from '../../services/patientService';
 import type { PatientListItem } from '../../api/types';
 
 export const PatientDirectory: React.FC = () => {
   const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [totalPatients, setTotalPatients] = useState<number>(0);
   const [search, setSearch] = useState('');
   const [branchFilter, setBranchFilter] = useState('all');
   const [insuranceFilter, setInsuranceFilter] = useState('all');
@@ -21,10 +22,12 @@ export const PatientDirectory: React.FC = () => {
     try {
       const res = await patientService.list({ search, branch: branchFilter, insurance: insuranceFilter });
       setPatients(res.data || []);
+      setTotalPatients(res.total || 0);
       setLoading(false);
     } catch (e) {
       console.error('Error fetching patients:', e);
       setPatients([]);
+      setTotalPatients(0);
       setLoading(false);
     }
   };
@@ -139,14 +142,30 @@ export const PatientDirectory: React.FC = () => {
   ];
 
   return (
-    <div className="py-6 px-space-md md:px-space-lg max-w-content-max-width mx-auto w-full space-y-space-lg">
-      {/* Top Summary & Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-        <div>
-          <div className="flex items-center gap-space-xs mb-1">
-            <span className="font-headline-lg text-headline-lg text-brand-navy-deep tracking-tight">Patient Directory</span>
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        <div className="space-y-1">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Patient Directory</span>
           </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Search and manage patient records.</p>
+
+          {/* Title */}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+              Patient Directory
+            </h1>
+          </div>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Search and manage patient records.
+          </p>
         </div>
         
         <div className="flex items-center gap-space-md flex-wrap">
@@ -155,7 +174,7 @@ export const PatientDirectory: React.FC = () => {
               <span className="material-symbols-outlined text-[20px]">groups</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">1,428</span>
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">{totalPatients.toLocaleString()}</span>
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Registered Patients</span>
             </div>
           </div>

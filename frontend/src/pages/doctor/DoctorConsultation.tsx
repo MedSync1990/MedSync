@@ -481,6 +481,11 @@ export const DoctorConsultation: React.FC = () => {
           <span className="text-brand-navy-deep font-semibold">Consultation</span>
         </nav>
 
+        <div>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Active Consultation</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Review patient history, prescribe medication, and add clinical notes</p>
+        </div>
+
         {/* Patient Header Card */}
         <div className="bg-surface-card rounded-xl p-5 border border-border-subtle shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
           {isLoadingPatient && (

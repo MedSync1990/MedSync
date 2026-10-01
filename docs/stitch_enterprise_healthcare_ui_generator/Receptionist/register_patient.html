@@ -204,7 +204,7 @@
               </label>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">person</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="fullName" name="fullName" placeholder="e.g., Priyantha Dharmasena" required="" type="text" value="Priyantha Dharmasena"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="fullName" name="fullName" placeholder="e.g., Priyantha Dharmasena" required="" type="text" value=""/>
               </div>
               <span class="font-body-sm text-body-sm text-outline">As stated on National Identity Card (NIC) or Sri Lankan Passport</span>
             </div>
@@ -216,7 +216,7 @@
               </div>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">badge</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider" id="nicNumber" name="nicNumber" placeholder="198734201844 or 873421844V" required="" type="text" value="198821400293"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider" id="nicNumber" name="nicNumber" placeholder="198734201844 or 873421844V" required="" type="text" value=""/>
                 <span class="material-symbols-outlined absolute right-3 text-status-completed-text text-[20px]" title="Valid NIC format">check_circle</span>
               </div>
               <span class="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
@@ -227,11 +227,11 @@
             <div class="flex flex-col gap-1.5">
               <div class="flex items-center justify-between">
                 <label class="font-label-lg text-label-lg text-brand-navy-deep" for="dateOfBirth">Date of Birth <span class="text-error font-bold">*</span></label>
-                <span class="font-label-sm text-[10px] bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase" id="calculatedAgeBadge">38 yrs</span>
+                <span class="font-label-sm text-[10px] bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase" id="calculatedAgeBadge"></span>
               </div>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">calendar_today</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="dateOfBirth" name="dateOfBirth" onchange="updateAgeDisplay(this.value)" required="" type="date" value="1988-04-12"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="dateOfBirth" name="dateOfBirth" onchange="updateAgeDisplay(this.value)" required="" type="date" value=""/>
               </div>
               <span class="font-body-sm text-body-sm text-outline">Format: MM / DD / YYYY</span>
             </div>
@@ -264,7 +264,8 @@
                 <span class="material-symbols-outlined absolute left-3.5 text-status-cancelled-text text-[20px] pointer-events-none">water_drop</span>
                 <select class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer" id="bloodGroup" name="bloodGroup">
                   <option value="">Select blood type</option>
-                  <option selected="" value="A+">A Positive (A+)</option>
+                  <option value="Unknown">Don't Know</option>
+                  <option value="A+">A Positive (A+)</option>
                   <option value="A-">A Negative (A-)</option>
                   <option value="B+">B Positive (B+)</option>
                   <option value="B-">B Negative (B-)</option>
@@ -301,7 +302,7 @@
                 </div>
                 <div class="sm:col-span-4 relative flex items-center">
                   <span class="absolute left-3 font-mono-data text-mono-data font-semibold text-outline select-none">+94</span>
-                  <input class="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md pl-12 pr-3 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus" name="primaryPhone" placeholder="07X XXX XXXX" required="" type="tel" value="077 482 9104"/>
+                  <input class="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md pl-12 pr-3 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus" name="primaryPhone" placeholder="07X XXX XXXX" required="" type="tel" value=""/>
                 </div>
                 <div class="sm:col-span-3">
                   <select class="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md px-3 font-body-sm text-body-sm text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus cursor-pointer" name="primaryPhoneType">
@@ -326,14 +327,14 @@
               <label class="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between" for="emailAddress"><span>Email Address <span class="text-error font-bold">*</span></span></label>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">mail</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emailAddress" name="emailAddress" placeholder="priyantha.d@gmail.com" required="" type="email" value="priyantha.dharmasena@outlook.com"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emailAddress" name="emailAddress" placeholder="priyantha.d@gmail.com" required="" type="email" value=""/>
               </div>
             </div>
             <div class="flex flex-col gap-1.5 md:col-span-2">
               <label class="font-label-lg text-label-lg text-brand-navy-deep" for="streetAddress">Residential Address <span class="text-error font-bold">*</span></label>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">home_pin</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="streetAddress" name="streetAddress" placeholder="Street address line e.g., No. 42/B, Flower Road" required="" type="text" value="No. 54/2, Dharmapala Mawatha"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="streetAddress" name="streetAddress" placeholder="Street address line e.g., No. 42/B, Flower Road" required="" type="text" value=""/>
               </div>
               <span class="font-body-sm text-body-sm text-outline">Permanent or primary current residential location</span>
             </div>
@@ -341,7 +342,7 @@
               <label class="font-label-lg text-label-lg text-brand-navy-deep" for="cityDistrict">City / District</label>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">location_city</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="cityDistrict" name="cityDistrict" placeholder="e.g., Colombo 07" type="text" value="Colombo 07"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="cityDistrict" name="cityDistrict" placeholder="e.g., Colombo 07" type="text" value=""/>
               </div>
             </div>
           </div>
@@ -365,7 +366,7 @@
               <label class="font-label-lg text-label-lg text-brand-navy-deep" for="emergencyName">Contact Full Name <span class="text-error font-bold">*</span></label>
               <div class="relative flex items-center">
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">support_agent</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emergencyName" name="emergencyName" placeholder="e.g., Anoma Dharmasena" required="" type="text" value="Anoma Dharmasena"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emergencyName" name="emergencyName" placeholder="e.g., Anoma Dharmasena" required="" type="text" value=""/>
               </div>
               <span class="font-body-sm text-body-sm text-outline">Primary point of legal contact</span>
             </div>
@@ -375,7 +376,7 @@
                 <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">diversity_1</span>
                 <select class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer" id="emergencyRelation" name="emergencyRelation" required="">
                   <option value="">Select relationship</option>
-                  <option selected="" value="Spouse">Spouse / Partner</option>
+                  <option value="Spouse">Spouse / Partner</option>
                   <option value="Parent">Parent / Mother / Father</option>
                   <option value="Child">Son / Daughter</option>
                   <option value="Sibling">Brother / Sister</option>
@@ -390,7 +391,7 @@
               <label class="font-label-lg text-label-lg text-brand-navy-deep" for="emergencyPhone">Emergency Phone Number <span class="text-error font-bold">*</span></label>
               <div class="relative flex items-center">
                 <span class="absolute left-3 font-mono-data text-mono-data font-semibold text-outline select-none">+94</span>
-                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-12 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emergencyPhone" name="emergencyPhone" placeholder="07X XXX XXXX" required="" type="tel" value="077 129 4811"/>
+                <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-12 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="emergencyPhone" name="emergencyPhone" placeholder="07X XXX XXXX" required="" type="tel" value=""/>
               </div>
               <span class="font-body-sm text-body-sm text-outline">Direct 24/7 reachable contact</span>
             </div>
@@ -460,7 +461,7 @@
                   <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">qr_code_2</span>
                   <select class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer" id="insuranceProvider" name="insuranceProvider">
                     <option value="">Select Insurer</option>
-                    <option selected="" value="SLIC">Sri Lanka Insurance Corporation (SLIC)</option>
+                    <option value="SLIC">Sri Lanka Insurance Corporation (SLIC)</option>
                     <option value="Ceylinco">Ceylinco Life General Insurance</option>
                     <option value="AIA">AIA Insurance Sri Lanka</option>
                     <option value="Union">Union Assurance PLC</option>
@@ -477,7 +478,7 @@
                 <label class="font-label-lg text-label-lg text-brand-navy-deep" for="policyNumber">Policy / Member Number <span class="text-error font-bold">*</span></label>
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">policy</span>
-                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all tracking-wider" id="policyNumber" name="policyNumber" placeholder="e.g., POL-SLIC-992014" type="text" value="POL-SLIC-8491024"/>
+                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all tracking-wider" id="policyNumber" name="policyNumber" placeholder="e.g., POL-SLIC-992014" type="text" value=""/>
                 </div>
                 <span class="font-body-sm text-body-sm text-outline">Refer to patient's corporate or individual card</span>
               </div>
@@ -485,21 +486,21 @@
                 <label class="font-label-lg text-label-lg text-brand-navy-deep" for="policyStartDate">Policy Effective Date</label>
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">calendar_month</span>
-                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="policyStartDate" name="policyStartDate" type="date" value="2023-01-01"/>
+                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="policyStartDate" name="policyStartDate" type="date" value=""/>
                 </div>
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="font-label-lg text-label-lg text-brand-navy-deep" for="policyEndDate">Policy Expiration Date</label>
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">event_busy</span>
-                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="policyEndDate" name="policyEndDate" type="date" value="2025-12-31"/>
+                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="policyEndDate" name="policyEndDate" type="date" value=""/>
                 </div>
               </div>
               <div class="flex flex-col gap-1.5 lg:col-span-2">
                 <label class="font-label-lg text-label-lg text-brand-navy-deep" for="corporateAffiliation">Corporate Employer / Scheme (Optional)</label>
                 <div class="relative flex items-center">
                   <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">apartment</span>
-                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="corporateAffiliation" name="corporateAffiliation" placeholder="e.g. John Keells Holdings / Dialog Axiata" type="text" value="Hayleys Group PLC"/>
+                  <input class="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all" id="corporateAffiliation" name="corporateAffiliation" placeholder="e.g. John Keells Holdings / Dialog Axiata" type="text" value=""/>
                 </div>
               </div>
             </div>
