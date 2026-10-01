@@ -16,7 +16,7 @@ export interface NavSection {
 }
 
 export const Sidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const userRole = user?.role;
   const branchName = user?.branchName || 'Central Branch';
 
@@ -164,18 +164,13 @@ export const Sidebar: React.FC = () => {
             </span>
             <span className="font-label-md text-label-md">Help Center</span>
           </NavLink>
-          <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to log out?')) {
-                logout();
-              }
-            }}
-            className="w-full group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left"
-            type="button"
+          <NavLink
+            to="/logout"
+            className="group flex items-center gap-space-sm px-space-sm h-9 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left"
           >
             <span className="material-symbols-outlined text-[18px] text-rose-400">logout</span>
             <span className="font-label-md text-label-md font-semibold">Logout</span>
-          </button>
+          </NavLink>
         </div>
       </div>
     </aside>

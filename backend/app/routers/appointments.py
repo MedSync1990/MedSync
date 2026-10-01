@@ -264,7 +264,8 @@ async def book_appointment(
         if "is no longer available" in err_msg or "does not exist" in err_msg:
             raise ConflictError("This doctor is no longer available at the selected time. Please choose another slot.")
         raise ConflictError(err_msg)
-
+    if appt_id is None:
+        raise ConflictError("Failed to create appointment: No ID returned.")
     created = await _fetch_appointment_detail(conn, appt_id)
     if not created:
         raise NotFoundError("Failed to retrieve created appointment.")
@@ -307,6 +308,9 @@ async def create_walk_in_appointment(
         if "is already booked over this time range" in err_msg or "excl_slot_overlap" in err_msg:
             raise ConflictError("This doctor is already booked over this time range. Please choose another time.")
         raise ConflictError(err_msg)
+
+    if appt_id is None:
+        raise ConflictError("Failed to create appointment: No ID returned.")
 
     created = await _fetch_appointment_detail(conn, appt_id)
     if not created:
