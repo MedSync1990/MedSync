@@ -7,7 +7,8 @@ CREATE TABLE patient (
                       CHECK (emergency_contact IS NULL OR emergency_contact ~ '^[0-9]{10}$'),
     contact_name      VARCHAR(100),
     registered_branch INT REFERENCES branch(branch_id),
-    registered_date   DATE NOT NULL DEFAULT CURRENT_DATE
+    registered_date   DATE NOT NULL DEFAULT CURRENT_DATE,
+    is_active         BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE UNIQUE INDEX uq_patient_code ON patient(patient_code);

@@ -50,13 +50,11 @@ this work:
   `https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap`
 - Don't reintroduce a second family for headings "to add personality" — differentiate headings
   from body text with weight and size only (the existing `font-*` tokens already do this).
-- **Type scale baseline** (revised up from the original spec for legibility on shared desk
-  monitors): `body-md` 16px, `body-sm` / `label-md` 14px, `label-lg` 16px, `mono-data` 14px,
-  `label-sm` 12px. Headline and display sizes are unchanged from the original scale
-  (`headline-sm` 16px, `headline-md` 20px, `headline-lg`/`display-lg-mobile` 24px, `display-lg`
-  32px). Apply this scale by editing the shared `fontSize` tokens in the Tailwind config, never
-  by hand-picking a literal size (`text-[13px]`, etc.) on individual elements — a handful of
-  IDs/tags across the Manage Appointments table did this and had to be swept up after the fact.
+- **Type scale baseline** (revised up for maximum high-precision legibility on shared desk
+  monitors): `body-md` / `body-lg` 18px, `body-sm` / `label-md` 16px, `label-lg` 18px, `mono-data` 16px,
+  `label-sm` 14px. Headline and display sizes: `headline-sm` 18px, `headline-md` 24px, `headline-lg`/`display-lg-mobile` 30px, `display-lg`
+  34px. Apply this scale by editing the shared `fontSize` tokens in the Tailwind config, never
+  by hand-picking a literal size (`text-[13px]`, etc.) on individual elements.
 
 ## 2. Component rules
 
