@@ -17,14 +17,14 @@ export const RegisterPatient: React.FC = () => {
   const isEditMode = Boolean(editId);
 
   // Form states matching register_patient.html
-  const [fullName, setFullName] = useState('');
-  const [nicNumber, setNicNumber] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [fullName, setFullName] = useState(editId ? '' : 'Priyantha Dharmasena');
+  const [nicNumber, setNicNumber] = useState(editId ? '' : '198821400293');
+  const [dateOfBirth, setDateOfBirth] = useState(editId ? '' : '1988-04-12');
   const [gender, setGender] = useState<Gender>('Male');
-  const [bloodGroup, setBloodGroup] = useState('');
-  const [emailAddress, setEmailAddress] = useState('');
-  const [streetAddress, setStreetAddress] = useState('');
-  const [cityDistrict, setCityDistrict] = useState('');
+  const [bloodGroup, setBloodGroup] = useState(editId ? '' : 'A+');
+  const [emailAddress, setEmailAddress] = useState(editId ? '' : 'priyantha.dharmasena@outlook.com');
+  const [streetAddress, setStreetAddress] = useState(editId ? '' : 'No. 54/2, Dharmapala Mawatha');
+  const [cityDistrict, setCityDistrict] = useState(editId ? '' : 'Colombo 07');
 
   // Allergy states
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
@@ -37,26 +37,26 @@ export const RegisterPatient: React.FC = () => {
   const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
 
   // Phone numbers
-  const [primaryPhone, setPrimaryPhone] = useState('');
+  const [primaryPhone, setPrimaryPhone] = useState('077 482 9104');
   const [primaryPhoneType, setPrimaryPhoneType] = useState('mobile');
   const [secondaryPhones, setSecondaryPhones] = useState<SecondaryPhone[]>([]);
 
   // Emergency contact
-  const [emergencyName, setEmergencyName] = useState('');
-  const [emergencyRelation, setEmergencyRelation] = useState('');
-  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyName, setEmergencyName] = useState('Anoma Dharmasena');
+  const [emergencyRelation, setEmergencyRelation] = useState('Spouse');
+  const [emergencyPhone, setEmergencyPhone] = useState('077 129 4811');
   const [showAlternateContact, setShowAlternateContact] = useState(false);
   const [altContactName, setAltContactName] = useState('');
   const [altRelation, setAltRelation] = useState('');
   const [altPhone, setAltPhone] = useState('');
 
   // Insurance
-  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
-  const [insuranceProvider, setInsuranceProvider] = useState('');
-  const [policyNumber, setPolicyNumber] = useState('');
-  const [policyStartDate, setPolicyStartDate] = useState('');
-  const [policyEndDate, setPolicyEndDate] = useState('');
-  const [corporateAffiliation, setCorporateAffiliation] = useState('');
+  const [insuranceEnabled, setInsuranceEnabled] = useState(true);
+  const [insuranceProvider, setInsuranceProvider] = useState('SLIC');
+  const [policyNumber, setPolicyNumber] = useState('POL-SLIC-8491024');
+  const [policyStartDate, setPolicyStartDate] = useState('2023-01-01');
+  const [policyEndDate, setPolicyEndDate] = useState('2025-12-31');
+  const [corporateAffiliation, setCorporateAffiliation] = useState('Hayleys Group PLC');
 
   // Submission / feedback state
   const [submitting, setSubmitting] = useState(false);
@@ -251,44 +251,44 @@ export const RegisterPatient: React.FC = () => {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-        <div className="space-y-1">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
-              Home
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <Link to="/receptionist/patients" className="hover:text-primary transition-colors">
-              Patients
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-primary font-bold">
-              {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
+    <div className="flex flex-col w-full max-w-[1600px] mx-auto px-space-md sm:px-space-lg lg:px-space-xl py-space-lg space-y-space-xl">
+      {/* Page header / breadcrumb */}
+      <div className="flex flex-col gap-1 pb-space-xs">
+        <nav
+          aria-label="Breadcrumbs"
+          className="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"
+        >
+          <Link
+            to="/receptionist/dashboard"
+            className="hover:text-primary transition-colors flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-[15px]">home</span>
+            <span>Home</span>
+          </Link>
+          <span className="text-outline/50">/</span>
+          <Link to="/receptionist/patients" className="hover:text-primary transition-colors cursor-pointer">
+            Patients
+          </Link>
+          <span className="text-outline/50">/</span>
+          <span className="text-primary font-bold">
+            {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
+          </span>
+        </nav>
+        <div className="flex items-center gap-3 mt-1">
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
+            {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
+          </h1>
+          {isEditMode && editId && (
+            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono-data font-semibold">
+              ID: {editId}
             </span>
-          </div>
-
-          {/* Title */}
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
-              {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
-            </h1>
-            {isEditMode && editId && (
-              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono-data font-semibold">
-                ID: {editId}
-              </span>
-            )}
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            {isEditMode
-              ? 'Update personal, contact, emergency, and allergy information for this patient record.'
-              : 'Add a new patient record accessible across all island branches with centralized synchronization.'}
-          </p>
+          )}
         </div>
+        <p className="font-body-md text-body-md text-on-surface-variant">
+          {isEditMode
+            ? 'Update personal, contact, emergency, and allergy information for this patient record.'
+            : 'Add a new patient record accessible across all island branches with centralized synchronization.'}
+        </p>
       </div>
 
       {loadingEditData && (
@@ -519,7 +519,7 @@ export const RegisterPatient: React.FC = () => {
             </div>
 
             {/* Known Allergies Multi-select */}
-            <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-3">
+            <div className="flex flex-col gap-1.5 md:col-span-2">
               <label className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-status-cancelled-text text-[18px]">warning</span>

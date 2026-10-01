@@ -196,17 +196,11 @@ export const ManageAppointments: React.FC = () => {
     fetchAppointments();
   }, [fetchAppointments]);
 
-  // ─── Filtered by Search and Status on Client ──────────────────────────────
+  // ─── Filtered by Search on Client ──────────────────────────────────────────
   const filteredAppointments = useMemo(() => {
-    let result = appointments;
-    if (selectedStatus !== 'Cancelled') {
-      result = result.filter(a => a.status?.toLowerCase() !== 'cancelled');
-    }
-    
-    if (!searchQuery.trim()) return result;
-    
+    if (!searchQuery.trim()) return appointments;
     const q = searchQuery.toLowerCase().trim();
-    return result.filter((apt) => {
+    return appointments.filter((apt) => {
       const code = (apt.appointment_code || '').toLowerCase();
       const patient = (apt.patient_name || '').toLowerCase();
       const doctor = (apt.doctor_name || '').toLowerCase();
@@ -220,7 +214,7 @@ export const ManageAppointments: React.FC = () => {
         idStr.includes(q)
       );
     });
-  }, [appointments, searchQuery, selectedStatus]);
+  }, [appointments, searchQuery]);
 
   // ─── Summary Statistics ────────────────────────────────────────────────────
   const scheduledCount = useMemo(() => {
@@ -438,7 +432,10 @@ export const ManageAppointments: React.FC = () => {
             <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
               Manage Appointments
             </h1>
-
+            <span className="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-status-scheduled-text animate-pulse"></span>
+              Live Queue Active
+            </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm font-semibold">
               <span className="material-symbols-outlined text-[14px]">check_circle</span>
               {completedCount} Completed
@@ -944,6 +941,18 @@ export const ManageAppointments: React.FC = () => {
                             >
                               {apt.patient_name}
                             </span>
+                            <span className="font-mono-data text-mono-data text-outline text-[12px] px-1.5 py-0.5 rounded bg-surface-subtle border border-border-subtle">
+                              {apt.appointment_code}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1 text-on-surface-variant font-body-sm text-body-sm">
+                            <span className="px-1.5 py-0.2 rounded bg-surface-subtle text-outline text-[11px] font-mono-data font-semibold">
+                              PID #{apt.patient_id}
+                            </span>
+                            <span className="text-outline">·</span>
+                            <span className="text-[12px] text-secondary font-medium">
+                              {apt.appointment_type || 'Consultation'}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -951,6 +960,9 @@ export const ManageAppointments: React.FC = () => {
                       {/* 2. Consultant */}
                       <td className="px-space-md py-3.5">
                         <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-label-sm text-[12px] font-bold shrink-0">
+                            {getInitials(apt.doctor_name)}
+                          </div>
                           <div className="flex flex-col">
                             <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">
                               {apt.doctor_name}
@@ -982,6 +994,9 @@ export const ManageAppointments: React.FC = () => {
                               schedule
                             </span>
                             {formatTime(apt.start_time)}
+                            <span className="px-1.5 py-0.2 rounded bg-surface-subtle text-[11px] text-outline font-semibold border border-border-subtle">
+                              Slot #{apt.slot_id}
+                            </span>
                           </span>
                           <span className="font-body-sm text-[12px] text-outline mt-0.5 font-medium">
                             {formatDate(apt.appointment_date)}
@@ -1207,7 +1222,7 @@ export const ManageAppointments: React.FC = () => {
                                 : 'bg-surface-subtle hover:bg-surface-container text-brand-navy-deep border-border-subtle'
                               }`}
                           >
-                            {formatTime(slot.start_time)}
+                            {formatTime(slot.start_time)} (Slot #{slot.slot_id})
                           </button>
                         );
                       })}
@@ -1393,7 +1408,7 @@ export const ManageAppointments: React.FC = () => {
                     <div className="flex justify-between py-2 border-b border-border-subtle">
                       <span className="text-outline">Scheduled Slot</span>
                       <span className="font-label-md text-primary font-bold">
-                        {formatTime(drawerApt.start_time)}
+                        {formatTime(drawerApt.start_time)} · Slot #{drawerApt.slot_id}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border-subtle">

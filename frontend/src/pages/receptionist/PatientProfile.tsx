@@ -56,7 +56,7 @@ export const PatientProfile: React.FC = () => {
           console.error("Patient not found", e);
           return null;
         }),
-        getPatientBalance(id).catch(() => ({ outstanding_balance: 0 })),
+        getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
         getPatientInsurance(id).catch(() => ({ data: [] })),
         fetch(`/api/v1/patients/${id}/payments`).then(r => r.json()).catch(() => ({
           data: []

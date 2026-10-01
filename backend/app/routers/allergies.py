@@ -66,9 +66,6 @@ async def create_allergy(
         code,
         payload.name.strip(),
     )
-    if row is None:
-        raise ValueError("Failed to insert allergy, no row returned.")
-        
     return AllergyResponse(
         allergy_id=row["allergy_id"],
         allergy_code=row["allergy_code"],
