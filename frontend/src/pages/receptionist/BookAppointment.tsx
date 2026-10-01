@@ -100,7 +100,7 @@ export const BookAppointment: React.FC = () => {
         };
         setSelectedPatient(p);
         setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
-      }).catch(err => {
+      }).catch(() => {
         showToast('Failed to load pre-filled patient', 'error');
       });
     }

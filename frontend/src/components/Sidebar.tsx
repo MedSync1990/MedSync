@@ -59,7 +59,7 @@ export const Sidebar: React.FC = () => {
     {
       header: 'REFERENCE',
       items: [
-        { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'menu_book' },
+        { label: 'Treatment Catalogue', path: '/treatment-catalogue', icon: 'menu_book' },
         { label: 'Manage Branches', path: '/admin/branches', icon: 'domain', roles: ['Administrator'] },
         { label: 'Manage Staff', path: '/admin/staff', icon: 'badge', roles: ['Administrator', 'Branch Manager'] },
         { label: 'Manage Doctors', path: '/admin/doctors', icon: 'medical_services', roles: ['Administrator'] },
