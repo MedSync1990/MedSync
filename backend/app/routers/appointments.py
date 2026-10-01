@@ -146,7 +146,7 @@ async def list_appointments(
           AND ($2::date IS NULL OR das.date = $2)
           AND ($3::text IS NULL OR a.status::text = $3)
           AND ($4::int IS NULL OR das.doctor_id = $4)
-          AND ($7::int IS NULL OR a.patient_id = $7)
+          AND ($5::int IS NULL OR a.patient_id = $5)
     """
 
     count_query = f"""
@@ -156,7 +156,7 @@ async def list_appointments(
         JOIN staff s ON das.doctor_id = s.user_id
         {base_where};
     """
-    total = await conn.fetchval(count_query, scoped_branch_id, date, status, doctor, None, None, patient_id)
+    total = await conn.fetchval(count_query, scoped_branch_id, date, status, doctor, patient_id)
 
     data_query = f"""
         SELECT
@@ -183,9 +183,9 @@ async def list_appointments(
         JOIN app_user du ON das.doctor_id = du.user_id
         {base_where}
         ORDER BY das.date DESC, das.start_time DESC
-        LIMIT $5 OFFSET $6;
+        LIMIT $6 OFFSET $7;
     """
-    rows = await conn.fetch(data_query, scoped_branch_id, date, status, doctor, limit, offset, patient_id)
+    rows = await conn.fetch(data_query, scoped_branch_id, date, status, doctor, patient_id, limit, offset)
 
     items = [
         AppointmentResponse(
@@ -264,7 +264,8 @@ async def book_appointment(
         if "is no longer available" in err_msg or "does not exist" in err_msg:
             raise ConflictError("This doctor is no longer available at the selected time. Please choose another slot.")
         raise ConflictError(err_msg)
-
+    if appt_id is None:
+        raise ConflictError("Failed to create appointment: No ID returned.")
     created = await _fetch_appointment_detail(conn, appt_id)
     if not created:
         raise NotFoundError("Failed to retrieve created appointment.")
@@ -307,6 +308,9 @@ async def create_walk_in_appointment(
         if "is already booked over this time range" in err_msg or "excl_slot_overlap" in err_msg:
             raise ConflictError("This doctor is already booked over this time range. Please choose another time.")
         raise ConflictError(err_msg)
+
+    if appt_id is None:
+        raise ConflictError("Failed to create appointment: No ID returned.")
 
     created = await _fetch_appointment_detail(conn, appt_id)
     if not created:

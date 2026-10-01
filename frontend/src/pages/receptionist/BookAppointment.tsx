@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
@@ -70,7 +69,6 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 }
 
 export const BookAppointment: React.FC = () => {
-  const navigate = useNavigate();
   const { showToast } = useToast();
 
   // ─── Step 1: Patient Search & Selection State ──────────────────────────────
@@ -100,7 +98,7 @@ export const BookAppointment: React.FC = () => {
         };
         setSelectedPatient(p);
         setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
-      }).catch(err => {
+      }).catch(() => {
         showToast('Failed to load pre-filled patient', 'error');
       });
     }
@@ -345,9 +343,7 @@ export const BookAppointment: React.FC = () => {
           'success',
         );
 
-        setTimeout(() => {
-          navigate('/receptionist/appointments');
-        }, 1200);
+
       } catch (err: any) {
         const msg = err?.message || '';
         if (err?.isConflict || msg.includes('already booked') || msg.includes('overlap')) {
@@ -383,9 +379,7 @@ export const BookAppointment: React.FC = () => {
           'success',
         );
 
-        setTimeout(() => {
-          navigate('/receptionist/appointments');
-        }, 1200);
+
       } catch (err: any) {
         const msg = err?.message || '';
         if (err?.isConflict || msg.includes('no longer available') || msg.includes('exclusion')) {
@@ -422,17 +416,36 @@ export const BookAppointment: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="py-space-lg lg:py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
-      {/* Top Page Header */}
-      <PageHeader
-        title="Book an Appointment"
-        subtitle="Schedule a consultation with an available doctor in real time."
-        breadcrumbs={[
-          { label: 'Home', href: '/receptionist/dashboard' },
-          { label: 'Appointments', href: '/receptionist/appointments' },
-          { label: 'Book an Appointment' },
-        ]}
-      />
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        <div className="space-y-1">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <Link to="/receptionist/appointments" className="hover:text-primary transition-colors">
+              Appointments
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Book an Appointment</span>
+          </div>
+
+          {/* Title */}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+              Book an Appointment
+            </h1>
+          </div>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Schedule a consultation with an available doctor in real time.
+          </p>
+        </div>
+      </div>
 
       <div className="space-y-space-lg">
         {/* ─────────────────────────────────────────────────────────────────── */}
