@@ -30,6 +30,11 @@ export {
   getOutstandingBalances,
   getTreatmentCategories,
   getInsuranceVsOutOfPocket,
+  getDoctorEarningsOverview,
+  getDoctorBankAccounts,
+  getDoctorPayoutRequests,
+  getDoctorPayouts,
+  createDoctorPayoutRequest,
 } from './reports';
 export type {
   AppointmentsSummaryParams,
@@ -38,6 +43,10 @@ export type {
   OutstandingBalancesParams,
   TreatmentCategoriesParams,
   InsuranceVsOutOfPocketParams,
+  DoctorEarningsOverviewResponse,
+  BankAccountItem,
+  PayoutRequestItem,
+  PayoutHistoryItem,
 } from './reports';
 
 // Appointment endpoints

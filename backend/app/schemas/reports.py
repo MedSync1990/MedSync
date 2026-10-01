@@ -1,6 +1,6 @@
 from fastapi import status
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 from pydantic import BaseModel
 from .common import PaginatedResponse
 
@@ -111,8 +111,8 @@ class PayoutRequestItem(BaseModel):
     account_id:int
     request_amount: float
     status:str
-    request_date: date
-    processed_date: Optional[date]
+    request_date: datetime
+    processed_date: Optional[datetime]
     remarks: Optional[str]
     bank_name:str
     account_number:str
@@ -125,7 +125,7 @@ class PayoutHistoryItem(BaseModel):
     amount_paid:float
     payment_reference: str
     payment_method: str
-    payment_date:  date
+    payment_date: datetime
     bank_name: str
     account_number: str
     
