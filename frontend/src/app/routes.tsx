@@ -43,6 +43,7 @@ import { DoctorRevenue } from '../pages/reports/DoctorRevenue';
 import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
 import TreatmentCategoryBreakdown from '../pages/reports/TreatmentCategoryBreakdown';
 import { InsuranceVsOutOfPocket } from '../pages/reports/InsuranceVsOutOfPocket';
+import HelpCenter from '../pages/HelpCenter';
 
 const RoleDashboardRedirect: React.FC = () => {
   const { user } = useAuth();
@@ -69,6 +70,8 @@ export const AppRoutes: React.FC = () => {
 
       {/* Authenticated Application Routes */}
       <Route element={<AuthenticatedLayout />}>
+        <Route path="/help-center" element={<HelpCenter />} />
+
         {/* Receptionist Routes */}
         <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator']} />}>
           <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
