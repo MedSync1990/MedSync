@@ -1,3 +1,4 @@
+from fastapi import status
 from typing import Optional
 from datetime import date
 from pydantic import BaseModel
@@ -85,3 +86,49 @@ class InsuranceVsOutOfPocketResponse(BaseModel):
     provider_split: list[ProviderSplitItem]
     claim_slas: list[ClaimSlaItem]
     payment_modes: list[PaymentModeItem]
+
+class DoctorEarningsOverviewResponse(BaseModel):
+    total_earned: float
+    paid_by_hospital: float
+    outstanding:float
+
+class BankAccountItem(BaseModel):
+    account_id: int
+    bank_name: str
+    account_number: str
+    branch_name:Optional[str]
+    is_default:bool
+
+class BankAccountsResponse(BaseModel):
+    data: list[BankAccountItem]
+
+class PayoutRequestCreate(BaseModel):
+    account_id: int
+    request_amount: float
+
+class PayoutRequestItem(BaseModel):
+    request_id:int
+    account_id:int
+    request_amount: float
+    status:str
+    request_date: date
+    processed_date: Optional[date]
+    remarks: Optional[str]
+    bank_name:str
+    account_number:str
+
+class PayoutRequestsResponse(BaseModel):
+    data: list[PayoutRequestItem]
+
+class PayoutHistoryItem(BaseModel):
+    payout_id: int
+    amount_paid:float
+    payment_reference: str
+    payment_method: str
+    payment_date:  date
+    bank_name: str
+    account_number: str
+    
+class PayoutHistoryResponse(BaseModel):
+    data: list[PayoutHistoryItem]
+    
