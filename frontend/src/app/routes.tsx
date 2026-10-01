@@ -81,6 +81,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/receptionist/invoices/:invoiceId" element={<Invoices />} />
           <Route path="/receptionist/collect-payment" element={<CollectPayment />} />
           <Route path="/receptionist/collect-payment/:invoiceCode" element={<CollectPayment />} />
+          <Route path="/receptionist/treatment-catalogue" element={<TreatmentCatalogue />} />
         </Route>
 
         {/* Doctor Routes */}
@@ -99,6 +100,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
           <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
           <Route path="/branch-manager/doctors" element={<ManageDoctors />} />
+          <Route path="/branch-manager/treatment-catalogue" element={<TreatmentCatalogue />} />
         </Route>
 
         {/* Admin Routes */}
