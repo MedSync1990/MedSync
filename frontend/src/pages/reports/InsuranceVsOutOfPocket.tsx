@@ -144,8 +144,13 @@ export function InsuranceVsOutOfPocket() {
           <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
           </button>
-          <button onClick={fetchReport} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[18px]">filter_alt</span>Apply Filters
+          <button onClick={fetchReport} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
+            {loading ? (
+              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+            ) : (
+              <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+            )}
+            {loading ? 'Applying...' : 'Apply Filters'}
           </button>
         </div>
       </div>
