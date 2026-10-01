@@ -60,6 +60,21 @@ const RoleDashboardRedirect: React.FC = () => {
   }
 };
 
+const RoleTreatmentCatalogueRedirect: React.FC = () => {
+  const { user } = useAuth();
+  switch (user?.role) {
+    case 'Administrator':
+      return <Navigate to="/admin/treatment-catalogue" replace />;
+    case 'Branch Manager':
+      return <Navigate to="/branch-manager/treatment-catalogue" replace />;
+    case 'Doctor':
+      return <Navigate to="/doctor/treatment-catalogue" replace />;
+    case 'Receptionist':
+    default:
+      return <Navigate to="/receptionist/treatment-catalogue" replace />;
+  }
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -124,8 +139,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/reports/insurance-vs-out-of-pocket" element={<InsuranceVsOutOfPocket />} />
         </Route>
 
-        {/* Dynamic Role Dashboard redirect */}
+        {/* Dynamic Role Dashboard & Treatment Catalogue redirects */}
         <Route path="/dashboard" element={<RoleDashboardRedirect />} />
+        <Route path="/treatment-catalogue" element={<RoleTreatmentCatalogueRedirect />} />
       </Route>
 
       {/* Redirect root to login */}
