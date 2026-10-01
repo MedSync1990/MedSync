@@ -7,7 +7,15 @@ from asyncpg import Connection, PostgresError
 from app.db import get_conn
 from app.dependencies import CurrentUser, get_db, require_roles
 from app.errors import NotFoundError, ConflictError, AppValidationError
-from app.schemas.appointments import DoctorSlotResponse, SlotStatusEnum
+from app.schemas.appointments import (
+    AppointmentBookRequest,
+    AppointmentListResponse,
+    AppointmentResponse,
+    AppointmentStatusEnum,
+    AppointmentTypeEnum,
+    DoctorSlotResponse,
+    SlotStatusEnum,
+)
 from app.schemas.consultations import (
     AppointmentCompleteRequest,
     AppointmentCompleteResponse,
