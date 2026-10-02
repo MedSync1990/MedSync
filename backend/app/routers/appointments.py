@@ -1,4 +1,5 @@
 from datetime import date
+import json
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 from asyncpg import Connection, PostgresError
@@ -8,6 +9,8 @@ from app.schemas.appointments import (
     AppointmentBookRequest,
     WalkInAppointmentRequest,
     AppointmentRescheduleRequest,
+    AppointmentCompleteRequest,
+    AppointmentCompleteResponse,
     AppointmentResponse,
     AppointmentListResponse,
     DoctorSlotResponse,
@@ -382,3 +385,52 @@ async def cancel_appointment(
     if not cancelled:
         raise NotFoundError("Appointment not found.")
     return cancelled
+
+
+@router.put("/{id}/complete", response_model=AppointmentCompleteResponse)
+async def complete_appointment(
+    id: int,
+    payload: AppointmentCompleteRequest,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Doctor")),
+):
+    """Complete a doctor's appointment and atomically generate its invoice."""
+    doctor_id = await conn.fetchval(
+        """
+        SELECT das.doctor_id
+        FROM appointments a
+        JOIN doctor_availability_slots das ON das.slot_id = a.slot_id
+        WHERE a.appointment_id = $1
+        """,
+        id,
+    )
+    if doctor_id is None:
+        raise NotFoundError("Appointment not found.")
+    if doctor_id != user.user_id:
+        raise ForbiddenError("You can only complete your own appointments.")
+
+    treatments = [
+        {"treatment_code": item.treatment_id, "quantity": item.quantity}
+        for item in payload.treatments
+    ]
+    try:
+        invoice_id = await conn.fetchval(
+            "SELECT fn_complete_appointment($1, $2, $3, $4::jsonb)",
+            id,
+            payload.diagnosis,
+            payload.consultation_notes,
+            json.dumps(treatments),
+        )
+    except PostgresError as exc:
+        message = str(exc)
+        if "does not exist" in message:
+            raise NotFoundError("Appointment not found.") from exc
+        raise ConflictError(message) from exc
+
+    if invoice_id is None:
+        raise ConflictError("Appointment completion did not generate an invoice.")
+    return AppointmentCompleteResponse(
+        appointment_id=id,
+        invoice_id=invoice_id,
+        message="Appointment completed and invoice generated successfully.",
+    )

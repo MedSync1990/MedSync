@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
+import { put } from '../../api/client';
 import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
+
+interface SelectedTreatment {
+  treatment_id: number;
+  name: string;
+  code: string;
+  department: string;
+  indication: string;
+  quantity: number;
+}
 
 const DEFAULT_PATIENT: PatientResponse = {
   patient_id: 1,
@@ -41,6 +51,7 @@ export const DoctorConsultation: React.FC = () => {
   const { patientId: routePatientId } = useParams<{ patientId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const activePatientId = routePatientId || searchParams.get('patientId') || searchParams.get('id') || '1';
+  const activeAppointmentId = searchParams.get('appointmentId') || searchParams.get('appointment_id') || searchParams.get('id');
 
   const [patient, setPatient] = useState<PatientResponse>(DEFAULT_PATIENT);
   const [allergies, setAllergies] = useState<AllergyItem[]>(DEFAULT_PATIENT.allergies || []);
@@ -72,6 +83,33 @@ export const DoctorConsultation: React.FC = () => {
   const [followUpWeek, setFollowUpWeek] = useState<string>('4');
   const [isFinalized, setIsFinalized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
+  const [selectedTreatments, setSelectedTreatments] = useState<SelectedTreatment[]>([
+    {
+      treatment_id: 5,
+      name: 'Cardiology Consultation',
+      code: '5',
+      department: 'OPD Unit',
+      indication: 'Routine follow-up post-stent placement',
+      quantity: 1,
+    },
+    {
+      treatment_id: 8,
+      name: 'ECG',
+      code: '8',
+      department: 'Cardiology Diagnostics',
+      indication: 'Evaluate baseline rhythm and conduction',
+      quantity: 1,
+    },
+    {
+      treatment_id: 7,
+      name: 'Blood Sugar Test',
+      code: '7',
+      department: 'Central Lab',
+      indication: 'Check glycemic control on existing medication',
+      quantity: 1,
+    },
+  ]);
 
   // Load master allergies catalogue
   useEffect(() => {
@@ -229,12 +267,36 @@ export const DoctorConsultation: React.FC = () => {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (!diagnosis.trim() || !notes.trim()) {
+      setCompletionError('Diagnosis and consultation notes are required before completing the appointment.');
+      return;
+    }
     setIsLoading(true);
-    setTimeout(() => {
+    setCompletionError(null);
+    try {
+      if (!activeAppointmentId) {
+        setCompletionError('An appointment ID is required before completing the consultation.');
+        setIsLoading(false);
+        return;
+      }
+      await put(`/appointments/${activeAppointmentId}/complete`, {
+        diagnosis: diagnosis.trim(),
+        consultation_notes: notes.trim(),
+        treatments: selectedTreatments.map(({ treatment_id, quantity }) => ({ treatment_id, quantity })),
+      });
       setIsLoading(false);
       setIsFinalized(true);
-    }, 700);
+    } catch (error) {
+      setIsLoading(false);
+      setCompletionError(error instanceof Error ? error.message : 'Unable to complete the appointment.');
+    }
+  };
+
+  const addTreatment = (treatment: SelectedTreatment) => {
+    setSelectedTreatments((current) => current.some((item) => item.treatment_id === treatment.treatment_id)
+      ? current
+      : [...current, treatment]);
   };
 
   const patientFullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Priyantha Dharmasena';
@@ -854,15 +916,15 @@ export const DoctorConsultation: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-label-sm text-label-sm font-bold text-secondary uppercase tracking-wider">Quick-Add Orders:</span>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
+            <button onClick={() => addTreatment({ treatment_id: 10, name: 'Echocardiogram', code: '10', department: 'Cardiology Diagnostics', indication: 'Structural cardiac assessment', quantity: 1 })} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
               <span className="material-symbols-outlined text-[14px]">add</span>
               <span>2D Echo (Transthoracic)</span>
             </button>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
+            <button onClick={() => addTreatment({ treatment_id: 6, name: 'Blood Test - Full Count', code: '6', department: 'Central Lab', indication: 'Routine blood screening', quantity: 1 })} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
               <span className="material-symbols-outlined text-[14px]">add</span>
               <span>Lipid Profile Full Panel</span>
             </button>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
+            <button onClick={() => addTreatment({ treatment_id: 7, name: 'Blood Sugar Test', code: '7', department: 'Central Lab', indication: 'Check glycemic control', quantity: 1 })} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
               <span className="material-symbols-outlined text-[14px]">add</span>
               <span>Serum Electrolytes</span>
             </button>
@@ -899,7 +961,7 @@ export const DoctorConsultation: React.FC = () => {
                   </span>
                 </td>
                 <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+                  <button onClick={() => setSelectedTreatments((current) => current.filter((item) => item.treatment_id !== 5))} className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </td>
@@ -920,7 +982,7 @@ export const DoctorConsultation: React.FC = () => {
                   </span>
                 </td>
                 <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+                  <button onClick={() => setSelectedTreatments((current) => current.filter((item) => item.treatment_id !== 8))} className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </td>
@@ -941,7 +1003,7 @@ export const DoctorConsultation: React.FC = () => {
                   </span>
                 </td>
                 <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+                  <button onClick={() => setSelectedTreatments((current) => current.filter((item) => item.treatment_id !== 7))} className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </td>
@@ -979,6 +1041,11 @@ export const DoctorConsultation: React.FC = () => {
           </div>
         </div>
 
+        {completionError && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {completionError}
+          </p>
+        )}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
