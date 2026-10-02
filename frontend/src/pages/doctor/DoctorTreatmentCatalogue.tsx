@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../../components/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { createTreatment, deactivateTreatment, listTreatments, updateTreatment } from '../../api/treatments';
 
 export interface TreatmentItem {
   code: string;
@@ -10,11 +11,22 @@ export interface TreatmentItem {
   category: string;
   price: string;
   insuranceEligible: boolean;
+  isActive?: boolean;
 }
 
 export interface DoctorTreatmentCatalogueProps {
   canEdit?: boolean;
 }
+
+const mapTreatment = (item: Awaited<ReturnType<typeof listTreatments>>[number]): TreatmentItem => ({
+  code: String(item.treatment_code),
+  name: item.treatment_name,
+  description: '',
+  category: item.category,
+  price: Number(item.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  insuranceEligible: item.is_eligible_for_insurance,
+  isActive: item.is_active,
+});
 
 // ─── Stat Card Sub-component ───────────────────────────────────────────────
 
@@ -56,11 +68,15 @@ const StatCard: React.FC<StatCardProps> = ({
 
 export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> = ({ canEdit: explicitCanEdit }) => {
   const { user } = useAuth();
-  const canEdit = explicitCanEdit !== undefined ? explicitCanEdit : user?.role === 'Administrator';
+  const canEdit = explicitCanEdit !== undefined
+    ? explicitCanEdit
+    : user?.role === 'Administrator' || user?.role === 'Branch Manager';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [loadError, setLoadError] = useState('');
 
   const [treatments, setTreatments] = useState<TreatmentItem[]>([
     {
@@ -70,6 +86,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Consultation',
       price: '3,500.00',
       insuranceEligible: true,
+      isActive: true,
     },
     {
       code: 'SRV-DIA-04',
@@ -78,6 +95,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Diagnostics',
       price: '1,800.00',
       insuranceEligible: true,
+      isActive: true,
     },
     {
       code: 'SRV-CRD-08',
@@ -86,6 +104,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Cardiology',
       price: '8,500.00',
       insuranceEligible: true,
+      isActive: true,
     },
     {
       code: 'SRV-LAB-12',
@@ -94,6 +113,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Laboratory',
       price: '450.00',
       insuranceEligible: false,
+      isActive: true,
     },
     {
       code: 'SRV-LAB-22',
@@ -102,6 +122,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Laboratory',
       price: '2,200.00',
       insuranceEligible: true,
+      isActive: true,
     },
     {
       code: 'SRV-RAD-03',
@@ -110,6 +131,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Radiology',
       price: '2,400.00',
       insuranceEligible: true,
+      isActive: true,
     },
     {
       code: 'SRV-PRC-09',
@@ -118,6 +140,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Procedures',
       price: '12,000.00',
       insuranceEligible: true,
+      isActive: true,
     },
   ]);
 
@@ -137,8 +160,23 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     price: '',
     insuranceEligible: true,
   });
+  const [formError, setFormError] = useState('');
 
-  const categories = ['All', 'Cardiology', 'Consultation', 'Diagnostics', 'Laboratory', 'Radiology', 'Procedures'];
+  const categories = ['All', 'Cardiology', 'Consultation', 'Diagnostic', 'Laboratory', 'Radiology', 'Procedure', 'Preventive'];
+
+  useEffect(() => {
+    let mounted = true;
+    listTreatments(true)
+      .then((items) => {
+        if (mounted) setTreatments(items.map(mapTreatment));
+      })
+      .catch(() => {
+        if (mounted) setLoadError('Unable to load the treatment catalogue. Please try again.');
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const filteredTreatments = treatments.filter((item) => {
     const matchesCat = selectedCategory === 'All' || item.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -164,13 +202,16 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       category: 'Consultation',
       price: '',
       insuranceEligible: true,
+      isActive: true,
     });
+    setFormError('');
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (item: TreatmentItem) => {
     setEditingItem(item);
     setFormData({ ...item });
+    setFormError('');
     setIsModalOpen(true);
   };
 
@@ -181,21 +222,123 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     setDeleteTarget(item);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteTarget) {
-      setTreatments((prev) => prev.filter((t) => t.code !== deleteTarget.code));
-      setDeleteTarget(null);
+      try {
+        await deactivateTreatment(Number(deleteTarget.code));
+        setTreatments((prev) => prev.map((item) => item.code === deleteTarget.code ? { ...item, isActive: false } : item));
+        setDeleteTarget(null);
+      } catch {
+        setLoadError('Unable to deactivate this treatment. Please try again.');
+      }
     }
   };
 
-  const handleSaveItem = (e: React.FormEvent) => {
+  const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingItem) {
-      setTreatments(treatments.map((t) => (t.code === editingItem.code ? formData : t)));
-    } else {
-      setTreatments([...treatments, formData]);
+    const normalizedCode = formData.code.trim().toUpperCase();
+    const normalizedName = formData.name.trim();
+    const normalizedPrice = formData.price.replace(/,/g, '').trim();
+    const price = Number(normalizedPrice);
+    const duplicateCode = treatments.some(
+      (item) => item.code.toUpperCase() === normalizedCode && item.code !== editingItem?.code,
+    );
+
+    if (!normalizedCode || !normalizedName || !Number.isFinite(price) || price <= 0) {
+      setFormError('Enter a treatment code, name, and a valid price greater than zero.');
+      return;
     }
+    if (duplicateCode) {
+      setFormError('Treatment codes must be unique.');
+      return;
+    }
+
+    const savedItem = {
+      ...formData,
+      code: normalizedCode,
+      name: normalizedName,
+      description: formData.description.trim(),
+      price: price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    };
+    try {
+      const payload = {
+        treatment_name: savedItem.name,
+        category: savedItem.category,
+        price,
+        is_eligible_for_insurance: savedItem.insuranceEligible,
+      };
+      const response = editingItem
+        ? await updateTreatment(Number(editingItem.code), payload)
+        : await createTreatment(payload);
+      const persistedItem = mapTreatment(response);
+      if (editingItem) {
+        setTreatments((current) => current.map((item) => item.code === editingItem.code ? persistedItem : item));
+      } else {
+        setTreatments((current) => [...current, persistedItem]);
+      }
+    } catch {
+      setFormError('Unable to save this treatment. Please try again.');
+      return;
+    }
+    setFormError('');
     setIsModalOpen(false);
+  };
+
+  const handleExport = () => {
+    const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const rows = [
+      ['Code', 'Name', 'Description', 'Category', 'Price (LKR)', 'Insurance Eligible'],
+      ...treatments.map((item) => [
+        item.code,
+        item.name,
+        item.description,
+        item.category,
+        item.price,
+        item.insuranceEligible ? 'Yes' : 'No',
+      ]),
+    ];
+    const csv = rows.map((row) => row.map(escapeCsv).join(',')).join('\n');
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    link.download = 'treatment-catalogue.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const lines = String(reader.result || '').trim().split(/\r?\n/);
+      const imported = lines.slice(1).map((line) => {
+        const values = line.match(/("(?:[^"]|"")*"|[^,]*)(?:,|$)/g)?.map((value) => value.replace(/,$/, '').replace(/^"|"$/g, '').replace(/""/g, '"')) || [];
+        return {
+          code: values[0]?.trim().toUpperCase() || '',
+          name: values[1]?.trim() || '',
+          description: values[2]?.trim() || '',
+          category: values[3]?.trim() || 'Consultation',
+          price: values[4]?.trim() || '',
+          insuranceEligible: values[5]?.trim().toLowerCase() === 'yes',
+        };
+      }).filter((item) => item.code && item.name && Number.isFinite(Number(item.price.replace(/,/g, ''))));
+
+      if (imported.length === 0) return;
+      try {
+        const persisted = await Promise.all(imported.map((item) => createTreatment({
+          treatment_name: item.name,
+          category: item.category,
+          price: Number(item.price.replace(/,/g, '')),
+          is_eligible_for_insurance: item.insuranceEligible,
+        })));
+        setTreatments((current) => [...current, ...persisted.map(mapTreatment)]);
+      } catch {
+        setLoadError('Unable to import the treatment catalogue. Please check the CSV and try again.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -225,6 +368,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
           <div className="flex items-center gap-2 flex-wrap self-start md:self-auto">
             <button
               type="button"
+              onClick={() => importInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">file_upload</span>
@@ -232,6 +376,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
             </button>
             <button
               type="button"
+              onClick={handleExport}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">download</span>
@@ -245,6 +390,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
               <span className="material-symbols-outlined text-[20px]">add</span>
               <span>Add Treatment</span>
             </button>
+            <input ref={importInputRef} type="file" accept=".csv,text/csv" onChange={handleImport} className="hidden" />
           </div>
         ) : (
           <div className="flex items-center gap-space-sm bg-surface-card px-space-md py-space-xs rounded-xl shadow-sm border border-border-subtle">
@@ -330,6 +476,9 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
               <span>Print Sheet</span>
             </button>
           </div>
+          {loadError && (
+            <p className="mt-space-sm rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{loadError}</p>
+          )}
         </div>
 
         {/* Category Filter Pills Bar */}
@@ -359,12 +508,19 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
                 <th className="px-space-md py-2 font-semibold" scope="col">Treatment / Service Name</th>
                 <th className="px-space-md py-2 w-40 font-semibold" scope="col">Category</th>
                 <th className="px-space-md py-2 w-44 text-right font-semibold" scope="col">Price (LKR)</th>
+                <th className="px-space-md py-2 w-40 text-center font-semibold" scope="col">Status</th>
                 <th className="px-space-md py-2 w-48 text-center font-semibold" scope="col">Insurance-Eligible</th>
                 <th className="px-space-md py-2 w-28 text-center font-semibold" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-subtle font-body-md text-body-md text-on-surface">
-              {filteredTreatments.map((item) => (
+              {filteredTreatments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-space-md py-space-xl text-center text-secondary">
+                    No treatments match the current search or category filter.
+                  </td>
+                </tr>
+              ) : filteredTreatments.map((item) => (
                 <tr key={item.code} className="hover:bg-surface-subtle/70 transition-colors group">
                   <td className="px-space-md py-3.5 font-mono-data text-mono-data font-semibold text-primary">
                     {item.code}
@@ -380,6 +536,17 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
                   </td>
                   <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-semibold text-brand-navy-deep">
                     {item.price}
+                  </td>
+                  <td className="px-space-md py-3.5 text-center">
+                    {item.isActive === false ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-slate-100 text-slate-600 font-semibold">
+                        Inactive
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-status-completed-bg text-status-completed-text font-semibold">
+                        Active
+                      </span>
+                    )}
                   </td>
                   <td className="px-space-md py-3.5 text-center">
                     {item.insuranceEligible ? (
@@ -415,14 +582,16 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
                           >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
                           </button>
-                          <button
-                            className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                            onClick={() => handleDeleteClick(item)}
-                            title="Delete Treatment"
-                            type="button"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
+                          {item.isActive !== false && (
+                            <button
+                              className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                              onClick={() => handleDeleteClick(item)}
+                              title="Deactivate Treatment"
+                              type="button"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
@@ -459,6 +628,9 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
         }
       >
         <form onSubmit={handleSaveItem} className="space-y-space-md">
+          {formError && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</p>
+          )}
           <div>
             <label className="block font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-1">
               Treatment Code

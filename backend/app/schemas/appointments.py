@@ -2,7 +2,7 @@ import datetime as dt
 from datetime import datetime, time
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # 1. Enums matching PostgreSQL types
@@ -62,6 +62,31 @@ class WalkInAppointmentRequest(BaseModel):
 # appointment id passed directly in rest api path
 class AppointmentRescheduleRequest(BaseModel):
     new_slot_id: int = Field(..., description="The new target slot ID")
+
+
+class AppointmentTreatmentRequest(BaseModel):
+    treatment_id: int = Field(..., gt=0)
+    quantity: int = Field(default=1, ge=1)
+
+
+class AppointmentCompleteRequest(BaseModel):
+    diagnosis: str = Field(..., min_length=1, max_length=255)
+    consultation_notes: str = Field(..., min_length=1)
+    treatments: List[AppointmentTreatmentRequest] = Field(default_factory=list)
+
+    @field_validator("diagnosis", "consultation_notes")
+    @classmethod
+    def require_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("This field is required.")
+        return value
+
+
+class AppointmentCompleteResponse(BaseModel):
+    appointment_id: int
+    invoice_id: int
+    message: str
 
 
 # 6. GET /appointments/{id} & Item in List Response

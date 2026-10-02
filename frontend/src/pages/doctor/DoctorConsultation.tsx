@@ -1,32 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
+import { getAppointment } from '../../api/appointments';
+import { put } from '../../api/client';
+import { listTreatments, type TreatmentApiItem } from '../../api/treatments';
 import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
+import type { AppointmentResponse } from '../../api/types';
 
-const DEFAULT_PATIENT: PatientResponse = {
-  patient_id: 1,
-  patient_code: 'PT-003420',
-  first_name: 'Priyantha',
-  last_name: 'Dharmasena',
-  id_number: '782410928V',
-  phone_number: '077 421 9081',
-  email: 'priyantha.d@email.lk',
-  gender: 'Male',
-  date_of_birth: '1976-03-14',
-  address: '42/B Temple Road, Colombo 03',
-  blood_group: 'B+',
-  emergency_contact: '071 992 4811',
-  contact_name: 'Sunethra Dharmasena (Spouse)',
-  registered_branch: 1,
-  branch_name: 'Colombo Central Branch',
-  has_insurance: true,
-  registered_date: '2023-01-15',
-  is_active: true,
-  allergies: [
-    { allergy_id: 1, allergy_code: 'ALG-PEN', name: 'Penicillin' },
-    { allergy_id: 2, allergy_code: 'ALG-PEA', name: 'Peanut' },
-  ],
-};
+interface AppointmentTreatment {
+  treatment_id: number;
+  quantity: number;
+}
 
 function calculateAge(dob?: string | null): string {
   if (!dob) return '48 yrs';
@@ -39,14 +23,21 @@ function calculateAge(dob?: string | null): string {
 
 export const DoctorConsultation: React.FC = () => {
   const { patientId: routePatientId } = useParams<{ patientId?: string }>();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activePatientId = routePatientId || searchParams.get('patientId') || searchParams.get('id') || '1';
+  const activePatientId = routePatientId || searchParams.get('patientId');
+  const activeAppointmentId = searchParams.get('appointmentId') || searchParams.get('appointment_id') || searchParams.get('id');
 
-  const [patient, setPatient] = useState<PatientResponse>(DEFAULT_PATIENT);
-  const [allergies, setAllergies] = useState<AllergyItem[]>(DEFAULT_PATIENT.allergies || []);
+  const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
+  const [patient, setPatient] = useState<PatientResponse | null>(null);
+  const [allergies, setAllergies] = useState<AllergyItem[]>([]);
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
+  const [availableTreatments, setAvailableTreatments] = useState<TreatmentApiItem[]>([]);
+  const [treatmentSearch, setTreatmentSearch] = useState('');
   const [availablePatients, setAvailablePatients] = useState<PatientListItem[]>([]);
   const [isLoadingPatient, setIsLoadingPatient] = useState<boolean>(false);
+  const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
+  const [appointmentLoadError, setAppointmentLoadError] = useState<string | null>(null);
   const [patientSwitchOpen, setPatientSwitchOpen] = useState<boolean>(false);
 
   // Allergy management modal state
@@ -62,15 +53,13 @@ export const DoctorConsultation: React.FC = () => {
   const [isCreatingMasterAllergy, setIsCreatingMasterAllergy] = useState<boolean>(false);
   const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
 
-  const [diagnosis, setDiagnosis] = useState(
-    'Essential (primary) hypertension - Grade 1 / Post-Stent follow-up monitoring'
-  );
-  const [notes, setNotes] = useState(
-    'Patient reports mild exertion-related fatigue. Blood pressure stabilized on current ACE inhibitor regimen (128/82 mmHg). 12-lead ECG confirms normal sinus rhythm with no ST-T segment anomalies. Advised low sodium dietary intake, 30-minute daily walking routine, and continuation of prescribed therapy.'
-  );
+  const [diagnosis, setDiagnosis] = useState('');
+  const [notes, setNotes] = useState('');
   const [followUpWeek, setFollowUpWeek] = useState<string>('4');
   const [isFinalized, setIsFinalized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
+  const [selectedTreatments, setSelectedTreatments] = useState<AppointmentTreatment[]>([]);
 
   // Load master allergies catalogue
   useEffect(() => {
@@ -82,17 +71,15 @@ export const DoctorConsultation: React.FC = () => {
         }
       })
       .catch(() => {
-        // Fallback default master allergies
-        if (isMounted) {
-          setMasterAllergies([
-            { allergy_id: 1, allergy_code: 'ALG-PEN', name: 'Penicillin' },
-            { allergy_id: 2, allergy_code: 'ALG-PEA', name: 'Peanut' },
-            { allergy_id: 3, allergy_code: 'ALG-LAT', name: 'Latex' },
-            { allergy_id: 4, allergy_code: 'ALG-SUL', name: 'Sulfa Drugs' },
-            { allergy_id: 5, allergy_code: 'ALG-SHF', name: 'Shellfish' },
-            { allergy_id: 6, allergy_code: 'ALG-ASP', name: 'Aspirin / NSAIDs' },
-          ]);
-        }
+        if (isMounted) setMasterAllergies([]);
+      });
+
+    listTreatments(false)
+      .then((data) => {
+        if (isMounted) setAvailableTreatments(data.filter((item) => item.is_active));
+      })
+      .catch(() => {
+        if (isMounted) setAppointmentLoadError('Unable to load available treatments.');
       });
 
     // Also fetch available patients for quick switching
@@ -114,6 +101,7 @@ export const DoctorConsultation: React.FC = () => {
   // Fetch patient details and allergies
   const fetchPatientData = useCallback(async (id: string | number) => {
     setIsLoadingPatient(true);
+    setPatientLoadError(null);
     try {
       const data = await patientService.getById(id);
       setPatient(data);
@@ -132,16 +120,32 @@ export const DoctorConsultation: React.FC = () => {
         }
       }
     } catch {
-      // Keep default demo patient if offline or not found
-      setSelectedAllergyIds(DEFAULT_PATIENT.allergies?.map((a) => a.allergy_id) || []);
+      setPatientLoadError('Unable to load patient information.');
+      setPatient(null);
+      setAllergies([]);
+      setSelectedAllergyIds([]);
     } finally {
       setIsLoadingPatient(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchPatientData(activePatientId);
-  }, [activePatientId, fetchPatientData]);
+    if (activePatientId && !activeAppointmentId) fetchPatientData(activePatientId);
+  }, [activeAppointmentId, activePatientId, fetchPatientData]);
+
+  useEffect(() => {
+    if (!activeAppointmentId) {
+      setAppointmentLoadError('Open this consultation from a scheduled appointment.');
+      return;
+    }
+    setAppointmentLoadError(null);
+    getAppointment(Number(activeAppointmentId))
+      .then((data) => {
+        setAppointment(data);
+        fetchPatientData(data.patient_id);
+      })
+      .catch(() => setAppointmentLoadError('Unable to load the appointment.'));
+  }, [activeAppointmentId, fetchPatientData]);
 
   // Handle opening allergy modal
   const handleOpenAllergyModal = () => {
@@ -227,16 +231,44 @@ export const DoctorConsultation: React.FC = () => {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (!diagnosis.trim() || !notes.trim()) {
+      setCompletionError('Diagnosis and consultation notes are required before completing the appointment.');
+      return;
+    }
     setIsLoading(true);
-    setTimeout(() => {
+    setCompletionError(null);
+    try {
+      if (!activeAppointmentId) {
+        setCompletionError('An appointment ID is required before completing the consultation.');
+        setIsLoading(false);
+        return;
+      }
+      await put(`/appointments/${activeAppointmentId}/complete`, {
+        diagnosis: diagnosis.trim(),
+        consultation_notes: notes.trim(),
+        treatments: selectedTreatments.map(({ treatment_id, quantity }) => ({ treatment_id, quantity })),
+      });
       setIsLoading(false);
       setIsFinalized(true);
-    }, 700);
+      window.setTimeout(() => navigate('/doctor/dashboard', { replace: true }), 1200);
+    } catch (error) {
+      setIsLoading(false);
+      setCompletionError(error instanceof Error ? error.message : 'Unable to complete the appointment.');
+    }
   };
 
-  const patientFullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Priyantha Dharmasena';
-  const patientDemographics = `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Male'}`;
+  const addTreatment = (treatment: TreatmentApiItem) => {
+    setSelectedTreatments((current) => current.some((item) => item.treatment_id === treatment.treatment_code)
+      ? current
+      : [...current, { treatment_id: treatment.treatment_code, quantity: 1 }]);
+  };
+
+  const patientView = patient ?? ({} as PatientResponse);
+  const patientFullName = patient
+    ? `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Patient'
+    : 'Loading patient...';
+  const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Loading...';
 
   return (
     <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-space-3xl">
@@ -252,6 +284,11 @@ export const DoctorConsultation: React.FC = () => {
           <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
           <span className="text-brand-navy-deep font-semibold">Consultation</span>
         </nav>
+        {(appointmentLoadError || patientLoadError) && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {appointmentLoadError || patientLoadError}
+          </p>
+        )}
 
         {/* Patient Header Card */}
         <div className="bg-surface-card rounded-2xl p-space-lg sm:p-space-xl border border-border-subtle shadow-sm flex flex-col gap-space-md relative">
@@ -274,14 +311,14 @@ export const DoctorConsultation: React.FC = () => {
                 {/* Queue Status Pill */}
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
                   <span className="w-2 h-2 rounded-full bg-border-focus animate-pulse"></span>
-                  In Consultation Room 04
+                  {appointment?.status || 'Loading appointment'}
                 </span>
               </div>
 
               {/* Sub-Header Demographics & Allergy Flags (page-content.md §2.3) */}
               <div className="flex flex-wrap items-center gap-2 text-sm text-secondary">
                 <span className="font-mono-data font-semibold text-primary">
-                  {patient.patient_code}
+                  {patientView.patient_code || '—'}
                 </span>
                 <span>·</span>
                 <span>{patientDemographics}</span>
@@ -292,7 +329,7 @@ export const DoctorConsultation: React.FC = () => {
                       {allergies.map((alg) => (
                         <span
                           key={alg.allergy_id}
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-label-sm text-xs font-bold shadow-2xs"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-label-sm text-xs font-bold shadow-2xs"
                         >
                           <span className="material-symbols-outlined text-[13px]">warning</span>
                           Allergy: {alg.name}
@@ -340,7 +377,7 @@ export const DoctorConsultation: React.FC = () => {
                           setPatientSwitchOpen(false);
                         }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between hover:bg-surface-subtle transition-colors ${
-                          p.patient_id === patient.patient_id ? 'bg-surface-container-high font-bold' : ''
+                          p.patient_id === patientView.patient_id ? 'bg-surface-container-high font-bold' : ''
                         }`}
                       >
                         <div>
@@ -389,7 +426,7 @@ export const DoctorConsultation: React.FC = () => {
                 Patient ID
               </span>
               <span className="font-mono-data text-mono-data font-bold text-primary text-base">
-                {patient.patient_code}
+                {patientView.patient_code || '—'}
               </span>
             </div>
 
@@ -411,7 +448,7 @@ export const DoctorConsultation: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px] text-rose-500">bloodtype</span>
                 <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                  {patient.blood_group || 'Unknown'}
+                  {patientView.blood_group || 'Unknown'}
                 </span>
               </div>
             </div>
@@ -422,7 +459,7 @@ export const DoctorConsultation: React.FC = () => {
                 National ID (NIC)
               </span>
               <span className="font-mono-data text-mono-data font-bold text-brand-navy-deep text-base">
-                {patient.id_number}
+                {patientView.id_number || '—'}
               </span>
             </div>
 
@@ -432,29 +469,29 @@ export const DoctorConsultation: React.FC = () => {
                 Encounter Type
               </span>
               <span className="font-label-md text-label-md font-semibold text-primary">
-                Follow-up Cardiology
+                {appointment?.appointment_type || 'Appointment'}
               </span>
             </div>
           </div>
 
           {/* Dynamic Critical Allergy Alert Bar */}
           {allergies.length > 0 ? (
-            <div className="p-space-sm sm:px-space-md sm:py-2.5 rounded-xl bg-rose-50 border border-rose-200 flex flex-wrap items-center justify-between gap-space-sm transition-all shadow-xs">
+            <div className="p-space-sm sm:px-space-md sm:py-2.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-space-sm transition-all shadow-xs">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-status-cancelled-text text-white flex items-center justify-center shrink-0 shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                   <span className="material-symbols-outlined text-[18px] font-bold">warning</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-label-sm text-label-sm font-bold text-status-cancelled-text uppercase tracking-wider">
+                  <span className="font-label-sm text-label-sm font-bold text-amber-800 uppercase tracking-wider">
                     CRITICAL ALLERGIES RECORDED ({allergies.length}):
                   </span>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {allergies.map((alg) => (
                       <span
                         key={alg.allergy_id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white text-status-cancelled-text font-label-sm text-label-sm font-bold border border-rose-200 shadow-2xs"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white text-amber-800 font-label-sm text-label-sm font-bold border border-amber-200 shadow-2xs"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-status-cancelled-text"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         <span>Allergy: {alg.name}</span>
                         <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
                       </span>
@@ -463,13 +500,13 @@ export const DoctorConsultation: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="px-2.5 py-1 rounded-md bg-white/90 text-status-cancelled-text font-label-xs text-xs font-semibold border border-rose-200 hidden md:inline-block">
+                <span className="px-2.5 py-1 rounded-md bg-white/90 text-amber-800 font-label-xs text-xs font-semibold border border-amber-200 hidden md:inline-block">
                   Contraindicated: Verify cross-reactivity before ordering
                 </span>
                 <button
                   type="button"
                   onClick={handleOpenAllergyModal}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-status-cancelled-text hover:bg-rose-700 text-white font-label-sm text-xs font-bold transition-colors shadow-xs"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-sm text-xs font-bold transition-colors shadow-xs"
                 >
                   <span className="material-symbols-outlined text-[15px]">edit</span>
                   <span>Manage Allergies</span>
@@ -511,7 +548,7 @@ export const DoctorConsultation: React.FC = () => {
             {/* Modal Header */}
             <div className="p-space-md sm:p-space-lg border-b border-border-subtle flex items-center justify-between bg-surface-subtle">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[20px]">warning</span>
                 </div>
                 <div>
@@ -519,7 +556,7 @@ export const DoctorConsultation: React.FC = () => {
                     Patient Allergy Profile
                   </h3>
                   <p className="text-xs text-secondary">
-                    {patientFullName} ({patient.patient_code})
+                    {patientFullName} ({patientView.patient_code || '—'})
                   </p>
                 </div>
               </div>
@@ -847,23 +884,22 @@ export const DoctorConsultation: React.FC = () => {
             <input
               className="w-full h-11 pl-10 pr-4 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
               placeholder="Search clinical order by name, code, or department..."
+              value={treatmentSearch}
+              onChange={(event) => setTreatmentSearch(event.target.value)}
               type="text"
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-label-sm text-label-sm font-bold text-secondary uppercase tracking-wider">Quick-Add Orders:</span>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
-              <span className="material-symbols-outlined text-[14px]">add</span>
-              <span>2D Echo (Transthoracic)</span>
-            </button>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
-              <span className="material-symbols-outlined text-[14px]">add</span>
-              <span>Lipid Profile Full Panel</span>
-            </button>
-            <button className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
-              <span className="material-symbols-outlined text-[14px]">add</span>
-              <span>Serum Electrolytes</span>
-            </button>
+            {availableTreatments
+              .filter((item) => `${item.treatment_name} ${item.category}`.toLowerCase().includes(treatmentSearch.toLowerCase()))
+              .slice(0, 5)
+              .map((item) => (
+                <button key={item.treatment_code} onClick={() => addTreatment(item)} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors" type="button">
+                  <span className="material-symbols-outlined text-[14px]">add</span>
+                  <span>{item.treatment_name}</span>
+                </button>
+              ))}
           </div>
         </div>
 
@@ -881,69 +917,30 @@ export const DoctorConsultation: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle bg-surface-card font-body-sm text-body-sm">
-              <tr className="hover:bg-surface-subtle/50 transition-colors">
-                <td className="py-3 pl-4 pr-3">
-                  <div className="font-semibold text-brand-navy-deep leading-tight font-headline-sm text-headline-sm">Cardiology Specialist Consultation</div>
-                  <div className="font-mono-data text-mono-data text-secondary mt-0.5">Code: SRV-CRD-01</div>
-                </td>
-                <td className="px-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded font-label-sm text-label-sm font-medium bg-surface-subtle text-secondary">OPD Unit</span>
-                </td>
-                <td className="px-3 text-secondary">Routine follow-up post-stent placement</td>
-                <td className="px-3 text-center font-medium text-brand-navy-deep">1 Session</td>
-                <td className="px-3 text-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-scheduled-bg text-status-scheduled-text">
-                    In Progress
-                  </span>
-                </td>
-                <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-surface-subtle/50 transition-colors">
-                <td className="py-3 pl-4 pr-3">
-                  <div className="font-semibold text-brand-navy-deep leading-tight font-headline-sm text-headline-sm">12-Lead Electrocardiogram (ECG)</div>
-                  <div className="font-mono-data text-mono-data text-secondary mt-0.5">Code: SRV-DIA-04</div>
-                </td>
-                <td className="px-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded font-label-sm text-label-sm font-medium bg-status-scheduled-bg text-status-scheduled-text">Cardiology Diagnostics</span>
-                </td>
-                <td className="px-3 text-secondary">Evaluate baseline rhythm and conduction</td>
-                <td className="px-3 text-center font-medium text-brand-navy-deep">1 Test</td>
-                <td className="px-3 text-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-completed-bg text-status-completed-text">
-                    Completed
-                  </span>
-                </td>
-                <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-surface-subtle/50 transition-colors">
-                <td className="py-3 pl-4 pr-3">
-                  <div className="font-semibold text-brand-navy-deep leading-tight font-headline-sm text-headline-sm">Blood Glucose Random (RBS)</div>
-                  <div className="font-mono-data text-mono-data text-secondary mt-0.5">Code: SRV-LAB-12</div>
-                </td>
-                <td className="px-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded font-label-sm text-label-sm font-medium bg-status-pending-bg text-status-pending-text">Central Lab</span>
-                </td>
-                <td className="px-3 text-secondary">Check glycemic control on existing medication</td>
-                <td className="px-3 text-center font-medium text-brand-navy-deep">1 Stat Test</td>
-                <td className="px-3 text-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-pending-bg text-status-pending-text">
-                    Sample Collected
-                  </span>
-                </td>
-                <td className="pr-4 pl-2 text-center">
-                  <button className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
-                </td>
-              </tr>
+              {selectedTreatments.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-secondary">No treatments selected.</td>
+                </tr>
+              ) : selectedTreatments.map((selected) => {
+                const treatment = availableTreatments.find((item) => item.treatment_code === selected.treatment_id);
+                return (
+                  <tr key={selected.treatment_id} className="hover:bg-surface-subtle/50 transition-colors">
+                    <td className="py-3 pl-4 pr-3">
+                      <div className="font-semibold text-brand-navy-deep leading-tight font-headline-sm text-headline-sm">{treatment?.treatment_name || `Treatment ${selected.treatment_id}`}</div>
+                      <div className="font-mono-data text-mono-data text-secondary mt-0.5">Code: {selected.treatment_id}</div>
+                    </td>
+                    <td className="px-3"><span className="inline-flex items-center px-2 py-0.5 rounded font-label-sm text-label-sm font-medium bg-surface-subtle text-secondary">{treatment?.category || 'Clinical'}</span></td>
+                    <td className="px-3 text-secondary">Selected for this consultation</td>
+                    <td className="px-3 text-center font-medium text-brand-navy-deep">{selected.quantity}</td>
+                    <td className="px-3 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-scheduled-bg text-status-scheduled-text">Selected</span></td>
+                    <td className="pr-4 pl-2 text-center">
+                      <button onClick={() => setSelectedTreatments((current) => current.filter((item) => item.treatment_id !== selected.treatment_id))} className="text-secondary hover:text-status-cancelled-text p-1 rounded hover:bg-status-cancelled-bg/50 transition-colors" title="Remove Item" type="button">
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -977,6 +974,11 @@ export const DoctorConsultation: React.FC = () => {
           </div>
         </div>
 
+        {completionError && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {completionError}
+          </p>
+        )}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">

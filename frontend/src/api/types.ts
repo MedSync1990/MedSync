@@ -460,7 +460,7 @@ export interface PatientListItem {
   last_name: string;
   id_number: string;
   phone_number: string;
-  gender: Gender;
+  gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
   registered_branch?: number | null;
   branch_name?: string | null;

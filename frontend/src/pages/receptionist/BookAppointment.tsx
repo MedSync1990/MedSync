@@ -93,7 +93,7 @@ export const BookAppointment: React.FC = () => {
           phone_number: res.phone_number,
           gender: res.gender,
           date_of_birth: res.date_of_birth,
-          has_insurance: res.has_insurance,
+          has_insurance: Boolean(res.has_insurance),
           is_active: res.is_active,
         };
         setSelectedPatient(p);
