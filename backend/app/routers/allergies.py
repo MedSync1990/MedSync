@@ -66,9 +66,14 @@ async def create_allergy(
         code,
         payload.name.strip(),
     )
-    if row is None:
-        raise ValueError("Failed to insert allergy, no row returned.")
-        
+    
+    if not row:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to insert allergy: Database returned no rows."
+        )
+
     return AllergyResponse(
         allergy_id=row["allergy_id"],
         allergy_code=row["allergy_code"],

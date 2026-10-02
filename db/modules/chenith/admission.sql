@@ -1,4 +1,4 @@
-CREATE TABLE admission (
+CREATE TABLE IF NOT EXISTS admission (
     admission_id   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     patient_id     INT NOT NULL REFERENCES patient(user_id) ON DELETE CASCADE,
     admit_date     DATE NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE admission (
     status         admission_status_enum NOT NULL DEFAULT 'Admitted'
 );
 
-CREATE INDEX idx_admission_patient ON admission(patient_id);
+CREATE INDEX IF NOT EXISTS idx_admission_patient ON admission(patient_id);

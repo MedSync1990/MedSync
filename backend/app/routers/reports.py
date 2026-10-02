@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends,HTTPException
 from asyncpg import Connection
 from typing import Optional
+from app.errors import ForbiddenError
 from datetime import date, datetime
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user, get_effective_branch_id
 from app.schemas.reports import (
-    AppointmentsSummaryResponse, AppointmentSummaryItem,
+    AppointmentsSummaryResponse, AppointmentDailySummaryItem,
     DoctorRevenueResponse, DoctorRevenueItem,
     ItemizedPaymentResponse, ItemizedPaymentItem,
     OutstandingBalancesResponse, OutstandingBalanceItem,
     TreatmentCategoriesResponse, TreatmentCategoryItem,
-    InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem
+    InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem,
+    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate
 )
 from app.schemas.common import PaginationParams
 
@@ -21,6 +23,7 @@ async def get_appointments_summary(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     branch_id: Optional[int] = None,
+    appointment_type: Optional[str] = None,
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
     conn: Connection = Depends(get_conn)
 ):
@@ -28,26 +31,55 @@ async def get_appointments_summary(
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
     query = """
-        SELECT a.status, a.appointment_type, COUNT(*) as count
+        SELECT 
+            das.date,
+            SUM(CASE WHEN a.status = 'Scheduled' THEN 1 ELSE 0 END) as scheduled,
+            SUM(CASE WHEN a.status = 'Completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN a.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled
         FROM appointments a
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND ($2::date IS NULL OR das.date >= $2)
           AND ($3::date IS NULL OR das.date <= $3)
-        GROUP BY a.status, a.appointment_type
+          AND ($4::varchar IS NULL OR a.appointment_type::varchar = $4)
+        GROUP BY das.date
+        ORDER BY das.date ASC
     """
-    records = await conn.fetch(query, actual_branch_id, start_date, end_date)
+    records = await conn.fetch(query, actual_branch_id, start_date, end_date, appointment_type)
     
-    data = [
-        AppointmentSummaryItem(
-            status=r["status"],
-            appointment_type=r["appointment_type"],
-            count=r["count"]
+    totals_query = """
+        SELECT
+            COUNT(CASE WHEN a.status = 'Scheduled' THEN 1 END) as total_scheduled,
+            COUNT(CASE WHEN a.status = 'Completed' THEN 1 END) as total_completed,
+            COUNT(CASE WHEN a.status = 'Cancelled' THEN 1 END) as total_cancelled,
+            COUNT(CASE WHEN a.appointment_type = 'Walk-in' THEN 1 END) as total_walkins
+        FROM appointments a
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        WHERE ($1::int IS NULL OR s.branch_id = $1)
+          AND ($2::date IS NULL OR das.date >= $2)
+          AND ($3::date IS NULL OR das.date <= $3)
+          AND ($4::varchar IS NULL OR a.appointment_type::varchar = $4)
+    """
+    totals = await conn.fetchrow(totals_query, actual_branch_id, start_date, end_date, appointment_type)
+    
+    daily_data = [
+        AppointmentDailySummaryItem(
+            date=r["date"],
+            scheduled=int(r["scheduled"]),
+            completed=int(r["completed"]),
+            cancelled=int(r["cancelled"])
         ) for r in records
     ]
     
-    return AppointmentsSummaryResponse(data=data, total=sum(d.count for d in data))
+    return AppointmentsSummaryResponse(
+        daily_data=daily_data,
+        total_scheduled=int(totals["total_scheduled"]) if totals and totals["total_scheduled"] else 0,
+        total_completed=int(totals["total_completed"]) if totals and totals["total_completed"] else 0,
+        total_cancelled=int(totals["total_cancelled"]) if totals and totals["total_cancelled"] else 0,
+        total_walkins=int(totals["total_walkins"]) if totals and totals["total_walkins"] else 0
+    )
 
 @router.get("/doctor-revenue", response_model=DoctorRevenueResponse)
 async def get_doctor_revenue(
@@ -65,8 +97,11 @@ async def get_doctor_revenue(
         SELECT 
             d.user_id as doctor_id,
             u.first_name || ' ' || u.last_name as doctor_name,
+            COALESCE(sp.name, 'General OPD') as specialty,
             b.name as branch_name,
             COUNT(DISTINCT a.appointment_id) as total_appointments,
+            COALESCE(SUM(CASE WHEN tc.category = 'Consultation' THEN ct.unit_price * ct.quantity ELSE 0 END), 0) as consult_revenue,
+            COALESCE(SUM(CASE WHEN tc.category != 'Consultation' THEN ct.unit_price * ct.quantity ELSE 0 END), 0) as procedure_revenue,
             COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
         FROM appointments a
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
@@ -74,14 +109,17 @@ async def get_doctor_revenue(
         JOIN app_user u ON s.user_id = u.user_id
         JOIN branch b ON s.branch_id = b.branch_id
         JOIN doctor d ON s.user_id = d.user_id
+        LEFT JOIN doctor_specialty ds ON d.user_id = ds.user_id
+        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
         JOIN consultations c ON a.appointment_id = c.appointment_id
         JOIN consultation_treatments ct ON c.consultation_id = ct.consultation_id
+        JOIN treatment_catalogue tc ON ct.treatment_code = tc.treatment_code
         WHERE a.status = 'Completed'
           AND ($1::int IS NULL OR s.branch_id = $1)
           AND ($2::int IS NULL OR d.user_id = $2)
           AND ($3::date IS NULL OR das.date >= $3)
           AND ($4::date IS NULL OR das.date <= $4)
-        GROUP BY d.user_id, u.first_name, u.last_name, b.name
+        GROUP BY d.user_id, u.first_name, u.last_name, COALESCE(sp.name, 'General OPD'), b.name
     """
     records = await conn.fetch(query, actual_branch_id, actual_doctor_id, start_date, end_date)
     
@@ -89,8 +127,11 @@ async def get_doctor_revenue(
         DoctorRevenueItem(
             doctor_id=r["doctor_id"],
             doctor_name=r["doctor_name"],
+            specialty=r["specialty"],
             branch_name=r["branch_name"],
             total_appointments=r["total_appointments"],
+            consult_revenue=float(r["consult_revenue"]),
+            procedure_revenue=float(r["procedure_revenue"]),
             total_revenue=float(r["total_revenue"])
         ) for r in records
     ]
@@ -179,46 +220,49 @@ async def get_outstanding_balances(
 ):
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     
-    # We sum outstanding balance per patient across all their non-Paid invoices
     query = """
-        WITH invoice_balances AS (
-            SELECT 
-                i.invoice_id,
-                a.patient_id,
-                s.branch_id,
-                (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as outstanding
-            FROM invoices i
-            JOIN appointments a ON i.appointment_id = a.appointment_id
-            JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-            JOIN staff s ON das.doctor_id = s.user_id
-            LEFT JOIN payments p ON i.invoice_id = p.invoice_id
-            WHERE i.status != 'Paid'
-            GROUP BY i.invoice_id, a.patient_id, s.branch_id, i.total_amount, i.insurance_amount
-        )
         SELECT 
-            ib.patient_id,
+            i.invoice_code as invoice_id,
+            a.patient_id,
             u.first_name || ' ' || u.last_name as patient_name,
             c.phone_number as contact_number,
-            SUM(ib.outstanding) as outstanding_balance
-        FROM invoice_balances ib
-        JOIN app_user u ON ib.patient_id = u.user_id
+            i.total_amount,
+            (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
+            (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
+            MAX(p.payment_date) as last_payment_date,
+            EXTRACT(DAY FROM (CURRENT_DATE - i.created_at::date)) as aging_days,
+            i.status
+        FROM invoices i
+        JOIN appointments a ON i.appointment_id = a.appointment_id
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        JOIN app_user u ON a.patient_id = u.user_id
         LEFT JOIN (
             SELECT user_id, phone_number,
                    ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY contact_id ASC) as rn
             FROM contact
         ) c ON u.user_id = c.user_id AND c.rn = 1
-        WHERE ($1::int IS NULL OR ib.branch_id = $1)
-        GROUP BY ib.patient_id, u.first_name, u.last_name, c.phone_number
-        HAVING SUM(ib.outstanding) > 0
+        LEFT JOIN payments p ON i.invoice_id = p.invoice_id
+        WHERE i.status != 'Paid'
+          AND ($1::int IS NULL OR s.branch_id = $1)
+        GROUP BY i.invoice_code, a.patient_id, u.first_name, u.last_name, c.phone_number, i.total_amount, i.insurance_amount, i.created_at, i.status
+        HAVING (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) > 0
+        ORDER BY aging_days DESC
     """
     records = await conn.fetch(query, actual_branch_id)
     
     data = [
         OutstandingBalanceItem(
+            invoice_id=r["invoice_id"],
             patient_id=r["patient_id"],
             patient_name=r["patient_name"],
             contact_number=r["contact_number"] or "N/A",
-            outstanding_balance=float(r["outstanding_balance"])
+            total_amount=float(r["total_amount"]),
+            paid_amount=float(r["paid_amount"]),
+            due_amount=float(r["due_amount"]),
+            last_payment_date=r["last_payment_date"],
+            aging_days=int(r["aging_days"]) if r["aging_days"] is not None else 0,
+            status=r["status"]
         ) for r in records
     ]
     return OutstandingBalancesResponse(data=data, total=len(data))
@@ -235,31 +279,45 @@ async def get_treatment_categories(
     
     query = """
         SELECT 
+            tc.treatment_code,
+            tc.treatment_name as treatment_item,
             tc.category,
+            tc.is_active,
             COUNT(ct.treatment_code) as usage_count,
             COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
-        FROM consultation_treatments ct
-        JOIN treatment_catalogue tc ON ct.treatment_code = tc.treatment_code
-        JOIN consultations c ON ct.consultation_id = c.consultation_id
-        JOIN appointments a ON c.appointment_id = a.appointment_id
-        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-        JOIN staff s ON das.doctor_id = s.user_id
-        WHERE a.status = 'Completed'
-          AND ($1::int IS NULL OR s.branch_id = $1)
-          AND ($2::date IS NULL OR das.date >= $2)
-          AND ($3::date IS NULL OR das.date <= $3)
-        GROUP BY tc.category
+        FROM treatment_catalogue tc
+        LEFT JOIN consultation_treatments ct ON tc.treatment_code = ct.treatment_code
+        LEFT JOIN consultations c ON ct.consultation_id = c.consultation_id
+        LEFT JOIN appointments a ON c.appointment_id = a.appointment_id AND a.status = 'Completed'
+        LEFT JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        LEFT JOIN staff s ON das.doctor_id = s.user_id 
+        WHERE ($1::int IS NULL OR (s.branch_id = $1 AND s.branch_id IS NOT NULL) OR s.branch_id IS NULL)
+          AND ($2::date IS NULL OR das.date >= $2 OR das.date IS NULL)
+          AND ($3::date IS NULL OR das.date <= $3 OR das.date IS NULL)
+        GROUP BY tc.treatment_code, tc.treatment_name, tc.category, tc.is_active
+        ORDER BY total_revenue DESC, usage_count DESC
     """
     records = await conn.fetch(query, actual_branch_id, start_date, end_date)
     
+    catalog_query = "SELECT COUNT(*) as total_items, COUNT(CASE WHEN is_active = TRUE THEN 1 END) as active_items FROM treatment_catalogue"
+    catalog_stats = await conn.fetchrow(catalog_query)
+    
     data = [
         TreatmentCategoryItem(
+            treatment_code=r["treatment_code"],
+            treatment_item=r["treatment_item"],
             category=r["category"],
-            usage_count=r["usage_count"],
+            is_active=bool(r["is_active"]),
+            usage_count=int(r["usage_count"]),
             total_revenue=float(r["total_revenue"])
         ) for r in records
     ]
-    return TreatmentCategoriesResponse(data=data, total=len(data))
+    return TreatmentCategoriesResponse(
+        data=data, 
+        total=len(data),
+        total_catalog_items=int(catalog_stats["total_items"]),
+        active_catalog_items=int(catalog_stats["active_items"])
+    )
 
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
 async def get_insurance_vs_out_of_pocket(
@@ -333,12 +391,34 @@ async def get_insurance_vs_out_of_pocket(
         ) for r in provider_records
     ]
     
-    # 3. Claim SLAs (Mocked for UI demo purposes)
+    # 3. Claim SLAs
+    sla_query = """
+        SELECT 
+            ipd.provider_name,
+            AVG(EXTRACT(EPOCH FROM (p.payment_date - i.created_at::date)) / 86400.0) as avg_days
+        FROM payments p
+        JOIN invoices i ON p.invoice_id = i.invoice_id
+        JOIN appointments a ON i.appointment_id = a.appointment_id
+        JOIN patient pt ON a.patient_id = pt.user_id
+        JOIN patient_insurance pi ON pt.user_id = pi.patient_id
+        JOIN insurance_policy_details ipd ON pi.policy_id = ipd.policy_id
+        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+        JOIN staff s ON das.doctor_id = s.user_id
+        WHERE p.payment_type = 'Insurance Settlement'
+          AND ($1::int IS NULL OR s.branch_id = $1)
+          AND ($2::date IS NULL OR das.date >= $2)
+          AND ($3::date IS NULL OR das.date <= $3)
+        GROUP BY ipd.provider_name
+        ORDER BY avg_days ASC
+    """
+    sla_records = await conn.fetch(sla_query, actual_branch_id, start_date, end_date)
     claim_slas = [
-        ClaimSlaItem(provider_name="Sri Lanka Insurance (SLIC)", avg_days=3.4),
-        ClaimSlaItem(provider_name="Ceylinco General Insurance", avg_days=4.1),
-        ClaimSlaItem(provider_name="AIA Health & Softlogic", avg_days=5.2),
+        ClaimSlaItem(
+            provider_name=r["provider_name"], 
+            avg_days=float(r["avg_days"]) if r["avg_days"] is not None else 0.0
+        ) for r in sla_records
     ]
+    avg_claim_days = sum(c.avg_days for c in claim_slas) / len(claim_slas) if claim_slas else 0.0
     
     # 4. Payment Modes
     payment_query = """
@@ -372,5 +452,181 @@ async def get_insurance_vs_out_of_pocket(
         ledger=ledger,
         provider_split=provider_split,
         claim_slas=claim_slas,
-        payment_modes=payment_modes
+        payment_modes=payment_modes,
+        avg_claim_days=avg_claim_days
     )
+@router.get("/doctor-earnings/{target_doctor_id}", response_model=DoctorEarningsOverviewResponse)
+async def get_doctor_earnings(
+    target_doctor_id : int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager","Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own earnings overview.")
+
+    earned_query = """
+    SELECT COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_earned
+    FROM consultation_treatments ct
+    JOIN consultations c ON ct.consultation_id = c.consultation_id
+    JOIN appointments a ON c.appointment_id = a.appointment_id
+    JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+    WHERE das.doctor_id = $1 AND a.status = 'Completed'
+    """
+
+    total_earned = await conn.fetchval(earned_query, target_doctor_id)
+
+    paid_query = """
+    SELECT COALESCE(SUM(amount_paid), 0) as total_paid
+    FROM staff_payouts
+    WHERE user_id = $1
+    """
+    
+    paid_by_hospital = await conn.fetchval(paid_query, target_doctor_id)
+
+    outstanding = float(total_earned or 0) - float(paid_by_hospital or 0)   
+
+    return DoctorEarningsOverviewResponse(
+        total_earned=float(total_earned or 0),
+        paid_by_hospital=float(paid_by_hospital or 0),
+        outstanding=outstanding
+    )
+
+@router.get("/doctor-earnings/{target_doctor_id}/bank-accounts", response_model=BankAccountsResponse)
+async def get_doctor_bank_accounts(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager","Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own bank accounts.")
+
+    query = """
+    SELECT account_id, bank_name, account_number, branch_name, is_default
+    FROM staff_bank_accounts
+    WHERE user_id = $1
+    ORDER BY is_default DESC, created_at DESC    
+    """
+
+    records = await conn.fetch(query, target_doctor_id)
+    data = [BankAccountItem(**dict(r)) for r in records]
+    return BankAccountsResponse(data=data)  
+
+@router.get("/doctor-earnings/{target_doctor_id}/payout-requests", response_model=PayoutRequestsResponse)
+async def  get_doctor_payout_requests(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+    ):
+
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own payout requests.")
+
+    query = """
+    SELECT 
+        r.request_id, r.account_id, r.request_amount, r.status, 
+        r.request_date, r.processed_date, r.remarks,
+        b.bank_name, b.account_number
+    FROM staff_payout_requests r
+    JOIN staff_bank_accounts b ON r.account_id = b.account_id
+    WHERE r.user_id = $1
+    ORDER BY r.request_date DESC
+    """
+
+    records = await conn.fetch(query, target_doctor_id)
+    
+    data = [PayoutRequestItem(**dict(r)) for r in records]
+    return PayoutRequestsResponse(data=data)
+
+@router.get("/doctor-earnings/{target_doctor_id}/payouts", response_model=PayoutHistoryResponse)
+async def get_doctor_payouts(
+    target_doctor_id: int,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only view their own payout history.")
+
+    query = """
+    SELECT
+        p.payout_id, p.amount_paid, p.payment_reference,
+        p.payment_method, p.payment_date,
+        b.bank_name, b.account_number
+    FROM staff_payouts p
+    JOIN staff_bank_accounts b ON p.account_id = b.account_id
+    WHERE p.user_id = $1
+    ORDER BY p.payment_date DESC
+    """
+    
+    records = await conn.fetch(query, target_doctor_id)
+
+    data = [PayoutHistoryItem(**dict(r)) for r in records]
+    return PayoutHistoryResponse(data=data)
+
+@router.post("/doctor-earnings/{target_doctor_id}/payout-requests")
+async def create_doctor_payout_request(
+    target_doctor_id: int,
+    payload: PayoutRequestCreate,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
+        raise ForbiddenError("Doctors can only create payout requests for themselves.")
+
+    if payload.request_amount <= 0:
+        raise HTTPException(status_code=400, detail="Request amount must be greater than zero.")
+
+    earned_query = """
+    SELECT COALESCE(SUM(ct.unit_price * ct.quantity), 0)
+    FROM consultation_treatments ct
+    JOIN consultations c ON ct.consultation_id = c.consultation_id
+    JOIN appointments a ON c.appointment_id = a.appointment_id
+    JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+    WHERE das.doctor_id = $1 AND a.status = 'Completed'
+    """
+    
+    earned = await conn.fetchval(earned_query, target_doctor_id) or 0.0
+
+    paid_query = """
+    SELECT COALESCE(SUM(amount_paid), 0)
+    FROM staff_payouts
+    WHERE user_id = $1
+    """
+
+    paid = await conn.fetchval(paid_query, target_doctor_id) or 0.0
+    
+    pending_query = """
+    SELECT COALESCE(SUM(request_amount), 0)
+    FROM staff_payout_requests
+    WHERE user_id = $1 AND status IN ('Pending', 'Approved')
+    """
+    
+    pending = await conn.fetchval(pending_query, target_doctor_id) or 0.0
+
+    available = float(earned or 0.0) - float(paid or 0.0) - float(pending or 0.0)
+
+    if payload.request_amount > available:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Requested amount exceeds available balance. Available: Rs. {available:,.2f}"
+        )
+
+    insert_query = """
+    INSERT INTO staff_payout_requests (
+        user_id, account_id, request_amount, status
+    ) VALUES ($1, $2, $3, 'Pending')
+    RETURNING request_id
+    """
+
+    try:
+        request_id = await conn.fetchval(
+            insert_query,
+            target_doctor_id,
+            payload.account_id,
+            payload.request_amount,
+        )            
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to create payout request. Check if the bank account is valid.")
+    
+    return {"message": "Payout request created successfully", "request_id": request_id}
+    

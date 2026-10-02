@@ -36,7 +36,7 @@ export function recordPayment(
   data: RecordPaymentRequest,
 ): Promise<RecordPaymentResponse> {
   return post<RecordPaymentResponse>(
-    `/invoices/${encodeURIComponent(invoiceIdentifier)}/payments`,
+    `/payments/${encodeURIComponent(invoiceIdentifier)}`,
     data,
   );
 }

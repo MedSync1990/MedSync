@@ -8,10 +8,10 @@
 --   psql -f db/modules/01_auth_branch_staff.sql
 --
 -- File layout (db/modules/dilantha/):
---   01_role.sql                  — CREATE TABLE role
---   02_branch.sql                — CREATE TABLE branch
---   03_app_user.sql              — CREATE TABLE app_user + contact
---   04_staff.sql                 — CREATE TABLE staff
+--   01_role.sql                  — CREATE TABLE IF NOT EXISTS role
+--   02_branch.sql                — CREATE TABLE IF NOT EXISTS branch
+--   03_app_user.sql              — CREATE TABLE IF NOT EXISTS app_user + contact
+--   04_staff.sql                 — CREATE TABLE IF NOT EXISTS staff
 --   05_protection_functions.sql  — fn_deactivate_branch/staff + fn_block_hard_delete + triggers
 --   06_auth_functions.sql        — fn_register_login_attempt (lockout)
 --   07_pg_roles.sql              — catms_owner/app/readonly/admin + grants

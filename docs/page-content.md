@@ -36,6 +36,13 @@ Help Center
 Logout
 ```
 
+### 0.1 Help Center
+- Heading: **"Help Center"** — sub: **"Quick guidance for common MedSync tasks and urgent support."**
+- Emergency callout: **"Medical emergency? Call 1990 for ambulance assistance in Sri Lanka."** Make 1990 a tap-to-call link.
+- Short description: **"MedSync brings patient records, appointments, consultations, and billing together in one place. Use the sidebar to find the tools available to your role, or contact our support team for help with your account or the application."**
+- Privacy reminder: **"Confirm the patient's identity before changing a record. Never share your sign-in, and log out on shared devices."**
+- Support contacts at the bottom: **medsync@gmail.com** and **+94771234321**, both clickable.
+
 ---
 
 ## 1. Receptionist

@@ -8,7 +8,7 @@
 -- Administrator, Branch Manager, Doctor, Receptionist, Patient.
 -- =============================================================================
 
-CREATE TABLE role (
+CREATE TABLE IF NOT EXISTS role (
     role_id     INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     role_name   VARCHAR(30) NOT NULL UNIQUE
 );

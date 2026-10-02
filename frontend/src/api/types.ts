@@ -269,13 +269,34 @@ export interface VerifyInsuranceResponse {
 
 // ─── Reports ────────────────────────────────────────────────────────────────
 
+export interface AppointmentDailySummaryItem {
+  date: string;
+  scheduled: number;
+  completed: number;
+  cancelled: number;
+}
+
 export interface AppointmentsSummaryResponse {
-  data: Array<Record<string, any>>;
-  total: number;
+  daily_data: AppointmentDailySummaryItem[];
+  total_scheduled: number;
+  total_completed: number;
+  total_cancelled: number;
+  total_walkins: number;
+}
+
+export interface DoctorRevenueItem {
+  doctor_id: number;
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  total_appointments: number;
+  consult_revenue: number;
+  procedure_revenue: number;
+  total_revenue: number;
 }
 
 export interface DoctorRevenueResponse {
-  data: Array<Record<string, any>>;
+  data: DoctorRevenueItem[];
   total: number;
 }
 
@@ -286,14 +307,38 @@ export interface ItemizedPaymentResponse {
   limit: number;
 }
 
+export interface OutstandingBalanceItem {
+  invoice_id: string;
+  patient_id: number;
+  patient_name: string;
+  contact_number: string;
+  total_amount: number;
+  paid_amount: number;
+  due_amount: number;
+  last_payment_date: string | null;
+  aging_days: number;
+  status: string;
+}
+
 export interface OutstandingBalancesResponse {
-  data: Array<Record<string, any>>;
+  data: OutstandingBalanceItem[];
   total: number;
 }
 
+export interface TreatmentCategoryItem {
+  treatment_code: string;
+  treatment_item: string;
+  category: string;
+  is_active: boolean;
+  usage_count: number;
+  total_revenue: number;
+}
+
 export interface TreatmentCategoriesResponse {
-  data: Array<Record<string, any>>;
+  data: TreatmentCategoryItem[];
   total: number;
+  total_catalog_items: number;
+  active_catalog_items: number;
 }
 
 export interface MonthlyLedgerItem {
@@ -326,6 +371,7 @@ export interface InsuranceVsOutOfPocketResponse {
   provider_split: ProviderSplitItem[];
   claim_slas: ClaimSlaItem[];
   payment_modes: PaymentModeItem[];
+  avg_claim_days: number;
 }
 
 // ─── Patients (schemas/patients.py) ─────────────────────────────────────────
@@ -385,7 +431,6 @@ export interface AllergyItem {
 }
 
 export interface PatientResponse {
-  user_id: number;
   patient_id: number;
   patient_code: string;
   first_name: string;
@@ -395,16 +440,15 @@ export interface PatientResponse {
   phone_number: string;
   email?: string | null;
   date_of_birth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  address?: string | null;
-  phone?: string | null;
+  gender: Gender;
+  address: string;
   blood_group?: string | null;
   emergency_contact?: string | null;
   contact_name?: string | null;
   registered_branch?: number | null;
   branch_name?: string | null;
-  has_insurance?: boolean;
-  registered_date?: string;
+  has_insurance: boolean;
+  registered_date?: string | null;
   is_active: boolean;
   allergies: AllergyItem[];
 }
@@ -456,53 +500,6 @@ export interface ActivityItem {
   timestamp?: string;
   created_at: string;
   performed_by: string;
-}
-
-// ─── Treatments & Consultations ──────────────────────────────────────────
-
-export interface TreatmentItem {
-  treatment_code: number;
-  treatment_name: string;
-  category: string;
-  price: number;
-  is_eligible_for_insurance: boolean;
-  is_active: boolean;
-}
-
-export interface ConsultationTreatmentInput {
-  treatment_code: number;
-  quantity: number;
-}
-
-export interface AppointmentCompleteRequest {
-  diagnosis?: string;
-  consultation_notes: string;
-  treatments?: ConsultationTreatmentInput[];
-}
-
-export interface AppointmentCompleteResponse {
-  appointment_id: number;
-  invoice_id: number;
-  status: string;
-  message: string;
-}
-
-export interface AppointmentItem {
-  appointment_id: number;
-  appointment_code: string;
-  patient_id: number;
-  patient_name: string;
-  patient_code: string;
-  patient_id_number: string;
-  doctor_id?: number;
-  doctor_name?: string;
-  slot_date?: string;
-  start_time?: string;
-  end_time?: string;
-  room_number?: string;
-  appointment_type: string;
-  status: string;
-  created_at: string;
 }
 
 // ─── Branches (schemas/branches.py) ─────────────────────────────────────────

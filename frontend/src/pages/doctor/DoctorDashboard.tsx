@@ -3,23 +3,16 @@ import { Link } from 'react-router-dom';
 
 export const DoctorDashboard: React.FC = () => {
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg flex flex-col min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between">
+    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg">
       {/* Top Level Welcome & Date Banner */}
-      <div className="flex flex-col">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-label-sm text-label-sm font-semibold uppercase tracking-wider mb-space-xs">
-          <Link className="text-secondary hover:text-primary transition-colors" to="/dashboard">HOME</Link>
-          <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-          <span className="text-primary">DASHBOARD</span>
-        </nav>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
         <div className="flex flex-col">
           <div className="flex items-center gap-space-xs mb-1">
             <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
               Live Session
             </span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Overview</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">View your scheduled appointments and active session metrics</p>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Overview</h1>
         </div>
 
         {/* Quick Date & Roster Controls */}
@@ -31,7 +24,6 @@ export const DoctorDashboard: React.FC = () => {
             <span className="font-mono-data text-mono-data text-secondary">09:58 AM IST</span>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Widget 1: Key Metric Cards Grid (Stretched to 2 columns to fill width) */}

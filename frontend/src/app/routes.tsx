@@ -7,7 +7,7 @@ import { RoleGuard } from '../components/RoleGuard';
 
 // Auth
 import { Login } from '../pages/Login';
-import { Logout } from '../pages/Logout';
+import { Logout } from '../pages/logout';
 
 // Receptionist
 import ReceptionistDashboard from '../pages/receptionist/Dashboard';
@@ -40,10 +40,11 @@ import ManageTreatmentCatalogue from '../pages/admin/ManageTreatmentCatalogue';
 // Reports
 import { ReportsIndex } from '../pages/reports/ReportsIndex';
 import BranchAppointmentSummary from '../pages/reports/BranchAppointmentSummary';
-import { DoctorRevenue } from '../pages/reports/DoctorRevenue';
+import DoctorRevenue from '../pages/reports/DoctorRevenue';
 import { OutstandingBalances } from '../pages/reports/OutstandingBalances';
 import TreatmentCategoryBreakdown from '../pages/reports/TreatmentCategoryBreakdown';
 import { InsuranceVsOutOfPocket } from '../pages/reports/InsuranceVsOutOfPocket';
+import HelpCenter from '../pages/HelpCenter';
 
 const RoleDashboardRedirect: React.FC = () => {
   const { user } = useAuth();
@@ -60,6 +61,21 @@ const RoleDashboardRedirect: React.FC = () => {
   }
 };
 
+const RoleTreatmentCatalogueRedirect: React.FC = () => {
+  const { user } = useAuth();
+  switch (user?.role) {
+    case 'Administrator':
+      return <Navigate to="/admin/treatment-catalogue" replace />;
+    case 'Branch Manager':
+      return <Navigate to="/branch-manager/treatment-catalogue" replace />;
+    case 'Doctor':
+      return <Navigate to="/doctor/treatment-catalogue" replace />;
+    case 'Receptionist':
+    default:
+      return <Navigate to="/receptionist/treatment-catalogue" replace />;
+  }
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -71,8 +87,10 @@ export const AppRoutes: React.FC = () => {
 
       {/* Authenticated Application Routes */}
       <Route element={<AuthenticatedLayout />}>
+        <Route path="/help-center" element={<HelpCenter />} />
+
         {/* Receptionist Routes */}
-        <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator']} />}>
+        <Route element={<RoleGuard allowedRoles={['Receptionist', 'Administrator', 'Branch Manager']} />}>
           <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
           <Route path="/receptionist/register-patient" element={<RegisterPatient />} />
           <Route path="/receptionist/patients" element={<PatientDirectory />} />
@@ -83,6 +101,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/receptionist/invoices/:invoiceId" element={<Invoices />} />
           <Route path="/receptionist/collect-payment" element={<CollectPayment />} />
           <Route path="/receptionist/collect-payment/:invoiceCode" element={<CollectPayment />} />
+          <Route path="/receptionist/treatment-catalogue" element={<TreatmentCatalogue />} />
         </Route>
 
         {/* Doctor Routes */}
@@ -101,13 +120,18 @@ export const AppRoutes: React.FC = () => {
           <Route path="/branch-manager/dashboard" element={<BranchManagerDashboard />} />
           <Route path="/branch-manager/branch-details" element={<BranchDetails />} />
           <Route path="/branch-manager/doctors" element={<ManageDoctors />} />
+          <Route path="/branch-manager/treatment-catalogue" element={<TreatmentCatalogue />} />
+        </Route>
+
+        {/* Shared Staff Management Route */}
+        <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
+          <Route path="/admin/staff" element={<ManageStaff />} />
         </Route>
 
         {/* Admin Routes */}
         <Route element={<RoleGuard allowedRoles={['Administrator']} />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/branches" element={<ManageBranches />} />
-          <Route path="/admin/staff" element={<ManageStaff />} />
           <Route path="/admin/doctors" element={<ManageDoctors />} />
           <Route path="/admin/treatment-catalogue" element={<ManageTreatmentCatalogue />} />
         </Route>
@@ -122,8 +146,23 @@ export const AppRoutes: React.FC = () => {
           <Route path="/reports/insurance-vs-out-of-pocket" element={<InsuranceVsOutOfPocket />} />
         </Route>
 
-        {/* Dynamic Role Dashboard redirect */}
+        {/* System & Global Routes */}
+        <Route path="/settings" element={
+          <div className="py-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Settings</h1>
+            <p className="text-slate-600">System settings and profile preferences.</p>
+          </div>
+        } />
+        <Route path="/help-center" element={
+          <div className="py-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Center</h1>
+            <p className="text-slate-600">User guides, documentation, and support resources.</p>
+          </div>
+        } />
+
+        {/* Dynamic Role Dashboard & Treatment Catalogue redirects */}
         <Route path="/dashboard" element={<RoleDashboardRedirect />} />
+        <Route path="/treatment-catalogue" element={<RoleTreatmentCatalogueRedirect />} />
       </Route>
 
       {/* Redirect root to login */}

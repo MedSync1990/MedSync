@@ -6,11 +6,11 @@
 \i db/modules/ashen/05_reporting_views.sql
 
 -- Patients and catalogue entries are deactivated, never hard-deleted.
-CREATE TRIGGER trg_block_delete_patient
+CREATE OR REPLACE TRIGGER trg_block_delete_patient
     BEFORE DELETE ON patient
     FOR EACH ROW EXECUTE FUNCTION fn_block_hard_delete();
 
-CREATE TRIGGER trg_block_delete_treatment_catalogue
+CREATE OR REPLACE TRIGGER trg_block_delete_treatment_catalogue
     BEFORE DELETE ON treatment_catalogue
     FOR EACH ROW EXECUTE FUNCTION fn_block_hard_delete();
 

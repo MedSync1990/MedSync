@@ -50,6 +50,15 @@ export const TopBar: React.FC<TopBarProps> = () => {
         </div>
 
         <button
+          onClick={onThemeToggle}
+          aria-label="Theme Toggle"
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">dark_mode</span>
+        </button>
+
+        <button
           aria-label="Notifications"
           className="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
           type="button"
@@ -65,6 +74,11 @@ export const TopBar: React.FC<TopBarProps> = () => {
             <div className="font-label-lg text-label-lg text-brand-navy-deep leading-tight">{userName}</div>
             <div className="font-body-sm text-body-sm text-secondary truncate max-w-[140px]">{user?.role}</div>
           </div>
+          <img
+            alt={userName}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
+            src={avatarUrl}
+          />
         </div>
       </div>
     </header>

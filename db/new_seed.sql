@@ -453,6 +453,34 @@ INSERT INTO audit_log (table_name, operation, row_pk, changed_by, old_data, new_
      '{"branch_id": 1, "phone_number": "0112345678"}'::jsonb);
 
 -- =============================================================================
+-- SECTION 12.5: STAFF PAYOUTS (Bank accounts, requests, and actual payouts)
+-- =============================================================================
+-- Insert bank accounts for Doctor 1 (user_id 6) and Doctor 2 (user_id 7)
+INSERT INTO staff_bank_accounts (account_id, user_id, bank_name, account_number, branch_name, is_default)
+OVERRIDING SYSTEM VALUE VALUES
+    (1, 6, 'Commercial Bank', '100200300', 'Colombo 07', true),
+    (2, 7, 'BOC', '800900100', 'Bambalapitiya', true);
+
+SELECT setval('staff_bank_accounts_account_id_seq', (SELECT MAX(account_id) FROM staff_bank_accounts));
+
+-- Insert payout requests
+INSERT INTO staff_payout_requests (request_id, user_id, account_id, request_amount, status, remarks)
+OVERRIDING SYSTEM VALUE VALUES
+    (1, 6, 1, 150000.00, 'Pending', 'Monthly payout for October'),
+    (2, 6, 1, 120000.00, 'Paid', 'Monthly payout for September'),
+    (3, 7, 2, 90000.00, 'Paid', 'Monthly payout for September');
+
+SELECT setval('staff_payout_requests_request_id_seq', (SELECT MAX(request_id) FROM staff_payout_requests));
+
+-- Insert actual payouts
+INSERT INTO staff_payouts (payout_id, user_id, request_id, account_id, amount_paid, payment_reference, payment_method)
+OVERRIDING SYSTEM VALUE VALUES
+    (1, 6, 2, 1, 120000.00, 'TRX-987654321', 'Bank Transfer'),
+    (2, 7, 3, 2, 90000.00, 'TRX-123456789', 'Bank Transfer');
+
+SELECT setval('staff_payouts_payout_id_seq', (SELECT MAX(payout_id) FROM staff_payouts));
+
+-- =============================================================================
 -- SECTION 13: RESET IDENTITY SEQUENCES
 -- =============================================================================
 -- Ensures future app-generated IDs don't collide with explicit seed IDs.

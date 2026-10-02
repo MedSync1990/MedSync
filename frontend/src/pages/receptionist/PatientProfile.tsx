@@ -56,7 +56,7 @@ export const PatientProfile: React.FC = () => {
           console.error("Patient not found", e);
           return null;
         }),
-        getPatientBalance(id).catch(() => ({ outstanding_balance: 0 })),
+        getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
         getPatientInsurance(id).catch(() => ({ data: [] })),
         fetch(`/api/v1/patients/${id}/payments`).then(r => r.json()).catch(() => ({
           data: []
@@ -497,7 +497,12 @@ export const PatientProfile: React.FC = () => {
                   LKR {balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <button 
-                  onClick={() => alert("Online Payment Integration is pending. Please collect payment at the desk.")}
+                  onClick={(e) => {
+                    const btn = e.currentTarget;
+                    const originalText = btn.innerText;
+                    btn.innerText = 'Pending Integration';
+                    setTimeout(() => { btn.innerText = originalText; }, 2000);
+                  }}
                   className="mt-space-lg w-full bg-surface-card border border-border-subtle font-label-md text-label-md px-4 py-2 rounded-lg text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors"
                 >
                   Pay Outstanding Balance

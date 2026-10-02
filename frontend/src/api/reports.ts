@@ -5,7 +5,7 @@
  * Owner: Ashen (these power Ashen's own report pages)
  */
 
-import { get } from './client';
+import { get, post } from './client';
 import type {
   AppointmentsSummaryResponse,
   DoctorRevenueResponse,
@@ -20,6 +20,7 @@ import type {
 export interface AppointmentsSummaryParams {
   branch?: number;
   date?: string;   // ISO date (YYYY-MM-DD)
+  appointment_type?: string;
 }
 
 export interface DoctorRevenueParams {
@@ -62,6 +63,7 @@ export function getAppointmentsSummary(
     branch_id: params.branch,
     start_date: params.date, // frontend passes single 'date' string
     end_date: params.date,
+    appointment_type: params.appointment_type,
   } : undefined;
   return get<AppointmentsSummaryResponse>('/reports/appointments-summary', query);
 }
@@ -123,4 +125,96 @@ export function getInsuranceVsOutOfPocket(
     end_date: params.to,
   } : undefined;
   return get<InsuranceVsOutOfPocketResponse>('/reports/insurance-vs-out-of-pocket', query);
+}
+/**
+ * Utility function to trigger a CSV file download from an array of objects
+ */
+export function exportToCSV(data: any[], filename: string) {
+  if (!data || !data.length) return;
+  const headers = Object.keys(data[0]);
+  const rows = data.map(row => 
+    headers.map(header => {
+      let cell = row[header] === null || row[header] === undefined ? '' : row[header];
+      cell = String(cell).replace(/"/g, '""');
+      return `"${cell}"`;
+    }).join(',')
+  );
+  
+  const csvContent = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ─── Doctor Earnings & Payouts ──────────────────────────────────────────────
+
+export interface DoctorEarningsOverviewResponse {
+  total_earned: number;
+  paid_by_hospital: number;
+  outstanding: number;
+}
+
+export interface BankAccountItem {
+  account_id: number;
+  bank_name: string;
+  account_number: string;
+  branch_name: string | null;
+  is_default: boolean;
+}
+
+export interface PayoutRequestItem {
+  request_id: number;
+  account_id: number;
+  request_amount: number;
+  status: string;
+  request_date: string;
+  processed_date: string | null;
+  remarks: string | null;
+  bank_name: string;
+  account_number: string;
+}
+
+export interface PayoutHistoryItem {
+  payout_id: number;
+  amount_paid: number;
+  payment_reference: string;
+  payment_method: string;
+  payment_date: string;
+  bank_name: string;
+  account_number: string;
+}
+
+/** Get Doctor Earnings Overview (Total, Paid, Outstanding) */
+export function getDoctorEarningsOverview(doctorId: number): Promise<DoctorEarningsOverviewResponse> {
+  return get<DoctorEarningsOverviewResponse>(`/reports/doctor-earnings/${doctorId}`);
+}
+
+/** Get Doctor Bank Accounts */
+export function getDoctorBankAccounts(doctorId: number): Promise<{ data: BankAccountItem[] }> {
+  return get<{ data: BankAccountItem[] }>(`/reports/doctor-earnings/${doctorId}/bank-accounts`);
+}
+
+/** Get Doctor Payout Requests */
+export function getDoctorPayoutRequests(doctorId: number): Promise<{ data: PayoutRequestItem[] }> {
+  return get<{ data: PayoutRequestItem[] }>(`/reports/doctor-earnings/${doctorId}/payout-requests`);
+}
+
+/** Get Doctor Payout History (Actual payments made) */
+export function getDoctorPayouts(doctorId: number): Promise<{ data: PayoutHistoryItem[] }> {
+  return get<{ data: PayoutHistoryItem[] }>(`/reports/doctor-earnings/${doctorId}/payouts`);
+}
+
+/** Create a new Payout Request */
+export function createDoctorPayoutRequest(
+  doctorId: number,
+  payload: { account_id: number; request_amount: number }
+): Promise<{ message: string; request_id: number }> {
+  // Assuming you have a 'post' function exported from './client'
+  return post(`/reports/doctor-earnings/${doctorId}/payout-requests`, payload);
 }
