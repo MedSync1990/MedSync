@@ -260,7 +260,7 @@ async def get_outstanding_balances(
             total_amount=float(r["total_amount"]),
             paid_amount=float(r["paid_amount"]),
             due_amount=float(r["due_amount"]),
-            last_payment_date=r["last_payment_date"],
+            last_payment_date=r["last_payment_date"].date() if hasattr(r["last_payment_date"], "date") else r["last_payment_date"],
             aging_days=int(r["aging_days"]) if r["aging_days"] is not None else 0,
             status=r["status"]
         ) for r in records
