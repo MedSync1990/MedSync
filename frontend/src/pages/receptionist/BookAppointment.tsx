@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
@@ -70,6 +70,7 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 
 export const BookAppointment: React.FC = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   // ─── Step 1: Patient Search & Selection State ──────────────────────────────
   const [patientSearch, setPatientSearch] = useState('');
@@ -342,7 +343,7 @@ export const BookAppointment: React.FC = () => {
           `Walk-in appointment booked for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedDate} (${formatTime(walkInStartTime)} – ${formatTime(walkInEndTime)}).`,
           'success',
         );
-
+        navigate('/receptionist/dashboard');
 
       } catch (err: any) {
         const msg = err?.message || '';
@@ -378,7 +379,7 @@ export const BookAppointment: React.FC = () => {
           `Appointment booked for ${selectedPatient.first_name} ${selectedPatient.last_name} with ${selectedDoctor.full_name} on ${selectedSlot.date} at ${formattedSlotTime}.`,
           'success',
         );
-
+        navigate('/receptionist/dashboard');
 
       } catch (err: any) {
         const msg = err?.message || '';
