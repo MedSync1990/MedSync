@@ -533,6 +533,21 @@ export interface StaffResponse {
   gender?: string | null;
   license_number?: string | null;
   specialty?: string | null;
+  branch_name?: string | null;
+  created_at?: string | null;
+  last_login_at?: string | null;
+  failed_login_attempts?: number;
+  locked_until?: string | null;
+}
+
+export interface StaffUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  email?: string;
+  phone_number?: string;
+  branch_id?: number;
+  is_active?: boolean;
 }
 
 export interface StaffCreatePayload {

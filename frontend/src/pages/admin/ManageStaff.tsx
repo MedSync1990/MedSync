@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getStaffList, createStaff, deactivateStaff } from '../../api';
+import { getStaffList, createStaff, deactivateStaff, updateStaff, resetStaffPassword } from '../../api';
 import type { StaffResponse } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -57,6 +57,8 @@ export const ManageStaff: React.FC = () => {
   
   // Actions state
   const [deactivatingStaff, setDeactivatingStaff] = useState<StaffResponse | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [resettingStaff, setResettingStaff] = useState<StaffResponse | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -108,41 +110,82 @@ export const ManageStaff: React.FC = () => {
     if (!ph.length) { showToast('At least one phone number is required.', 'error'); return; }
     
     const selectedRole = roles.find(r => r.role_id === Number(fRole));
-    if (!selectedRole) { showToast('Please select a valid role.', 'error'); return; }
+    if (!selectedRole && !editMode) { showToast('Please select a valid role.', 'error'); return; }
 
-    if (selectedRole.role_name === 'Doctor' && (!fLicense.trim() || !fSpecialty)) {
+    if (!editMode && selectedRole?.role_name === 'Doctor' && (!fLicense.trim() || !fSpecialty)) {
       showToast('Doctors must have a specialty and a medical license number.', 'error');
       return;
     }
 
     setSaving(true);
     try {
-      const payload = {
-        role_id: Number(fRole),
-        branch_id: user?.branch_id || 1, // Using logged in branch or default 1 for demo
-        first_name: fFirst.trim(),
-        middle_name: fMid.trim() || undefined,
-        last_name: fLast.trim(),
-        id_number: fNic.trim(),
-        address: fAddr.trim(),
-        birthdate: fDob,
-        gender: fGender,
-        email: fEmail.trim() || undefined,
-        phone_number: ph[0],
-        specialty: selectedRole.role_name === 'Doctor' ? fSpecialty : undefined,
-        license_number: selectedRole.role_name === 'Doctor' ? fLicense.trim() : undefined,
-      };
-
-      const res = await createStaff(payload);
-      showToast('Staff account created successfully', 'success');
-      setIsDrawerOpen(false);
-      fetchData();
-      setCredsModal({ username: res.username, tempPw: res.temporary_password, name: `${fFirst} ${fLast}` });
-      resetForm();
+      if (editMode && selectedStaffId) {
+        await updateStaff(selectedStaffId, {
+          first_name: fFirst.trim(),
+          last_name: fLast.trim(),
+          address: fAddr.trim(),
+          email: fEmail.trim() || undefined,
+          phone_number: ph[0]
+        });
+        showToast('Staff details updated successfully', 'success');
+        setIsDrawerOpen(false);
+        fetchData();
+      } else {
+        const payload = {
+          role_id: Number(fRole),
+          branch_id: user?.branch_id || 1,
+          first_name: fFirst.trim(),
+          middle_name: fMid.trim() || undefined,
+          last_name: fLast.trim(),
+          id_number: fNic.trim(),
+          address: fAddr.trim(),
+          birthdate: fDob,
+          gender: fGender,
+          email: fEmail.trim() || undefined,
+          phone_number: ph[0],
+          specialty: selectedRole?.role_name === 'Doctor' ? fSpecialty : undefined,
+          license_number: selectedRole?.role_name === 'Doctor' ? fLicense.trim() : undefined,
+        };
+        const res = await createStaff(payload);
+        showToast('Staff account created successfully', 'success');
+        setIsDrawerOpen(false);
+        fetchData();
+        setCredsModal({ username: res.username, tempPw: res.temporary_password, name: `${fFirst} ${fLast}` });
+        resetForm();
+      }
     } catch (err: any) {
       showToast(err.message || 'Failed to create staff account', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  
+  const handleEditClick = (s: StaffResponse) => {
+    setFFirst(s.first_name);
+    setFLast(s.last_name);
+    setFNic(s.id_number);
+    setFDob(s.birthdate ? s.birthdate.split('T')[0] : '');
+    setFGender(s.gender || '');
+    setFAddr(s.address || '');
+    setFEmail(s.email || '');
+    setFPhones([s.phone_number || '']);
+    setFRole(roles.find(r => r.role_name === s.role_name)?.role_id?.toString() || '');
+    setFLicense(s.license_number || '');
+    setFSpecialty(s.specialty || '');
+    setEditMode(true);
+    setIsDrawerOpen(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!resettingStaff) return;
+    try {
+      const res = await resetStaffPassword(resettingStaff.user_id);
+      showToast('Password reset successfully', 'success');
+      setCredsModal({ username: resettingStaff.username, tempPw: res.temporary_password, name: `${resettingStaff.first_name} ${resettingStaff.last_name}` });
+      setResettingStaff(null);
+    } catch(err: any) {
+      showToast(err.message || 'Failed to reset password', 'error');
     }
   };
 
@@ -203,14 +246,35 @@ export const ManageStaff: React.FC = () => {
               <div className="px-space-lg divide-y divide-surface-subtle border-t border-surface-subtle">
                 <div className="flex items-center justify-between gap-3 py-2.5">
                   <span className="text-on-surface-variant">Status</span>
-                  <span className="text-right font-medium">{selectedStaff.is_active ? 'Active' : 'Inactive'}</span>
+                  <span className={`text-right font-medium flex items-center gap-1.5 ${selectedStaff.is_active ? 'text-primary' : 'text-outline'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${selectedStaff.is_active ? 'bg-primary' : 'bg-outline'}`}></div>
+                    {selectedStaff.is_active ? 'Active' : 'Inactive'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-3 py-2.5">
                   <span className="text-on-surface-variant">Username</span>
                   <span className="text-right font-medium font-mono">@{selectedStaff.username}</span>
                 </div>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="text-on-surface-variant">Branch</span>
+                  <span className="text-right font-medium">{selectedStaff.branch_name || 'N/A'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="text-on-surface-variant">Last sign-in</span>
+                  <span className="text-right font-medium">{timeAgo(selectedStaff.last_login_at)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="text-on-surface-variant">Created</span>
+                  <span className="text-right font-medium">{selectedStaff.created_at ? new Date(selectedStaff.created_at).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}) : 'N/A'}</span>
+                </div>
               </div>
               <div className="p-space-lg space-y-2 border-t border-surface-subtle bg-surface-subtle/50">
+                <button onClick={() => handleEditClick(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-primary hover:bg-brand-navy-deep text-on-primary text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">edit</span>Edit details
+                </button>
+                <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                  <span className="material-symbols-outlined text-[18px]">lock_reset</span>Reset password
+                </button>
                 {selectedStaff.is_active && (
                   <button onClick={() => setDeactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-error-container/60 hover:bg-error-container text-error text-label-md flex items-center justify-center gap-1.5 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">person_off</span>Deactivate account
@@ -263,6 +327,55 @@ export const ManageStaff: React.FC = () => {
                   </div>
                 </dl>
               </section>
+                            <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[20px] text-primary">badge</span>
+                  <h2 className="text-headline-sm">Account and access</h2>
+                </div>
+                <dl className="divide-y divide-surface-subtle">
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Username</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.username}</dd>
+                  </div>
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Role</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.role_name}</dd>
+                  </div>
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Branch</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.branch_name || 'N/A'}</dd>
+                  </div>
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3 items-center">
+                    <dt className="text-on-surface-variant">Status</dt>
+                    <dd className="text-label-md font-medium">
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-bold ${selectedStaff.is_active ? 'bg-secondary-container text-primary' : 'bg-surface-subtle text-outline'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${selectedStaff.is_active ? 'bg-primary' : 'bg-outline'}`}></div>
+                        {selectedStaff.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+              <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[20px] text-primary">security</span>
+                  <h2 className="text-headline-sm">Sign-in security</h2>
+                </div>
+                <dl className="divide-y divide-surface-subtle">
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Last sign-in</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.last_login_at ? new Date(selectedStaff.last_login_at).toLocaleString() : 'Never'} <span className="text-on-surface-variant font-normal">· {timeAgo(selectedStaff.last_login_at)}</span></dd>
+                  </div>
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Failed attempts</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.failed_login_attempts || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <dt className="text-on-surface-variant">Locked until</dt>
+                    <dd className="text-label-md font-medium">{selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() ? new Date(selectedStaff.locked_until).toLocaleString() : 'Not locked'}</dd>
+                  </div>
+                </dl>
+              </section>
               {selectedStaff.role_name === 'Doctor' && (
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
                   <div className="px-space-md py-space-sm bg-status-scheduled-bg border-b border-brand-teal-light/30 flex items-center gap-2">
@@ -296,7 +409,7 @@ export const ManageStaff: React.FC = () => {
               <p className="text-body-md text-on-surface-variant">Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.</p>
             </div>
             <div className="flex gap-space-sm">
-              <button onClick={() => { resetForm(); setIsDrawerOpen(true); }} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
+              <button onClick={() => { resetForm(); setEditMode(false); setIsDrawerOpen(true); }} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
                 <span className="material-symbols-outlined text-[20px]">person_add</span>Add staff
               </button>
             </div>
@@ -444,14 +557,14 @@ export const ManageStaff: React.FC = () => {
                 </div>
                 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">NIC <span className="text-error">*</span></label>
+                  <label className="text-label-md font-semibold">NIC {!editMode && <span className="text-error">*</span>}</label>
                   <input required value={fNic} onChange={e=>setFNic(e.target.value.toUpperCase())} placeholder="199071400234 or 925430188V" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
                   <p className="text-body-sm text-outline">9 digits + V/X, or 12 digits</p>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Date of birth <span className="text-error">*</span></label><input type="date" required value={fDob} onChange={e=>setFDob(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Gender <span className="text-error">*</span></label><select required value={fGender} onChange={e=>setFGender(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Date of birth <span className="text-error">*</span></label><input type="date" required disabled={editMode} value={fDob} onChange={e=>setFDob(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
+                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Gender <span className="text-error">*</span></label><select required disabled={editMode} value={fGender} onChange={e=>setFGender(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
                   <div className="space-y-1.5"><label className="text-label-md font-semibold">Marital status</label><select value={fMarital} onChange={e=>setFMarital(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Not provided</option><option value="Single">Single</option><option value="Married">Married</option><option value="Divorced">Divorced</option><option value="Widowed">Widowed</option></select></div>
                 </div>
 
@@ -477,7 +590,7 @@ export const ManageStaff: React.FC = () => {
                 <div className="grid grid-cols-1 gap-space-md">
                   <div className="space-y-1.5">
                     <label className="text-label-md font-semibold">Role <span className="text-error">*</span></label>
-                    <select required value={fRole} onChange={e=>setFRole(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
+                    <select required disabled={editMode} value={fRole} onChange={e=>setFRole(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                       <option value="">Select a role</option>
                       {roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
                     </select>
@@ -491,11 +604,11 @@ export const ManageStaff: React.FC = () => {
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-label-md font-semibold">Medical License Number <span className="text-error">*</span></label>
-                      <input required value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+                      <input required disabled={editMode} value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-label-md font-semibold">Primary Specialty <span className="text-error">*</span></label>
-                      <select required value={fSpecialty} onChange={e=>setFSpecialty(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
+                      <select required disabled={editMode} value={fSpecialty} onChange={e=>setFSpecialty(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                         <option value="">Select a specialty</option>
                         {specialties.map(s => <option key={s.specialty_id} value={s.name}>{s.name}</option>)}
                       </select>
@@ -511,7 +624,7 @@ export const ManageStaff: React.FC = () => {
               <div className="p-space-md border-t border-surface-subtle flex justify-end gap-3 shrink-0 bg-white">
                 <button type="button" onClick={() => setIsDrawerOpen(false)} className="h-10 px-space-md rounded-xl text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold transition-colors">Cancel</button>
                 <button type="submit" disabled={saving} className="h-10 px-space-md rounded-xl text-label-md bg-border-focus hover:bg-status-scheduled-text text-on-primary shadow-sm flex items-center gap-2 font-bold transition-colors disabled:opacity-70">
-                  <span className="material-symbols-outlined text-[18px]">save</span>{saving ? 'Creating...' : 'Create account'}
+                  <span className="material-symbols-outlined text-[18px]">save</span>{saving ? 'Saving...' : (editMode ? 'Save changes' : 'Create account')}
                 </button>
               </div>
             </form>
@@ -540,6 +653,15 @@ export const ManageStaff: React.FC = () => {
       </Modal>
 
       {/* CONFIRM DEACTIVATE */}
+      <ConfirmDialog 
+        isOpen={!!resettingStaff} 
+        onClose={() => setResettingStaff(null)} 
+        onConfirm={handleResetPassword} 
+        title="Reset Password?" 
+        message={`Are you sure you want to reset the password for ${resettingStaff?.first_name} ${resettingStaff?.last_name}? A new temporary password will be generated and their current sessions may not be affected until next login.`}
+        confirmLabel="Reset Password"
+        isDestructive={false}
+      />
       <ConfirmDialog 
         isOpen={!!deactivatingStaff} 
         onClose={() => setDeactivatingStaff(null)} 
