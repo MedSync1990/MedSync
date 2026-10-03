@@ -230,7 +230,7 @@ async def get_outstanding_balances(
             (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
             (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
             MAX(p.payment_date) as last_payment_date,
-            EXTRACT(DAY FROM (CURRENT_DATE - i.created_at::date)) as aging_days,
+            (CURRENT_DATE - i.created_at::date) as aging_days,
             i.status
         FROM invoices i
         JOIN appointments a ON i.appointment_id = a.appointment_id
@@ -307,7 +307,7 @@ async def get_treatment_categories(
     
     data = [
         TreatmentCategoryItem(
-            treatment_code=r["treatment_code"],
+            treatment_code=str(r["treatment_code"]),
             treatment_item=r["treatment_item"],
             category=r["category"],
             is_active=bool(r["is_active"]),
