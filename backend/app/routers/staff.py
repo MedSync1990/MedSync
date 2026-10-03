@@ -26,11 +26,17 @@ async def list_staff(
     query = """
         SELECT s.user_id, s.username, s.is_active, s.branch_id,
                a.first_name, a.last_name, a.id_number, a.email,
+               a.address, a.birthdate, a.gender,
                r.role_name,
-               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number
+               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number,
+               d.license_number,
+               sp.name as specialty
         FROM staff s
         JOIN app_user a ON s.user_id = a.user_id
         JOIN role r ON a.role_id = r.role_id
+        LEFT JOIN doctor d ON s.user_id = d.user_id
+        LEFT JOIN doctor_specialty ds ON s.user_id = ds.user_id
+        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
         WHERE 1=1
     """
     args = []
