@@ -136,12 +136,13 @@ async def list_appointments(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(25, ge=1, le=100, description="Items per page"),
     conn: Connection = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist")),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist", "Doctor")),
 ):
     """
     List appointments with filters. Branch Manager is locked to their own branch.
     """
     scoped_branch_id = user.branch_id if user.role == "Branch Manager" else branch
+    scoped_doctor_id = user.user_id if user.role == "Doctor" else doctor
     offset = (page - 1) * limit
 
     base_where = """
@@ -159,7 +160,7 @@ async def list_appointments(
         JOIN staff s ON das.doctor_id = s.user_id
         {base_where};
     """
-    total = await conn.fetchval(count_query, scoped_branch_id, date, status, doctor, patient_id)
+    total = await conn.fetchval(count_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id)
 
     data_query = f"""
         SELECT
@@ -188,7 +189,7 @@ async def list_appointments(
         ORDER BY das.date DESC, das.start_time DESC
         LIMIT $6 OFFSET $7;
     """
-    rows = await conn.fetch(data_query, scoped_branch_id, date, status, doctor, patient_id, limit, offset)
+    rows = await conn.fetch(data_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, limit, offset)
 
     items = [
         AppointmentResponse(

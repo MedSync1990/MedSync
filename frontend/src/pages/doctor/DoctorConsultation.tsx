@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
-import { getAppointment } from '../../api/appointments';
+import { getAppointment, listAppointments } from '../../api/appointments';
 import { put } from '../../api/client';
 import { listTreatments, type TreatmentApiItem } from '../../api/treatments';
 import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
@@ -135,7 +135,20 @@ export const DoctorConsultation: React.FC = () => {
 
   useEffect(() => {
     if (!activeAppointmentId) {
-      setAppointmentLoadError('Open this consultation from a scheduled appointment.');
+      if (activePatientId) {
+        return;
+      }
+
+      listAppointments({ status: 'Scheduled', limit: 1 })
+        .then((response) => {
+          const nextAppointment = response.data?.[0];
+          if (nextAppointment) {
+            setSearchParams({ appointmentId: String(nextAppointment.appointment_id) }, { replace: true });
+          } else {
+            setAppointmentLoadError('No scheduled appointments are available for consultation.');
+          }
+        })
+        .catch(() => setAppointmentLoadError('Unable to load the next appointment.'));
       return;
     }
     setAppointmentLoadError(null);
@@ -267,8 +280,8 @@ export const DoctorConsultation: React.FC = () => {
   const patientView = patient ?? ({} as PatientResponse);
   const patientFullName = patient
     ? `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Patient'
-    : 'Loading patient...';
-  const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Loading...';
+    : 'No patient selected';
+  const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Select a scheduled appointment';
 
   return (
     <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-space-3xl">
