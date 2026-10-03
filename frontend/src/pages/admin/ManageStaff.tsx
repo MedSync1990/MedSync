@@ -59,6 +59,7 @@ export const ManageStaff: React.FC = () => {
   const [deactivatingStaff, setDeactivatingStaff] = useState<StaffResponse | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [resettingStaff, setResettingStaff] = useState<StaffResponse | null>(null);
+  const [customPassword, setCustomPassword] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -177,13 +178,16 @@ export const ManageStaff: React.FC = () => {
     setIsDrawerOpen(true);
   };
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!resettingStaff) return;
+    if (!customPassword.trim()) { showToast('Password cannot be empty', 'error'); return; }
     try {
-      const res = await resetStaffPassword(resettingStaff.user_id);
+      const res = await resetStaffPassword(resettingStaff.user_id, customPassword.trim());
       showToast('Password reset successfully', 'success');
       setCredsModal({ username: resettingStaff.username, tempPw: res.temporary_password, name: `${resettingStaff.first_name} ${resettingStaff.last_name}` });
       setResettingStaff(null);
+      setCustomPassword('');
     } catch(err: any) {
       showToast(err.message || 'Failed to reset password', 'error');
     }
@@ -653,21 +657,39 @@ export const ManageStaff: React.FC = () => {
       </Modal>
 
       {/* CONFIRM DEACTIVATE */}
-      <ConfirmDialog 
+      <Modal 
         isOpen={!!resettingStaff} 
-        onClose={() => setResettingStaff(null)} 
-        onConfirm={handleResetPassword} 
-        title="Reset Password?" 
-        message={`Are you sure you want to reset the password for ${resettingStaff?.first_name} ${resettingStaff?.last_name}? A new temporary password will be generated and their current sessions may not be affected until next login.`}
-        confirmLabel="Reset Password"
-        isDestructive={false}
-      />
+        onClose={() => { setResettingStaff(null); setCustomPassword(''); }} 
+        title="Reset Password"
+        footer={
+          <>
+            <button type="button" onClick={() => { setResettingStaff(null); setCustomPassword(''); }} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all">Cancel</button>
+            <button type="button" onClick={handleResetPassword} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 bg-primary hover:bg-primary-container text-on-primary">Reset Password</button>
+          </>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Set a new custom password for <strong>{resettingStaff?.first_name} {resettingStaff?.last_name}</strong>. Their current sessions may not be affected until next login.
+          </p>
+          <div className="space-y-1.5">
+            <label className="text-label-md font-semibold">New Password</label>
+            <input 
+              type="text" 
+              value={customPassword} 
+              onChange={e => setCustomPassword(e.target.value)} 
+              placeholder="Enter custom password..." 
+              className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono"
+            />
+          </div>
+        </div>
+      </Modal>
       <ConfirmDialog 
         isOpen={!!deactivatingStaff} 
         onClose={() => setDeactivatingStaff(null)} 
         onConfirm={handleDeactivate} 
         title="Deactivate this account?" 
-        message={<strong>{deactivatingStaff?.first_name} {deactivatingStaff?.last_name}</strong> + " will lose access immediately. Their record and history are kept, and you can reactivate the account later. Reassign any upcoming appointments first if they are a doctor."}
+        message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} will lose access immediately. Their record and history are kept, and you can reactivate the account later. Reassign any upcoming appointments first if they are a doctor.`}
         confirmLabel="Deactivate"
         isDestructive={true}
       />

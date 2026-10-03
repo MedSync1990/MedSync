@@ -14,8 +14,8 @@ export function updateStaff(userId: number, payload: StaffUpdatePayload): Promis
   return put(`/staff/${userId}`, payload);
 }
 
-export function resetStaffPassword(userId: number): Promise<{ message: string; temporary_password: string }> {
-  return put(`/staff/${userId}/reset-password`, {});
+export function resetStaffPassword(userId: number, password: string): Promise<{ message: string; temporary_password: string }> {
+  return put(`/staff/${userId}/reset-password`, { password });
 }
 
 export function deactivateStaff(userId: number): Promise<{ message: string; user_id: number }> {

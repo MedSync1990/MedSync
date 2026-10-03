@@ -93,5 +93,7 @@ export {
 export {
   getStaffList,
   createStaff,
+  updateStaff,
+  resetStaffPassword,
   deactivateStaff,
 } from './staff';
