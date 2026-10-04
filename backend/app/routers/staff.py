@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 from app.db import get_conn
 from app.dependencies import require_roles, get_current_user, CurrentUser
-from app.schemas.staff import StaffCreate, StaffUpdate, StaffResponse
+from app.schemas.staff import StaffCreate, StaffUpdate, StaffResponse, StaffResetPassword
 from app.security import hash_password
 import secrets
 import string
@@ -26,11 +26,20 @@ async def list_staff(
     query = """
         SELECT s.user_id, s.username, s.is_active, s.branch_id,
                a.first_name, a.last_name, a.id_number, a.email,
+               a.address, a.birthdate, a.gender, a.created_at,
                r.role_name,
-               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number
+               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number,
+               d.license_number,
+               sp.name as specialty,
+               b.name as branch_name,
+               s.last_login_at, s.failed_login_attempts, s.locked_until
         FROM staff s
         JOIN app_user a ON s.user_id = a.user_id
         JOIN role r ON a.role_id = r.role_id
+        JOIN branch b ON s.branch_id = b.branch_id
+        LEFT JOIN doctor d ON s.user_id = d.user_id
+        LEFT JOIN doctor_specialty ds ON s.user_id = ds.user_id
+        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
         WHERE 1=1
     """
     args = []
@@ -136,3 +145,75 @@ async def deactivate_staff(
 
     await db.execute("SELECT fn_deactivate_staff($1)", id)
     return {"message": "Staff deactivated successfully", "user_id": id}
+
+@router.put("/{id}/reset-password")
+async def reset_staff_password(
+    id: int,
+    payload: StaffResetPassword,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn)
+):
+    if current_user.role == "Branch Manager":
+        staff_branch = await db.fetchval("SELECT branch_id FROM staff WHERE user_id = $1", id)
+        if staff_branch != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="You can only reset passwords for staff in your own branch.")
+    
+    hashed_pw = hash_password(payload.password)
+    await db.execute("UPDATE staff SET password_hash = $1 WHERE user_id = $2", hashed_pw, id)
+    
+    return {"message": "Password reset successfully", "temporary_password": payload.password}
+
+@router.put("/{id}")
+async def update_staff(
+    id: int,
+    payload: StaffUpdate,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn)
+):
+    if current_user.role == "Branch Manager":
+        staff_branch = await db.fetchval("SELECT branch_id FROM staff WHERE user_id = $1", id)
+        if staff_branch != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="You can only edit staff in your own branch.")
+            
+    async with db.transaction():
+        # Update app_user
+        set_clauses = []
+        args = []
+        if payload.first_name is not None:
+            args.append(payload.first_name)
+            set_clauses.append(f"first_name = ${len(args)}")
+        if payload.last_name is not None:
+            args.append(payload.last_name)
+            set_clauses.append(f"last_name = ${len(args)}")
+        if payload.address is not None:
+            args.append(payload.address)
+            set_clauses.append(f"address = ${len(args)}")
+        if payload.email is not None:
+            args.append(payload.email)
+            set_clauses.append(f"email = ${len(args)}")
+            
+        if set_clauses:
+            args.append(id)
+            query = f"UPDATE app_user SET {', '.join(set_clauses)} WHERE user_id = ${len(args)}"
+            await db.execute(query, *args)
+            
+        # Update phone number
+        if payload.phone_number is not None:
+            await db.execute("UPDATE contact SET phone_number = $1 WHERE user_id = $2", payload.phone_number, id)
+            
+        # Update branch or active status
+        staff_set = []
+        staff_args = []
+        if payload.branch_id is not None:
+            staff_args.append(payload.branch_id)
+            staff_set.append(f"branch_id = ${len(staff_args)}")
+        if payload.is_active is not None:
+            staff_args.append(payload.is_active)
+            staff_set.append(f"is_active = ${len(staff_args)}")
+            
+        if staff_set:
+            staff_args.append(id)
+            query = f"UPDATE staff SET {', '.join(staff_set)} WHERE user_id = ${len(staff_args)}"
+            await db.execute(query, *staff_args)
+            
+    return {"message": "Staff updated successfully"}

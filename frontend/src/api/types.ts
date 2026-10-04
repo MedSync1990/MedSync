@@ -514,3 +514,59 @@ export interface BranchResponse {
   staff_count?: number;
   is_active?: boolean;
 }
+
+// ─── Staff ──────────────────────────────────────────────────────────────────
+
+export interface StaffResponse {
+  user_id: number;
+  username: string;
+  is_active: boolean;
+  branch_id: number;
+  first_name: string;
+  last_name: string;
+  id_number: string;
+  email: string | null;
+  role_name: string;
+  phone_number: string | null;
+  address?: string | null;
+  birthdate?: string | null;
+  gender?: string | null;
+  license_number?: string | null;
+  specialty?: string | null;
+  branch_name?: string | null;
+  created_at?: string | null;
+  last_login_at?: string | null;
+  failed_login_attempts?: number;
+  locked_until?: string | null;
+}
+
+export interface StaffUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  email?: string;
+  phone_number?: string;
+  branch_id?: number;
+  is_active?: boolean;
+}
+
+export interface StaffCreatePayload {
+  role_id: number;
+  branch_id: number;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  id_number: string;
+  address: string;
+  birthdate: string;
+  gender: string;
+  email?: string;
+  phone_number: string;
+  specialty?: string;
+  license_number?: string;
+}
+
+export interface StaffListResponse {
+  data: StaffResponse[];
+  total: number;
+}

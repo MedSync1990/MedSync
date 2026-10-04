@@ -88,3 +88,12 @@ export {
   getStatsOverview,
   getRecentActivity,
 } from './stats';
+
+// Staff endpoints
+export {
+  getStaffList,
+  createStaff,
+  updateStaff,
+  resetStaffPassword,
+  deactivateStaff,
+} from './staff';

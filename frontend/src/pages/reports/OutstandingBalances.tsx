@@ -97,8 +97,8 @@ export function OutstandingBalances() {
   // KPIs
   const totalOutstanding = filteredData.reduce((acc, curr) => acc + curr.due_amount, 0) || 0;
   const overdueInvoices = filteredData.length || 0;
-  const partiallyPaid = filteredData.filter(i => i.paid_amount > 0 && i.due_amount > 0).length || 0;
-  const fullyUnpaid = filteredData.filter(i => i.paid_amount === 0).length || 0;
+  const partiallyPaid = filteredData.filter(i => i.status === 'Partially Paid').length || 0;
+  const fullyUnpaid = filteredData.filter(i => i.status === 'Unpaid').length || 0;
 
   const handleView = (inv: any) => {
     setSelectedInv(inv);
@@ -269,8 +269,8 @@ export function OutstandingBalances() {
               {filteredData.map((d: any, i: number) => {
                 const paidAmt = d.paid_amount;
                 const dueAmt = d.due_amount;
-                const un = paidAmt === 0;
-                const st = un ? 'Unpaid' : 'Partially Paid';
+                const un = d.status === 'Unpaid';
+                const st = d.status;
                 const c = un ? 'bg-status-cancelled-bg text-status-cancelled-text' : 'bg-status-pending-bg text-status-pending-text';
                 const dot = un ? 'bg-status-cancelled-text' : 'bg-status-pending-text';
                 const initials = (d.patient_name || 'U').split(' ').map((n: string) => n[0]).join('').substring(0, 2);
