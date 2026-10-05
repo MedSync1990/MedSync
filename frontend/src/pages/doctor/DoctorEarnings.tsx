@@ -1,59 +1,92 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth/AuthContext';
-import { getDoctorItemizedPayments } from '../../api';
-import type { ItemizedPaymentResponse } from '../../api';
+import {
+  getDoctorEarningsOverview,
+  getDoctorBankAccounts,
+  getDoctorPayoutRequests,
+  getDoctorPayouts,
+  createDoctorPayoutRequest
+} from '../../api';
+import type {
+  DoctorEarningsOverviewResponse,
+  BankAccountItem,
+  PayoutRequestItem,
+  PayoutHistoryItem
+} from '../../api';
 
 export const DoctorEarnings: React.FC = () => {
   const { user } = useAuth();
   
   // UI State
-  const [activeTab, setActiveTab] = useState<'overview' | 'itemized'>('overview');
-  const [requestAmount, setRequestAmount] = useState('30000');
-  const [bankAccount, setBankAccount] = useState('Commercial Bank (Acc: **** 5821)');
-  const [showSuccessAlert, setShowSuccessAlert] = useState(true);
+  const [requestAmount, setRequestAmount] = useState('');
+  const [bankAccountId, setBankAccountId] = useState<number | ''>('');
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
-  // Itemized Report State
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [itemizedData, setItemizedData] = useState<ItemizedPaymentResponse | null>(null);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  // Overview State
+  const [loadingOverview, setLoadingOverview] = useState(false);
+  const [overviewData, setOverviewData] = useState<DoctorEarningsOverviewResponse | null>(null);
+  const [bankAccounts, setBankAccounts] = useState<BankAccountItem[]>([]);
+  const [payoutRequests, setPayoutRequests] = useState<PayoutRequestItem[]>([]);
+  const [payouts, setPayouts] = useState<PayoutHistoryItem[]>([]);
+
+  const loadOverviewData = async () => {
+    if (!user?.id) return;
+    setLoadingOverview(true);
+    try {
+      const [overview, banks, requests, history] = await Promise.all([
+        getDoctorEarningsOverview(user.id),
+        getDoctorBankAccounts(user.id),
+        getDoctorPayoutRequests(user.id),
+        getDoctorPayouts(user.id)
+      ]);
+      setOverviewData(overview);
+      setBankAccounts(banks.data);
+      setPayoutRequests(requests.data);
+      setPayouts(history.data);
+      if (banks.data.length > 0 && !bankAccountId) {
+        const defaultAccount = banks.data.find(b => b.is_default) || banks.data[0];
+        setBankAccountId(defaultAccount.account_id);
+      }
+    } catch (err: any) {
+      console.error('Failed to load overview data', err);
+    } finally {
+      setLoadingOverview(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      loadOverviewData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requestAmount || !bankAccountId) return;
+    setRequestError(null);
     setShowConfirmModal(true);
   };
 
-  const handleConfirmPayout = () => {
-    setShowConfirmModal(false);
-    setShowSuccessAlert(true);
-  };
-
-  const loadItemizedPayments = async () => {
-    if (!user?.id) return;
-    setLoading(true);
-    setError(null);
+  const handleConfirmPayout = async () => {
+    if (!user?.id || !bankAccountId) return;
     try {
-      const res = await getDoctorItemizedPayments(user.id, {
-        from: dateFrom || undefined,
-        to: dateTo || undefined,
+      await createDoctorPayoutRequest(user.id, {
+        account_id: Number(bankAccountId),
+        request_amount: Number(requestAmount)
       });
-      setItemizedData(res);
+      setShowConfirmModal(false);
+      setShowSuccessAlert(true);
+      setRequestAmount('');
+      loadOverviewData(); // Reload data
+      setTimeout(() => setShowSuccessAlert(false), 5000);
     } catch (err: any) {
-      setError(err.message || 'Failed to load itemized payments');
-    } finally {
-      setLoading(false);
+      setRequestError(err.message || 'Failed to submit request');
+      setShowConfirmModal(false);
     }
   };
-
-  // Load itemized data when switching to that tab
-  useEffect(() => {
-    if (activeTab === 'itemized' && !itemizedData) {
-      loadItemizedPayments();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, user?.id]);
 
   return (
     <div className="flex flex-col w-full pb-space-3xl max-w-content-max-width mx-auto">
@@ -77,44 +110,25 @@ export const DoctorEarnings: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 border-b border-border-subtle mb-space-lg">
-        <button
-          className={`pb-2 font-label-md text-[16px] transition-colors border-b-2 ${
-            activeTab === 'overview'
-              ? 'border-primary text-primary font-bold'
-              : 'border-transparent text-secondary hover:text-brand-navy-deep'
-          }`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview & Payouts
-        </button>
-        <button
-          className={`pb-2 font-label-md text-[16px] transition-colors border-b-2 ${
-            activeTab === 'itemized'
-              ? 'border-primary text-primary font-bold'
-              : 'border-transparent text-secondary hover:text-brand-navy-deep'
-          }`}
-          onClick={() => setActiveTab('itemized')}
-        >
-          Itemized Payments
-        </button>
-      </div>
-
-      {activeTab === 'overview' && (
         <div className="animate-in fade-in duration-300">
-          {/* 2. Alert Banner */}
+          {loadingOverview ? (
+            <div className="py-12 flex justify-center">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-space-md">
+              {/* 2. Alert Banner */}
           {showSuccessAlert && (
-            <div className="mb-space-md rounded-xl border border-status-completed-text/30 bg-status-completed-bg/70 p-space-sm sm:px-space-md sm:py-space-sm flex items-center justify-between gap-space-sm shadow-xs">
+            <div className="mb-space-md rounded-xl border border-primary/30 bg-primary/10 p-space-sm sm:px-space-md sm:py-space-sm flex items-center justify-between gap-space-sm shadow-xs">
               <div className="flex items-center gap-space-sm min-w-0">
-                <div className="w-6 h-6 rounded-full bg-status-completed-text text-white flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[16px] font-bold">check</span>
                 </div>
                 <span className="font-body-sm text-body-sm font-medium text-brand-navy-deep truncate">
                   Payment request submitted successfully. Request ref <strong className="font-mono-data text-brand-navy-deep">#REQ-2026-0902</strong> is currently under administrative audit.
                 </span>
               </div>
-              <span className="shrink-0 px-2.5 py-1 rounded-md font-label-sm text-label-sm font-semibold bg-status-completed-bg text-status-completed-text border border-status-completed-text/20">
+              <span className="shrink-0 px-2.5 py-1 rounded-md font-label-sm text-label-sm font-semibold bg-primary/10 text-primary border border-primary/20">
                 Pending Approval
               </span>
             </div>
@@ -133,7 +147,7 @@ export const DoctorEarnings: React.FC = () => {
                 </div>
                 <div className="mt-1">
                   <span className="font-display-lg text-display-lg text-brand-navy-deep font-mono-data font-bold tracking-tight">
-                    Rs. 185,000
+                    Rs. {overviewData?.total_earned.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                   </span>
                 </div>
               </div>
@@ -147,13 +161,13 @@ export const DoctorEarnings: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between">
                   <span className="font-label-sm text-label-sm text-secondary tracking-wider uppercase">PAID BY HOSPITAL</span>
-                  <div className="w-9 h-9 rounded-lg bg-status-completed-bg flex items-center justify-center text-status-completed-text">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined text-[20px]">check_circle</span>
                   </div>
                 </div>
                 <div className="mt-1">
                   <span className="font-display-lg text-display-lg text-status-completed-text font-mono-data font-bold tracking-tight">
-                    Rs. 140,000
+                    Rs. {overviewData?.paid_by_hospital.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                   </span>
                 </div>
               </div>
@@ -178,12 +192,12 @@ export const DoctorEarnings: React.FC = () => {
                 </div>
                 <div className="mt-1">
                   <span className="font-display-lg text-display-lg text-primary font-mono-data font-bold tracking-tight">
-                    Rs. 45,000
+                    Rs. {overviewData?.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                   </span>
                 </div>
               </div>
               <p className="font-body-sm text-body-sm text-secondary mt-space-sm leading-relaxed">
-                Formula: Total Earned (Rs. 185,000) - Paid by Hospital (Rs. 140,000)
+                Formula: Total Earned - Paid by Hospital
               </p>
             </div>
           </div>
@@ -200,7 +214,7 @@ export const DoctorEarnings: React.FC = () => {
               <div className="self-start sm:self-auto">
                 <div className="inline-flex items-center gap-2 px-space-sm py-1.5 rounded-lg border border-border-subtle bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md shadow-xs">
                   <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                  <span>Available to Request: <strong className="font-bold text-brand-navy-deep font-mono-data">Rs. 45,000</strong></span>
+                  <span>Available to Request: <strong className="font-bold text-brand-navy-deep font-mono-data">Rs. {overviewData?.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</strong></span>
                 </div>
               </div>
             </div>
@@ -230,12 +244,15 @@ export const DoctorEarnings: React.FC = () => {
                     <select
                       className="w-full h-11 pl-10 pr-9 rounded-lg bg-surface-subtle border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
                       id="bankAccountSelect"
-                      value={bankAccount}
-                      onChange={(e) => setBankAccount(e.target.value)}
+                      value={bankAccountId}
+                      onChange={(e) => setBankAccountId(Number(e.target.value))}
                     >
-                      <option>Commercial Bank (Acc: **** 5821)</option>
-                      <option>Sampath Bank (Acc: **** 9044)</option>
-                      <option>Hatton National Bank (Acc: **** 1120)</option>
+                      <option value="" disabled>Select Bank Account</option>
+                      {bankAccounts.map(account => (
+                        <option key={account.account_id} value={account.account_id}>
+                          {account.bank_name} (Acc: **** {account.account_number.slice(-4)})
+                        </option>
+                      ))}
                     </select>
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary">
                       <span className="material-symbols-outlined text-[18px]">unfold_more</span>
@@ -255,8 +272,13 @@ export const DoctorEarnings: React.FC = () => {
             </form>
             <div className="flex items-center gap-1.5 font-body-sm text-body-sm text-secondary mt-space-sm pt-1">
               <span className="material-symbols-outlined text-[15px]">info</span>
-              <span>Max eligible request: Rs. 45,000. Payouts are reviewed and credited within 2 business days.</span>
+              <span>Max eligible request: Rs. {overviewData?.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}. Payouts are reviewed and credited within 2 business days.</span>
             </div>
+            {requestError && (
+              <div className="mt-4 p-3 rounded-lg bg-error-container text-error text-sm">
+                {requestError}
+              </div>
+            )}
           </div>
 
           {/* 5. Payment Requests Table */}
@@ -268,7 +290,7 @@ export const DoctorEarnings: React.FC = () => {
                   Doctor-initiated payout requests awaiting hospital approval or disbursement
                 </p>
               </div>
-              <span className="font-label-sm text-label-sm text-secondary self-start sm:self-auto">Showing 3 requests</span>
+              <span className="font-label-sm text-label-sm text-secondary self-start sm:self-auto">Showing {payoutRequests.length} requests</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
@@ -282,39 +304,24 @@ export const DoctorEarnings: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-subtle font-body-sm text-body-sm text-brand-navy-deep">
-                  <tr className="hover:bg-surface-subtle/60 transition-colors">
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">02 Sep 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data">Rs. 20,000</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-pending-bg text-status-pending-text border border-status-pending-bg">
-                        Pending
-                      </span>
-                    </td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary">—</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary">Monthly consultation payout</td>
-                  </tr>
-                  <tr className="hover:bg-surface-subtle/60 transition-colors">
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">15 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data">Rs. 25,000</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-completed-bg text-status-completed-text border border-status-completed-bg">
-                        Paid
-                      </span>
-                    </td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-medium">20 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary">Bi-weekly OPD disbursement</td>
-                  </tr>
-                  <tr className="hover:bg-surface-subtle/60 transition-colors">
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">01 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data">Rs. 25,000</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-completed-bg text-status-completed-text border border-status-completed-bg">
-                        Paid
-                      </span>
-                    </td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-medium">05 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary">Ward rounds & emergency procedures</td>
-                  </tr>
+                  {payoutRequests.map(req => (
+                    <tr key={req.request_id} className="hover:bg-surface-subtle/60 transition-colors">
+                      <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">{new Date(req.request_date).toLocaleDateString()}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-brand-navy-deep font-mono-data">Rs. {req.request_amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap text-center">
+                        <span className={`font-semibold ${req.status === 'Paid' ? 'text-brand-navy-deep' : req.status === 'Pending' ? 'text-brand-navy-deep' : 'text-secondary'}`}>
+                          {req.status}
+                        </span>
+                      </td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-medium">{req.processed_date ? new Date(req.processed_date).toLocaleDateString() : '—'}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap text-secondary">{req.remarks || '—'}</td>
+                    </tr>
+                  ))}
+                  {payoutRequests.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-space-md py-6 text-center text-secondary">No payout requests found</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -330,7 +337,7 @@ export const DoctorEarnings: React.FC = () => {
                 </p>
               </div>
               <div className="font-label-md text-label-md text-secondary self-start sm:self-auto">
-                Total Received: <span className="font-bold text-status-completed-text font-mono-data">Rs. 140,000</span>
+                Total Received: <span className="font-bold text-status-completed-text font-mono-data">Rs. {overviewData?.paid_by_hospital.toLocaleString(undefined, {minimumFractionDigits: 2}) || '0.00'}</span>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -346,145 +353,45 @@ export const DoctorEarnings: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-subtle font-body-sm text-body-sm text-brand-navy-deep">
-                  <tr className="hover:bg-surface-subtle/60 transition-colors">
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">20 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data">Rs. 25,000</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-mono-data text-brand-navy-deep">PAY-00482</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 text-secondary">
-                        <span className="material-symbols-outlined text-[16px]">account_balance</span>
-                        <span>Bank Transfer</span>
-                      </div>
-                    </td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-mono-data">Commercial Bank •••• 5821</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-center">
-                      <button
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
-                        onClick={() => alert('Downloading remittance slip for PAY-00482 (PDF)')}
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[15px] text-secondary">download</span>
-                        <span>Download Slip</span>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-surface-subtle/60 transition-colors">
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">05 Aug 2026</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data">Rs. 25,000</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap font-mono-data text-brand-navy-deep">PAY-00391</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 text-secondary">
-                        <span className="material-symbols-outlined text-[16px]">account_balance</span>
-                        <span>Bank Transfer</span>
-                      </div>
-                    </td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-mono-data">Commercial Bank •••• 5821</td>
-                    <td className="px-space-md py-3.5 whitespace-nowrap text-center">
-                      <button
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
-                        onClick={() => alert('Downloading remittance slip for PAY-00391 (PDF)')}
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[15px] text-secondary">download</span>
-                        <span>Download Slip</span>
-                      </button>
-                    </td>
-                  </tr>
+                  {payouts.map(payment => (
+                    <tr key={payment.payout_id} className="hover:bg-surface-subtle/60 transition-colors">
+                      <td className="px-space-md py-3.5 whitespace-nowrap font-medium text-brand-navy-deep">{new Date(payment.payment_date).toLocaleDateString()}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap font-bold text-status-completed-text font-mono-data">Rs. {payment.amount_paid.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap font-mono-data text-brand-navy-deep">{payment.payment_reference}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 text-secondary">
+                          <span className="material-symbols-outlined text-[16px]">account_balance</span>
+                          <span>{payment.payment_method}</span>
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-mono-data">{payment.bank_name} •••• {payment.account_number.slice(-4)}</td>
+                      <td className="px-space-md py-3.5 whitespace-nowrap text-center">
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
+                          onClick={() => alert(`Downloading remittance slip for ${payment.payment_reference} (PDF)`)}
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[15px] text-secondary">download</span>
+                          <span>Download Slip</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {payouts.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-space-md py-6 text-center text-secondary">No hospital payments found</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'itemized' && (
-        <div className="animate-in fade-in duration-300">
-          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-xs overflow-hidden">
-            {/* Filter Bar for Itemized Report */}
-            <div className="p-space-md border-b border-border-subtle flex flex-col sm:flex-row items-end gap-space-md bg-surface-subtle/30">
-              <div className="flex-1 w-full sm:w-auto">
-                <label className="block font-label-sm text-secondary mb-1">From Date</label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-border-subtle bg-white text-brand-navy-deep focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                />
-              </div>
-              <div className="flex-1 w-full sm:w-auto">
-                <label className="block font-label-sm text-secondary mb-1">To Date</label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-border-subtle bg-white text-brand-navy-deep focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                />
-              </div>
-              <button
-                onClick={loadItemizedPayments}
-                className="h-10 px-6 rounded-lg bg-primary hover:bg-primary-container text-white font-label-md transition-colors w-full sm:w-auto shrink-0"
-                type="button"
-              >
-                Apply Filters
-              </button>
             </div>
-
-            {loading ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <p className="font-body-lg text-brand-navy-deep">Loading payments...</p>
-              </div>
-            ) : error ? (
-              <div className="bg-error-container/50 border border-error/20 text-error rounded-xl m-4 p-6 text-center shadow-sm">
-                <span className="material-symbols-outlined text-[32px] mb-2">error</span>
-                <p className="font-body-md">{error}</p>
-              </div>
-            ) : itemizedData?.data.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-secondary">
-                  <span className="material-symbols-outlined text-[36px]">search_off</span>
-                </div>
-                <h3 className="font-headline-sm text-brand-navy-deep">No payments found</h3>
-                <p className="font-body-md text-on-surface-variant">Try adjusting your date range.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-surface-subtle border-b border-border-subtle">
-                      <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Date</th>
-                      <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Patient Name</th>
-                      <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider">Invoice ID</th>
-                      <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Amount (LKR)</th>
-                      <th className="py-3 px-space-md font-label-sm text-secondary uppercase tracking-wider text-right">Running Total (LKR)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-subtle">
-                    {itemizedData?.data.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-surface-subtle/50 transition-colors">
-                        <td className="py-3 px-space-md font-body-sm text-on-surface-variant">
-                          {new Date(item.payment_date).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-space-md font-body-sm text-brand-navy-deep font-medium">{item.patient_name}</td>
-                        <td className="py-3 px-space-md font-mono-data text-secondary text-sm">#{item.invoice_id}</td>
-                        <td className="py-3 px-space-md font-mono-data text-brand-navy-deep text-right">
-                          {item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3 px-space-md font-mono-data text-primary text-right font-medium">
-                          {item.running_total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      )}
 
       {/* Confirmation Dialog for Requests (Only relevant for overview) */}
-      {showConfirmModal && activeTab === 'overview' && (
+      {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy-deep/60 backdrop-blur-xs p-4">
           <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-xl max-w-md w-full p-space-lg flex flex-col gap-space-md">
             <div className="flex items-center gap-space-sm">
@@ -505,7 +412,7 @@ export const DoctorEarnings: React.FC = () => {
               </div>
               <div className="flex justify-between font-body-sm text-body-sm">
                 <span className="text-secondary">Account:</span>
-                <span className="font-medium text-brand-navy-deep">{bankAccount}</span>
+                <span className="font-medium text-brand-navy-deep">{bankAccounts.find(b => b.account_id === bankAccountId)?.bank_name || 'Selected Account'} (Acc: **** {bankAccounts.find(b => b.account_id === bankAccountId)?.account_number.slice(-4)})</span>
               </div>
             </div>
             <p className="font-body-sm text-body-sm text-secondary">

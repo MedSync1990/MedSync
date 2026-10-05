@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { patientService } from '../../services/patientService';
-import { getPatientBalance, getPatientInsurance, verifyInsurance } from '../../api/billing';
+import { getPatientInsurance, verifyInsurance } from '../../api/billing';
 import { useAuth } from '../../context/AuthContext';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
 
@@ -51,33 +51,29 @@ export const PatientProfile: React.FC = () => {
   const fetchData = async (id: number | string) => {
     setLoading(true);
     try {
-      const [patientRes, balanceRes, insuranceRes, paymentsRes, allergiesRes, appointmentsRes, invoicesRes, policiesRes] = await Promise.all([
-        patientService.getById(id).catch((e: any) => {
-          console.error("Patient not found", e);
-          return null;
-        }),
-        getPatientBalance(id).catch(() => ({ outstanding_balance: 1500 })),
-        getPatientInsurance(id).catch(() => ({ data: [] })),
-        fetch(`/api/v1/patients/${id}/payments`).then(r => r.json()).catch(() => ({
-          data: []
-        })),
-        fetch(`/api/v1/patients/${id}/allergies`).then(r => r.json()).catch(() => ({
-          data: []
-        })),
-        fetch(`/api/v1/appointments?patient_id=${id}`).then(r => r.json()).catch(() => ({ data: [] })),
-        fetch(`/api/v1/billing/invoices/patient/${id}`).then(r => r.json()).catch(() => ({ data: [] })),
-        fetch(`/api/v1/insurance/policies`).then(r => r.json()).catch(() => ({ data: [] }))
+      const patientRes = await patientService.getById(id);
+      const patientIdNumber = patientRes.patient_id;
+      const readOptional = async (url: string) => {
+        const response = await fetch(url, { credentials: 'include' });
+        return response.ok ? response.json() : null;
+      };
+      const [balanceRes, insuranceRes, allergiesRes, appointmentsRes, invoicesRes] = await Promise.all([
+        readOptional(`/api/v1/invoices/patient/${patientIdNumber}/balance`),
+        getPatientInsurance(patientIdNumber).catch(() => ({ data: [] })),
+        readOptional(`/api/v1/patients/${patientIdNumber}/allergies`),
+        readOptional(`/api/v1/appointments?patient_id=${patientIdNumber}`),
+        readOptional(`/api/v1/invoices/patient/${patientIdNumber}`),
       ]);
 
       setPatient(patientRes);
       setEditData(patientRes);
-      setBalance('outstanding_balance' in balanceRes ? balanceRes.outstanding_balance : 0);
-      setInsurancePolicies(insuranceRes.data || []);
-      setPayments(paymentsRes?.data || paymentsRes || []);
-      setAllergies(allergiesRes?.data || allergiesRes || []);
-      setAppointments(appointmentsRes?.data || appointmentsRes || []);
-      setInvoices(invoicesRes?.data || invoicesRes || []);
-      setCataloguePolicies(policiesRes?.data || policiesRes || []);
+      setBalance(balanceRes && 'outstanding_balance' in balanceRes ? balanceRes.outstanding_balance : 0);
+      setInsurancePolicies(Array.isArray(insuranceRes?.data) ? insuranceRes.data : []);
+      setPayments([]);
+      setAllergies(Array.isArray(allergiesRes) ? allergiesRes : []);
+      setAppointments(Array.isArray(appointmentsRes?.data) ? appointmentsRes.data : Array.isArray(appointmentsRes) ? appointmentsRes : []);
+      setInvoices(Array.isArray(invoicesRes?.data) ? invoicesRes.data : []);
+      setCataloguePolicies([]);
     } catch (error) {
       console.error('Failed to load patient data', error);
     } finally {
@@ -497,7 +493,12 @@ export const PatientProfile: React.FC = () => {
                   LKR {balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <button 
-                  onClick={() => alert("Online Payment Integration is pending. Please collect payment at the desk.")}
+                  onClick={(e) => {
+                    const btn = e.currentTarget;
+                    const originalText = btn.innerText;
+                    btn.innerText = 'Pending Integration';
+                    setTimeout(() => { btn.innerText = originalText; }, 2000);
+                  }}
                   className="mt-space-lg w-full bg-surface-card border border-border-subtle font-label-md text-label-md px-4 py-2 rounded-lg text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors"
                 >
                   Pay Outstanding Balance

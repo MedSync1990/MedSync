@@ -114,3 +114,8 @@ async def get_me(
 @router.get("/admin-only-dashboard", dependencies=[Depends(require_roles("Administrator", "Branch Manager"))])
 async def admin_dashboard_data():
     return {"message": "Welcome to the admin dashboard! Your role allowed you here."}
+
+@router.get("/roles")
+async def get_roles(db: asyncpg.Connection = Depends(get_conn)):
+    rows = await db.fetch("SELECT role_id, role_name FROM role ORDER BY role_id")
+    return [dict(r) for r in rows]

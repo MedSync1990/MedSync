@@ -28,22 +28,9 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const defaultTestUser: UserProfile = {
-  id: 1,
-  username: 'receptionist',
-  firstName: 'Sarah',
-  lastName: 'Perera',
-  role: 'Receptionist',
-  roleTitle: 'Receptionist Portal',
-  branchId: 1,
-  branchName: 'Colombo Central Branch',
-  avatarUrl:
-    'https://lh3.googleusercontent.com/aida/AEtjO1UPm4HIqPc1W2Y65YJx_yxzYAHERJFf3_-X65GsvCxTOQQ1inOEDRiHZEfkVkylhn-qm7fWHjIv7nF6AjefK6Qiz2lGNxehmhXjRt64nMIzQz7AEoccFb97Je4Ah1-qdXeeF36IUZBCJBRG7dvmGIaZ2QJY9jpx0W_gTQIItFWRoo1FJ6k2i5rm8Lho7aGj6nOOxKMqctzo-ieNcpglyhGz9Im7tfaCbM1ucgtaXLndm09DRHOSMR-EGp82snLCU4nOsJt9fuxooz4',
-};
-
 const AuthContext = createContext<AuthContextType>({
-  user: defaultTestUser,
-  token: 'mock-jwt-token',
+  user: null,
+  token: null,
   setUser: () => { },
   setToken: () => { },
   logout: () => { },
@@ -62,9 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.error('Failed to parse current_user from localStorage', e);
     }
-    return defaultTestUser;
+    return null;
   });
-  const [token, setToken] = useState<string | null>('mock-jwt-token');
+  const [token, setToken] = useState<string | null>(null);
 
   const setUser = (newUser: UserProfile | null) => {
     setUserState(newUser);

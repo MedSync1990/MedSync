@@ -1,0 +1,6 @@
+import { get } from './client';
+import type { BranchResponse } from './types';
+
+export function listBranches(): Promise<BranchResponse[]> {
+  return get<BranchResponse[]>('/branches');
+}

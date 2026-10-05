@@ -22,6 +22,9 @@ export type * from './types';
 // Auth endpoints
 export { login, logout, getMe } from './auth';
 
+// Branch endpoints
+export { listBranches } from './branches';
+
 // Report endpoints
 export {
   getAppointmentsSummary,
@@ -30,6 +33,11 @@ export {
   getOutstandingBalances,
   getTreatmentCategories,
   getInsuranceVsOutOfPocket,
+  getDoctorEarningsOverview,
+  getDoctorBankAccounts,
+  getDoctorPayoutRequests,
+  getDoctorPayouts,
+  createDoctorPayoutRequest,
 } from './reports';
 export type {
   AppointmentsSummaryParams,
@@ -38,6 +46,10 @@ export type {
   OutstandingBalancesParams,
   TreatmentCategoriesParams,
   InsuranceVsOutOfPocketParams,
+  DoctorEarningsOverviewResponse,
+  BankAccountItem,
+  PayoutRequestItem,
+  PayoutHistoryItem,
 } from './reports';
 
 // Appointment endpoints
@@ -76,3 +88,12 @@ export {
   getStatsOverview,
   getRecentActivity,
 } from './stats';
+
+// Staff endpoints
+export {
+  getStaffList,
+  createStaff,
+  updateStaff,
+  resetStaffPassword,
+  deactivateStaff,
+} from './staff';

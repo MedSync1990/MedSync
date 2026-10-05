@@ -21,10 +21,8 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
 
   const userName = user ? (user.role === 'Doctor' ? `Dr. ${user.lastName}` : user.firstName || user.lastName) : 'Guest';
   const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
-  const branchName = user?.branchName || 'Unknown Branch';
-  const avatarUrl =
-    user?.avatarUrl ||
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
+  const branchName = user?.branchName || 'Colombo Central Branch';
+  const avatarUrl = user?.avatarUrl || '/logo.jpg';
 
   return (
     <header
@@ -68,6 +66,26 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
           <span>{branchName}</span>
         </div>
 
+        {onThemeToggle && (
+          <button
+            onClick={onThemeToggle}
+            aria-label="Theme Toggle"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[20px]">dark_mode</span>
+          </button>
+        )}
+
+        <button
+          aria-label="Notifications"
+          className="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">notifications</span>
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
+        </button>
+
         <div className="h-7 w-[1px] bg-border-subtle"></div>
 
         <div className="flex items-center gap-space-sm pl-space-xs">
@@ -85,3 +103,4 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
     </header>
   );
 };
+

@@ -269,13 +269,34 @@ export interface VerifyInsuranceResponse {
 
 // ─── Reports ────────────────────────────────────────────────────────────────
 
+export interface AppointmentDailySummaryItem {
+  date: string;
+  scheduled: number;
+  completed: number;
+  cancelled: number;
+}
+
 export interface AppointmentsSummaryResponse {
-  data: Array<Record<string, any>>;
-  total: number;
+  daily_data: AppointmentDailySummaryItem[];
+  total_scheduled: number;
+  total_completed: number;
+  total_cancelled: number;
+  total_walkins: number;
+}
+
+export interface DoctorRevenueItem {
+  doctor_id: number;
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  total_appointments: number;
+  consult_revenue: number;
+  procedure_revenue: number;
+  total_revenue: number;
 }
 
 export interface DoctorRevenueResponse {
-  data: Array<Record<string, any>>;
+  data: DoctorRevenueItem[];
   total: number;
 }
 
@@ -286,14 +307,38 @@ export interface ItemizedPaymentResponse {
   limit: number;
 }
 
+export interface OutstandingBalanceItem {
+  invoice_id: string;
+  patient_id: number;
+  patient_name: string;
+  contact_number: string;
+  total_amount: number;
+  paid_amount: number;
+  due_amount: number;
+  last_payment_date: string | null;
+  aging_days: number;
+  status: string;
+}
+
 export interface OutstandingBalancesResponse {
-  data: Array<Record<string, any>>;
+  data: OutstandingBalanceItem[];
   total: number;
 }
 
+export interface TreatmentCategoryItem {
+  treatment_code: string;
+  treatment_item: string;
+  category: string;
+  is_active: boolean;
+  usage_count: number;
+  total_revenue: number;
+}
+
 export interface TreatmentCategoriesResponse {
-  data: Array<Record<string, any>>;
+  data: TreatmentCategoryItem[];
   total: number;
+  total_catalog_items: number;
+  active_catalog_items: number;
 }
 
 export interface MonthlyLedgerItem {
@@ -326,6 +371,7 @@ export interface InsuranceVsOutOfPocketResponse {
   provider_split: ProviderSplitItem[];
   claim_slas: ClaimSlaItem[];
   payment_modes: PaymentModeItem[];
+  avg_claim_days: number;
 }
 
 // ─── Patients (schemas/patients.py) ─────────────────────────────────────────
@@ -414,7 +460,7 @@ export interface PatientListItem {
   last_name: string;
   id_number: string;
   phone_number: string;
-  gender: Gender;
+  gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
   registered_branch?: number | null;
   branch_name?: string | null;
@@ -467,4 +513,60 @@ export interface BranchResponse {
   branch_manager_name?: string | null;
   staff_count?: number;
   is_active?: boolean;
+}
+
+// ─── Staff ──────────────────────────────────────────────────────────────────
+
+export interface StaffResponse {
+  user_id: number;
+  username: string;
+  is_active: boolean;
+  branch_id: number;
+  first_name: string;
+  last_name: string;
+  id_number: string;
+  email: string | null;
+  role_name: string;
+  phone_number: string | null;
+  address?: string | null;
+  birthdate?: string | null;
+  gender?: string | null;
+  license_number?: string | null;
+  specialty?: string | null;
+  branch_name?: string | null;
+  created_at?: string | null;
+  last_login_at?: string | null;
+  failed_login_attempts?: number;
+  locked_until?: string | null;
+}
+
+export interface StaffUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  email?: string;
+  phone_number?: string;
+  branch_id?: number;
+  is_active?: boolean;
+}
+
+export interface StaffCreatePayload {
+  role_id: number;
+  branch_id: number;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  id_number: string;
+  address: string;
+  birthdate: string;
+  gender: string;
+  email?: string;
+  phone_number: string;
+  specialty?: string;
+  license_number?: string;
+}
+
+export interface StaffListResponse {
+  data: StaffResponse[];
+  total: number;
 }
