@@ -315,8 +315,8 @@ async def get_treatment_categories(
     return TreatmentCategoriesResponse(
         data=data, 
         total=len(data),
-        total_catalog_items=int(catalog_stats["total_items"]),
-        active_catalog_items=int(catalog_stats["active_items"])
+        total_catalog_items=int(catalog_stats["total_items"]) if catalog_stats and catalog_stats["total_items"] is not None else 0,
+        active_catalog_items=int(catalog_stats["active_items"]) if catalog_stats and catalog_stats["active_items"] is not None else 0
     )
 
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
