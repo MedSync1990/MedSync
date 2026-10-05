@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { listAppointments } from '../../api/appointments';
+import type { AppointmentResponse } from '../../api/types';
 
 export const DoctorDashboard: React.FC = () => {
+  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    listAppointments({ date: today, limit: 25 })
+      .then((response) => setAppointments(response.data || []))
+      .catch(() => setAppointments([]))
+      .finally(() => setLoadingAppointments(false));
+  }, []);
+
+  const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
+  const completedAppointments = appointments.filter((item) => item.status === 'Completed').length;
+  const todayLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg">
       {/* Top Level Welcome & Date Banner */}
@@ -19,7 +36,7 @@ export const DoctorDashboard: React.FC = () => {
         <div className="flex items-center gap-space-sm self-start md:self-auto">
           <div className="flex items-center bg-surface-card rounded-xl px-space-md py-2 shadow-sm border border-border-subtle">
             <span className="material-symbols-outlined text-[18px] text-primary mr-2">event_available</span>
-            <span className="font-label-lg text-label-lg text-brand-navy-deep">Sep 3, 2026</span>
+            <span className="font-label-lg text-label-lg text-brand-navy-deep">{todayLabel}</span>
             <span className="mx-2 text-secondary opacity-40">|</span>
             <span className="font-mono-data text-mono-data text-secondary">09:58 AM IST</span>
           </div>
@@ -37,12 +54,12 @@ export const DoctorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg">14</span>
+            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg">{appointments.length}</span>
             <span className="font-body-md text-body-md text-secondary">Patients</span>
           </div>
           <div className="flex items-center justify-between text-status-scheduled-text font-label-sm text-label-sm pt-space-xs border-t border-border-subtle/50">
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">checklist</span> 10 remaining
+                <span className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px]">checklist</span> {appointments.filter((item) => item.status === 'Scheduled').length} remaining
             </span>
             <span className="text-secondary opacity-75">Target: 20 max</span>
           </div>
@@ -59,7 +76,7 @@ export const DoctorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg">4</span>
+            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg">{completedAppointments}</span>
             <span className="font-body-md text-body-md text-secondary">Consultations</span>
           </div>
           <div className="flex items-center justify-between text-status-completed-text font-label-sm text-label-sm pt-space-xs border-t border-border-subtle/50">
@@ -97,17 +114,18 @@ export const DoctorDashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-space-sm">
                 <div>
                   <div className="flex flex-wrap items-center gap-space-xs mb-1">
-                    <h3 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold">Priyantha Dharmasena</h3>
-                    <span className="px-2.5 py-0.5 rounded font-mono-data text-mono-data font-semibold bg-surface-container-high text-primary">
-                      PT-002841
-                    </span>
+                    <h3 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold">
+                      {loadingAppointments ? 'Loading next patient...' : nextAppointment?.patient_name || 'No patient waiting'}
+                    </h3>
+                    {nextAppointment && (
+                      <span className="px-2.5 py-0.5 rounded font-mono-data text-mono-data font-semibold bg-surface-container-high text-primary">
+                        {nextAppointment.appointment_code}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-body-md text-body-md text-secondary">
-                    <span>48 yrs · Male</span>
-                    <span className="text-outline-variant">·</span>
-                    <span>NIC: 782410928V</span>
-                    <span className="text-outline-variant">·</span>
-                    <span className="font-medium text-brand-navy-deep">Blood Group: B+</span>
+                    <span>{nextAppointment?.appointment_type || 'No scheduled appointment'}</span>
+                    {nextAppointment && <><span className="text-outline-variant">·</span><span>{nextAppointment.start_time}</span></>}
                   </div>
                 </div>
               </div>
@@ -123,7 +141,7 @@ export const DoctorDashboard: React.FC = () => {
                       Allergy Alert
                     </span>
                     <span className="font-body-md text-body-md font-semibold text-brand-navy-deep">
-                      Penicillin & Beta-Lactam Antibiotics
+                      Review allergy flags before consultation
                     </span>
                   </div>
                 </div>
@@ -136,7 +154,7 @@ export const DoctorDashboard: React.FC = () => {
                     Chief Clinical Reason
                   </span>
                   <p className="font-body-md text-body-md text-brand-navy-deep font-medium">
-                    Follow-up Hypertension & 12-Lead ECG Review (Post-Stent Care)
+                    {nextAppointment?.appointment_type || 'No clinical session assigned'}
                   </p>
                 </div>
               </div>
@@ -146,7 +164,7 @@ export const DoctorDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm pt-space-xs">
             <Link
               className="w-full inline-flex items-center justify-center gap-2 px-space-xl py-3.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold shadow-sm hover:shadow transition-all"
-              to="/consultation"
+              to={nextAppointment ? `/doctor/consultation?appointmentId=${nextAppointment.appointment_id}` : '/doctor/schedule'}
             >
               <span className="material-symbols-outlined text-[20px]">stethoscope</span>
               <span>Start Consultation Now</span>

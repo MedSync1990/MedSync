@@ -230,7 +230,7 @@ async def get_outstanding_balances(
             (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
             (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
             MAX(p.payment_date) as last_payment_date,
-            EXTRACT(DAY FROM (CURRENT_DATE - i.created_at::date)) as aging_days,
+            (CURRENT_DATE - i.created_at::date) as aging_days,
             i.status
         FROM invoices i
         JOIN appointments a ON i.appointment_id = a.appointment_id
@@ -260,7 +260,7 @@ async def get_outstanding_balances(
             total_amount=float(r["total_amount"]),
             paid_amount=float(r["paid_amount"]),
             due_amount=float(r["due_amount"]),
-            last_payment_date=r["last_payment_date"],
+            last_payment_date=r["last_payment_date"].date() if hasattr(r["last_payment_date"], "date") else r["last_payment_date"],
             aging_days=int(r["aging_days"]) if r["aging_days"] is not None else 0,
             status=r["status"]
         ) for r in records
@@ -286,14 +286,17 @@ async def get_treatment_categories(
             COUNT(ct.treatment_code) as usage_count,
             COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
         FROM treatment_catalogue tc
-        LEFT JOIN consultation_treatments ct ON tc.treatment_code = ct.treatment_code
-        LEFT JOIN consultations c ON ct.consultation_id = c.consultation_id
-        LEFT JOIN appointments a ON c.appointment_id = a.appointment_id AND a.status = 'Completed'
-        LEFT JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-        LEFT JOIN staff s ON das.doctor_id = s.user_id 
-        WHERE ($1::int IS NULL OR (s.branch_id = $1 AND s.branch_id IS NOT NULL) OR s.branch_id IS NULL)
-          AND ($2::date IS NULL OR das.date >= $2 OR das.date IS NULL)
-          AND ($3::date IS NULL OR das.date <= $3 OR das.date IS NULL)
+        LEFT JOIN (
+            SELECT ct2.treatment_code, ct2.unit_price, ct2.quantity
+            FROM consultation_treatments ct2
+            JOIN consultations c2 ON ct2.consultation_id = c2.consultation_id
+            JOIN appointments a2 ON c2.appointment_id = a2.appointment_id AND a2.status = 'Completed'
+            JOIN doctor_availability_slots das2 ON a2.slot_id = das2.slot_id
+            JOIN staff s2 ON das2.doctor_id = s2.user_id
+            WHERE ($1::int IS NULL OR s2.branch_id = $1)
+              AND ($2::date IS NULL OR das2.date >= $2)
+              AND ($3::date IS NULL OR das2.date <= $3)
+        ) ct ON tc.treatment_code = ct.treatment_code
         GROUP BY tc.treatment_code, tc.treatment_name, tc.category, tc.is_active
         ORDER BY total_revenue DESC, usage_count DESC
     """
@@ -304,7 +307,7 @@ async def get_treatment_categories(
     
     data = [
         TreatmentCategoryItem(
-            treatment_code=r["treatment_code"],
+            treatment_code=str(r["treatment_code"]),
             treatment_item=r["treatment_item"],
             category=r["category"],
             is_active=bool(r["is_active"]),

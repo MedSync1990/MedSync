@@ -26,6 +26,9 @@ class StaffUpdate(BaseModel):
     branch_id: Optional[int] = None
     is_active: Optional[bool] = None
 
+class StaffResetPassword(BaseModel):
+    password: str
+
 class StaffResponse(BaseModel):
     user_id: int
     username: str

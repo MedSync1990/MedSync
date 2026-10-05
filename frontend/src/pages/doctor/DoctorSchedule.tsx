@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { listAppointments } from '../../api/appointments';
+import type { AppointmentResponse } from '../../api/types';
 
 export const DoctorSchedule: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'remaining' | 'waiting' | 'upcoming' | 'completed'>('remaining');
   const [currentDateIndex, setCurrentDateIndex] = useState(1); // 1 = Today (Thursday)
+  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const dates = [
-    { label: 'Wednesday, Sep 2, 2026', isToday: false, hasData: false },
-    { label: 'Thursday, Sep 3, 2026', isToday: true, hasData: true },
-    { label: 'Friday, Sep 4, 2026', isToday: false, hasData: false },
-  ];
+  const dates = useMemo(() => {
+    const today = new Date();
+    return [-1, 0, 1].map((offset) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + offset);
+      return {
+        date: date.toISOString().split('T')[0],
+        label: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }),
+        isToday: offset === 0,
+      };
+    });
+  }, []);
 
   const currentDate = dates[currentDateIndex];
+
+  useEffect(() => {
+    setLoading(true);
+    setLoadError(null);
+    listAppointments({ date: currentDate.date, limit: 100 })
+      .then((response) => setAppointments(response.data || []))
+      .catch(() => {
+        setAppointments([]);
+        setLoadError('Unable to load appointments for this date.');
+      })
+      .finally(() => setLoading(false));
+  }, [currentDate.date]);
+
+  const visibleAppointments = appointments.filter((appointment) => {
+    if (activeTab === 'completed') return appointment.status === 'Completed';
+    if (activeTab === 'remaining') return appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
+    if (activeTab === 'waiting') return appointment.status === 'Scheduled';
+    if (activeTab === 'upcoming') return appointment.status === 'Scheduled';
+    return appointment.status !== 'Cancelled';
+  });
+
+  const formatTime = (value: string) => value ? value.slice(0, 5) : '—';
+  const statusLabel = (status: string) => status === 'Scheduled' ? 'Scheduled' : status;
+  const completedCount = appointments.filter((appointment) => appointment.status === 'Completed').length;
+  const remainingCount = appointments.filter((appointment) => appointment.status !== 'Completed' && appointment.status !== 'Cancelled').length;
+  const waitingCount = appointments.filter((appointment) => appointment.status === 'Scheduled').length;
 
   return (
     <div className="flex flex-col w-full py-space-md space-y-space-lg">
@@ -138,11 +176,11 @@ export const DoctorSchedule: React.FC = () => {
           <div className="flex flex-wrap items-center gap-space-xs">
             <div className="flex items-center bg-surface-card p-1 rounded-xl shadow-xs border border-border-subtle">
               {[
-                { id: 'all', label: 'All Today (14)' },
-                { id: 'remaining', label: 'Remaining To Do (8)' },
-                { id: 'waiting', label: 'Waiting / In Queue (2)' },
-                { id: 'upcoming', label: 'Upcoming (6)' },
-                { id: 'completed', label: 'Completed (6)' },
+                { id: 'all', label: `All (${appointments.length})` },
+                { id: 'remaining', label: `Remaining To Do (${remainingCount})` },
+                { id: 'waiting', label: `Waiting / In Queue (${waitingCount})` },
+                { id: 'upcoming', label: `Upcoming (${waitingCount})` },
+                { id: 'completed', label: `Completed (${completedCount})` },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -181,19 +219,74 @@ export const DoctorSchedule: React.FC = () => {
         </div>
 
         {/* Schedule Table (Shown when data is present) */}
-        {currentDate.hasData ? (
+        {!loading && !loadError ? (
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full table-fixed text-left border-collapse">
+              <colgroup>
+                <col className="w-32" />
+                <col />
+                <col className="w-40" />
+                <col className="w-44" />
+                <col className="w-60" />
+              </colgroup>
               <thead>
                 <tr className="bg-canvas-bg h-11 text-secondary font-label-sm text-label-sm uppercase tracking-wider">
                   <th className="py-2.5 px-space-lg w-32">Slot Time</th>
                   <th className="py-2.5 px-space-md min-w-[320px]">Patient Information</th>
-                  <th className="py-2.5 px-space-md w-36">Category</th>
+                  <th className="py-2.5 px-space-md w-40">Category</th>
                   <th className="py-2.5 px-space-md w-44">Status</th>
                   <th className="py-2.5 px-space-lg text-right min-w-[240px]">Session Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-subtle font-body-md text-body-md text-brand-navy-deep">
+                {visibleAppointments.map((appointment) => (
+                  <tr key={appointment.appointment_id} className="hover:bg-surface-subtle/70 transition-colors h-16">
+                    <td className="px-space-lg py-space-sm font-mono-data text-mono-data text-brand-navy-deep font-semibold">
+                      {formatTime(appointment.start_time)}
+                    </td>
+                    <td className="px-space-md py-space-sm">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-wrap items-center gap-space-xs">
+                          <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                            {appointment.patient_name}
+                          </span>
+                          <span className="text-primary font-mono-data text-mono-data font-label-sm text-label-sm font-semibold">
+                            {appointment.appointment_code}
+                          </span>
+                        </div>
+                        <div className="font-body-sm text-body-sm text-secondary">
+                          {appointment.appointment_type}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-space-md py-space-sm align-middle whitespace-nowrap">
+                      <span className="inline-flex px-2.5 py-1 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md font-semibold">
+                        {appointment.appointment_type}
+                      </span>
+                    </td>
+                    <td className="px-space-md py-space-sm">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold">
+                        <span className="material-symbols-outlined text-[14px]">schedule</span>
+                        {statusLabel(appointment.status)}
+                      </span>
+                    </td>
+                    <td className="px-space-lg py-space-sm text-right">
+                      {appointment.status === 'Scheduled' ? (
+                        <Link
+                          to={`/doctor/consultation?appointmentId=${appointment.appointment_id}`}
+                          className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">stethoscope</span>
+                          <span>Start Consultation</span>
+                        </Link>
+                      ) : (
+                        <span className="font-mono-data text-mono-data text-secondary">{statusLabel(appointment.status)}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tbody hidden className="divide-y divide-surface-subtle font-body-md text-body-md text-brand-navy-deep">
                 {/* Row 1: Waiting / In Queue */}
                 <tr className="bg-status-scheduled-bg/30 hover:bg-status-scheduled-bg/50 transition-colors h-20 border-l-4 border-l-border-focus">
                   <td className="px-space-lg py-space-sm font-mono-data text-mono-data text-status-scheduled-text font-bold">
@@ -347,7 +440,7 @@ export const DoctorSchedule: React.FC = () => {
             {/* Table Footer / Capacity Summary */}
             <div className="px-space-lg py-space-md bg-canvas-bg border-t border-border-subtle flex flex-wrap items-center justify-between text-secondary font-body-sm text-body-sm">
               <div className="flex items-center gap-space-md flex-wrap">
-                <span>Total Booked Today: <strong className="text-brand-navy-deep">14 Patients</strong></span>
+                <span>Total Booked Today: <strong className="text-brand-navy-deep">{appointments.length} Patients</strong></span>
                 <span className="text-outline-variant">•</span>
                 <span>Estimated Time Remaining: <strong className="text-brand-navy-deep">3h 45m</strong></span>
                 <span className="text-outline-variant">•</span>
@@ -355,7 +448,9 @@ export const DoctorSchedule: React.FC = () => {
                   <span className="material-symbols-outlined text-[16px]">verified</span>Clinic running on schedule
                 </span>
               </div>
-              <div className="text-secondary font-mono-data text-mono-data">Next appointment slot: 10:15 AM (Priyantha Dharmasena)</div>
+              <div className="text-secondary font-mono-data text-mono-data">
+                Next appointment slot: {visibleAppointments[0] ? `${formatTime(visibleAppointments[0].start_time)} (${visibleAppointments[0].patient_name})` : 'None'}
+              </div>
             </div>
           </div>
         ) : (
@@ -365,9 +460,11 @@ export const DoctorSchedule: React.FC = () => {
               <span className="material-symbols-outlined text-[36px]">event_busy</span>
             </div>
             <div className="space-y-1">
-              <h3 className="font-headline-md text-headline-md text-brand-navy-deep">No appointments scheduled for this date.</h3>
+              <h3 className="font-headline-md text-headline-md text-brand-navy-deep">
+                {loadError || 'No appointments scheduled for this date.'}
+              </h3>
               <p className="font-body-md text-body-md text-secondary max-w-md">
-                There are no clinical sessions or patient consultations registered for this date. Check another day or contact the reception coordinator.
+                {loadError ? 'Please try again or contact the reception coordinator.' : 'There are no clinical sessions or patient consultations registered for this date.'}
               </p>
             </div>
             <button
@@ -375,7 +472,7 @@ export const DoctorSchedule: React.FC = () => {
               className="h-10 px-space-lg rounded-xl bg-border-focus text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
               type="button"
             >
-              Return to Today (Sep 3, 2026)
+              Return to Today ({dates[1].label})
             </button>
           </div>
         )}

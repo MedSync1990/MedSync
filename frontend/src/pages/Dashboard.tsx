@@ -33,6 +33,14 @@ export const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
+    const refreshOnFocus = () => fetchDashboardData();
+    const refreshTimer = window.setInterval(fetchDashboardData, 15000);
+    window.addEventListener('focus', refreshOnFocus);
+
+    return () => {
+      window.clearInterval(refreshTimer);
+      window.removeEventListener('focus', refreshOnFocus);
+    };
   }, [user?.role]);
 
   // If doctor, they shouldn't be here (they go to my-schedule or my-earnings)
