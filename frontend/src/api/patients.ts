@@ -45,6 +45,11 @@ export function createPatient(data: {
   return post<PatientResponse>('/patients', data);
 }
 
+/** Quick register a walk-in patient (only first_name is required) */
+export function quickCreatePatient(data: import('./types').QuickPatientPayload): Promise<PatientResponse> {
+  return post<PatientResponse>('/patients/quick', data);
+}
+
 /** Update a patient record */
 export function updatePatient(
   patientId: number,

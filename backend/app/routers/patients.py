@@ -1,3 +1,4 @@
+import random
 from datetime import date
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, status
@@ -9,6 +10,7 @@ from app.errors import AppValidationError, NotFoundError
 from app.schemas.allergies import PatientAllergiesUpdateRequest
 from app.schemas.patients import (
     PatientCreateRequest,
+    QuickPatientCreateRequest,
     PatientUpdateRequest,
     PatientResponse,
     PatientListItem,
@@ -168,6 +170,56 @@ async def register_patient(
                 )
 
     return await get_patient(str(user_id), conn)
+
+
+@router.post(
+    "/quick",
+    response_model=PatientResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles("Receptionist", "Administrator"))],
+)
+async def register_quick_patient(
+    payload: QuickPatientCreateRequest,
+    current_user: CurrentUser = Depends(require_roles("Receptionist", "Administrator")),
+    conn: Connection = Depends(get_conn),
+):
+    """
+    Quickly register an unregistered/walk-in patient with minimal fields.
+    Wraps standard `register_patient` with smart default fallbacks.
+    """
+    # Resolve or generate unique temporary NIC matching format: 999xxxxxxV
+    # 999 start can be used to check unregistered status
+    if payload.id_number:
+        nic = payload.id_number.strip().upper()
+    else:
+        for _ in range(10):
+            rand_digits = "".join([str(random.randint(0, 9)) for _ in range(6)])
+            candidate_nic = f"999{rand_digits}V"
+            exists = await conn.fetchval(
+                "SELECT 1 FROM app_user WHERE id_number = $1", candidate_nic
+            )
+            if not exists:
+                nic = candidate_nic
+                break
+        else:
+            nic = f"999{int(date.today().strftime('%y%m%d'))}V"
+
+    # standard PatientCreateRequest using defaults
+    full_payload = PatientCreateRequest(
+        first_name=payload.first_name,
+        last_name=payload.last_name or "(Walk-in Patient)",
+        middle_name=payload.middle_name,
+        id_number=nic,
+        address=payload.address or "Address Pending",
+        gender=payload.gender,
+        birthdate=payload.resolved_birthdate,
+        phone_number=payload.phone_number,
+        phone_numbers=payload.phone_numbers,
+        registered_branch=payload.registered_branch,
+    )
+
+    # Call normal register_patient with modified payload
+    return await register_patient(full_payload, current_user, conn)
 
 
 @router.get(

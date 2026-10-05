@@ -475,6 +475,22 @@ export interface PatientListResponse {
   limit: number;
 }
 
+export interface QuickPatientPayload {
+  first_name: string;
+  last_name?: string;
+  middle_name?: string;
+  id_number?: string;
+  address?: string;
+  gender?: Gender;
+  date_of_birth?: string;
+  age?: number;
+  phone_number?: string;
+  phone_numbers?: string[];
+  email?: string;
+  registered_branch?: number;
+}
+
+
 // ─── Stats / Dashboard ─────────────────────────────────────────────────────
 
 export interface StatsOverview {
