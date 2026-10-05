@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { PageHeader } from '../../components/PageHeader';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
@@ -69,6 +70,7 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 }
 
 export const BookAppointment: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -99,7 +101,7 @@ export const BookAppointment: React.FC = () => {
         };
         setSelectedPatient(p);
         setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
-      }).catch(() => {
+      }).catch(err => {
         showToast('Failed to load pre-filled patient', 'error');
       });
     }
@@ -406,47 +408,28 @@ export const BookAppointment: React.FC = () => {
   const isReadyToConfirm =
     category === 'Walk-in'
       ? Boolean(
-          selectedPatient &&
-          selectedDoctor &&
-          walkInStartTime &&
-          walkInEndTime &&
-          walkInEndTime > walkInStartTime &&
-          !conflictingSlot
-        )
+        selectedPatient &&
+        selectedDoctor &&
+        walkInStartTime &&
+        walkInEndTime &&
+        walkInEndTime > walkInStartTime &&
+        !conflictingSlot
+      )
       : Boolean(selectedPatient && selectedDoctor && selectedSlot);
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-        <div className="space-y-1">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
-              Home
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <Link to="/receptionist/appointments" className="hover:text-primary transition-colors">
-              Appointments
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-primary font-bold">Book an Appointment</span>
-          </div>
-
-          {/* Title */}
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
-              Book an Appointment
-            </h1>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Schedule a consultation with an available doctor in real time.
-          </p>
-        </div>
-      </div>
+    <div className="py-space-lg lg:py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
+      {/* Top Page Header */}
+      <PageHeader
+        title="Book an Appointment"
+        subtitle="Schedule a consultation with an available doctor in real time."
+        breadcrumbs={[
+          { label: 'Home', href: '/receptionist/dashboard' },
+          { label: 'Appointments', href: '/receptionist/appointments' },
+          { label: 'Book an Appointment' },
+        ]}
+      />
 
       <div className="space-y-space-lg">
         {/* ─────────────────────────────────────────────────────────────────── */}
@@ -1012,11 +995,10 @@ export const BookAppointment: React.FC = () => {
                                       setWalkInEndTime(addMinutesToTime(val, 20));
                                     }
                                   }}
-                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
-                                    conflictingSlot
-                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
-                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
-                                  }`}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot
+                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                    }`}
                                 />
                               </div>
 
@@ -1028,11 +1010,10 @@ export const BookAppointment: React.FC = () => {
                                   type="time"
                                   value={walkInEndTime}
                                   onChange={(e) => setWalkInEndTime(e.target.value)}
-                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
-                                    conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
-                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
-                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
-                                  }`}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
+                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                    }`}
                                 />
                               </div>
 
@@ -1084,9 +1065,8 @@ export const BookAppointment: React.FC = () => {
                                 <div>
                                   <span className="font-bold">Schedule Overlap Detected:</span> The entered walk-in window ({formatTime(walkInStartTime)} – {formatTime(walkInEndTime)}) overlaps with an existing{' '}
                                   <span
-                                    className={`px-1.5 py-0.5 rounded font-bold ${
-                                      conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
-                                    }`}
+                                    className={`px-1.5 py-0.5 rounded font-bold ${conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
+                                      }`}
                                   >
                                     {conflictingSlot.status}
                                   </span>{' '}
@@ -1157,34 +1137,31 @@ export const BookAppointment: React.FC = () => {
                                     return (
                                       <span
                                         key={s.slot_id}
-                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${
-                                          isConflict
-                                            ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
-                                            : isBooked
+                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${isConflict
+                                          ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
+                                          : isBooked
                                             ? 'bg-red-50 border border-red-200 text-red-700 font-medium'
                                             : 'bg-teal-50 border border-teal-200 text-teal-700 font-medium'
-                                        }`}
+                                          }`}
                                       >
                                         <span
-                                          className={`w-1.5 h-1.5 rounded-full ${
-                                            isConflict
-                                              ? 'bg-red-600 animate-ping'
-                                              : isBooked
+                                          className={`w-1.5 h-1.5 rounded-full ${isConflict
+                                            ? 'bg-red-600 animate-ping'
+                                            : isBooked
                                               ? 'bg-red-500'
                                               : 'bg-teal-500'
-                                          }`}
+                                            }`}
                                         />
                                         <span>
                                           {formatTime(s.start_time)} – {formatTime(s.end_time)}
                                         </span>
                                         <span
-                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                            isConflict
-                                              ? 'bg-red-600 text-white'
-                                              : isBooked
+                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isConflict
+                                            ? 'bg-red-600 text-white'
+                                            : isBooked
                                               ? 'bg-red-100 text-red-800'
                                               : 'bg-teal-100 text-teal-800'
-                                          }`}
+                                            }`}
                                         >
                                           {isConflict ? 'Conflict' : s.status}
                                         </span>
