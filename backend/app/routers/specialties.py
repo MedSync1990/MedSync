@@ -67,6 +67,13 @@ async def create_specialty(
 
     record = await conn.fetchrow(insert_query, payload.name.strip(), payload.description)
 
+    if not record:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create specialty. Database did not return the inserted record."
+        )
+
     return SpecialtyResponse(
         specialty_id=record["specialty_id"],
         name=record["name"],
@@ -116,6 +123,13 @@ async def update_specialty(
         specialty_id
     )
 
+    if not updated_rec:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update specialty. Database did not return the updated record."
+        )
+
     count_row = await conn.fetchrow(
         "SELECT COUNT(*)::int as count FROM doctor_specialty WHERE specialty_id = $1;",
         specialty_id
@@ -150,7 +164,7 @@ async def delete_specialty(
         "SELECT COUNT(*) FROM doctor_specialty WHERE specialty_id = $1;",
         specialty_id
     )
-    if doc_count > 0:
+    if doc_count is not None and doc_count > 0:
         raise ConflictError(
             f"Cannot delete specialty '{existing['name']}' because it is currently assigned to {doc_count} doctor(s). Reassign them first."
         )
