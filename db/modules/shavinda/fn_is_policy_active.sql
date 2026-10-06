@@ -1,4 +1,3 @@
-
 -- Evaluates policy validity against current date (source of truth is date range)
 CREATE OR REPLACE FUNCTION fn_is_policy_active(p_insurance_id INT)
 RETURNS BOOLEAN

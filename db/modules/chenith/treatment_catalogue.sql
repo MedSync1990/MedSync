@@ -1,4 +1,4 @@
-CREATE TABLE treatment_catalogue (
+CREATE TABLE IF NOT EXISTS treatment_catalogue (
     treatment_code            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     treatment_name            VARCHAR(100) NOT NULL,
     category                  VARCHAR(50) NOT NULL,
@@ -7,5 +7,5 @@ CREATE TABLE treatment_catalogue (
     is_active                 BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE INDEX idx_treatment_category ON treatment_catalogue(category);
-CREATE INDEX idx_treatment_active ON treatment_catalogue(is_active);
+CREATE INDEX IF NOT EXISTS idx_treatment_category ON treatment_catalogue(category);
+CREATE INDEX IF NOT EXISTS idx_treatment_active ON treatment_catalogue(is_active);

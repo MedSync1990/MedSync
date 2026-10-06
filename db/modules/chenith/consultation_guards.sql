@@ -44,10 +44,10 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER trg_guard_consultation
+CREATE OR REPLACE TRIGGER trg_guard_consultation
     BEFORE INSERT ON consultations
     FOR EACH ROW EXECUTE FUNCTION fn_guard_consultation();
 
-CREATE TRIGGER trg_guard_consultation_treatments
+CREATE OR REPLACE TRIGGER trg_guard_consultation_treatments
     BEFORE INSERT ON consultation_treatments
     FOR EACH ROW EXECUTE FUNCTION fn_guard_consultation_treatments();

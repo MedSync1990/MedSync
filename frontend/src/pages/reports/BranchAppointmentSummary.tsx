@@ -1,0 +1,311 @@
+import { useState, useEffect } from 'react';
+import { getAppointmentsSummary, exportToCSV } from '../../api/reports';
+import type { AppointmentsSummaryResponse, BranchResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { listBranches } from '../../api';
+
+export default function BranchAppointmentSummary() {
+  const [data, setData] = useState<AppointmentsSummaryResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [isApplying, setIsApplying] = useState(false);
+
+  const { user } = useAuth();
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
+
+  useEffect(() => {
+    if (user?.role === 'Administrator') {
+      listBranches().then(setBranches);
+    }
+  }, [user?.role]);
+
+  const fetchSummary = () => {
+    const typeMap: Record<string, string> = {
+      'doctor': 'Scheduled Visit',
+      'followup': 'Follow-up',
+      'walkin': 'Walk-in'
+    };
+    const params: any = categoryFilter === 'all' ? {} : { appointment_type: typeMap[categoryFilter] };
+    if (selectedBranch) params.branch = selectedBranch;
+    return getAppointmentsSummary(Object.keys(params).length > 0 ? params : undefined).then(res => {
+      setData(res);
+    });
+  };
+
+  useEffect(() => {
+    fetchSummary().then(() => setLoading(false));
+  }, []);
+
+  const handleApply = () => {
+    setIsApplying(true);
+    fetchSummary().then(() => setIsApplying(false));
+  };
+
+  const handleReset = () => {
+    setCategoryFilter('all');
+    setTimeout(() => {
+      setIsApplying(true);
+      getAppointmentsSummary().then(res => {
+        setData(res);
+        setIsApplying(false);
+      });
+    }, 0);
+  };
+
+  const handleExport = (type: string) => {
+    if (type === 'CSV') {
+      exportToCSV(data?.daily_data || [], 'Branch_Appointment_Summary');
+    } else if (type === 'PDF') {
+      window.print();
+    }
+  };
+
+  const hasData = categoryFilter === 'all' && data && data.daily_data && data.daily_data.length > 0;
+  
+  // Safe extraction for KPIs
+  const totalScheduled = data?.total_scheduled || 0;
+  const totalCompleted = data?.total_completed || 0;
+  const totalCancelled = data?.total_cancelled || 0;
+  const totalWalkins = data?.total_walkins || 0;
+
+  // Chart
+  const base = 200;
+  const top = 30;
+  const dynamicMax = data?.daily_data?.reduce((m: number, d: any) => Math.max(m, d.scheduled), 50) || 50;
+  const sc = (base - top) / dynamicMax;
+  const yAxisLabels = [0, dynamicMax * 0.2, dynamicMax * 0.4, dynamicMax * 0.6, dynamicMax * 0.8, dynamicMax].map(Math.round);
+
+  return (
+    <div className="flex flex-col w-full gap-space-xl">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+        <div className="flex flex-col gap-space-2xs">
+          <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
+            <span className="material-symbols-outlined text-[18px]">verified</span>
+            <span>Operational Analytics</span>
+            <span className="text-outline">/</span>
+            <span className="text-secondary font-medium">Q3 Reporting Period</span>
+          </div>
+          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Branch Appointment Summary</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">Scheduled, completed, and cancelled appointments by branch and day.</p>
+        </div>
+        {user?.role === 'Administrator' ? (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">domain</span>
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
+              <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+        <div className="flex flex-wrap items-center gap-space-md flex-1">
+          <div className="flex flex-col gap-1 min-w-[260px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="date-range">Date Interval</label>
+            <div className="relative flex items-center">
+              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
+              <input id="date-range" type="text" readOnly value="Sep 01, 2026 – Sep 07, 2026" className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 min-w-[220px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="category-filter">Appointment Category</label>
+            <div className="relative flex items-center">
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">category</span>
+              <select id="category-filter" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
+                <option value="all">All Categories</option>
+                <option value="doctor">Doctor Consultation</option>
+                <option value="followup">Follow-up</option>
+                <option value="walkin">Walk-in</option>
+              </select>
+              <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-space-xs self-end lg:self-center">
+          <button onClick={handleReset} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
+          </button>
+          <button onClick={handleApply} disabled={isApplying} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
+            {isApplying ? <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[18px]">filter_alt</span>}
+            {isApplying ? 'Applying...' : 'Apply Filters'}
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Scheduled</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">calendar_today</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalScheduled}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">event</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Completed</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">check_circle</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalCompleted}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">task_alt</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Cancelled</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">cancel</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalCancelled}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">event_busy</span></div>
+        </div>
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-space-sm">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Walk-in Inflow</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">transfer_within_a_station</span></div>
+          </div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalWalkins}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">directions_walk</span></div>
+        </div>
+      </div>
+
+      <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+          <div>
+            <h2 className="font-headline-md text-headline-md text-on-surface">Daily Volume &amp; Outcomes</h2>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">Each bar is the day's scheduled total, split by outcome</p>
+          </div>
+          <div className="flex items-center gap-space-sm text-label-sm font-label-sm">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-primary"></div><span className="text-on-surface-variant">Completed</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-brand-teal-light"></div><span className="text-on-surface-variant">Pending / Other</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-[#FB7185]"></div><span className="text-on-surface-variant">Cancelled</span></div>
+          </div>
+        </div>
+        <div className="w-full overflow-x-auto">
+          <svg className="min-w-[560px] w-full h-[280px]" viewBox="0 0 700 250" role="img" aria-label="Stacked bar chart of daily appointments by outcome">
+            {yAxisLabels.map((v, idx) => {
+              const y = base - (v * sc);
+              return (
+                <g key={idx}>
+                  <line x1="40" x2="700" y1={y} y2={y} stroke={v ? '#E2E8F0' : '#bfc7d2'} strokeDasharray={v ? '3 3' : ''} />
+                  <text x="32" y={y + 4} fontSize="11" fill="#707881" textAnchor="end">{v}</text>
+                </g>
+              );
+            })}
+            {(data?.daily_data || []).map((d: any, i: number) => {
+              const gap = Math.max(90, 600 / Math.max((data?.daily_data || []).length, 1));
+              const x = 70 + i * gap;
+              const w = 44;
+              const oth = Math.max(0, d.scheduled - d.completed - d.cancelled);
+              const hc = d.completed * sc;
+              const ho = oth * sc;
+              const hx = d.cancelled * sc;
+              const displayDate = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+              
+              return (
+                <g key={i}>
+                  <rect x={x} y={base - hc} width={w} height={hc} fill="#006194" rx="3" />
+                  <rect x={x} y={base - hc - ho} width={w} height={ho} fill="#38BDF8" />
+                  <rect x={x} y={base - hc - ho - hx} width={w} height={hx} fill="#FB7185" rx="3" />
+                  <text x={x + w / 2} y={base - (d.scheduled * sc) - 8} fontSize="12" fontWeight="700" fill="#0b1c30" textAnchor="middle">{d.scheduled}</text>
+                  <text x={x + w / 2} y="222" fontSize="12" fontWeight="600" fill="#565e74" textAnchor="middle">{displayDate}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
+      <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div className="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-lowest">
+          <div className="flex items-center gap-space-sm">
+            <div className="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">table_chart</span></div>
+            <div>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface">Daily Breakdown Records</h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Appointment lifecycle log for Colombo Central Branch</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => handleExport('CSV')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">download</span>Export CSV</button>
+            <button onClick={() => handleExport('PDF')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>Export PDF</button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className={`w-full text-left border-collapse ${hasData ? '' : 'hidden'}`}>
+            <thead>
+              <tr className="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11">
+                <th className="px-space-md py-2.5 font-semibold">Branch</th>
+                <th className="px-space-md py-2.5 font-semibold">Date</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Scheduled</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Completed</th>
+                <th className="px-space-md py-2.5 font-semibold text-right">Cancelled</th>
+                <th className="px-space-md py-2.5 font-semibold min-w-[200px]">Completion Rate</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-surface-subtle">
+              {(data?.daily_data || []).slice().reverse().map((d: any, i: number) => {
+                const p = d.scheduled > 0 ? ((d.completed / d.scheduled) * 100).toFixed(1) : "0.0";
+                const hi = parseFloat(p) >= 88 ? 'bg-status-completed-text' : 'bg-primary';
+                const displayDate = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                return (
+                  <tr key={i} className="hover:bg-surface-subtle/70 transition-colors">
+                    <td className="px-space-md py-3.5"><div className="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm"><span className="material-symbols-outlined text-[16px] text-primary">apartment</span>Colombo Central Branch</div></td>
+                    <td className="px-space-md py-3.5 font-mono-data text-mono-data text-on-surface-variant">{displayDate}</td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data font-semibold">{d.scheduled}</td>
+                    <td className="px-space-md py-3.5 text-right"><span className="px-2 py-0.5 rounded bg-status-completed-bg text-status-completed-text font-mono-data text-mono-data font-semibold">{d.completed}</span></td>
+                    <td className="px-space-md py-3.5 text-right font-mono-data text-mono-data text-secondary font-semibold">{d.cancelled}</td>
+                    <td className="px-space-md py-3.5">
+                      <div className="flex items-center gap-3">
+                        <span className="font-label-md text-label-md font-bold text-on-surface w-14">{p}%</span>
+                        <div className="flex-1 h-2 rounded-full bg-surface-subtle overflow-hidden">
+                          <div className={`h-full ${hi} rounded-full`} style={{ width: `${p}%` }}></div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!hasData && !loading && (
+            <div className="py-space-3xl px-space-md flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span className="material-symbols-outlined text-[32px]">folder_off</span></div>
+              <h4 className="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>
+              <p className="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">Adjust your date interval or category parameters.</p>
+            </div>
+          )}
+          {loading && (
+            <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
+               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+            </div>
+          )}
+        </div>
+        <div className="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+          <div className="text-body-sm font-body-sm text-secondary">Showing {data?.daily_data?.length || 0} entries</div>
+          <div className="flex items-center gap-1">
+            <button className="w-8 h-8 rounded flex items-center justify-center text-outline bg-surface-card cursor-not-allowed opacity-50" disabled aria-label="Previous page"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
+            <span className="w-8 h-8 rounded flex items-center justify-center font-label-sm text-label-sm bg-primary text-on-primary">1</span>
+            <button className="w-8 h-8 rounded flex items-center justify-center text-outline bg-surface-card cursor-not-allowed opacity-50" disabled aria-label="Next page"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

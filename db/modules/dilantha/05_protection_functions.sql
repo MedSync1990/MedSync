@@ -73,8 +73,8 @@ END;
 $$;
 
 -- Attach hard-delete guard to Dilantha's tables
-CREATE TRIGGER trg_block_delete_branch
+CREATE OR REPLACE TRIGGER trg_block_delete_branch
     BEFORE DELETE ON branch FOR EACH ROW EXECUTE FUNCTION fn_block_hard_delete();
 
-CREATE TRIGGER trg_block_delete_staff
+CREATE OR REPLACE TRIGGER trg_block_delete_staff
     BEFORE DELETE ON staff FOR EACH ROW EXECUTE FUNCTION fn_block_hard_delete();
