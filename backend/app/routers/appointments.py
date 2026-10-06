@@ -140,6 +140,7 @@ async def list_appointments(
     status: Optional[str] = Query(None, description="Filter by status (Scheduled/Completed/Cancelled)"),
     doctor: Optional[int] = Query(None, description="Filter by doctor user ID"),
     patient_id: Optional[int] = Query(None, description="Filter by patient user ID"),
+    search: Optional[str] = Query(None, description="Search by NIC, patient name, doctor, or appointment code"),
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(25, ge=1, le=100, description="Items per page"),
     conn: Connection = Depends(get_db),
@@ -151,6 +152,7 @@ async def list_appointments(
     scoped_branch_id = user.branch_id if user.role == "Branch Manager" else branch
     scoped_doctor_id = user.user_id if user.role == "Doctor" else doctor
     offset = (page - 1) * limit
+    search_term = f"%{search.strip()}%" if search and search.strip() else None
 
     base_where = """
         WHERE ($1::int IS NULL OR s.branch_id = $1)
@@ -158,6 +160,12 @@ async def list_appointments(
           AND ($3::text IS NULL OR a.status::text = $3)
           AND ($4::int IS NULL OR das.doctor_id = $4)
           AND ($5::int IS NULL OR a.patient_id = $5)
+          AND ($6::text IS NULL OR (
+                pu.id_number ILIKE $6 OR
+                CONCAT_WS(' ', pu.first_name, NULLIF(pu.middle_name, ''), pu.last_name) ILIKE $6 OR
+                a.appointment_code ILIKE $6 OR
+                CONCAT_WS(' ', du.first_name, NULLIF(du.middle_name, ''), du.last_name) ILIKE $6
+          ))
     """
 
     count_query = f"""
@@ -165,9 +173,11 @@ async def list_appointments(
         FROM appointments a
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
+        JOIN app_user pu ON a.patient_id = pu.user_id
+        JOIN app_user du ON das.doctor_id = du.user_id
         {base_where};
     """
-    total = await conn.fetchval(count_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id)
+    total = await conn.fetchval(count_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term)
 
     data_query = f"""
         SELECT
@@ -198,9 +208,9 @@ async def list_appointments(
         LEFT JOIN patient pt ON a.patient_id = pt.user_id
         {base_where}
         ORDER BY das.date DESC, das.start_time DESC
-        LIMIT $6 OFFSET $7;
+        LIMIT $7 OFFSET $8;
     """
-    rows = await conn.fetch(data_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, limit, offset)
+    rows = await conn.fetch(data_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term, limit, offset)
 
     items = [
         AppointmentResponse(

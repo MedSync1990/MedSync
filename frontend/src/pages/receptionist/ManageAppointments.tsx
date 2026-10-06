@@ -214,15 +214,15 @@ export const ManageAppointments: React.FC = () => {
     return result.filter((apt) => {
       const code = (apt.appointment_code || '').toLowerCase();
       const patient = (apt.patient_name || '').toLowerCase();
+      const nic = (apt.patient_nic || '').toLowerCase();
       const doctor = (apt.doctor_name || '').toLowerCase();
       const branch = (apt.branch_name || '').toLowerCase();
-      const idStr = String(apt.patient_id);
       return (
         code.includes(q) ||
         patient.includes(q) ||
+        nic.includes(q) ||
         doctor.includes(q) ||
-        branch.includes(q) ||
-        idStr.includes(q)
+        branch.includes(q)
       );
     });
   }, [appointments, searchQuery, selectedStatus]);
@@ -959,7 +959,7 @@ export const ManageAppointments: React.FC = () => {
                           <div className="flex items-center gap-2 mt-0.5 font-mono-data text-[11px] text-outline font-medium">
                             <span className="text-primary font-semibold">{apt.appointment_code || `APT-${apt.appointment_id}`}</span>
                             <span>•</span>
-                            <span>PID: #{apt.patient_id}</span>
+                            <span>NIC: {apt.is_temp || apt.patient_nic?.startsWith('999') ? 'Pending' : (apt.patient_nic || 'N/A')}</span>
                           </div>
                         </div>
                       </td>
