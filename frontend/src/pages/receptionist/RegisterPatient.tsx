@@ -81,13 +81,14 @@ export const RegisterPatient: React.FC = () => {
       .getById(editId)
       .then((p) => {
         if (p) {
-          setFullName(`${p.first_name || ''} ${p.last_name || ''}`.trim());
-          setNicNumber(p.id_number || '');
-          setDateOfBirth(p.date_of_birth || '');
+          const lName = p.last_name === '(Walk-in Patient)' ? '' : (p.last_name || '');
+          setFullName(`${p.first_name || ''} ${lName}`.trim());
+          setNicNumber(p.id_number?.startsWith('999') ? '' : (p.id_number || ''));
+          setDateOfBirth(p.date_of_birth && p.date_of_birth !== '1995-01-01' ? p.date_of_birth : '');
           setGender((p.gender as Gender) || 'Male');
           setBloodGroup(p.blood_group || '');
           setEmailAddress(p.email || '');
-          setStreetAddress(p.address || '');
+          setStreetAddress(p.address === 'Address Pending' ? '' : (p.address || ''));
           setCityDistrict('');
           setPrimaryPhone(p.phone_number || '');
           setEmergencyName(p.contact_name || '');
@@ -159,6 +160,7 @@ export const RegisterPatient: React.FC = () => {
         const response = await patientService.update(editId, {
           first_name: firstName,
           last_name: lastName,
+          id_number: nicNumber.trim().toUpperCase(),
           address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
           birthdate: dateOfBirth,
           gender: gender,

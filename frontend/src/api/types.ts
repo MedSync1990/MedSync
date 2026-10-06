@@ -82,6 +82,9 @@ export interface AppointmentResponse {
   appointment_code: string;
   patient_id: number;
   patient_name: string;
+  patient_nic?: string | null;
+  is_walkin_patient?: boolean;
+  is_temp?: boolean;
   doctor_id: number;
   doctor_name: string;
   branch_id: number;
@@ -411,6 +414,10 @@ export interface PatientUpdateRequest {
   first_name?: string | null;
   middle_name?: string | null;
   last_name?: string | null;
+  id_number?: string | null;
+  birthdate?: string | null;
+  date_of_birth?: string | null;
+  gender?: Gender | string | null;
   address?: string | null;
   email?: string | null;
   phone_numbers?: string[] | null;
@@ -462,10 +469,12 @@ export interface PatientListItem {
   phone_number: string;
   gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
+  address?: string;
   registered_branch?: number | null;
   branch_name?: string | null;
   has_insurance: boolean;
   is_active: boolean;
+  is_temp?: boolean;
 }
 
 export interface PatientListResponse {
@@ -474,6 +483,22 @@ export interface PatientListResponse {
   page: number;
   limit: number;
 }
+
+export interface QuickPatientPayload {
+  first_name: string;
+  last_name?: string;
+  middle_name?: string;
+  id_number?: string;
+  address?: string;
+  gender?: Gender;
+  date_of_birth?: string;
+  age?: number;
+  phone_number?: string;
+  phone_numbers?: string[];
+  email?: string;
+  registered_branch?: number;
+}
+
 
 // ─── Stats / Dashboard ─────────────────────────────────────────────────────
 

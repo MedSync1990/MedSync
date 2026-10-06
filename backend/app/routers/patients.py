@@ -1,3 +1,4 @@
+import random
 from datetime import date
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, status
@@ -9,6 +10,7 @@ from app.errors import AppValidationError, NotFoundError
 from app.schemas.allergies import PatientAllergiesUpdateRequest
 from app.schemas.patients import (
     PatientCreateRequest,
+    QuickPatientCreateRequest,
     PatientUpdateRequest,
     PatientResponse,
     PatientListItem,
@@ -53,8 +55,8 @@ async def register_patient(
     if not role_id:
         role_id = 5  # Standard seed role_id for Patient
 
-    # 3. Determine registering branch (caller's branch takes precedence)
-    branch_id = current_user.branch_id or payload.registered_branch or 1
+    # 3. Determine registering branch (explicit payload branch takes precedence over caller's branch)
+    branch_id = payload.registered_branch or current_user.branch_id or 1
 
     birthdate = payload.resolved_birthdate
     phones = payload.resolved_phones
@@ -101,9 +103,9 @@ async def register_patient(
             """
             INSERT INTO patient (
                 user_id, blood_group, emergency_contact, contact_name,
-                registered_branch, registered_date, is_active
+                registered_branch, registered_date, is_active, is_temp
             ) VALUES (
-                $1, $2, $3, $4, $5, CURRENT_DATE, TRUE
+                $1, $2, $3, $4, $5, CURRENT_DATE, TRUE, $6
             )
             RETURNING patient_code
             """,
@@ -112,6 +114,7 @@ async def register_patient(
             emergency_phone,
             contact_name,
             branch_id,
+            payload.is_temp,
         )
 
         # D. Optional: Insert health insurance if provided
@@ -168,6 +171,57 @@ async def register_patient(
                 )
 
     return await get_patient(str(user_id), conn)
+
+
+@router.post(
+    "/quick",
+    response_model=PatientResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles("Receptionist", "Administrator"))],
+)
+async def register_quick_patient(
+    payload: QuickPatientCreateRequest,
+    current_user: CurrentUser = Depends(require_roles("Receptionist", "Administrator")),
+    conn: Connection = Depends(get_conn),
+):
+    """
+    Quickly register an unregistered/walk-in patient with minimal fields.
+    Wraps standard `register_patient` with smart default fallbacks.
+    """
+    # Resolve or generate unique temporary NIC matching format: 999xxxxxxV
+    # 999 start can be used to check unregistered status
+    if payload.id_number:
+        nic = payload.id_number.strip().upper()
+    else:
+        for _ in range(10):
+            rand_digits = "".join([str(random.randint(0, 9)) for _ in range(6)])
+            candidate_nic = f"999{rand_digits}V"
+            exists = await conn.fetchval(
+                "SELECT 1 FROM app_user WHERE id_number = $1", candidate_nic
+            )
+            if not exists:
+                nic = candidate_nic
+                break
+        else:
+            nic = f"999{int(date.today().strftime('%y%m%d'))}V"
+
+    # standard PatientCreateRequest using defaults
+    full_payload = PatientCreateRequest(
+        first_name=payload.first_name,
+        last_name=payload.last_name or "(Walk-in Patient)",
+        middle_name=payload.middle_name,
+        id_number=nic,
+        address=payload.address or "Address Pending",
+        gender=payload.gender,
+        birthdate=payload.resolved_birthdate,
+        phone_number=payload.phone_number or (payload.phone_numbers[0] if payload.phone_numbers else None) or "0000000000",
+        phone_numbers=payload.phone_numbers,
+        registered_branch=payload.registered_branch,
+        is_temp=True,
+    )
+
+    # Call normal register_patient with modified payload
+    return await register_patient(full_payload, current_user, conn)
 
 
 @router.get(
@@ -252,7 +306,8 @@ async def list_patients(
                   AND pi.is_active = TRUE 
                   AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
             ) AS has_insurance,
-            p.is_active
+            p.is_active,
+            p.is_temp
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
@@ -296,6 +351,7 @@ async def list_patients(
             branch_name=r["branch_name"] or ("Colombo Central Branch" if r["registered_branch"] == 1 else f"Branch {r['registered_branch']}"),
             has_insurance=bool(r["has_insurance"]),
             is_active=r["is_active"],
+            is_temp=bool(r["is_temp"]),
         )
         for r in rows
     ]
@@ -343,7 +399,8 @@ async def get_patient(
                   AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
             ) AS has_insurance,
             p.registered_date::text AS registered_date,
-            p.is_active
+            p.is_active,
+            p.is_temp
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
@@ -395,6 +452,7 @@ async def get_patient(
         has_insurance=bool(row["has_insurance"]),
         registered_date=row["registered_date"],
         is_active=row["is_active"],
+        is_temp=bool(row["is_temp"]),
         allergies=allergies,
     )
 
@@ -433,6 +491,28 @@ async def update_patient(
     if not patient_id:
         raise NotFoundError("Patient not found.")
 
+    current_user_info = await conn.fetchrow(
+        "SELECT id_number, birthdate::text FROM app_user WHERE user_id = $1",
+        patient_id,
+    )
+    existing_nic = (current_user_info["id_number"] if current_user_info else "") or ""
+    existing_dob = (current_user_info["birthdate"] if current_user_info else "") or ""
+    is_walkin_temp = existing_nic.startswith("999")
+
+    # Security check: core identity details (NIC & DOB) can ONLY be altered for temporary walk-in profiles (999...)
+    if payload.id_number is not None and payload.id_number.strip().upper() != existing_nic.strip().upper():
+        if not is_walkin_temp:
+            raise AppValidationError([
+                {"field": "id_number", "message": "Core NIC detail cannot be modified after full patient registration."}
+            ])
+
+    dob = payload.birthdate or payload.date_of_birth
+    if dob is not None and str(dob) != existing_dob and existing_dob != "1995-01-01" and existing_dob != "1990-01-01":
+        if not is_walkin_temp:
+            raise AppValidationError([
+                {"field": "birthdate", "message": "Core Date of Birth detail cannot be modified after full patient registration."}
+            ])
+
     async with conn.transaction():
         # 1. Update app_user fields
         user_updates = []
@@ -446,6 +526,25 @@ async def update_patient(
         if payload.last_name is not None:
             user_params.append(payload.last_name.strip())
             user_updates.append(f"last_name = ${len(user_params)}")
+        if payload.id_number is not None and is_walkin_temp:
+            new_nic = payload.id_number.strip().upper()
+            existing_user = await conn.fetchval(
+                "SELECT user_id FROM app_user WHERE UPPER(id_number) = $1 AND user_id != $2",
+                new_nic,
+                patient_id,
+            )
+            if existing_user:
+                raise AppValidationError([
+                    {"field": "id_number", "message": "A patient with this NIC already exists."}
+                ])
+            user_params.append(new_nic)
+            user_updates.append(f"id_number = ${len(user_params)}")
+        if dob is not None and is_walkin_temp:
+            user_params.append(dob)
+            user_updates.append(f"birthdate = ${len(user_params)}")
+        if payload.gender is not None:
+            user_params.append(payload.gender)
+            user_updates.append(f"gender = ${len(user_params)}::gender_enum")
         if payload.address is not None:
             user_params.append(payload.address.strip())
             user_updates.append(f"address = ${len(user_params)}")
@@ -504,6 +603,13 @@ async def update_patient(
         if c_name is not None:
             pt_params.append(c_name.strip() if c_name else None)
             pt_updates.append(f"contact_name = ${len(pt_params)}")
+
+        if payload.is_temp is not None:
+            pt_params.append(payload.is_temp)
+            pt_updates.append(f"is_temp = ${len(pt_params)}")
+        elif is_walkin_temp and (payload.id_number and not payload.id_number.startswith('999')):
+            pt_params.append(False)
+            pt_updates.append(f"is_temp = ${len(pt_params)}")
 
         if pt_updates:
             update_sql = f"UPDATE patient SET {', '.join(pt_updates)} WHERE user_id = $1"
