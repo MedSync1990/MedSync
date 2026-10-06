@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { DataTable, type Column } from '../../components/DataTable';
 import { patientService } from '../../services/patientService';
+import { CompleteRegistrationModal } from '../../components/CompleteRegistrationModal';
 import type { PatientListItem } from '../../api/types';
 
 export const PatientDirectory: React.FC = () => {
@@ -11,6 +12,7 @@ export const PatientDirectory: React.FC = () => {
   const [branchFilter, setBranchFilter] = useState('all');
   const [insuranceFilter, setInsuranceFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+  const [completingPatient, setCompletingPatient] = useState<PatientListItem | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export const PatientDirectory: React.FC = () => {
   };
 
   const getInitials = (first: string, last: string) => {
-    return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+    return `${first?.charAt(0) || 'P'}${last?.charAt(0) || 'T'}`.toUpperCase();
   };
 
   const calculateAge = (dob: string) => {
@@ -43,6 +45,10 @@ export const PatientDirectory: React.FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  const isWalkin = (p: PatientListItem) => {
+    return p.id_number?.startsWith('999') || p.address === 'Address Pending' || p.last_name === '(Walk-in Patient)';
+  };
+
   const columns: Column<PatientListItem>[] = [
     { 
       key: 'patient_code', 
@@ -50,7 +56,7 @@ export const PatientDirectory: React.FC = () => {
       render: (r) => (
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
-            {getInitials(r.first_name, r.last_name)}
+            {getInitials(r.first_name, r.last_name === '(Walk-in Patient)' ? '' : r.last_name)}
           </div>
           <span className="font-mono-data text-mono-data font-semibold text-primary">{r.patient_code}</span>
         </div>
@@ -59,26 +65,58 @@ export const PatientDirectory: React.FC = () => {
     { 
       key: 'first_name', 
       header: 'Patient Name', 
-      render: (r) => (
-        <div className="flex flex-col">
-          <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">{r.first_name} {r.last_name}</span>
-          <span className="font-body-sm text-body-sm text-outline mt-0.5">{calculateAge(r.date_of_birth)} yrs · {r.gender}</span>
-        </div>
-      ) 
+      render: (r) => {
+        const walkin = isWalkin(r);
+        const displayName = r.last_name === '(Walk-in Patient)' || !r.last_name
+          ? r.first_name
+          : `${r.first_name} ${r.last_name}`;
+
+        return (
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">
+                {displayName}
+              </span>
+              {walkin && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[11px] font-bold border border-amber-200 shadow-xs">
+                  <span className="material-symbols-outlined text-[13px] text-amber-600">bolt</span>
+                  Walk-in
+                </span>
+              )}
+            </div>
+            <span className="font-body-sm text-body-sm text-outline mt-0.5">
+              {calculateAge(r.date_of_birth) > 0 ? `${calculateAge(r.date_of_birth)} yrs` : 'Age pending'} · {r.gender}
+            </span>
+          </div>
+        );
+      } 
     },
     { 
       key: 'id_number', 
       header: 'NIC Number',
-      render: (r) => <span className="font-mono-data text-mono-data text-on-surface-variant">{r.id_number}</span>
+      render: (r) => (
+        r.id_number?.startsWith('999') ? (
+          <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-outline italic">
+            <span className="material-symbols-outlined text-[14px] text-amber-600">hourglass_empty</span>
+            Pending
+          </span>
+        ) : (
+          <span className="font-mono-data text-mono-data text-on-surface-variant">{r.id_number}</span>
+        )
+      )
     },
     { 
       key: 'phone_number', 
       header: 'Contact Phone',
       render: (r) => (
-        <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
-          <span className="material-symbols-outlined text-[16px] text-outline">call</span>
-          <span>{r.phone_number}</span>
-        </div>
+        r.phone_number ? (
+          <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
+            <span className="material-symbols-outlined text-[16px] text-outline">call</span>
+            <span>{r.phone_number}</span>
+          </div>
+        ) : (
+          <span className="font-body-sm text-body-sm text-outline italic">—</span>
+        )
       )
     },
     {
@@ -112,6 +150,17 @@ export const PatientDirectory: React.FC = () => {
       align: 'right',
       render: (r) => (
         <div className="inline-flex items-center justify-end gap-1.5">
+          {isWalkin(r) && (
+            <button 
+              onClick={() => navigate(`/receptionist/register-patient?edit=${r.patient_code}`)}
+              className="px-3 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-sm text-label-sm font-bold transition-all flex items-center gap-1.5 shadow-xs mr-1 cursor-pointer"
+              title="Complete Full Registration in Register Form"
+            >
+              <span className="material-symbols-outlined text-[15px]">verified</span>
+              <span>Complete Reg</span>
+            </button>
+          )}
+
           <button 
             onClick={() => navigate(`/receptionist/patients/${r.patient_code}`)}
             className="w-8 h-8 rounded-lg bg-surface-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors flex items-center justify-center"
@@ -246,6 +295,14 @@ export const PatientDirectory: React.FC = () => {
           emptyMessage={loading ? 'Loading patients...' : 'No matching patient records found.'}
         />
       </div>
+
+      {/* Complete Registration Modal */}
+      <CompleteRegistrationModal
+        isOpen={!!completingPatient}
+        patient={completingPatient}
+        onClose={() => setCompletingPatient(null)}
+        onSuccess={() => fetchPatients()}
+      />
     </div>
   );
 };

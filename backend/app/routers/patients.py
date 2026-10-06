@@ -55,8 +55,8 @@ async def register_patient(
     if not role_id:
         role_id = 5  # Standard seed role_id for Patient
 
-    # 3. Determine registering branch (caller's branch takes precedence)
-    branch_id = current_user.branch_id or payload.registered_branch or 1
+    # 3. Determine registering branch (explicit payload branch takes precedence over caller's branch)
+    branch_id = payload.registered_branch or current_user.branch_id or 1
 
     birthdate = payload.resolved_birthdate
     phones = payload.resolved_phones
@@ -485,6 +485,28 @@ async def update_patient(
     if not patient_id:
         raise NotFoundError("Patient not found.")
 
+    current_user_info = await conn.fetchrow(
+        "SELECT id_number, birthdate::text FROM app_user WHERE user_id = $1",
+        patient_id,
+    )
+    existing_nic = (current_user_info["id_number"] if current_user_info else "") or ""
+    existing_dob = (current_user_info["birthdate"] if current_user_info else "") or ""
+    is_walkin_temp = existing_nic.startswith("999")
+
+    # Security check: core identity details (NIC & DOB) can ONLY be altered for temporary walk-in profiles (999...)
+    if payload.id_number is not None and payload.id_number.strip().upper() != existing_nic.strip().upper():
+        if not is_walkin_temp:
+            raise AppValidationError([
+                {"field": "id_number", "message": "Core NIC detail cannot be modified after full patient registration."}
+            ])
+
+    dob = payload.birthdate or payload.date_of_birth
+    if dob is not None and str(dob) != existing_dob and existing_dob != "1995-01-01" and existing_dob != "1990-01-01":
+        if not is_walkin_temp:
+            raise AppValidationError([
+                {"field": "birthdate", "message": "Core Date of Birth detail cannot be modified after full patient registration."}
+            ])
+
     async with conn.transaction():
         # 1. Update app_user fields
         user_updates = []
@@ -498,6 +520,25 @@ async def update_patient(
         if payload.last_name is not None:
             user_params.append(payload.last_name.strip())
             user_updates.append(f"last_name = ${len(user_params)}")
+        if payload.id_number is not None and is_walkin_temp:
+            new_nic = payload.id_number.strip().upper()
+            existing_user = await conn.fetchval(
+                "SELECT user_id FROM app_user WHERE UPPER(id_number) = $1 AND user_id != $2",
+                new_nic,
+                patient_id,
+            )
+            if existing_user:
+                raise AppValidationError([
+                    {"field": "id_number", "message": "A patient with this NIC already exists."}
+                ])
+            user_params.append(new_nic)
+            user_updates.append(f"id_number = ${len(user_params)}")
+        if dob is not None and is_walkin_temp:
+            user_params.append(dob)
+            user_updates.append(f"birthdate = ${len(user_params)}")
+        if payload.gender is not None:
+            user_params.append(payload.gender)
+            user_updates.append(f"gender = ${len(user_params)}::gender_enum")
         if payload.address is not None:
             user_params.append(payload.address.strip())
             user_updates.append(f"address = ${len(user_params)}")

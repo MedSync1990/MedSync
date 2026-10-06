@@ -82,6 +82,8 @@ export interface AppointmentResponse {
   appointment_code: string;
   patient_id: number;
   patient_name: string;
+  patient_nic?: string | null;
+  is_walkin_patient?: boolean;
   doctor_id: number;
   doctor_name: string;
   branch_id: number;
@@ -411,6 +413,10 @@ export interface PatientUpdateRequest {
   first_name?: string | null;
   middle_name?: string | null;
   last_name?: string | null;
+  id_number?: string | null;
+  birthdate?: string | null;
+  date_of_birth?: string | null;
+  gender?: Gender | string | null;
   address?: string | null;
   email?: string | null;
   phone_numbers?: string[] | null;
@@ -462,6 +468,7 @@ export interface PatientListItem {
   phone_number: string;
   gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
+  address?: string;
   registered_branch?: number | null;
   branch_name?: string | null;
   has_insurance: boolean;

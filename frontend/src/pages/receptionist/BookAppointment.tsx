@@ -85,7 +85,6 @@ export const BookAppointment: React.FC = () => {
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
-  const prefillPatientId = searchParams.get('patient_id');
 
   // ─── Quick Walk-in Patient Modal State ─────────────────────────────────────
   const [showQuickModal, setShowQuickModal] = useState(false);
@@ -93,7 +92,7 @@ export const BookAppointment: React.FC = () => {
     first_name: '',
     last_name: '',
     phone_number: '',
-    gender: 'Male' as 'Male' | 'Female' | 'Other',
+    gender: 'Male' as 'Male' | 'Female',
     age: '',
   });
   const [creatingQuickPatient, setCreatingQuickPatient] = useState(false);
@@ -107,12 +106,17 @@ export const BookAppointment: React.FC = () => {
 
     setCreatingQuickPatient(true);
     try {
+      const branchIdNum = selectedBranch && selectedBranch !== 'All' && !isNaN(parseInt(selectedBranch, 10))
+        ? parseInt(selectedBranch, 10)
+        : selectedDoctor?.branch_id;
+
       const res = await patientService.quickCreate({
         first_name: quickForm.first_name.trim(),
         last_name: quickForm.last_name.trim() || undefined,
         phone_number: quickForm.phone_number.trim() || undefined,
         gender: quickForm.gender,
         age: quickForm.age ? parseInt(quickForm.age, 10) : undefined,
+        registered_branch: branchIdNum || undefined,
       });
 
       const p: PatientListItem = {
@@ -1542,7 +1546,6 @@ export const BookAppointment: React.FC = () => {
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-                <option value="Other">Other</option>
               </select>
             </div>
 

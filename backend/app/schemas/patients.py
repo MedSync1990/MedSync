@@ -94,6 +94,9 @@ class PatientUpdateRequest(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=60)
     middle_name: Optional[str] = Field(None, max_length=60)
     last_name: Optional[str] = Field(None, min_length=1, max_length=60)
+    id_number: Optional[str] = Field(None, description="12 digits or 9 digits followed by V/X")
+    birthdate: Optional[date] = None
+    date_of_birth: Optional[date] = None
     gender: Optional[GenderEnum] = None
     address: Optional[str] = Field(None, min_length=3, max_length=255)
     email: Optional[str] = None
@@ -106,6 +109,16 @@ class PatientUpdateRequest(BaseModel):
     emergency_contact_name: Optional[str] = None
     emergency_contact_relationship: Optional[str] = None
     allergy_ids: Optional[List[int]] = None
+
+    @field_validator("id_number")
+    @classmethod
+    def validate_nic(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return None
+        nic = v.strip().upper()
+        if not re.match(r"^([0-9]{9}[VX]|[0-9]{12})$", nic):
+            raise ValueError("NIC must be 9 digits followed by V/X or 12 computerised digits.")
+        return nic
 
 
 class PatientResponse(BaseModel):
@@ -164,6 +177,7 @@ class QuickPatientCreateRequest(BaseModel):
     gender: GenderEnum = Field(default=GenderEnum.Male)
     birthdate: Optional[date] = None
     date_of_birth: Optional[date] = None
+    age: Optional[int] = Field(None, ge=0, le=120)
     phone_number: Optional[str] = None
     phone_numbers: Optional[List[str]] = None
     email: Optional[str] = None
@@ -185,6 +199,10 @@ class QuickPatientCreateRequest(BaseModel):
             return self.birthdate
         if self.date_of_birth:
             return self.date_of_birth
+        if self.age is not None:
+            curr_year = date.today().year
+            birth_year = max(1900, curr_year - self.age)
+            return date(birth_year, 1, 1)
         return date(1995, 1, 1)
 
     @property
