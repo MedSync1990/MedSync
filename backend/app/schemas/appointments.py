@@ -96,7 +96,7 @@ class AppointmentResponse(BaseModel):
     patient_id: int
     patient_name: str
     patient_nic: Optional[str] = None
-    is_walkin_patient: bool = False
+    is_temp: bool = False
     doctor_id: int
     doctor_name: str
     branch_id: int

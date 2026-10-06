@@ -949,7 +949,7 @@ export const ManageAppointments: React.FC = () => {
                             >
                               {apt.patient_name}
                             </span>
-                            {apt.is_walkin_patient && (
+                            {apt.is_temp && (
                               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-label-sm text-[10px] font-bold border border-amber-300">
                                 <span className="material-symbols-outlined text-[12px] text-amber-600">bolt</span>
                                 Walk-in
@@ -1019,7 +1019,7 @@ export const ManageAppointments: React.FC = () => {
                       {/* 7. Actions */}
                       <td className="px-space-md py-3.5 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {apt.is_walkin_patient && (
+                          {apt.is_temp && (
                             <button
                               type="button"
                               onClick={() => navigate(`/receptionist/register-patient?edit=${apt.patient_id}`)}
@@ -1365,7 +1365,7 @@ export const ManageAppointments: React.FC = () => {
                         {loadingDrawerPatient ? (
                           'Loading patient profile...'
                         ) : drawerPatient ? (
-                          `NIC: ${drawerPatient.id_number || 'N/A'} · ${drawerPatient.address || 'Address unlisted'}`
+                          `NIC: ${drawerPatient.is_temp || drawerPatient.id_number?.startsWith('999') ? 'Pending Registration' : (drawerPatient.id_number || 'N/A')} · ${drawerPatient.address === 'Address Pending' ? 'Address Pending' : (drawerPatient.address || 'Address unlisted')}`
                         ) : (
                           `Patient ID #${drawerApt.patient_id}`
                         )}
@@ -1378,21 +1378,21 @@ export const ManageAppointments: React.FC = () => {
                       <span className="font-label-sm text-outline block font-semibold">Age / Gender</span>
                       <span className="text-brand-navy-deep font-medium">
                         {drawerPatient
-                          ? `${getAge(drawerPatient.date_of_birth)} Yrs · ${drawerPatient.gender}`
+                          ? `${drawerPatient.date_of_birth && drawerPatient.date_of_birth !== '1900-01-01' && drawerPatient.date_of_birth !== '1995-01-01' && getAge(drawerPatient.date_of_birth) > 0 && getAge(drawerPatient.date_of_birth) < 120 ? `${getAge(drawerPatient.date_of_birth)} Yrs` : 'Age Pending'} · ${drawerPatient.gender}`
                           : '—'}
                       </span>
                     </div>
                     <div>
                       <span className="font-label-sm text-outline block font-semibold">Contact Phone</span>
                       <span className="text-brand-navy-deep font-medium">
-                        {drawerPatient?.phone_number || '—'}
+                        {drawerPatient?.phone_number && drawerPatient.phone_number !== '0000000000' ? drawerPatient.phone_number : 'Not Provided'}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Walk-in Profile Warning Banner */}
-                {drawerPatient && (drawerPatient.id_number?.startsWith('999') || drawerPatient.address === 'Address Pending' || drawerPatient.last_name === '(Walk-in Patient)') && (
+                {drawerPatient?.is_temp && (
                   <div className="p-4 rounded-xl bg-status-pending-bg/50 border border-amber-200 space-y-3 shadow-xs">
                     <div className="flex items-center gap-2 text-amber-900 font-label-sm uppercase font-bold tracking-wider">
                       <span className="material-symbols-outlined text-[20px] text-amber-600">person_alert</span>

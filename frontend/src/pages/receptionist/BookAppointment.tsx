@@ -667,8 +667,8 @@ export const BookAppointment: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-semibold text-brand-navy-deep font-label-md text-label-md flex items-center gap-2">
-                              <span>{p.first_name} {p.last_name}</span>
-                              {p.id_number?.startsWith('999') && (
+                              <span>{p.first_name} {p.last_name === '(Walk-in Patient)' ? '' : p.last_name}</span>
+                              {(p.is_temp || p.id_number?.startsWith('999')) && (
                                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
                                   ⚡ Walk-in Profile
                                 </span>
@@ -680,9 +680,9 @@ export const BookAppointment: React.FC = () => {
                               )}
                             </div>
                             <div className="text-outline text-body-sm flex items-center gap-2">
-                              <span>NIC: {p.id_number}</span>
+                              <span>NIC: {p.is_temp || p.id_number?.startsWith('999') ? 'Pending' : p.id_number}</span>
                               <span>•</span>
-                              <span>{p.phone_number || 'No phone'}</span>
+                              <span>{p.phone_number && p.phone_number !== '0000000000' ? p.phone_number : 'No phone'}</span>
                             </div>
                           </div>
                         </div>
@@ -716,9 +716,9 @@ export const BookAppointment: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                      {selectedPatient.first_name} {selectedPatient.last_name}
+                      {selectedPatient.first_name} {selectedPatient.last_name === '(Walk-in Patient)' ? '' : selectedPatient.last_name}
                     </span>
-                    {selectedPatient.id_number?.startsWith('999') && (
+                    {(selectedPatient.is_temp || selectedPatient.id_number?.startsWith('999')) && (
                       <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold flex items-center gap-1 border border-amber-300">
                         <span>⚡</span> Walk-in (Pending Full Registration)
                       </span>
@@ -742,7 +742,9 @@ export const BookAppointment: React.FC = () => {
                       <>
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[15px] text-outline">cake</span>
-                          {selectedPatient.date_of_birth} ({getAge(selectedPatient.date_of_birth)} yrs)
+                          {selectedPatient.date_of_birth && selectedPatient.date_of_birth !== '1900-01-01' && selectedPatient.date_of_birth !== '1995-01-01'
+                            ? `${selectedPatient.date_of_birth} (${getAge(selectedPatient.date_of_birth)} yrs)`
+                            : 'DOB Pending'}
                         </span>
                         <span>•</span>
                       </>
@@ -754,12 +756,12 @@ export const BookAppointment: React.FC = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">call</span>
-                      {selectedPatient.phone_number || 'N/A'}
+                      {selectedPatient.phone_number && selectedPatient.phone_number !== '0000000000' ? selectedPatient.phone_number : 'Pending'}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">badge</span>
-                      {selectedPatient.id_number}
+                      {selectedPatient.is_temp || selectedPatient.id_number?.startsWith('999') ? 'Pending Registration' : selectedPatient.id_number}
                     </span>
                   </div>
                 </div>

@@ -35,6 +35,7 @@ class PatientCreateRequest(BaseModel):
     registered_branch: Optional[int] = None
     insurance: Optional[PatientInsuranceCreate] = None
     allergy_ids: Optional[List[int]] = None
+    is_temp: bool = False
 
     @field_validator("id_number")
     @classmethod
@@ -109,6 +110,7 @@ class PatientUpdateRequest(BaseModel):
     emergency_contact_name: Optional[str] = None
     emergency_contact_relationship: Optional[str] = None
     allergy_ids: Optional[List[int]] = None
+    is_temp: Optional[bool] = None
 
     @field_validator("id_number")
     @classmethod
@@ -141,6 +143,7 @@ class PatientResponse(BaseModel):
     has_insurance: bool = False
     registered_date: Optional[str] = None
     is_active: bool = True
+    is_temp: bool = False
     allergies: List[PatientAllergyItem] = Field(default_factory=list)
 
 
@@ -157,6 +160,7 @@ class PatientListItem(BaseModel):
     branch_name: Optional[str] = None
     has_insurance: bool = False
     is_active: bool = True
+    is_temp: bool = False
 
 
 class PatientListResponse(BaseModel):
@@ -203,7 +207,7 @@ class QuickPatientCreateRequest(BaseModel):
             curr_year = date.today().year
             birth_year = max(1900, curr_year - self.age)
             return date(birth_year, 1, 1)
-        return date(1995, 1, 1)
+        return date(1900, 1, 1)
 
     @property
     def resolved_phones(self) -> List[str]:

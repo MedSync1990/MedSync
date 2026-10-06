@@ -103,9 +103,9 @@ async def register_patient(
             """
             INSERT INTO patient (
                 user_id, blood_group, emergency_contact, contact_name,
-                registered_branch, registered_date, is_active
+                registered_branch, registered_date, is_active, is_temp
             ) VALUES (
-                $1, $2, $3, $4, $5, CURRENT_DATE, TRUE
+                $1, $2, $3, $4, $5, CURRENT_DATE, TRUE, $6
             )
             RETURNING patient_code
             """,
@@ -114,6 +114,7 @@ async def register_patient(
             emergency_phone,
             contact_name,
             branch_id,
+            payload.is_temp,
         )
 
         # D. Optional: Insert health insurance if provided
@@ -213,9 +214,10 @@ async def register_quick_patient(
         address=payload.address or "Address Pending",
         gender=payload.gender,
         birthdate=payload.resolved_birthdate,
-        phone_number=payload.phone_number,
+        phone_number=payload.phone_number or (payload.phone_numbers[0] if payload.phone_numbers else None) or "0000000000",
         phone_numbers=payload.phone_numbers,
         registered_branch=payload.registered_branch,
+        is_temp=True,
     )
 
     # Call normal register_patient with modified payload
@@ -304,7 +306,8 @@ async def list_patients(
                   AND pi.is_active = TRUE 
                   AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
             ) AS has_insurance,
-            p.is_active
+            p.is_active,
+            p.is_temp
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
@@ -348,6 +351,7 @@ async def list_patients(
             branch_name=r["branch_name"] or ("Colombo Central Branch" if r["registered_branch"] == 1 else f"Branch {r['registered_branch']}"),
             has_insurance=bool(r["has_insurance"]),
             is_active=r["is_active"],
+            is_temp=bool(r["is_temp"]),
         )
         for r in rows
     ]
@@ -395,7 +399,8 @@ async def get_patient(
                   AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
             ) AS has_insurance,
             p.registered_date::text AS registered_date,
-            p.is_active
+            p.is_active,
+            p.is_temp
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
@@ -447,6 +452,7 @@ async def get_patient(
         has_insurance=bool(row["has_insurance"]),
         registered_date=row["registered_date"],
         is_active=row["is_active"],
+        is_temp=bool(row["is_temp"]),
         allergies=allergies,
     )
 
@@ -597,6 +603,13 @@ async def update_patient(
         if c_name is not None:
             pt_params.append(c_name.strip() if c_name else None)
             pt_updates.append(f"contact_name = ${len(pt_params)}")
+
+        if payload.is_temp is not None:
+            pt_params.append(payload.is_temp)
+            pt_updates.append(f"is_temp = ${len(pt_params)}")
+        elif is_walkin_temp and (payload.id_number and not payload.id_number.startswith('999')):
+            pt_params.append(False)
+            pt_updates.append(f"is_temp = ${len(pt_params)}")
 
         if pt_updates:
             update_sql = f"UPDATE patient SET {', '.join(pt_updates)} WHERE user_id = $1"

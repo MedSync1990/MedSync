@@ -82,7 +82,8 @@ async def _fetch_appointment_detail(conn: Connection, appointment_id: int) -> Op
             a.patient_id,
             CONCAT_WS(' ', pu.first_name, NULLIF(pu.middle_name, ''), pu.last_name) AS patient_name,
             pu.id_number AS patient_nic,
-            (pu.id_number LIKE '999%' OR pu.address = 'Address Pending' OR pu.last_name = '(Walk-in Patient)') AS is_walkin_patient,
+            pt.is_temp AS is_temp,
+            pt.is_temp AS is_walkin_patient,
             das.doctor_id,
             CONCAT_WS(' ', du.first_name, NULLIF(du.middle_name, ''), du.last_name) AS doctor_name,
             s.branch_id,
@@ -100,6 +101,7 @@ async def _fetch_appointment_detail(conn: Connection, appointment_id: int) -> Op
         JOIN branch b ON s.branch_id = b.branch_id
         JOIN app_user pu ON a.patient_id = pu.user_id
         JOIN app_user du ON das.doctor_id = du.user_id
+        LEFT JOIN patient pt ON a.patient_id = pt.user_id
         WHERE a.appointment_id = $1;
     """
     r = await conn.fetchrow(query, appointment_id)
@@ -112,6 +114,7 @@ async def _fetch_appointment_detail(conn: Connection, appointment_id: int) -> Op
         patient_id=r["patient_id"],
         patient_name=r["patient_name"],
         patient_nic=r["patient_nic"],
+        is_temp=bool(r["is_temp"]),
         is_walkin_patient=bool(r["is_walkin_patient"]),
         doctor_id=r["doctor_id"],
         doctor_name=r["doctor_name"],
@@ -173,7 +176,8 @@ async def list_appointments(
             a.patient_id,
             CONCAT_WS(' ', pu.first_name, NULLIF(pu.middle_name, ''), pu.last_name) AS patient_name,
             pu.id_number AS patient_nic,
-            (pu.id_number LIKE '999%' OR pu.address = 'Address Pending' OR pu.last_name = '(Walk-in Patient)') AS is_walkin_patient,
+            pt.is_temp AS is_temp,
+            pt.is_temp AS is_walkin_patient,
             das.doctor_id,
             CONCAT_WS(' ', du.first_name, NULLIF(du.middle_name, ''), du.last_name) AS doctor_name,
             s.branch_id,
@@ -191,6 +195,7 @@ async def list_appointments(
         JOIN branch b ON s.branch_id = b.branch_id
         JOIN app_user pu ON a.patient_id = pu.user_id
         JOIN app_user du ON das.doctor_id = du.user_id
+        LEFT JOIN patient pt ON a.patient_id = pt.user_id
         {base_where}
         ORDER BY das.date DESC, das.start_time DESC
         LIMIT $6 OFFSET $7;
@@ -204,6 +209,7 @@ async def list_appointments(
             patient_id=r["patient_id"],
             patient_name=r["patient_name"],
             patient_nic=r["patient_nic"],
+            is_temp=bool(r["is_temp"]),
             is_walkin_patient=bool(r["is_walkin_patient"]),
             doctor_id=r["doctor_id"],
             doctor_name=r["doctor_name"],

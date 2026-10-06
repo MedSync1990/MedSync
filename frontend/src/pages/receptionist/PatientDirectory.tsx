@@ -46,7 +46,7 @@ export const PatientDirectory: React.FC = () => {
   };
 
   const isWalkin = (p: PatientListItem) => {
-    return p.id_number?.startsWith('999') || p.address === 'Address Pending' || p.last_name === '(Walk-in Patient)';
+    return Boolean(p.is_temp);
   };
 
   const columns: Column<PatientListItem>[] = [
@@ -85,7 +85,9 @@ export const PatientDirectory: React.FC = () => {
               )}
             </div>
             <span className="font-body-sm text-body-sm text-outline mt-0.5">
-              {calculateAge(r.date_of_birth) > 0 ? `${calculateAge(r.date_of_birth)} yrs` : 'Age pending'} · {r.gender}
+              {r.date_of_birth && r.date_of_birth !== '1900-01-01' && r.date_of_birth !== '1995-01-01' && calculateAge(r.date_of_birth) > 0 && calculateAge(r.date_of_birth) < 120
+                ? `${calculateAge(r.date_of_birth)} yrs`
+                : 'Age pending'} · {r.gender}
             </span>
           </div>
         );
@@ -95,7 +97,7 @@ export const PatientDirectory: React.FC = () => {
       key: 'id_number', 
       header: 'NIC Number',
       render: (r) => (
-        r.id_number?.startsWith('999') ? (
+        r.is_temp || r.id_number?.startsWith('999') ? (
           <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-outline italic">
             <span className="material-symbols-outlined text-[14px] text-amber-600">hourglass_empty</span>
             Pending
@@ -109,13 +111,13 @@ export const PatientDirectory: React.FC = () => {
       key: 'phone_number', 
       header: 'Contact Phone',
       render: (r) => (
-        r.phone_number ? (
+        r.phone_number && r.phone_number !== '0000000000' ? (
           <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
             <span className="material-symbols-outlined text-[16px] text-outline">call</span>
             <span>{r.phone_number}</span>
           </div>
         ) : (
-          <span className="font-body-sm text-body-sm text-outline italic">—</span>
+          <span className="font-body-sm text-body-sm text-outline italic">Not Provided</span>
         )
       )
     },

@@ -84,6 +84,7 @@ export interface AppointmentResponse {
   patient_name: string;
   patient_nic?: string | null;
   is_walkin_patient?: boolean;
+  is_temp?: boolean;
   doctor_id: number;
   doctor_name: string;
   branch_id: number;
@@ -473,6 +474,7 @@ export interface PatientListItem {
   branch_name?: string | null;
   has_insurance: boolean;
   is_active: boolean;
+  is_temp?: boolean;
 }
 
 export interface PatientListResponse {
