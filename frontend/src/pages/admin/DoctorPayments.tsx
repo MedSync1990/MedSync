@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllPayoutRequests, approvePayoutRequest, rejectPayoutRequest } from '../../api/reports';
+import { getAllPayoutRequests, payPayoutRequest, rejectPayoutRequest } from '../../api/reports';
 import { listBranches } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -19,36 +19,23 @@ function makeInitials(name: string): string {
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
   Pending:  { label: 'Pending',  bg: 'bg-status-pending-bg',   text: 'text-status-pending-text',   dot: 'bg-status-pending-text'   },
-  Approved: { label: 'Approved', bg: 'bg-status-completed-bg', text: 'text-status-completed-text', dot: 'bg-status-completed-text' },
+  Paid: { label: 'Paid', bg: 'bg-status-completed-bg', text: 'text-status-completed-text', dot: 'bg-status-completed-text' },
   Rejected: { label: 'Rejected', bg: 'bg-status-cancelled-bg', text: 'text-status-cancelled-text', dot: 'bg-status-cancelled-text' },
 };
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-const KpiCard: React.FC<{ label: string; value: string; icon: string; sub: string }> = ({ label, value, icon, sub }) => (
-  <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
-    <div className="flex items-center justify-between mb-space-sm">
-      <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">{label}</span>
-      <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-      </div>
-    </div>
-    <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{value}</div>
-    <div className="font-body-sm text-body-sm text-secondary mt-1">{sub}</div>
-  </div>
-);
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 
 interface ReviewModalProps {
   payout: AdminPayoutRequestItem;
   onClose: () => void;
-  onApprove: (note: string) => Promise<void>;
+  onPay: (note: string) => Promise<void>;
   onReject: (note: string) => Promise<void>;
   saving: boolean;
 }
 
-const ReviewModal: React.FC<ReviewModalProps> = ({ payout, onClose, onApprove, onReject, saving }) => {
+const ReviewModal: React.FC<ReviewModalProps> = ({ payout, onClose, onPay, onReject, saving }) => {
   const [note, setNote] = useState(payout.remarks || '');
   const [err, setErr] = useState('');
   const isPending = payout.status === 'Pending';
@@ -60,9 +47,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ payout, onClose, onApprove, o
     return () => window.removeEventListener('keydown', handler);
   }, [onClose, saving]);
 
-  const handleApprove = async () => {
+  const handlePay = async () => {
     setErr('');
-    await onApprove(note);
+    await onPay(note);
   };
 
   const handleReject = async () => {
@@ -150,13 +137,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ payout, onClose, onApprove, o
             <>
               <button onClick={handleReject} disabled={saving}
                 className="h-10 px-4 rounded-lg bg-status-cancelled-bg text-status-cancelled-text font-label-md text-label-md hover:brightness-95 transition flex items-center gap-1.5 disabled:opacity-60">
-                {saving ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span> : <span className="material-symbols-outlined text-[16px]">block</span>}
+                {saving ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[16px]">block</span>}
                 Reject
               </button>
-              <button onClick={handleApprove} disabled={saving}
+              <button onClick={handlePay} disabled={saving}
                 className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5 disabled:opacity-60">
-                {saving ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span> : <span className="material-symbols-outlined text-[16px]">check_circle</span>}
-                Approve Payout
+                {saving ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[16px]">check_circle</span>}
+                Pay Doctor
               </button>
             </>
           )}
@@ -177,7 +164,7 @@ const DoctorPayments: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [branches, setBranches] = useState<BranchResponse[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('Pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [reviewTarget, setReviewTarget] = useState<AdminPayoutRequestItem | null>(null);
@@ -209,22 +196,22 @@ const DoctorPayments: React.FC = () => {
 
   // KPIs
   const pendingList  = requests.filter((r) => r.status === 'Pending');
-  const approvedList = requests.filter((r) => r.status === 'Approved');
+  const paidList     = requests.filter((r) => r.status === 'Paid');
   const rejectedList = requests.filter((r) => r.status === 'Rejected');
-  const pendingTotal  = pendingList.reduce((s, r)  => s + r.request_amount, 0);
-  const approvedTotal = approvedList.reduce((s, r) => s + r.request_amount, 0);
-  const totalAmount   = requests.reduce((s, r) => s + r.request_amount, 0);
+  const pendingTotal = pendingList.reduce((s, r)  => s + r.request_amount, 0);
+  const paidTotal    = paidList.reduce((s, r) => s + r.request_amount, 0);
+  const totalAmount  = requests.reduce((s, r) => s + r.request_amount, 0);
 
   // Decide (single)
-  const handleApprove = async (requestId: number, note: string) => {
+  const handlePay = async (requestId: number, note: string) => {
     setSaving(true);
     try {
-      await approvePayoutRequest(requestId, note);
-      showToast('Payout request approved ✓', 'success');
+      await payPayoutRequest(requestId, note);
+      showToast('Payout successfully marked as Paid ✓', 'success');
       setReviewTarget(null);
       fetchData();
     } catch (e: any) {
-      showToast(e?.message || 'Failed to approve.', 'error');
+      showToast(e?.message || 'Failed to process payment.', 'error');
     } finally {
       setSaving(false);
     }
@@ -245,11 +232,11 @@ const DoctorPayments: React.FC = () => {
   };
 
   // Bulk approve
-  const bulkApprove = async () => {
+  const bulkPay = async () => {
     setSaving(true);
     const ids = [...selected];
     try {
-      await Promise.all(ids.map((id) => approvePayoutRequest(id, '')));
+      await Promise.all(ids.map((id) => payPayoutRequest(id, '')));
       showToast(`${ids.length} payout${ids.length !== 1 ? 's' : ''} approved`, 'success');
       setSelected(new Set());
       fetchData();
@@ -261,14 +248,14 @@ const DoctorPayments: React.FC = () => {
   };
 
   // Quick approve single
-  const quickApprove = async (requestId: number) => {
+  const quickPay = async (requestId: number) => {
     setSaving(true);
     try {
-      await approvePayoutRequest(requestId, '');
-      showToast('Payout approved ✓', 'success');
+      await payPayoutRequest(requestId, '');
+      showToast('Payout processed ✓', 'success');
       fetchData();
     } catch (e: any) {
-      showToast(e?.message || 'Failed to approve.', 'error');
+      showToast(e?.message || 'Failed to process payment.', 'error');
     } finally {
       setSaving(false);
     }
@@ -319,7 +306,7 @@ const DoctorPayments: React.FC = () => {
     showToast('Exported as CSV', 'success');
   };
 
-  const resetFilters = () => { setStatusFilter('all'); setSearchQuery(''); };
+  const resetFilters = () => { setStatusFilter('Pending'); setSearchQuery(''); };
 
   return (
     <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
@@ -376,10 +363,8 @@ const DoctorPayments: React.FC = () => {
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">fact_check</span>
               <select id="status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer transition-all">
-                <option value="all">All Statuses</option>
                 <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Paid">Paid</option>
               </select>
               <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
             </div>
@@ -400,18 +385,26 @@ const DoctorPayments: React.FC = () => {
           </button>
           <button onClick={fetchData} disabled={loading}
             className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
-            {loading ? <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> : <span className="material-symbols-outlined text-[18px]">refresh</span>}
+            {loading ? <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[18px]">refresh</span>}
             {loading ? 'Loading...' : 'Refresh'}
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-        <KpiCard label="Pending Approval" value={String(pendingList.length)} icon="hourglass_top" sub={`${fmt(pendingTotal)} awaiting`} />
-        <KpiCard label="Approved" value={String(approvedList.length)} icon="check_circle" sub={`${fmt(approvedTotal)} released`} />
-        <KpiCard label="Rejected" value={String(rejectedList.length)} icon="block" sub="On hold" />
-        <KpiCard label="Total Requested" value={fmt(totalAmount)} icon="account_balance_wallet" sub={`${requests.length} request${requests.length !== 1 ? 's' : ''}`} />
+      {/* KPI Badges */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-space-sm w-full">
+        <div className="px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md shadow-sm border border-primary/20 flex items-center justify-center text-center">
+          Pending Amount: {fmt(pendingTotal)}
+        </div>
+        <div className="px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md shadow-sm border border-primary/20 flex items-center justify-center text-center">
+          Pending Count: {pendingList.length}
+        </div>
+        <div className="px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md shadow-sm border border-primary/20 flex items-center justify-center text-center">
+          Paid Amount: {fmt(paidTotal)}
+        </div>
+        <div className="px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md shadow-sm border border-primary/20 flex items-center justify-center text-center">
+          Paid Count: {paidList.length}
+        </div>
       </div>
 
       {/* Table */}
@@ -428,10 +421,10 @@ const DoctorPayments: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             {selected.size > 0 && (
-              <button onClick={bulkApprove} disabled={saving} id="bulk-approve-btn"
+              <button onClick={bulkPay} disabled={saving} id="bulk-approve-btn"
                 className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1 disabled:opacity-60">
                 <span className="material-symbols-outlined text-[16px]">done_all</span>
-                Approve Selected ({selected.size})
+                Pay Selected ({selected.size})
               </button>
             )}
             <button onClick={handleExport} id="export-btn"
@@ -444,7 +437,7 @@ const DoctorPayments: React.FC = () => {
         <div className="overflow-x-auto">
           {loading ? (
             <div className="py-space-3xl flex flex-col items-center justify-center gap-space-sm">
-              <span className="material-symbols-outlined text-[36px] text-secondary animate-spin">refresh</span>
+              <span className="material-symbols-outlined text-[36px] text-secondary ">hourglass_empty</span>
               <span className="font-body-md text-body-md text-secondary">Loading payout requests…</span>
             </div>
           ) : visible.length === 0 ? (
@@ -526,13 +519,6 @@ const DoctorPayments: React.FC = () => {
                             className="px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1">
                             <span className="material-symbols-outlined text-[16px]">visibility</span>Review
                           </button>
-                          {isPending && (
-                            <button onClick={() => quickApprove(r.request_id)} disabled={saving}
-                              title={`Quick approve ${r.doctor_name}`} aria-label={`Quick approve ${r.doctor_name}`}
-                              className="w-8 h-8 rounded-lg bg-status-completed-bg text-status-completed-text hover:brightness-95 flex items-center justify-center transition-all disabled:opacity-60">
-                              <span className="material-symbols-outlined text-[18px]">check</span>
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -565,7 +551,7 @@ const DoctorPayments: React.FC = () => {
           payout={reviewTarget}
           saving={saving}
           onClose={() => setReviewTarget(null)}
-          onApprove={(note) => handleApprove(reviewTarget.request_id, note)}
+          onPay={(note) => handlePay(reviewTarget.request_id, note)}
           onReject={(note) => handleReject(reviewTarget.request_id, note)}
         />
       )}

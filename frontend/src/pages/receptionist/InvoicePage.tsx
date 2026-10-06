@@ -228,7 +228,7 @@ export default function InvoicePage() {
         ) : loading ? (
           /* Loading state — matches UI guidelines §5 */
           <div className="bg-surface-card rounded-xl shadow-sm p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
             <p className="font-label-lg text-label-lg text-brand-navy-deep">
               Loading invoice details…
             </p>

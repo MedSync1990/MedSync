@@ -176,7 +176,7 @@ export function InsuranceVsOutOfPocket() {
           </button>
           <button onClick={fetchReport} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
             {loading ? (
-              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+              <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
             ) : (
               <span className="material-symbols-outlined text-[18px]">filter_alt</span>
             )}
@@ -308,7 +308,7 @@ export function InsuranceVsOutOfPocket() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
+              {isExporting ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
               {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export Ledger'}
             </button>
             <button className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1">
@@ -369,7 +369,7 @@ export function InsuranceVsOutOfPocket() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined animate-spin text-[32px]">refresh</span>
+               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

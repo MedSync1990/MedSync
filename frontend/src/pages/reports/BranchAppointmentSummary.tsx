@@ -145,7 +145,7 @@ export default function BranchAppointmentSummary() {
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>Reset
           </button>
           <button onClick={handleApply} disabled={isApplying} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
-            {isApplying ? <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> : <span className="material-symbols-outlined text-[18px]">filter_alt</span>}
+            {isApplying ? <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[18px]">filter_alt</span>}
             {isApplying ? 'Applying...' : 'Apply Filters'}
           </button>
         </div>
@@ -293,7 +293,7 @@ export default function BranchAppointmentSummary() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined animate-spin text-[32px]">refresh</span>
+               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

@@ -36,6 +36,7 @@ import ManageBranches from '../pages/admin/ManageBranches';
 import ManageStaff from '../pages/admin/ManageStaff';
 import ManageDoctors from '../pages/admin/ManageDoctors';
 import ManageTreatmentCatalogue from '../pages/admin/ManageTreatmentCatalogue';
+import DoctorPayments from '../pages/admin/DoctorPayments';
 
 // Reports
 import { ReportsIndex } from '../pages/reports/ReportsIndex';
@@ -134,6 +135,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin/branches" element={<ManageBranches />} />
           <Route path="/admin/doctors" element={<ManageDoctors />} />
           <Route path="/admin/treatment-catalogue" element={<ManageTreatmentCatalogue />} />
+          <Route path="/admin/doctor-payments" element={<DoctorPayments />} />
         </Route>
 
         {/* Reports Routes */}
