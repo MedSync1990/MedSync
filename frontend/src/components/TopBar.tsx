@@ -10,76 +10,60 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const userName = user ? (user.role === 'Doctor' ? `Dr. ${user.lastName}` : user.firstName || user.lastName) : 'Guest';
-  const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
-  const branchName = user?.branchName || 'Colombo Central Branch';
+  const userName = user?.firstName || 'manager1';
+  const roleSubtitle = user?.role || 'Branch Manager';
+  const branchName = user?.branchName || 'Colombo';
   const avatarUrl = user?.avatarUrl || '/logo.jpg';
+
   return (
-    <header
-      className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-shadow duration-200 ${isScrolled
-        ? 'shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
-        : 'shadow-[0_1px_4px_rgba(15,23,42,0.04)]'
-        }`}
-    >
+    <header className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-white/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-slate-200 transition-shadow duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
       {/* Greeting & Role Info */}
       <div className="flex items-center gap-space-md">
         <div className="flex flex-col">
           <div className="flex items-center gap-space-xs">
-            <span className="font-headline-sm text-headline-sm text-brand-navy-deep">
+            <span className="font-headline-sm text-headline-sm text-slate-900 font-bold">
               Good morning, {userName}
             </span>
-            <span className="material-symbols-outlined text-brand-teal-light text-[20px]">verified</span>
+            <span className="material-symbols-outlined text-amber-400 text-[20px]">light_mode</span>
           </div>
-          <span className="font-body-sm text-body-sm text-secondary">
-            {branchName} · {roleSubtitle}
+          <span className="font-body-sm text-body-sm text-slate-500">
+            {branchName} · {roleSubtitle} Portal
           </span>
         </div>
       </div>
 
       {/* Controls & Profile */}
       <div className="flex items-center gap-space-md">
-        <div className="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md">
-          <span className="material-symbols-outlined text-[16px] text-status-completed-text">domain</span>
-          <span>{branchName}</span>
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer shadow-sm">
+          <span className="material-symbols-outlined text-[18px] text-primary">domain</span>
+          <span className="font-label-md text-label-md text-slate-700 font-medium">{branchName}</span>
+          <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
         </div>
 
-        <button
-          onClick={onThemeToggle}
-          aria-label="Theme Toggle"
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
-          type="button"
-        >
+        <button onClick={onThemeToggle} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <span className="material-symbols-outlined text-[20px]">dark_mode</span>
         </button>
 
-        <button
-          aria-label="Notifications"
-          className="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
-          type="button"
-        >
+        <button className="relative w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <span className="material-symbols-outlined text-[20px]">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
+          <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
         </button>
 
-        <div className="h-7 w-[1px] bg-border-subtle"></div>
+        <div className="h-8 w-[1px] bg-slate-200 mx-1"></div>
 
-        <div className="flex items-center gap-space-sm pl-space-xs">
+        <div className="flex items-center gap-space-sm pl-space-xs cursor-pointer hover:opacity-80 transition-opacity">
           <div className="text-right hidden sm:block">
-            <div className="font-label-lg text-label-lg text-brand-navy-deep leading-tight">{userName}</div>
-            <div className="font-body-sm text-body-sm text-secondary truncate max-w-[140px]">{user?.role}</div>
+            <div className="font-label-md text-label-md text-slate-900 font-bold">{userName}</div>
+            <div className="font-body-sm text-[12px] text-slate-500">{roleSubtitle}</div>
           </div>
-          <img
-            alt={userName}
-            className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
-            src={avatarUrl}
-          />
+          <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center text-primary ring-2 ring-slate-100">
+            <span className="material-symbols-outlined text-[20px]">person</span>
+          </div>
         </div>
       </div>
     </header>
