@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,HTTPException
 from asyncpg import Connection
 from typing import Optional
-from app.errors import ForbiddenError
+from app.errors import ForbiddenError, NotFoundError, ConflictError, AppValidationError
 from datetime import date, datetime
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user, get_effective_branch_id
@@ -12,7 +12,8 @@ from app.schemas.reports import (
     OutstandingBalancesResponse, OutstandingBalanceItem,
     TreatmentCategoriesResponse, TreatmentCategoryItem,
     InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem,
-    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate
+    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate,
+    AdminPayoutRequestItem, AdminPayoutRequestsResponse, PayoutDecisionRequest
 )
 from app.schemas.common import PaginationParams
 
@@ -318,8 +319,8 @@ async def get_treatment_categories(
     return TreatmentCategoriesResponse(
         data=data, 
         total=len(data),
-        total_catalog_items=int(catalog_stats["total_items"]),
-        active_catalog_items=int(catalog_stats["active_items"])
+        total_catalog_items=int(catalog_stats["total_items"]) if catalog_stats and catalog_stats["total_items"] is not None else 0,
+        active_catalog_items=int(catalog_stats["active_items"]) if catalog_stats and catalog_stats["active_items"] is not None else 0
     )
 
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
@@ -633,3 +634,111 @@ async def create_doctor_payout_request(
     
     return {"message": "Payout request created successfully", "request_id": request_id}
     
+
+@router.get("/doctor-payments", response_model=AdminPayoutRequestsResponse)
+async def get_all_payout_requests(
+    branch_id: Optional[int] = None,
+    status: Optional[str] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+
+    """
+    Admin/Branch Manager: list all doctor payout requests.
+    Branch Managers are locked to their own branch.
+    """
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
+
+    query = """
+    SELECT 
+    r.request_id,
+    r.user_id,
+    u.first_name || ' ' || u.last_name AS doctor_name,
+    COALESCE(sp.name, 'General OPD') AS specialty,
+    b.name AS branch_name,
+    r.account_id,
+    ba.bank_name,
+    ba.account_number,
+    r.request_amount,
+    r.status,
+    r.request_date,
+    r.processed_date,
+    r.remarks
+    FROM staff_payout_requests r
+    JOIN staff s ON r.user_id = s.user_id
+    JOIN app_user u ON s.user_id = u.user_id
+    JOIN branch b ON s.branch_id = b.branch_id
+    LEFT JOIN doctor d ON s.user_id = d.user_id
+    LEFT JOIN doctor_specialty ds ON d.user_id = ds.user_id
+    LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+    JOIN staff_bank_accounts ba ON r.account_id = ba.account_id
+    WHERE ($1::int IS NULL OR s.branch_id = $1)
+    AND ($2::text IS NULL OR r.status = $2)
+    ORDER BY r.request_date DESC
+    """
+
+    records = await conn.fetch(query, actual_branch_id, status)
+    data = [AdminPayoutRequestItem(**dict(r)) for r in records]
+    return AdminPayoutRequestsResponse(data=data, total=len(data))
+
+@router.patch("/doctor-payments/{request_id}/pay")
+async def pay_payout_request(
+    request_id: int,
+    body: PayoutDecisionRequest,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    """Pay a pending payout request."""
+    row = await conn.fetchrow(
+        "SELECT request_id, status, user_id, account_id, request_amount FROM staff_payout_requests WHERE request_id = $1",
+        request_id
+    )
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Request not found.")
+    if row["status"] != "Pending":
+        raise HTTPException(status_code=400, detail="Request is not pending.")
+    
+    async with conn.transaction():
+        await conn.execute(
+            """
+            UPDATE staff_payout_requests
+            SET status = 'Paid',
+                processed_date = NOW(),
+                remarks = $2
+            WHERE request_id = $1
+            """,
+            request_id,
+            body.remarks
+        )
+
+        await conn.execute(
+            """
+            INSERT INTO staff_payouts (user_id, request_id, account_id, amount_paid, payment_reference, payment_method)
+            VALUES ($1, $2, $3, $4, $5, 'Bank Transfer')
+            """,
+            row["user_id"], request_id, row["account_id"], row["request_amount"], f"PAY-{request_id}"
+        )
+
+    return {"message": "Payout request marked as Paid.", "request_id": request_id}
+
+@router.patch("/doctor-payments/{request_id}/reject")
+async def reject_payout_request(
+    request_id: int,
+    body: PayoutDecisionRequest,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    """Reject a pending payout request. Remarks/reason is required."""
+    if not body.remarks or not body.remarks.strip():
+        raise HTTPException(status_code=400, detail="A reason is required when rejecting a payout.")
+
+    row = await conn.fetchrow(
+        "SELECT request_id, status FROM staff_payout_requests WHERE request_id = $1",
+        request_id
+    )
+
+    if not row:
+        raise NotFoundError(f"Payout request {request_id} not found.")
+    if row["status"] != "Pending":
+        raise ConflictError(f"Cannot reject — request is already '{row['status']}'.")

@@ -295,7 +295,7 @@ export const RegisterPatient: React.FC = () => {
 
       {loadingEditData && (
         <div className="rounded-xl border border-primary/20 bg-primary/5 px-space-lg py-3 text-primary font-label-md text-label-md flex items-center gap-2 animate-pulse">
-          <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+          <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
           <span>Loading patient profile for editing...</span>
         </div>
       )}

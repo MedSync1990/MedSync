@@ -153,7 +153,7 @@ export const ReportPageShell: React.FC<ReportPageShellProps> = ({
       <div className="w-full">
         {loading ? (
           <div className="bg-surface-container-lowest rounded-xl p-12 text-center flex flex-col items-center justify-center space-y-3 shadow-sm">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
             <p className="font-body-lg text-on-surface">Loading report data...</p>
           </div>
         ) : error ? (

@@ -5,7 +5,7 @@
  * Owner: Ashen (these power Ashen's own report pages)
  */
 
-import { get, post } from './client';
+import { get, post, patch } from './client';
 import type {
   AppointmentsSummaryResponse,
   DoctorRevenueResponse,
@@ -217,4 +217,54 @@ export function createDoctorPayoutRequest(
 ): Promise<{ message: string; request_id: number }> {
   // Assuming you have a 'post' function exported from './client'
   return post(`/reports/doctor-earnings/${doctorId}/payout-requests`, payload);
+}
+
+// ─── Admin Doctor Payment Approval ──────────────────────────────────────────
+
+export interface AdminPayoutRequestItem {
+  request_id: number;
+  user_id: number;
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  account_id: number;
+  bank_name: string;
+  account_number: string;
+  request_amount: number;
+  status: string;
+  request_date: string;
+  processed_date: string | null;
+  remarks: string | null;
+}
+
+export interface AdminPayoutRequestsResponse {
+  data: AdminPayoutRequestItem[];
+  total: number;
+}
+
+/** Get all doctor payout requests (Admin/Branch Manager view) */
+export function getAllPayoutRequests(params?: {
+  branch?: number;
+  status?: string;
+}): Promise<AdminPayoutRequestsResponse> {
+  return get<AdminPayoutRequestsResponse>('/reports/doctor-payments', {
+    branch_id: params?.branch,
+    status: params?.status,
+  });
+}
+
+/** Pay a payout request */
+export function payPayoutRequest(
+  requestId: number,
+  remarks?: string
+): Promise<{ message: string; request_id: number }> {
+  return patch(`/reports/doctor-payments/${requestId}/pay`, { remarks });
+}
+
+/** Reject a payout request */
+export function rejectPayoutRequest(
+  requestId: number,
+  remarks: string
+): Promise<{ message: string; request_id: number }> {
+  return patch(`/reports/doctor-payments/${requestId}/reject`, { remarks });
 }

@@ -604,7 +604,7 @@ export const BookAppointment: React.FC = () => {
                   />
                   {searchingPatients && (
                     <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline font-label-sm text-label-sm animate-pulse flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                      <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span>
                       Searching...
                     </span>
                   )}
@@ -624,7 +624,7 @@ export const BookAppointment: React.FC = () => {
                 <div className="absolute z-20 left-0 right-0 mt-2 bg-surface-card rounded-xl border border-border-subtle shadow-lg divide-y divide-border-subtle overflow-hidden max-h-64 overflow-y-auto">
                   {searchingPatients && patientResults.length === 0 ? (
                     <div className="p-4 text-center text-outline text-body-sm flex items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                      <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
                       <span>Loading real patient records...</span>
                     </div>
                   ) : patientResults.length === 0 ? (

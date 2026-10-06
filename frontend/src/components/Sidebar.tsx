@@ -66,6 +66,7 @@ export const Sidebar: React.FC = () => {
               { label: 'Doctors & Specialties', path: '/admin/doctors', icon: 'stethoscope', dataPath: 'doctors-specialties' },
               { label: 'Patients', path: '/receptionist/patients', icon: 'contact_page', dataPath: 'patients' },
               { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'medical_services', dataPath: 'treatment-catalogue' },
+              { label: 'Doctor Payments', path: '/admin/doctor-payments', icon: 'request_quote', dataPath: 'doctor-payments' },
             ],
           },
           systemSection,
