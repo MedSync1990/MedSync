@@ -886,9 +886,7 @@ export const ManageAppointments: React.FC = () => {
                 <tr>
                   <td colSpan={7} className="px-space-md py-12 text-center text-outline">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[32px] text-primary animate-spin">
-                        progress_activity
-                      </span>
+                      <span className="material-symbols-outlined text-[32px] text-primary ">hourglass_empty</span>
                       <span className="font-body-sm text-body-sm font-medium">
                         Loading scheduled appointments...
                       </span>
@@ -1184,9 +1182,7 @@ export const ManageAppointments: React.FC = () => {
                   </label>
                   {loadingSlots ? (
                     <div className="p-4 rounded-xl bg-surface-subtle text-center text-outline font-body-sm text-body-sm flex items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] animate-spin text-primary">
-                        progress_activity
-                      </span>
+                      <span className="material-symbols-outlined text-[18px]  text-primary">hourglass_empty</span>
                       <span>Checking doctor availability...</span>
                     </div>
                   ) : rescheduleSlots.length === 0 ? (

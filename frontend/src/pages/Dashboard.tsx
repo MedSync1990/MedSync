@@ -68,7 +68,7 @@ export const Dashboard: React.FC = () => {
 
       {loading ? (
         <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
           <p className="font-body-lg text-brand-navy-deep">Loading dashboard...</p>
         </div>
       ) : error ? (

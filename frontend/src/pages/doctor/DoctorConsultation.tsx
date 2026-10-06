@@ -308,7 +308,7 @@ export const DoctorConsultation: React.FC = () => {
           {isLoadingPatient && (
             <div className="absolute inset-0 bg-surface-card/60 backdrop-blur-xs flex items-center justify-center rounded-2xl z-10">
               <div className="flex items-center gap-2 bg-surface-card px-4 py-2 rounded-xl shadow-md border border-border-subtle text-primary">
-                <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
+                <span className="material-symbols-outlined text-[20px] ">hourglass_empty</span>
                 <span className="text-sm font-semibold">Loading patient records...</span>
               </div>
             </div>
@@ -728,7 +728,7 @@ export const DoctorConsultation: React.FC = () => {
                 >
                   {isSavingAllergies ? (
                     <>
-                      <span className="material-symbols-outlined text-[15px] animate-spin">refresh</span>
+                      <span className="material-symbols-outlined text-[15px] ">hourglass_empty</span>
                       <span>Saving...</span>
                     </>
                   ) : (
@@ -1031,7 +1031,7 @@ export const DoctorConsultation: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+                  <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
                   <span>Finalizing Encounter...</span>
                 </>
               ) : isFinalized ? (

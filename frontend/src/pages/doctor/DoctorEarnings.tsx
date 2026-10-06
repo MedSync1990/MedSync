@@ -113,7 +113,7 @@ export const DoctorEarnings: React.FC = () => {
         <div className="animate-in fade-in duration-300">
           {loadingOverview ? (
             <div className="py-12 flex justify-center">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
             </div>
           ) : (
             <div className="flex flex-col gap-space-md">

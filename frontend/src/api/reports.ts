@@ -5,7 +5,7 @@
  * Owner: Ashen (these power Ashen's own report pages)
  */
 
-import { get, post } from './client';
+import { get, post, patch } from './client';
 import type {
   AppointmentsSummaryResponse,
   DoctorRevenueResponse,
@@ -253,12 +253,12 @@ export function getAllPayoutRequests(params?: {
   });
 }
 
-/** Approve a payout request */
-export function approvePayoutRequest(
+/** Pay a payout request */
+export function payPayoutRequest(
   requestId: number,
   remarks?: string
 ): Promise<{ message: string; request_id: number }> {
-  return post(`/reports/doctor-payments/${requestId}/approve`, { remarks });
+  return patch(`/reports/doctor-payments/${requestId}/pay`, { remarks });
 }
 
 /** Reject a payout request */
@@ -266,5 +266,5 @@ export function rejectPayoutRequest(
   requestId: number,
   remarks: string
 ): Promise<{ message: string; request_id: number }> {
-  return post(`/reports/doctor-payments/${requestId}/reject`, { remarks });
+  return patch(`/reports/doctor-payments/${requestId}/reject`, { remarks });
 }

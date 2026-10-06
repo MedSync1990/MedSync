@@ -150,4 +150,25 @@ class PayoutHistoryItem(BaseModel):
     
 class PayoutHistoryResponse(BaseModel):
     data: list[PayoutHistoryItem]
-    
+
+class AdminPayoutRequestItem(BaseModel):
+    request_id: int
+    user_id: int
+    doctor_name: str
+    specialty: str
+    branch_name: str
+    account_id: int
+    bank_name: str
+    account_number: str
+    request_amount: float
+    status: str
+    request_date: datetime
+    processed_date: Optional[datetime]
+    remarks: Optional[str]
+
+class AdminPayoutRequestsResponse(BaseModel):
+    data: list[AdminPayoutRequestItem]
+    total: int
+
+class PayoutDecisionRequest(BaseModel):
+    remarks: Optional[str] = None

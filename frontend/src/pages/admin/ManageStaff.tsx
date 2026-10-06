@@ -529,7 +529,7 @@ export const ManageStaff: React.FC = () => {
                     </tr>
                   )}
                   {loading && (
-                    <tr><td colSpan={6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px] animate-spin text-primary">refresh</span></td></tr>
+                    <tr><td colSpan={6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px]  text-primary">hourglass_empty</span></td></tr>
                   )}
                 </tbody>
               </table>
