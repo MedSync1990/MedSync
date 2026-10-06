@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>MedSync – Doctor Payment Approval</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+:focus-visible{outline:2px solid #0284C7;outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){*{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;}}
+input[type=checkbox]{accent-color:#006194;width:16px;height:16px;cursor:pointer;}</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#00628d","secondary":"#565e74","surface-dim":"#cbdbf5","tertiary-fixed-dim":"#89ceff","primary":"#006194","background":"#f8f9ff","tertiary-container":"#007cb1","status-pending-text":"#B45309","surface-container-low":"#eff4ff","error":"#ba1a1a","surface":"#f8f9ff","on-primary":"#ffffff","on-background":"#0b1c30","status-cancelled-bg":"#FFE4E6","status-cancelled-text":"#BE123C","surface-container-highest":"#d3e4fe","outline-variant":"#bfc7d2","status-completed-text":"#047857","status-scheduled-text":"#0369A1","status-pending-bg":"#FEF3C7","surface-subtle":"#F1F5F9","status-completed-bg":"#D1FAE5","inverse-surface":"#213145","inverse-on-surface":"#eaf1ff","on-surface-variant":"#3f4850","surface-container-lowest":"#ffffff","brand-teal-light":"#38BDF8","surface-container-high":"#dce9ff","surface-card":"#FFFFFF","outline":"#707881","canvas-bg":"#E9EEF5","status-scheduled-bg":"#E0F2FE","brand-navy-deep":"#0F172A","surface-container":"#e5eeff","on-surface":"#0b1c30","primary-container":"#007bb9"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","2xl":"1rem","full":"9999px"},spacing:{"content-max-width":"1600px","space-2xs":"0.25rem","space-md":"1rem","space-xs":"0.5rem","space-lg":"1.5rem","sidebar-width":"260px","gutter-desktop":"1.5rem","space-xl":"2rem","topbar-height":"68px","space-3xl":"3rem","space-sm":"0.75rem"},fontFamily:{"label-md":["Roboto"],"body-md":["Roboto"],"display-lg":["Roboto"],"body-sm":["Roboto"],"label-lg":["Roboto"],"headline-md":["Roboto"],"headline-sm":["Roboto"],"headline-lg":["Roboto"],"mono-data":["Roboto"],"label-sm":["Roboto"]},fontSize:{"label-md":["14px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"600"}],"body-md":["16px",{lineHeight:"23px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["14px",{lineHeight:"19px",fontWeight:"400"}],"label-lg":["16px",{lineHeight:"22px",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"mono-data":["14px",{lineHeight:"19px",letterSpacing:"0.01em",fontWeight:"500"}],"label-sm":["12px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}]}}}};</script></head>
+<body class="bg-surface font-body-md text-body-md text-on-surface">
+<aside class="fixed left-0 top-0 h-screen w-sidebar-width bg-[#0F172A] shadow-[0_1px_8px_rgba(0,0,0,0.06)] z-50 flex flex-col justify-between py-space-md">
+  <div class="flex flex-col gap-space-lg">
+    <div class="px-space-lg flex items-center gap-space-sm">
+      <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-brand-teal-light"><span class="material-symbols-outlined text-[22px]">local_hospital</span></div>
+      <div><div class="font-headline-sm text-headline-sm text-white leading-tight">MedSync</div><div class="font-label-sm text-label-sm uppercase tracking-wider text-white/50">Branch Manager</div></div>
+    </div>
+    <nav class="flex flex-col px-space-sm gap-space-2xs" aria-label="Primary" id="nav"></nav>
+  </div>
+  <div class="px-space-sm flex flex-col gap-space-2xs">
+    <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-white/50">settings</span><span class="font-label-lg text-label-lg">Settings</span></a>
+    <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-white/50">help</span><span class="font-label-lg text-label-lg">Help Center</span></a>
+    <a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-rose-300">logout</span><span class="font-label-lg text-label-lg">Logout</span></a>
+  </div>
+</aside>
+<div class="pl-sidebar-width">
+<header class="fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between">
+  <div><div class="font-headline-sm text-headline-sm text-on-surface leading-tight">MedSync</div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Branch Manager Portal</div></div>
+  <div class="flex items-center gap-space-lg">
+    <div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-sm text-label-sm font-semibold">Colombo Central Branch (Locked)</span></div>
+    <div class="flex items-center gap-space-xs">
+      <button aria-label="Toggle Theme" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">light_mode</span></button>
+      <button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button>
+    </div>
+    <div class="flex items-center gap-space-sm pl-space-xs">
+      <div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Good evening, Chaminda</div><div class="font-label-sm text-label-sm text-on-surface-variant">Branch Manager · Colombo Central Branch</div></div>
+      <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] ring-2 ring-surface-container-highest">CH</div>
+    </div>
+  </div>
+</header>
+<main class="relative pt-topbar-height bg-canvas-bg min-h-screen w-full px-gutter-desktop py-space-xl max-w-content-max-width mx-auto"><div class="flex flex-col w-full gap-space-xl">
+
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+  <div class="flex flex-col gap-space-2xs">
+    <div class="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider"><span class="material-symbols-outlined text-[18px]">verified</span><span>Financial Operations</span><span class="text-outline">/</span><span class="text-secondary font-medium">Doctor Payouts</span></div>
+    <h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">Doctor Payment Approval</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Review each physician's monthly earnings, then approve or reject the payout before it is released to finance.</p>
+  </div>
+  <div class="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+    <div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">lock</span></div>
+    <div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span><span class="font-label-lg text-label-lg text-on-surface">Colombo Central Branch (Locked)</span></div>
+  </div>
+</div>
+
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+  <div class="flex flex-wrap items-center gap-space-md flex-1">
+    <div class="flex flex-col gap-1 min-w-[200px]">
+      <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="period">Payout Period</label>
+      <div class="relative flex items-center"><span class="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
+        <select id="period" class="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"><option value="sep">September 2026</option><option value="aug">August 2026</option></select>
+        <span class="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span></div>
+    </div>
+    <div class="flex flex-col gap-1 min-w-[180px]">
+      <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="status">Status</label>
+      <div class="relative flex items-center"><span class="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">fact_check</span>
+        <select id="status" class="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"><option value="all">All Statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+        <span class="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span></div>
+    </div>
+    <div class="flex flex-col gap-1 min-w-[220px]">
+      <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="search">Search Physician</label>
+      <div class="relative flex items-center"><span class="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
+        <input id="search" type="text" placeholder="Filter by doctor name..." class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20"/></div>
+    </div>
+  </div>
+  <div class="flex items-center gap-space-xs self-end lg:self-center">
+    <button id="reset-btn" class="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">restart_alt</span>Reset</button>
+    <button id="apply-btn" class="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">filter_alt</span>Apply Filters</button>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md" id="kpis"></div>
+
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+  <div class="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-lowest">
+    <div class="flex items-center gap-space-sm">
+      <div class="w-9 h-9 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">payments</span></div>
+      <div><h3 class="font-headline-sm text-headline-sm text-on-surface">Payout Requests</h3><p class="font-body-sm text-body-sm text-on-surface-variant" id="sub">6 physicians · September 2026</p></div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="bulk-btn" class="hidden h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors items-center gap-1"><span class="material-symbols-outlined text-[16px]">done_all</span><span id="bulk-label">Approve Selected</span></button>
+      <button id="export-btn" class="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">download</span>Export CSV</button>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse" id="tbl">
+      <thead><tr class="bg-surface-subtle text-secondary font-label-sm text-label-sm uppercase tracking-wider h-11">
+        <th class="pl-space-md py-2.5 w-10"><input type="checkbox" id="check-all" aria-label="Select all pending"/></th>
+        <th class="px-space-md py-2.5 font-semibold">Doctor</th><th class="px-space-md py-2.5 font-semibold text-right">Appointments</th><th class="px-space-md py-2.5 font-semibold text-right">Gross Revenue</th><th class="px-space-md py-2.5 font-semibold text-right">Doctor Share</th><th class="px-space-md py-2.5 font-semibold text-right">Net Payable</th><th class="px-space-md py-2.5 font-semibold text-center">Status</th><th class="px-space-md py-2.5 font-semibold text-center">Actions</th></tr></thead>
+      <tbody class="divide-y divide-surface-subtle" id="tbody"></tbody>
+    </table>
+    <div class="hidden py-space-3xl px-space-md flex-col items-center justify-center text-center" id="empty">
+      <div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span class="material-symbols-outlined text-[32px]">folder_off</span></div>
+      <h4 class="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">Try another payout period, status, or physician name.</p>
+      <button id="empty-reset" class="mt-space-md px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors">Clear Filters</button>
+    </div>
+  </div>
+  <div class="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+    <div class="text-body-sm font-body-sm text-secondary" id="foot-count"></div>
+    <div class="flex items-center gap-2"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Visible Net Payable:</span><span class="font-headline-sm text-headline-sm font-bold text-primary" id="foot-total"></span></div>
+  </div>
+</div>
+
+<div class="fixed inset-0 z-50 bg-brand-navy-deep/40 backdrop-blur-sm hidden items-center justify-center p-space-md" id="modal" role="dialog" aria-modal="true">
+  <div class="bg-surface-card rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div class="p-space-lg bg-surface-container-low flex items-start justify-between">
+      <div class="flex items-center gap-space-sm">
+        <div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-[26px]">request_quote</span></div>
+        <div><div class="font-headline-sm text-headline-sm text-on-surface" id="m-name"></div><div class="font-body-sm text-body-sm text-primary font-medium" id="m-spec"></div></div>
+      </div>
+      <button id="m-close" class="w-8 h-8 rounded-lg bg-surface-card text-secondary hover:text-on-surface flex items-center justify-center" aria-label="Close"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    <div class="p-space-lg flex flex-col gap-space-md overflow-y-auto">
+      <div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-subtle"><span class="font-label-md text-label-md text-secondary">Payout Period</span><span class="font-label-md text-label-md font-semibold">September 2026 · <span id="m-appts"></span> appointments</span></div>
+      <div class="flex flex-col gap-space-xs" id="m-lines"></div>
+      <div class="p-space-sm rounded-xl bg-surface-subtle flex items-center justify-between"><div><span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Net Payable</span><div class="font-headline-lg text-headline-lg text-primary font-bold" id="m-net"></div></div><span id="m-badge" class="px-3 py-1 rounded-full font-label-sm text-label-sm"></span></div>
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary" for="m-note">Approval Note <span class="normal-case font-normal" id="m-note-hint">(required when rejecting)</span></label>
+        <textarea id="m-note" rows="3" class="w-full p-space-sm rounded-lg bg-surface-subtle font-body-md text-body-md outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 resize-none" placeholder="Add a remark for finance..."></textarea>
+        <p id="m-err" class="hidden font-body-sm text-body-sm text-status-cancelled-text">Please add a reason before rejecting this payout.</p>
+      </div>
+    </div>
+    <div class="p-space-md bg-surface-container-low flex justify-end gap-space-sm" id="m-actions">
+      <button id="m-dismiss" class="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">Close</button>
+      <button id="m-reject" class="h-10 px-4 rounded-lg bg-status-cancelled-bg text-status-cancelled-text font-label-md text-label-md hover:brightness-95 transition flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">block</span>Reject</button>
+      <button id="m-approve" class="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">check_circle</span>Approve Payout</button>
+    </div>
+  </div>
+</div>
+
+</div></main></div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id), fmt=n=>'LKR '+n.toLocaleString('en-US');
+  const a='relative flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all';
+  const act="relative flex items-center gap-space-sm px-space-sm py-2 transition-all bg-white/10 text-white rounded-lg before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-brand-teal-light before:rounded-r-full";
+  const hd=t=>`<div class="pt-space-md pb-space-2xs px-space-sm font-label-sm text-label-sm text-white/40 uppercase tracking-wider">${t}</div>`;
+  const it=(i,t,on)=>`<a ${on?'aria-current="page"':''} class="${on?act:a}" href="#"><span class="material-symbols-outlined text-[20px] ${on?'text-brand-teal-light':'text-white/50'}">${i}</span><span class="font-label-lg text-label-lg">${t}</span></a>`;
+  $('nav').innerHTML=it('dashboard','Dashboard')+hd('Reports')+it('event_note','Branch Appointments')+it('payments','Doctor Revenue')+it('account_balance_wallet','Outstanding Balances')+it('pie_chart','Treatment Breakdown')+it('health_and_safety','Insurance vs. Out-of-Pocket')+hd('Management')+it('request_quote','Doctor Payments',1)+it('badge','Manage Staff')+it('stethoscope','Doctors &amp; Specialties')+it('contact_page','Patients')+it('medical_services','Treatment Catalogue');
+
+  const TAX=0.05;
+  // Sample figures: revenue from the Doctor Revenue report; share % and withholding rate are placeholders.
+  const docs=[
+    {n:'Dr. K. Bandara',i:'KB',s:'Cardiology Specialist',reg:'SLMC-48201',ap:64,c:310000,p:175000,sh:55,st:'pending',note:''},
+    {n:'Dr. Sarah Jayasinghe',i:'SJ',s:'General Physician',reg:'SLMC-51922',ap:82,c:260000,p:68000,sh:60,st:'pending',note:''},
+    {n:'Dr. Priyantha Alwis',i:'PA',s:'Pediatrician',reg:'SLMC-39180',ap:58,c:220000,p:70000,sh:55,st:'pending',note:''},
+    {n:'Dr. Nimal Fonseka',i:'NF',s:'Orthopedic Surgeon',reg:'SLMC-41299',ap:45,c:160000,p:115000,sh:50,st:'approved',note:'Verified against OT logs.'},
+    {n:'Dr. Anoma Silva',i:'AS',s:'Dermatologist',reg:'SLMC-46733',ap:52,c:175000,p:70000,sh:55,st:'pending',note:''},
+    {n:'Dr. Ruwan Perera',i:'RP',s:'ENT Specialist',reg:'SLMC-35619',ap:41,c:150000,p:72000,sh:55,st:'rejected',note:'Procedure invoices still under reconciliation.'}];
+  docs.forEach(d=>{d.g=d.c+d.p;d.sa=Math.round(d.g*d.sh/100);d.tx=Math.round(d.sa*TAX);d.net=d.sa-d.tx});
+  const ST={pending:['Pending','bg-status-pending-bg text-status-pending-text','bg-status-pending-text'],approved:['Approved','bg-status-completed-bg text-status-completed-text','bg-status-completed-text'],rejected:['Rejected','bg-status-cancelled-bg text-status-cancelled-text','bg-status-cancelled-text']};
+  const sel=new Set();let cur=null;
+
+  function kpis(){
+    const sum=s=>docs.filter(d=>d.st===s).reduce((x,d)=>x+d.net,0), cnt=s=>docs.filter(d=>d.st===s).length;
+    const k=(l,v,i,w,sub)=>`<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between"><div class="flex items-center justify-between mb-space-sm"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">${l}</span><div class="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">${i}</span></div></div><div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">${v}</div><div class="font-body-sm text-body-sm text-secondary mt-1">${sub}</div><div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span class="material-symbols-outlined text-[90px]">${w}</span></div></div>`;
+    $('kpis').innerHTML=k('Pending Approval',cnt('pending'),'hourglass_top','pending_actions',fmt(sum('pending'))+' awaiting')+k('Approved',cnt('approved'),'check_circle','task_alt',fmt(sum('approved'))+' released')+k('Rejected',cnt('rejected'),'block','cancel',fmt(sum('rejected'))+' on hold')+k('Total Net Payable',fmt(docs.reduce((x,d)=>x+d.net,0)),'account_balance_wallet','payments','6 physicians · Sep 2026');
+  }
+
+  function visible(){
+    const q=$('search').value.toLowerCase().trim(),s=$('status').value;
+    return $('period').value!=='sep'?[]:docs.filter(d=>(s==='all'||d.st===s)&&(!q||d.n.toLowerCase().includes(q)));
+  }
+
+  function render(){
+    kpis();const v=visible();
+    [...sel].forEach(n=>{const d=docs.find(x=>x.n===n);if(!d||d.st!=='pending'||!v.includes(d))sel.delete(n)});
+    $('tbody').innerHTML=v.map(d=>{const t=ST[d.st],pend=d.st==='pending';
+      return `<tr class="hover:bg-surface-subtle/70 transition-colors"><td class="pl-space-md py-3.5">${pend?`<input type="checkbox" class="row-check" data-n="${d.n}" ${sel.has(d.n)?'checked':''} aria-label="Select ${d.n}"/>`:''}</td><td class="px-space-md py-3.5"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[14px]">${d.i}</div><div><div class="font-label-lg text-label-lg">${d.n}</div><div class="font-body-sm text-body-sm text-secondary">${d.s} · ${d.reg}</div></div></div></td><td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">${d.ap}</td><td class="px-space-md py-3.5 text-right font-mono-data text-mono-data">${fmt(d.g)}</td><td class="px-space-md py-3.5 text-right font-mono-data text-mono-data text-secondary">${d.sh}%</td><td class="px-space-md py-3.5 text-right font-mono-data text-mono-data font-bold">${fmt(d.net)}</td><td class="px-space-md py-3.5 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full ${t[1]} font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full ${t[2]}"></span>${t[0]}</span></td><td class="px-space-md py-3.5"><div class="flex items-center justify-center gap-1.5"><button class="review-btn px-3 py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1" data-n="${d.n}"><span class="material-symbols-outlined text-[16px]">visibility</span>Review</button>${pend?`<button class="quick-btn w-8 h-8 rounded-lg bg-status-completed-bg text-status-completed-text hover:brightness-95 flex items-center justify-center" data-n="${d.n}" title="Approve" aria-label="Approve ${d.n}"><span class="material-symbols-outlined text-[18px]">check</span></button>`:''}</div></td></tr>`}).join('');
+    const none=v.length===0;
+    $('tbl').classList.toggle('hidden',none);$('empty').classList.toggle('hidden',!none);$('empty').classList.toggle('flex',none);
+    $('foot-count').textContent=`Showing ${v.length} of ${$('period').value==='sep'?docs.length:0} physicians · Period: ${$('period').selectedOptions[0].text}`;
+    $('foot-total').textContent=fmt(v.reduce((x,d)=>x+d.net,0));
+    const pendVis=v.filter(d=>d.st==='pending');
+    $('check-all').checked=pendVis.length>0&&pendVis.every(d=>sel.has(d.n));
+    $('bulk-btn').classList.toggle('hidden',sel.size===0);$('bulk-btn').classList.toggle('flex',sel.size>0);
+    $('bulk-label').textContent=`Approve Selected (${sel.size})`;
+    document.querySelectorAll('.row-check').forEach(c=>c.onchange=()=>{c.checked?sel.add(c.dataset.n):sel.delete(c.dataset.n);render()});
+    document.querySelectorAll('.review-btn').forEach(b=>b.onclick=()=>openM(b.dataset.n));
+    document.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>decide(b.dataset.n,'approved',''));
+  }
+
+  function toast(t){const e=document.createElement('div');e.className='fixed bottom-6 right-6 z-[60] bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0';e.innerHTML=`<span class="material-symbols-outlined text-[20px] text-brand-teal-light">check_circle</span><span class="font-label-md text-label-md">${t}</span>`;document.body.appendChild(e);requestAnimationFrame(()=>e.classList.remove('translate-y-2','opacity-0'));setTimeout(()=>{e.classList.add('opacity-0','translate-y-2');setTimeout(()=>e.remove(),300)},2400)}
+  function decide(n,st,note){const d=docs.find(x=>x.n===n);d.st=st;d.note=note;sel.delete(n);render();toast(`${n} payout ${st}`)}
+
+  // Modal
+  const modal=$('modal');
+  const line=(l,v,cls)=>`<div class="p-space-sm rounded-lg bg-surface-subtle flex items-center justify-between"><span class="font-body-sm text-body-sm text-secondary">${l}</span><span class="font-mono-data text-mono-data font-semibold ${cls||'text-on-surface'}">${v}</span></div>`;
+  function openM(n){
+    const d=docs.find(x=>x.n===n);cur=d;
+    $('m-name').textContent=d.n;$('m-spec').textContent=d.s+' · '+d.reg;$('m-appts').textContent=d.ap;
+    $('m-lines').innerHTML=line('Consultation charges',fmt(d.c))+line('Procedures & diagnostics',fmt(d.p))+line(`Doctor share (${d.sh}% of ${fmt(d.g)})`,fmt(d.sa))+line('Withholding tax (5%)','− '+fmt(d.tx),'text-status-cancelled-text');
+    $('m-net').textContent=fmt(d.net);
+    const t=ST[d.st];$('m-badge').textContent=t[0];$('m-badge').className='px-3 py-1 rounded-full font-label-sm text-label-sm '+t[1];
+    const pend=d.st==='pending';
+    $('m-note').value=d.note;$('m-note').readOnly=!pend;$('m-err').classList.add('hidden');
+    $('m-note-hint').textContent=pend?'(required when rejecting)':'(decision recorded)';
+    $('m-reject').classList.toggle('hidden',!pend);$('m-approve').classList.toggle('hidden',!pend);
+    modal.classList.remove('hidden');modal.classList.add('flex');
+  }
+  function closeM(){modal.classList.add('hidden');modal.classList.remove('flex')}
+  $('m-close').onclick=closeM;$('m-dismiss').onclick=closeM;
+  modal.onclick=e=>{if(e.target===modal)closeM()};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+  $('m-approve').onclick=()=>{decide(cur.n,'approved',$('m-note').value.trim());closeM()};
+  $('m-reject').onclick=()=>{const v=$('m-note').value.trim();if(!v){$('m-err').classList.remove('hidden');$('m-note').focus();return}decide(cur.n,'rejected',v);closeM()};
+
+  // Bulk, filters, export
+  $('check-all').onchange=e=>{visible().filter(d=>d.st==='pending').forEach(d=>e.target.checked?sel.add(d.n):sel.delete(d.n));render()};
+  $('bulk-btn').onclick=()=>{const c=sel.size;[...sel].forEach(n=>{const d=docs.find(x=>x.n===n);d.st='approved';d.note=''});sel.clear();render();toast(`${c} payouts approved`)};
+  function reset(){$('period').value='sep';$('status').value='all';$('search').value='';render()}
+  $('apply-btn').onclick=render;$('reset-btn').onclick=reset;$('empty-reset').onclick=reset;
+  ['period','status'].forEach(i=>$(i).onchange=render);$('search').oninput=render;
+  $('export-btn').onclick=()=>toast('Payout list exported as CSV');
+  render();
+})();
+</script>
+</body></html>
