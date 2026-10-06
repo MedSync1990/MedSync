@@ -74,6 +74,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }).catch(() => { });
   };
 
+  React.useEffect(() => {
+    const handleUnauthorized = () => {
+      // Token expired or invalid, log out automatically
+      setUser(null);
+      setToken(null);
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, []);
+
   return (
     <AuthContext.Provider value={{ user, token, setUser, setToken, logout }}>
       {children}
