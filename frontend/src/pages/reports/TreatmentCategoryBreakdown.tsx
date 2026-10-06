@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTreatmentCategories, exportToCSV } from '../../api/reports';
+import { getTreatmentCategories, exportToCSV, downloadTreatmentCategoriesPdf } from '../../api/reports';
 import type { TreatmentCategoriesResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
@@ -24,6 +24,7 @@ export default function TreatmentCategoryBreakdownReport() {
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const fetchReport = () => {
     setLoading(true);
@@ -49,6 +50,29 @@ export default function TreatmentCategoryBreakdownReport() {
       setExportComplete(true);
       setTimeout(() => setExportComplete(false), 2000);
     }, 600);
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsDownloadingPdf(true);
+      const blob = await downloadTreatmentCategoriesPdf({
+        from: startDate || undefined,
+        to: endDate || undefined,
+        branch: selectedBranch || undefined,
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Treatment_Report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to generate PDF');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   };
 
   const handleReset = () => {
@@ -292,7 +316,10 @@ export default function TreatmentCategoryBreakdownReport() {
               <span className="material-symbols-outlined text-primary text-[20px]">info</span>
               <span className="font-body-sm text-body-sm text-on-surface">Diagnostic turnover matches the Q3 target (94.2% within standard turnaround).</span>
             </div>
-            <button onClick={() => window.print()} className="font-label-sm text-label-sm text-primary hover:underline shrink-0" type="button">Download Audit PDF</button>
+            <button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="font-label-sm text-label-sm text-primary hover:underline shrink-0 flex items-center gap-1" type="button">
+              {isDownloadingPdf ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : null}
+              {isDownloadingPdf ? 'Generating...' : 'Download Audit PDF'}
+            </button>
           </div>
         </div>
       </div>

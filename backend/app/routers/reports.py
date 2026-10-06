@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from asyncpg import Connection
 from typing import Optional
 from app.errors import ForbiddenError, NotFoundError, ConflictError, AppValidationError
@@ -322,6 +323,137 @@ async def get_treatment_categories(
         total_catalog_items=int(catalog_stats["total_items"]) if catalog_stats and catalog_stats["total_items"] is not None else 0,
         active_catalog_items=int(catalog_stats["active_items"]) if catalog_stats and catalog_stats["active_items"] is not None else 0
     )
+
+@router.get("/treatment-categories/pdf")
+async def get_treatment_categories_pdf(
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    branch_id: Optional[int] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    import weasyprint
+    from jinja2 import Environment, FileSystemLoader
+    from datetime import datetime
+    import os
+    
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
+    if actual_branch_id == 1:
+        branch_name = "Colombo Central Branch"
+    elif actual_branch_id is None:
+        branch_name = "All Branches"
+    else:
+        branch_name = f"Branch {actual_branch_id}"
+    
+    query = """
+        SELECT 
+            tc.treatment_code,
+            tc.treatment_name as treatment_item,
+            tc.category,
+            tc.is_active,
+            COUNT(ct.treatment_code) as usage_count,
+            COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
+        FROM treatment_catalogue tc
+        LEFT JOIN (
+            SELECT ct2.treatment_code, ct2.unit_price, ct2.quantity
+            FROM consultation_treatments ct2
+            JOIN consultations c2 ON ct2.consultation_id = c2.consultation_id
+            JOIN appointments a2 ON c2.appointment_id = a2.appointment_id AND a2.status = 'Completed'
+            JOIN doctor_availability_slots das2 ON a2.slot_id = das2.slot_id
+            JOIN staff s2 ON das2.doctor_id = s2.user_id
+            WHERE ($1::int IS NULL OR s2.branch_id = $1)
+              AND ($2::date IS NULL OR das2.date >= $2)
+              AND ($3::date IS NULL OR das2.date <= $3)
+        ) ct ON tc.treatment_code = ct.treatment_code
+        GROUP BY tc.treatment_code, tc.treatment_name, tc.category, tc.is_active
+        ORDER BY total_revenue DESC, usage_count DESC
+    """
+    records = await conn.fetch(query, actual_branch_id, start_date, end_date)
+    
+    total_treatments = sum(r["usage_count"] for r in records)
+    total_revenue = sum(r["total_revenue"] for r in records)
+    
+    # Calculate category stats
+    categories_dict = {}
+    for r in records:
+        c = r["category"]
+        if c not in categories_dict:
+            categories_dict[c] = {"name": c, "count": 0, "pct": 0.0}
+        categories_dict[c]["count"] += r["usage_count"]
+    
+    categories = list(categories_dict.values())
+    categories.sort(key=lambda x: x["count"], reverse=True)
+    
+    for c in categories:
+        c["pct"] = (c["count"] / total_treatments * 100) if total_treatments > 0 else 0
+        
+    items = []
+    for r in records:
+        if r["usage_count"] > 0:
+            items.append({
+                "category": r["category"],
+                "name": r["treatment_item"],
+                "count": r["usage_count"],
+                "pct": (r["usage_count"] / total_treatments * 100) if total_treatments > 0 else 0,
+                "revenue": r["total_revenue"]
+            })
+    
+    # Prepare template data
+    top_category = categories[0]["name"] if categories else "N/A"
+    
+    if start_date and end_date:
+        period_str = f"{start_date.strftime('%b %Y')} - {end_date.strftime('%b %Y')}"
+    elif start_date:
+        period_str = f"From {start_date.strftime('%b %Y')}"
+    elif end_date:
+        period_str = f"Until {end_date.strftime('%b %Y')}"
+    else:
+        period_str = "All Time"
+
+    # Determine prepared_for using the logged in user's name and role
+    prepared_for = f"{current_user.username}, {current_user.role}"
+    
+    # Generate an intelligent, dynamic summary
+    top_category_pct = categories[0]["pct"] if categories else 0
+    top_revenue_item = max(items, key=lambda x: x["revenue"]) if items else None
+    top_revenue_name = top_revenue_item["name"] if top_revenue_item else "N/A"
+    top_revenue_amount = top_revenue_item["revenue"] if top_revenue_item else 0
+    
+    period_display = "" if period_str == "All Time" else f" in {period_str}"
+    
+    dynamic_summary = (
+        f"{branch_name} performed <strong>{total_treatments} procedures</strong>{period_display}, "
+        f"generating <strong>LKR {total_revenue:,.2f}</strong> in total value. "
+        f"<strong>{top_category}</strong> led clinical demand, accounting for {top_category_pct:.1f}% of all patient volume. "
+        f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
+    )
+    
+    template_data = {
+        "branch_name": branch_name,
+        "generated_date": datetime.now().strftime("%d %b %Y"),
+        "period": period_str,
+        "prepared_for": prepared_for,
+        "top_category": top_category,
+        "summary_text": dynamic_summary,
+        "total_treatments": total_treatments,
+        "total_revenue": total_revenue,
+        "total_categories": len(categories_dict),
+        "categories": categories,
+        "items": items
+    }
+    
+    env = Environment(loader=FileSystemLoader("app/templates"))
+    template = env.get_template("treatment_report_template.html")
+    html_string = template.render(**template_data)
+    
+    pdf_bytes = weasyprint.HTML(string=html_string, base_url="file:///app/").write_pdf()
+    
+    return Response(
+        content=pdf_bytes, 
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=Treatment_Report.pdf"}
+    )
+
 
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
 async def get_insurance_vs_out_of_pocket(
