@@ -1,11 +1,7 @@
 import React from 'react';
 import { useAuth } from '../auth/AuthContext';
 
-interface TopBarProps {
-  onThemeToggle?: () => void;
-}
-
-export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
+export const TopBar: React.FC = () => {
   const { user } = useAuth();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -18,7 +14,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const userName = user?.firstName || 'manager1';
   const roleSubtitle = user?.role || 'Branch Manager';
   const branchName = user?.branchName || 'Colombo';
-  const avatarUrl = user?.avatarUrl || '/logo.jpg';
 
   return (
     <header className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-white/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-slate-200 transition-shadow duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
@@ -44,10 +39,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
           <span className="font-label-md text-label-md text-slate-700 font-medium">{branchName}</span>
           <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
         </div>
-
-        <button onClick={onThemeToggle} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
-          <span className="material-symbols-outlined text-[20px]">dark_mode</span>
-        </button>
 
         <button className="relative w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <span className="material-symbols-outlined text-[20px]">notifications</span>
