@@ -748,7 +748,8 @@ async def _management_pdf(title, sections, conn, current_user, branch_id, filter
     from pathlib import Path
     from jinja2 import Environment, FileSystemLoader, select_autoescape
     from starlette.concurrency import run_in_threadpool
-    from datetime import timezone
+    from datetime import timezone, timedelta
+    from app.report_design import build_design
     import weasyprint
 
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
@@ -759,10 +760,14 @@ async def _management_pdf(title, sections, conn, current_user, branch_id, filter
             raise NotFoundError("Branch not found.")
     template_dir = Path(__file__).resolve().parents[1] / "templates"
     env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=select_autoescape(["html"]))
+    profile = await conn.fetchrow("SELECT first_name, last_name FROM app_user WHERE user_id = $1", current_user.user_id)
+    full_name = " ".join(str(profile[key] or "") for key in ("first_name", "last_name")).strip() if profile else current_user.username
+    design = build_design(title, sections, filters, branch_name)
+    logo = template_dir / "report_logo.png"
     html = env.get_template("management_report.html").render(
-        title=title, branch_name=branch_name, sections=sections,
-        generated_at=datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC"),
-        prepared_for=f"{current_user.username} ({current_user.role})", filters=filters,
+        **design, branch_name=branch_name,
+        generated_at=datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%d %b %Y"),
+        prepared_for=f"{full_name}, {current_user.role}", logo_uri=logo.as_uri(),
     )
     # Rendering is CPU intensive and must not block the async API event loop.
     pdf = await run_in_threadpool(lambda: weasyprint.HTML(string=html).write_pdf())
@@ -826,7 +831,7 @@ async def outstanding_balances_pdf(
     items = [r for r in report.data if
              (not q or any(q in str(v).lower() for v in (r.patient_name, r.patient_id, r.invoice_id))) and
              (aging == "all" or aging == ("0-30" if r.aging_days <= 30 else "31-60" if r.aging_days <= 60 else "60+"))]
-    sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status")])]
+    sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status"), ("patient_id", "Patient ID"), ("last_payment_date", "Last payment")])]
     return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])
 
 
@@ -848,4 +853,5 @@ async def insurance_cash_pdf(
         _report_section("Claim settlement times", slas, [("provider_name", "Provider"), ("avg_days", "Average days")]),
         _report_section("Payment modes (LKR)", report.payment_modes, [("payment_type", "Mode"), ("amount", "Amount"), ("percentage", "Percentage")]),
     ]
+    sections[2]["average"] = report.avg_claim_days
     return await _management_pdf("Insurance vs Cash", sections, conn, current_user, branch_id, [period, f"Provider: {provider}", f"Period search: {search or 'All'}"])
