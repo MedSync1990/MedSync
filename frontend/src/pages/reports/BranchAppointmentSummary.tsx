@@ -61,8 +61,8 @@ export default function BranchAppointmentSummary() {
     if (type === 'CSV') {
       exportToCSV(data?.daily_data || [], 'Branch_Appointment_Summary');
     } else if (type === 'PDF') {
+
       try {
-        setIsExporting(true);
         const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
         const margin = 14;
@@ -177,7 +177,6 @@ export default function BranchAppointmentSummary() {
         doc.setFontSize(8);
         doc.setTextColor(71, 85, 105); // slate-600
         doc.setFont('helvetica', 'normal');
-        const trunc = (str: string, max: number) => str.length > max ? str.substring(0, max) + '...' : str;
         doc.text(doc.splitTextToSize(branchName, colW - 5), c1, metaY + 4);
         doc.text(doc.splitTextToSize(dateInterval, colW - 5), c2, metaY + 4);
         doc.text(doc.splitTextToSize(categoryFilter === 'all' ? 'All Categories' : categoryFilter, colW - 5), c3, metaY + 4);
@@ -424,9 +423,8 @@ export default function BranchAppointmentSummary() {
         doc.save(`MedSync_Branch_Appointment_Summary.pdf`);
       } catch (err) {
         console.error("PDF generation failed:", err);
-      } finally {
-        setIsExporting(false);
       }
+
     }
   };
 
