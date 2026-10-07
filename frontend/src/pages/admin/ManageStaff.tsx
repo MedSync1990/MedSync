@@ -77,10 +77,10 @@ export const ManageStaff: React.FC = () => {
 
   const fetchData = () => {
     setLoading(true);
-    getStaffList(user?.role === 'Administrator' ? undefined : user?.branch_id).then(res => {
+    getStaffList(user?.role === 'Administrator' ? undefined : user?.branchId).then(res => {
       setStaff(res.data);
       setLoading(false);
-    }).catch(err => {
+    }).catch(_err => {
       showToast('Failed to load staff list', 'error');
       setLoading(false);
     });
@@ -97,7 +97,7 @@ export const ManageStaff: React.FC = () => {
   }, [staff, searchQuery, roleFilter, activeTab]);
 
   const activeCount = staff.filter(s => s.is_active).length;
-  const lockedCount = 0; // Not fully tracked in backend list endpoint yet
+  // const lockedCount = 0; // Not fully tracked in backend list endpoint yet
 
   const handleAddPhone = () => {
     if (fPhones.length < 3) setFPhones([...fPhones, '']);
@@ -134,7 +134,7 @@ export const ManageStaff: React.FC = () => {
       } else {
         const payload = {
           role_id: Number(fRole),
-          branch_id: user?.branch_id || 1,
+          branch_id: user?.branchId || 1,
           first_name: fFirst.trim(),
           middle_name: fMid.trim() || undefined,
           last_name: fLast.trim(),
@@ -265,7 +265,7 @@ export const ManageStaff: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between gap-3 py-2.5">
                   <span className="text-on-surface-variant">Last sign-in</span>
-                  <span className="text-right font-medium">{timeAgo(selectedStaff.last_login_at)}</span>
+                  <span className="text-right font-medium">{timeAgo(selectedStaff.last_login_at || null)}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3 py-2.5">
                   <span className="text-on-surface-variant">Created</span>
@@ -368,7 +368,7 @@ export const ManageStaff: React.FC = () => {
                 <dl className="divide-y divide-surface-subtle">
                   <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
                     <dt className="text-on-surface-variant">Last sign-in</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.last_login_at ? new Date(selectedStaff.last_login_at).toLocaleString() : 'Never'} <span className="text-on-surface-variant font-normal">· {timeAgo(selectedStaff.last_login_at)}</span></dd>
+                    <dd className="text-label-md font-medium">{selectedStaff.last_login_at ? new Date(selectedStaff.last_login_at).toLocaleString() : 'Never'} <span className="text-on-surface-variant font-normal">· {timeAgo(selectedStaff.last_login_at || null)}</span></dd>
                   </div>
                   <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
                     <dt className="text-on-surface-variant">Failed attempts</dt>
@@ -622,7 +622,7 @@ export const ManageStaff: React.FC = () => {
                 
                 <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-xl mt-4 border border-border-subtle">
                   <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
-                  <span>Branch: <strong>{user?.branch_name || 'Assigned Branch'}</strong> · A temporary password and auto-generated username will be provided upon creation.</span>
+                  <span>Branch: <strong>{user?.branchName || 'Assigned Branch'}</strong> · A temporary password and auto-generated username will be provided upon creation.</span>
                 </div>
               </div>
               <div className="p-space-md border-t border-surface-subtle flex justify-end gap-3 shrink-0 bg-white">

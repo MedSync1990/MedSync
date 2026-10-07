@@ -25,11 +25,17 @@ async def get_current_user(request: Request) -> CurrentUser:
     payload = decode_access_token(token)
 
     if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
-        cookie_csrf = request.cookies.get("csrf_token")
-        header_csrf = request.headers.get("X-CSRF-Token")
+        from app.config import config
+        origin = request.headers.get("origin")
+        
+        # If the request comes from our trusted frontend domain, we can rely on CORS 
+        # and the browser's Origin header for CSRF protection.
+        if not origin or origin not in config.CORS_ALLOWED_ORIGINS:
+            cookie_csrf = request.cookies.get("csrf_token")
+            header_csrf = request.headers.get("X-CSRF-Token")
 
-        if not cookie_csrf or not header_csrf or cookie_csrf != header_csrf:
-            raise ForbiddenError("CSRF token missing or invalid.")
+            if not cookie_csrf or not header_csrf or cookie_csrf != header_csrf:
+                raise ForbiddenError("CSRF token missing or invalid.")
 
     user = CurrentUser(
         user_id=payload["user_id"],

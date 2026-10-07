@@ -65,7 +65,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         value=token,
         httponly=True,
         secure=config.COOKIE_SECURE,
-        samesite="lax",
+        samesite="none",
         max_age=max_age,
     )
 
@@ -74,7 +74,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         value=csrf_token,
         httponly=False,
         secure=config.COOKIE_SECURE,
-        samesite="lax",
+        samesite="none",
         max_age=max_age,
     )
 
