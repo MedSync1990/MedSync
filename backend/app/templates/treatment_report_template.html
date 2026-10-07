@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-left {
+                content: "MedSync Branch Manager Portal | Ledger Code: CCB-2026-TREAT | Confidential - for internal use";
+                font-family: 'Roboto', sans-serif;
+                font-size: 9px;
+                color: #707881;
+            }
+            @bottom-right {
+                content: "Page " counter(page);
+                font-family: 'Roboto', sans-serif;
+                font-size: 9px;
+                color: #707881;
+            }
+        }
+        body { font-family: 'Roboto', sans-serif; color: #0b1c30; margin: 0; padding: 0; font-size: 12px; }
+        
+        .header-bg {
+            background-color: #1a2332;
+            border-bottom: 8px solid #006194;
+            padding: 40px 1.5cm 30px 1.5cm;
+            margin: -1.5cm -1.5cm 0 -1.5cm;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+        }
+        .header-left { color: #ffffff; }
+        .header-super { font-size: 9px; font-weight: bold; color: #89a3c2; text-transform: uppercase; letter-spacing: 1px; }
+        .header-context { font-size: 11px; color: #e2e8f0; margin-top: 4px; line-height: 1.4; }
+        .header-title { font-size: 32px; font-weight: bold; margin: 25px 0 8px 0; color: #ffffff; letter-spacing: -0.5px; }
+        .header-subtitle { font-size: 11px; color: #cbd5e1; }
+        
+        .logo-box {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .logo { max-height: 80px; }
+
+        .content { padding: 30px 0; }
+
+        .metadata-row {
+            display: table;
+            width: 100%;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .meta-col { display: table-cell; width: 20%; vertical-align: top; }
+        .meta-label { font-size: 10px; color: #0b1c30; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        .meta-value { font-size: 11px; color: #3f4850; line-height: 1.4; }
+        .meta-status { color: #047857; }
+
+        .section-header { margin-bottom: 15px; page-break-after: avoid; }
+        .section-title { font-size: 22px; font-weight: bold; color: #0b1c30; margin: 0; letter-spacing: -0.5px; }
+        .section-subtitle { font-size: 11px; color: #565e74; margin-top: 4px; }
+
+        .kpi-grid { display: table; width: 100%; table-layout: fixed; border-spacing: 12px 0; margin-left: -12px; margin-bottom: 15px; }
+        .kpi-card { 
+            display: table-cell; 
+            background-color: #f4f6f9; 
+            border-top: 3px solid #006194;
+            padding: 15px; 
+            vertical-align: top;
+        }
+        .kpi-label { font-size: 9px; color: #565e74; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 22px; font-weight: bold; color: #0b1c30; margin-top: 10px; }
+        .kpi-sub { font-size: 11px; color: #707881; font-weight: normal; }
+
+        .summary-text { font-size: 12px; color: #3f4850; line-height: 1.6; margin-bottom: 40px; }
+        
+        .bars-container { border: 1px solid #e2e8f0; padding: 25px; margin-bottom: 40px; }
+        .bar-row { margin-bottom: 15px; page-break-inside: avoid; }
+        .bar-name { font-weight: bold; font-size: 11px; color: #0b1c30; }
+        .bar-stats { color: #565e74; font-size: 11px; }
+        .bar-track { background-color: #f1f5f9; height: 10px; width: 100%; margin-top: 5px; }
+        .bar-fill { background-color: #006194; height: 100%; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 11px; page-break-inside: auto; }
+        thead { display: table-header-group; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        th { background-color: #f8fafc; color: #565e74; font-weight: bold; padding: 12px 10px; text-align: left; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; font-size: 10px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #0b1c30; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="header-bg">
+        <div class="header-left">
+            <div class="header-super">CLINICAL REPORTING / UTILIZATION</div>
+            <div class="header-context">
+                {{ branch_name }}<br>
+                Reporting period: {{ period }}
+            </div>
+            <div class="header-title">Treatment Category Breakdown</div>
+            <div class="header-subtitle">Treatments performed per category, demand distribution and procedure revenue</div>
+        </div>
+        <div class="logo-box">
+            <img src="file:///app/medsync.jpg" alt="MedSync Logo" class="logo">
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="metadata-row">
+            <div class="meta-col">
+                <div class="meta-label">REPORTING SCOPE</div>
+                <div class="meta-value">{{ branch_name }}</div>
+            </div>
+            <div class="meta-col">
+                <div class="meta-label">PERIOD</div>
+                <div class="meta-value">{{ period }}</div>
+            </div>
+            <div class="meta-col">
+                <div class="meta-label">PREPARED FOR</div>
+                <div class="meta-value">{{ prepared_for }}</div>
+            </div>
+            <div class="meta-col">
+                <div class="meta-label">GENERATED</div>
+                <div class="meta-value">{{ generated_date }}</div>
+            </div>
+            <div class="meta-col">
+                <div class="meta-label">AUDIT STATUS</div>
+                <div class="meta-value meta-status">Synced</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Executive Summary</h2>
+            <div class="section-subtitle">Key figures for the reporting period</div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">TOTAL TREATMENTS</div>
+                <div class="kpi-value">{{ total_treatments }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">TOP CATEGORY</div>
+                <div class="kpi-value" style="font-size: 18px;">{{ top_category }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">TOTAL TREATMENT VALUE</div>
+                <div class="kpi-value">LKR {{ "{:,.0f}".format(total_revenue) }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">CATALOG ACTIVE ITEMS</div>
+                <div class="kpi-value">{{ total_categories }} <span class="kpi-sub">/ {{ total_categories }} items</span></div>
+            </div>
+        </div>
+
+        <div class="summary-text">
+            {{ summary_text }}
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Volume & Capacity Impact</h2>
+            <div class="section-subtitle">Delivery load per clinical specialty</div>
+        </div>
+        
+        <div class="bars-container">
+            {% for cat in categories %}
+            <div class="bar-row">
+                <table style="width: 100%; margin: 0; border: none; padding: 0; font-size: 11px; line-height: 1; page-break-inside: avoid; margin-bottom: 0;">
+                    <tr>
+                        <td style="border: none; padding: 0; padding-bottom: 2px;" class="bar-name">{{ cat.name }}</td>
+                        <td style="border: none; padding: 0; padding-bottom: 2px;" class="text-right bar-stats">{{ cat.count }} ops ({{ "%.1f"|format(cat.pct) }}%)</td>
+                    </tr>
+                </table>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width: {{ cat.pct }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Treatment Item Performance</h2>
+            <div class="section-subtitle">Procedure frequency, demand share and revenue</div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>CATEGORY</th>
+                    <th>TREATMENT ITEM</th>
+                    <th class="text-right">COUNT</th>
+                    <th class="text-right">% OF TOTAL</th>
+                    <th class="text-right">REVENUE (LKR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.name }}</td>
+                    <td class="text-right" style="font-weight: bold;">{{ item.count }}</td>
+                    <td class="text-right">{{ "%.1f"|format(item.pct) }}%</td>
+                    <td class="text-right" style="font-weight: bold;">{{ "{:,.2f}".format(item.revenue) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
