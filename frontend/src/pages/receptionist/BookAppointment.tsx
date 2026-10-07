@@ -84,7 +84,7 @@ export const BookAppointment: React.FC = () => {
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
-  const [] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   // ─── Quick Walk-in Patient Modal State ─────────────────────────────────────
   const [showQuickModal, setShowQuickModal] = useState(false);
@@ -231,6 +231,38 @@ export const BookAppointment: React.FC = () => {
     };
     loadInitialData();
   }, []);
+
+  // ─── Auto-select patient from URL parameter ────────────────────────────────
+  useEffect(() => {
+    const patientIdParam = searchParams.get('patient_id');
+    if (patientIdParam) {
+      const loadPatientFromUrl = async () => {
+        try {
+          const res = await patientService.getById(patientIdParam);
+          if (res) {
+            const p: PatientListItem = {
+              patient_id: res.patient_id,
+              patient_code: res.patient_code,
+              first_name: res.first_name,
+              last_name: res.last_name,
+              id_number: res.id_number,
+              phone_number: res.phone_number || '',
+              gender: res.gender,
+              date_of_birth: res.date_of_birth,
+              has_insurance: Boolean(res.has_insurance || (res as any).insurance_provider),
+              is_active: res.is_active,
+              branch_name: res.branch_name,
+            };
+            setSelectedPatient(p);
+            setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
+          }
+        } catch (error) {
+          showToast('Failed to auto-load patient details from URL', 'error');
+        }
+      };
+      loadPatientFromUrl();
+    }
+  }, [searchParams, showToast]);
 
   // ─── Patient Search Functions ──────────────────────────────────────────────
   const searchPatients = async (query?: string) => {

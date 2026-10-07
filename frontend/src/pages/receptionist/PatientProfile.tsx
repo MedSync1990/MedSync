@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { patientService } from '../../services/patientService';
+import { get, put } from '../../services/api';
 import { getPatientInsurance, verifyInsurance } from '../../api/billing';
 import { useAuth } from '../../context/AuthContext';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
@@ -53,16 +54,12 @@ export const PatientProfile: React.FC = () => {
     try {
       const patientRes = await patientService.getById(id);
       const patientIdNumber = patientRes.patient_id;
-      const readOptional = async (url: string) => {
-        const response = await fetch(url, { credentials: 'include' });
-        return response.ok ? response.json() : null;
-      };
       const [balanceRes, insuranceRes, allergiesRes, appointmentsRes, invoicesRes] = await Promise.all([
-        readOptional(`/api/v1/invoices/patient/${patientIdNumber}/balance`),
+        get<any>(`/invoices/patient/${patientIdNumber}/balance`).catch(() => null),
         getPatientInsurance(patientIdNumber).catch(() => ({ data: [] })),
-        readOptional(`/api/v1/patients/${patientIdNumber}/allergies`),
-        readOptional(`/api/v1/appointments?patient_id=${patientIdNumber}`),
-        readOptional(`/api/v1/invoices/patient/${patientIdNumber}`),
+        get<any>(`/patients/${patientIdNumber}/allergies`).catch(() => null),
+        get<any>(`/appointments`, { patient_id: patientIdNumber }).catch(() => null),
+        get<any>(`/invoices/patient/${patientIdNumber}`).catch(() => null),
       ]);
 
       setPatient(patientRes);
@@ -85,12 +82,7 @@ export const PatientProfile: React.FC = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      // Stub to call update API
-      await fetch(`/api/v1/patients/${patientId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editData)
-      });
+      await patientService.update(patientId!, editData);
       setPatient({ ...patient, ...editData });
       setShowEditModal(false);
     } catch (e) {
