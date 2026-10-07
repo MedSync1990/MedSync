@@ -29,7 +29,7 @@ export function OutstandingBalances() {
 
   // Export
   const [isExporting, setIsExporting] = useState(false);
-  const [exportComplete, setExportComplete] = useState(false);
+  const [, setExportComplete] = useState(false);
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   const fetchReport = () => {

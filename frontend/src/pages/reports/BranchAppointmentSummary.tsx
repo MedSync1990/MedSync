@@ -3,6 +3,9 @@ import { getAppointmentsSummary, exportToCSV } from '../../api/reports';
 import type { AppointmentsSummaryResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 export default function BranchAppointmentSummary() {
   const [data, setData] = useState<AppointmentsSummaryResponse | null>(null);
@@ -53,11 +56,374 @@ export default function BranchAppointmentSummary() {
     }, 0);
   };
 
-  const handleExport = (type: string) => {
+  const handleExport = async (type: string) => {
     if (type === 'CSV') {
       exportToCSV(data?.daily_data || [], 'Branch_Appointment_Summary');
     } else if (type === 'PDF') {
-      window.print();
+
+      try {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Data Prep
+        const branchName = selectedBranch ? branches.find(b => b.branch_id === selectedBranch)?.name || 'Colombo Central Branch' : 'Colombo Central Branch';
+        const userName = user?.firstName ? `${user.firstName}, ${user.role}` : 'Chaminda, Branch Manager';
+        
+        const chartData = [...(data?.daily_data || [])];
+        const tableData = [...(data?.daily_data || [])].slice().reverse();
+
+        // Date Interval Formatting (e.g. "01 - 07 September 2026")
+        let dateInterval = 'N/A';
+        if (chartData.length > 0) {
+            const sD = new Date(chartData[0].date);
+            const eD = new Date(chartData[chartData.length - 1].date);
+            dateInterval = `${sD.toLocaleDateString('en-GB', { day: '2-digit' })} - ${eD.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+        }
+        const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        // KPIs
+        const totalScheduled = data?.total_scheduled || 0;
+        const totalCompleted = data?.total_completed || 0;
+        const totalCancelled = data?.total_cancelled || 0;
+        const totalWalkins = data?.total_walkins || 0;
+
+        // ================= PAGE 1 =================
+        
+        // 1. Dark Navy Header Background
+        doc.setFillColor(15, 23, 42); // slate-900 (Navy)
+        doc.rect(0, 0, pageWidth, 55, 'F');
+        
+        // Bright Blue Accent Line
+        doc.setFillColor(14, 165, 233); // sky-500 (Blue)
+        doc.rect(0, 55, pageWidth, 2, 'F');
+
+        // 2. Header Text (Left side)
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFont('helvetica', 'bold');
+        doc.text("OPERATIONAL ANALYTICS / APPOINTMENTS", margin, 15);
+        
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255); // white
+        doc.setFont('helvetica', 'normal');
+        doc.text(branchName, margin, 20);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.text(`Reporting period: ${dateInterval}`, margin, 24);
+
+        // Title
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255); // white
+        doc.text("Branch Appointment Summary", margin, 42);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.text("Scheduled, completed and cancelled appointments by branch and day", margin, 48);
+
+        // 3. Header Logo (Right side inside white box)
+        const logoBoxW = 45;
+        const logoBoxH = 35;
+        const logoBoxX = pageWidth - margin - logoBoxW;
+        const logoBoxY = 10;
+        
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 3, 3, 'F');
+
+        try {
+          const img = new Image();
+          img.src = '/logo.jpg';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const imgProps = doc.getImageProperties(img);
+          const imgW = 35;
+          const imgH = (imgProps.height * imgW) / imgProps.width;
+          // Center image perfectly inside the white box
+          const imgX = logoBoxX + (logoBoxW - imgW) / 2;
+          const imgY = logoBoxY + (logoBoxH - imgH) / 2;
+          doc.addImage(img, 'JPEG', imgX, imgY, imgW, imgH); 
+        } catch (e) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(56, 189, 248); 
+          doc.text("MEDSYNC", logoBoxX + 12, logoBoxY + 18);
+        }
+
+        // 4. Meta Info Grid
+        const metaY = 68;
+        const colW = contentWidth / 5;
+        const c1 = margin;
+        const c2 = margin + colW;
+        const c3 = margin + colW * 2;
+        const c4 = margin + colW * 3;
+        const c5 = margin + colW * 4 + 10;
+
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); // slate-900
+        doc.text("REPORTING SCOPE", c1, metaY);
+        doc.text("DATE INTERVAL", c2, metaY);
+        doc.text("CATEGORY", c3, metaY);
+        doc.text("PREPARED FOR", c4, metaY);
+        doc.text("GENERATED", c5, metaY);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105); // slate-600
+        doc.setFont('helvetica', 'normal');
+        doc.text(doc.splitTextToSize(branchName, colW - 5), c1, metaY + 4);
+        doc.text(doc.splitTextToSize(dateInterval, colW - 5), c2, metaY + 4);
+        doc.text(doc.splitTextToSize(categoryFilter === 'all' ? 'All Categories' : categoryFilter, colW - 5), c3, metaY + 4);
+        doc.text(doc.splitTextToSize(userName, colW - 5), c4, metaY + 4);
+        doc.text(genDate, c5, metaY + 4);
+
+        // Line separator
+        doc.setDrawColor(226, 232, 240); // slate-200
+        doc.setLineWidth(0.5);
+        doc.line(margin, 82, pageWidth - margin, 82);
+
+        // 5. Executive Summary
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); // slate-900
+        doc.text("Executive Summary", margin, 96);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.text("Key figures for the reporting period", margin, 101);
+
+        // Styled KPI Boxes
+        const kpiY = 106;
+        const kpiW = (contentWidth - 15) / 4; 
+        const kpis = [
+            { label: "TOTAL SCHEDULED", val: totalScheduled.toString() },
+            { label: "TOTAL COMPLETED", val: totalCompleted.toString() },
+            { label: "TOTAL CANCELLED", val: totalCancelled.toString() },
+            { label: "WALK-IN INFLOW", val: totalWalkins.toString() }
+        ];
+
+        kpis.forEach((kpi, idx) => {
+            const x = margin + (idx * (kpiW + 5));
+            
+            // Light gray box
+            doc.setFillColor(241, 245, 249); // slate-100
+            doc.rect(x, kpiY, kpiW, 22, 'F');
+            
+            // Top blue accent border on the box
+            doc.setFillColor(14, 165, 233); // sky-500
+            doc.rect(x, kpiY, kpiW, 1, 'F');
+            
+            // Text inside box (Left aligned)
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 116, 139); // slate-500
+            doc.text(kpi.label, x + 4, kpiY + 7);
+            
+            // Large number
+            doc.setFontSize(22);
+            doc.setTextColor(15, 23, 42); // slate-900
+            doc.text(kpi.val, x + 4, kpiY + 18);
+        });
+
+        // Summary Paragraph
+        const completionRate = totalScheduled > 0 ? ((totalCompleted / totalScheduled) * 100).toFixed(1) : "0.0";
+        const pending = totalScheduled - totalCompleted - totalCancelled;
+        const peakDay = chartData.length > 0 ? chartData.reduce((max, d) => d.scheduled > max.scheduled ? d : max, chartData[0]) : null;
+        const peakDateStr = peakDay ? new Date(peakDay.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit' }) : '';
+        
+        let lowestRate = 100;
+        let lowestDay = '';
+        chartData.forEach(d => {
+            if (d.scheduled > 0) {
+                const r = (d.completed / d.scheduled) * 100;
+                if (r < lowestRate) { 
+                    lowestRate = r; 
+                    lowestDay = new Date(d.date).toLocaleDateString('en-GB', { month: 'short', day: '2-digit' }); 
+                }
+            }
+        });
+
+        const summaryPara = `Between ${dateInterval}, ${branchName} scheduled ${totalScheduled} appointments, of which ${totalCompleted} were completed (${completionRate}%), ${totalCancelled} were cancelled (${totalScheduled ? ((totalCancelled/totalScheduled)*100).toFixed(1) : 0}%) and ${pending} remained pending or in another status. Demand peaked on ${peakDateStr} with ${peakDay?.scheduled || 0} appointments. The lowest daily completion rate was ${lowestRate === 100 ? 0.0 : lowestRate.toFixed(1)}% on ${lowestDay || 'N/A'}.`;
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105); // slate-600
+        const splitSummary = doc.splitTextToSize(summaryPara, contentWidth);
+        doc.text(splitSummary, margin, kpiY + 32);
+
+        // 6. Chart Section
+        let currentY = kpiY + 32 + (splitSummary.length * 5) + 6;
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Daily Volume & Outcomes", margin, currentY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Each bar is the day's scheduled total, split by outcome", margin, currentY + 5);
+
+        const chartEl = document.getElementById('chart-container');
+        if (chartEl) {
+            const canvas = await html2canvas(chartEl, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfHeight = (imgProps.height * contentWidth) / imgProps.width;
+            
+            // Draw a subtle border around the chart image
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(margin, currentY + 10, contentWidth, pdfHeight);
+            doc.addImage(imgData, 'PNG', margin, currentY + 10, contentWidth, pdfHeight);
+        }
+
+        // Footer P1
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 1", pageWidth - margin, 285, { align: 'right' });
+
+        // ================= PAGE 2 =================
+        doc.addPage();
+        
+        // 7. P2 Simple Navy Header
+        doc.setFillColor(15, 23, 42); // slate-900
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text("MEDSYNC", margin, 12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text("| Branch Appointment Summary", margin + 22, 12);
+        
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Daily Breakdown Records", margin, 32);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Appointment lifecycle log for ${branchName} (newest first)`, margin, 37);
+
+        // 8. Formatted Data Table 
+        const tableColumn = ["BRANCH", "DATE", "SCHEDULED", "COMPLETED", "CANCELLED", "COMPLETION RATE"];
+        const tableRows = tableData.map(d => {
+            const p = d.scheduled > 0 ? ((d.completed / d.scheduled) * 100).toFixed(1) + '%' : "0.0%";
+            const displayDate = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+            return [branchName, displayDate, d.scheduled.toString(), d.completed.toString(), d.cancelled.toString(), p];
+        });
+        
+        // Total Row
+        tableRows.push([
+            `Total (${tableData.length} days)`, "", totalScheduled.toString(), totalCompleted.toString(), totalCancelled.toString(), `${completionRate}%`
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 42,
+            theme: 'plain', 
+            styles: { fontSize: 9, textColor: [71, 85, 105], cellPadding: { top: 5, right: 4, bottom: 5, left: 4 } },
+            headStyles: { textColor: [100, 116, 139], fontStyle: 'bold', fontSize: 8 },
+            columnStyles: {
+                2: { halign: 'right' },
+                3: { halign: 'right' },
+                4: { halign: 'right' },
+                5: { halign: 'right' }
+            },
+            didDrawCell: function(data) {
+                // Subtle row dividers
+                if (data.row.section === 'body' || data.row.section === 'head') {
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
+            },
+            didParseCell: function(data) {
+                // Bold the total row
+                if (data.row.index === tableRows.length - 1) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.textColor = [15, 23, 42];
+                }
+            }
+        });
+
+        // Table Footer Caption
+        const finalY = (doc as any).lastAutoTable.finalY || 150;
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Showing ${tableRows.length > 1 ? tableRows.length - 1 : 0} entries. Completion rate = completed/scheduled. Pending/other = scheduled - completed - cancelled.`, margin, finalY + 5);
+
+        // 9. Key Observations Section
+        const obsY = finalY + 20;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Key Observations", margin, obsY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Derived from the daily figures above", margin, obsY + 5);
+
+        const obsW = (contentWidth - 10) / 3;
+        const avgSched = (totalScheduled / (tableRows.length > 1 ? tableRows.length - 1 : 1)).toFixed(1);
+        const avgComp = (totalCompleted / (tableRows.length > 1 ? tableRows.length - 1 : 1)).toFixed(1);
+        const cancelRate = totalScheduled ? ((totalCancelled/totalScheduled)*100).toFixed(1) : "0.0";
+        const maxCancellations = chartData.length > 0 ? Math.max(...chartData.map(d => d.cancelled)) : 0;
+
+        const observations = [
+            {
+                title: "Peak Day",
+                desc: `${peakDateStr} was the busiest day with ${peakDay?.scheduled || 0} scheduled appointments and ${peakDay?.completed || 0} completed.`,
+                metric: `${peakDay && peakDay.scheduled > 0 ? ((peakDay.completed/peakDay.scheduled)*100).toFixed(1) : 0}% completion`
+            },
+            {
+                title: "Cancellations",
+                desc: `${totalCancelled} appointments were cancelled over the period (${cancelRate}% of scheduled). No single day exceeded ${maxCancellations} cancellations.`,
+                metric: `${cancelRate}% rate`
+            },
+            {
+                title: "Daily Average",
+                desc: `The branch averaged ${avgSched} scheduled and ${avgComp} completed appointments per day.`,
+                metric: `Peak Completion: ${peakDay && peakDay.scheduled > 0 ? ((peakDay.completed/peakDay.scheduled)*100).toFixed(1) : 0}%`
+            }
+        ];
+
+        observations.forEach((obs, idx) => {
+            const x = margin + (idx * (obsW + 5));
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(obs.title, x, obsY + 15);
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(71, 85, 105);
+            const splitDesc = doc.splitTextToSize(obs.desc, obsW);
+            doc.text(splitDesc, x, obsY + 22);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(14, 165, 233);
+            doc.text(obs.metric, x, obsY + 45);
+        });
+
+        // Footer P2
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 2", pageWidth - margin, 285, { align: 'right' });
+
+        doc.save(`MedSync_Branch_Appointment_Summary.pdf`);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+      }
+
     }
   };
 
