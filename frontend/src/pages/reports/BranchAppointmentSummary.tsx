@@ -58,8 +58,10 @@ export default function BranchAppointmentSummary() {
   };
 
   const handleExport = async (type: string) => {
+    setIsExporting(true);
     if (type === 'CSV') {
       exportToCSV(data?.daily_data || [], 'Branch_Appointment_Summary');
+      setIsExporting(false);
     } else if (type === 'PDF') {
 
       try {
@@ -423,6 +425,8 @@ export default function BranchAppointmentSummary() {
         doc.save(`MedSync_Branch_Appointment_Summary.pdf`);
       } catch (err) {
         console.error("PDF generation failed:", err);
+      } finally {
+        setIsExporting(false);
       }
 
     }
