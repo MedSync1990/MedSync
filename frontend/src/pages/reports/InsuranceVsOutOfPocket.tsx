@@ -28,7 +28,7 @@ export function InsuranceVsOutOfPocket() {
   const [searchPeriod, setSearchPeriod] = useState('');
 
   const [isExporting, setIsExporting] = useState(false);
-  const [exportComplete, setExportComplete] = useState(false);
+  const [, setExportComplete] = useState(false);
 
   const fetchReport = () => {
     setLoading(true);
