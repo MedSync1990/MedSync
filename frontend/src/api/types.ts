@@ -444,6 +444,7 @@ export interface PatientResponse {
   middle_name?: string | null;
   last_name: string;
   id_number: string;
+  is_temp?: boolean;
   phone_number: string;
   email?: string | null;
   date_of_birth: string;
@@ -489,6 +490,7 @@ export interface QuickPatientPayload {
   last_name?: string;
   middle_name?: string;
   id_number?: string;
+  is_temp?: boolean;
   address?: string;
   gender?: Gender;
   date_of_birth?: string;

@@ -147,7 +147,7 @@ export default function TreatmentCategoryBreakdownReport() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branchName || 'Assigned Branch'} (Locked)</span>
             </div>
           </div>
         )}

@@ -84,7 +84,7 @@ export const BookAppointment: React.FC = () => {
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
-  const [searchParams] = useSearchParams();
+  const [] = useSearchParams();
 
   // ─── Quick Walk-in Patient Modal State ─────────────────────────────────────
   const [showQuickModal, setShowQuickModal] = useState(false);
