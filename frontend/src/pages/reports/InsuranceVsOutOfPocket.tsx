@@ -3,6 +3,9 @@ import { getInsuranceVsOutOfPocket, exportToCSV } from '../../api/reports';
 import type { InsuranceVsOutOfPocketResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 export function InsuranceVsOutOfPocket() {
   const [data, setData] = useState<InsuranceVsOutOfPocketResponse | null>(null);
@@ -25,7 +28,6 @@ export function InsuranceVsOutOfPocket() {
   const [searchPeriod, setSearchPeriod] = useState('');
 
   const [isExporting, setIsExporting] = useState(false);
-  const [exportComplete, setExportComplete] = useState(false);
 
   const fetchReport = () => {
     setLoading(true);
@@ -42,16 +44,6 @@ export function InsuranceVsOutOfPocket() {
   useEffect(() => {
     fetchReport();
   }, []);
-
-  const handleExport = () => {
-    setIsExporting(true);
-    exportToCSV(filteredData, 'Monthly_Settlement_Ledger');
-    setTimeout(() => {
-      setIsExporting(false);
-      setExportComplete(true);
-      setTimeout(() => setExportComplete(false), 2000);
-    }, 600);
-  };
 
   const handleReset = () => {
     setStartDate('');
@@ -92,6 +84,427 @@ export function InsuranceVsOutOfPocket() {
 
   const totalInvoices = (data?.ledger || []).reduce((acc, curr) => acc + curr.volume, 0) || 0;
 
+  const handleExport = async (type: string) => {
+    if (type === 'CSV') {
+      setIsExporting(true);
+      exportToCSV(filteredData, 'Monthly_Settlement_Ledger');
+      setTimeout(() => {
+        setIsExporting(false);
+
+      }, 600);
+    } else if (type === 'PDF') {
+      try {
+        setIsExporting(true);
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Data Prep
+        const branchName = selectedBranch ? branches.find(b => b.branch_id === selectedBranch)?.name || 'Colombo Central Branch' : 'Colombo Central Branch';
+        const userName = user?.firstName ? `${user.firstName}, ${user.role}` : 'Chaminda, Branch Manager';
+        
+        let dateInterval = 'All Time';
+        if (asc.length > 0) {
+            dateInterval = `Last ${asc.length} Months (${asc[0].period} - ${asc[asc.length - 1].period})`;
+        }
+        const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const trunc = (str: string, max: number) => str.length > max ? str.substring(0, max) + '...' : str;
+        // ================= PAGE 1 =================
+        
+        // 1. Dark Navy Header Background
+        doc.setFillColor(15, 23, 42); // slate-900 (Navy)
+        doc.rect(0, 0, pageWidth, 55, 'F');
+        doc.setFillColor(14, 165, 233); // sky-500 (Blue)
+        doc.rect(0, 55, pageWidth, 2, 'F');
+
+        // 2. Header Text (Left side)
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFont('helvetica', 'bold');
+        doc.text("FINANCIAL OPERATIONS / BRANCH PERFORMANCE", margin, 15);
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255); 
+        doc.setFont('helvetica', 'normal');
+        doc.text(branchName, margin, 20);
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184); 
+        doc.text(`Reporting period: ${dateInterval}`, margin, 24);
+
+        // Title
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255); 
+        doc.text("Insurance vs. Out-of-Pocket", margin, 42);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184); 
+        doc.text("Coverage split between insurance and patient payments over a period", margin, 48);
+
+        // 3. Header Logo (Right side inside white box)
+        const logoBoxW = 45;
+        const logoBoxH = 35;
+        const logoBoxX = pageWidth - margin - logoBoxW;
+        const logoBoxY = 10;
+        
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 3, 3, 'F');
+
+        try {
+          const img = new Image();
+          img.src = '/logo.jpg';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const imgProps = doc.getImageProperties(img);
+          const imgW = 35;
+          const imgH = (imgProps.height * imgW) / imgProps.width;
+          const imgX = logoBoxX + (logoBoxW - imgW) / 2;
+          const imgY = logoBoxY + (logoBoxH - imgH) / 2;
+          doc.addImage(img, 'JPEG', imgX, imgY, imgW, imgH); 
+        } catch (e) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(56, 189, 248); 
+          doc.text("MEDSYNC", logoBoxX + 12, logoBoxY + 18);
+        }
+
+        // 4. Meta Info Grid
+        const metaY = 68;
+        const colW = contentWidth / 5;
+        const c1 = margin;
+        const c2 = margin + colW;
+        const c3 = margin + colW * 2 + 10;
+        const c4 = margin + colW * 3 + 10;
+        const c5 = margin + colW * 4 + 10;
+
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); 
+        doc.text("REPORTING SCOPE", c1, metaY);
+        doc.text("DATE RANGE", c2, metaY);
+        doc.text("INSURANCE", c3, metaY);
+        doc.text("PREPARED FOR", c4, metaY);
+        doc.text("GENERATED", c5, metaY);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105); 
+        doc.setFont('helvetica', 'normal');
+        doc.text(doc.splitTextToSize(branchName, colW - 5), c1, metaY + 4);
+        doc.text(doc.splitTextToSize(dateInterval, colW + 5), c2, metaY + 4);
+        doc.text(providerFilter === 'all' ? 'All Providers' : providerFilter.toUpperCase(), c3, metaY + 4);
+        doc.text(doc.splitTextToSize(userName, colW - 5), c4, metaY + 4);
+        doc.text(genDate, c5, metaY + 4);
+
+        // Line separator
+        doc.setDrawColor(226, 232, 240); 
+        doc.setLineWidth(0.5);
+        doc.line(margin, 82, pageWidth - margin, 82);
+
+        // 5. Executive Summary
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); 
+        doc.text("Executive Summary", margin, 96);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139); 
+        doc.text("Key figures for the reporting period", margin, 101);
+
+        // Styled KPI Boxes
+        const kpiY = 106;
+        const kpiW = (contentWidth - 15) / 4; 
+        const kpis = [
+            { label: "INSURANCE COVERAGE", val: `${insCoveragePct}%` },
+            { label: "OUT-OF-POCKET RATIO", val: `${oopRatio}%` },
+            { label: "TOTAL GROSS BILLED", val: `LKR ${(totalBilled/1000).toFixed(0)}K` },
+            { label: "AVG CLAIM SETTLEMENT", val: `${data?.avg_claim_days?.toFixed(1) || '0.0'} days` }
+        ];
+
+        kpis.forEach((kpi, idx) => {
+            const x = margin + (idx * (kpiW + 5));
+            doc.setFillColor(241, 245, 249); 
+            doc.rect(x, kpiY, kpiW, 22, 'F');
+            doc.setFillColor(14, 165, 233); 
+            doc.rect(x, kpiY, kpiW, 1, 'F');
+            
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 116, 139); 
+            doc.text(kpi.label, x + 4, kpiY + 7);
+            
+            let valFontSize = 18;
+            doc.setFontSize(valFontSize);
+            doc.setTextColor(15, 23, 42); 
+            while (doc.getTextWidth(kpi.val) > kpiW - 8 && valFontSize > 8) {
+                valFontSize -= 1;
+                doc.setFontSize(valFontSize);
+            }
+            doc.text(kpi.val, x + 4, kpiY + 18);
+        });
+
+        // Summary Paragraph
+        const topProviderStr = prov.length > 0 ? `${prov[0].provider_name} accounted for ${prov[0].percentage.toFixed(1)}% of disbursed claims.` : "";
+        const summaryPara = `Across ${dateInterval}, ${branchName} invoiced LKR ${totalBilled.toLocaleString()} over ${totalInvoices} invoices. Insurers covered LKR ${totalIns.toLocaleString()} (${insCoveragePct}%) and patients paid LKR ${totalOop.toLocaleString()} (${oopRatio}%) out of pocket. ${topProviderStr}`;
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105); 
+        const splitSummary = doc.splitTextToSize(summaryPara, contentWidth);
+        doc.text(splitSummary, margin, kpiY + 32);
+
+        // 6. Main SVG Chart Capture
+        let currentY = kpiY + 32 + (splitSummary.length * 5) + 6;
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Monthly Settlement Progression", margin, currentY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Insurance vs. out-of-pocket disbursement across the selected periods", margin, currentY + 5);
+
+        const chartEl = document.getElementById('monthly-chart-container');
+        if (chartEl) {
+            const canvas = await html2canvas(chartEl, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imgData);
+            // Limit height so it perfectly fits Page 1
+            const maxImgHeight = 65; 
+            const calcHeight = (imgProps.height * contentWidth) / imgProps.width;
+            const finalHeight = Math.min(calcHeight, maxImgHeight);
+            
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(margin, currentY + 10, contentWidth, finalHeight);
+            doc.addImage(imgData, 'PNG', margin, currentY + 10, contentWidth, finalHeight);
+            currentY += finalHeight + 20;
+        } else {
+            currentY += 80; // fallback spacing
+        }
+
+        // 7. Top Provider Split (Native Drawing)
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Top Provider Split", margin, currentY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Disbursed claims by contracted insurer (total LKR ${totalIns.toLocaleString()})`, margin, currentY + 5);
+
+        currentY += 12;
+        const barMaxWidth = contentWidth - 80;
+        
+        prov.slice(0, 4).forEach((p, idx) => {
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(`• ${p.provider_name}`, margin, currentY);
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(71, 85, 105);
+            doc.text(`LKR ${p.amount.toLocaleString()}`, margin + barMaxWidth + 20, currentY, { align: 'right' });
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(14, 165, 233);
+            doc.text(`${p.percentage.toFixed(1)}%`, margin + barMaxWidth + 35, currentY, { align: 'right' });
+
+            const pW = (p.percentage / 100) * barMaxWidth;
+            
+            // Apply different colors based on rank
+            if (idx === 0) doc.setFillColor(0, 97, 148); // Primary
+            else if (idx === 1) doc.setFillColor(15, 23, 42); // Navy
+            else if (idx === 2) doc.setFillColor(56, 189, 248); // Sky
+            else doc.setFillColor(100, 116, 139); // Slate
+
+            doc.rect(margin, currentY + 2, pW, 4, 'F');
+            currentY += 12;
+        });
+
+        // Footer P1
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 1", pageWidth - margin, 285, { align: 'right' });
+
+        // ================= PAGE 2 =================
+        doc.addPage();
+        
+        // Header P2
+        doc.setFillColor(15, 23, 42); 
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text("MEDSYNC", margin, 12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text("| Insurance vs. Out-of-Pocket", margin + 22, 12);
+        
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Monthly Settlement Ledger", margin, 32);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Billing disbursements per monthly cycle (newest first)`, margin, 37);
+
+        // 8. Formatted Data Table 
+        const tableColumn = ["BILLING PERIOD", "INSURANCE (LKR)", "OUT-OF-POCKET (LKR)", "TOTAL INVOICED", "% COVERED", "VOLUME"];
+        const tableRows = filteredData.map((m, i) => {
+            const t = m.total_insurance_covered + m.total_out_of_pocket;
+            const p = t > 0 ? (m.total_insurance_covered / t * 100).toFixed(1) + '%' : "0.0%";
+            return [
+              m.period + (i === 0 ? ' (ACTIVE)' : ''), 
+              m.total_insurance_covered.toLocaleString(), 
+              m.total_out_of_pocket.toLocaleString(), 
+              t.toLocaleString(), 
+              p,
+              m.volume.toString()
+            ];
+        });
+        
+        tableRows.push([
+            `Total (${filteredData.length} mo)`, totalIns.toLocaleString(), totalOop.toLocaleString(), totalBilled.toLocaleString(), `${insCoveragePct}%`, totalInvoices.toString()
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 42,
+            theme: 'plain', 
+            styles: { fontSize: 8, textColor: [71, 85, 105], cellPadding: { top: 5, right: 4, bottom: 5, left: 4 } },
+            headStyles: { textColor: [100, 116, 139], fontStyle: 'bold', fontSize: 7 },
+            columnStyles: {
+                1: { halign: 'right' },
+                2: { halign: 'right' },
+                3: { halign: 'right' },
+                4: { halign: 'right' },
+                5: { halign: 'right' }
+            },
+            didDrawCell: function(data) {
+                if (data.row.section === 'body' || data.row.section === 'head') {
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
+            },
+            didParseCell: function(data) {
+                if (data.row.index === tableRows.length - 1) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.textColor = [15, 23, 42];
+                }
+            }
+        });
+
+        const finalY = (doc as any).lastAutoTable.finalY || 150;
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Showing ${filteredData.length} periods, ${totalInvoices} cumulative invoices. % Covered = insurance/total invoiced.`, margin, finalY + 5);
+
+        // 9. Bottom Blocks (Split layout)
+        const obsY = finalY + 20;
+        const halfW = (contentWidth / 2) - 5;
+        const rightX = margin + halfW + 10;
+
+        // LEFT: SLA
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Insurer Claim Turnaround", margin, obsY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Average settlement time by insurer against the 5-day SLA", margin, obsY + 5);
+
+        let sY = obsY + 12;
+        sla.forEach(r => {
+            const isGood = r.avg_days <= 5.0;
+            const init = r.provider_name.substring(0, 2).toUpperCase();
+            
+            doc.setFillColor(241, 245, 249);
+            doc.rect(margin, sY, halfW, 12, 'F');
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${init} | ${trunc(r.provider_name, 20)}`, margin + 3, sY + 5);
+            
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 116, 139);
+            doc.text("Processing SLA", margin + 3, sY + 9);
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${r.avg_days.toFixed(1)} Days`, margin + halfW - 3, sY + 5, { align: 'right' });
+            
+            doc.setFontSize(8);
+            if(isGood) doc.setTextColor(16, 185, 129); // emerald-500
+            else doc.setTextColor(245, 158, 11); // amber-500
+            doc.text(isGood ? 'Under SLA (5d)' : 'Review Pending', margin + halfW - 3, sY + 9, { align: 'right' });
+
+            sY += 14;
+        });
+
+        // RIGHT: Payment Modes
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Out-of-Pocket Payment Modes", rightX, obsY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Share of patient payments by mode", rightX, obsY + 5);
+
+        let mY = obsY + 12;
+        const modeW = (halfW - 6) / 3;
+        
+        modes.forEach((m, idx) => {
+            const mx = rightX + (idx * (modeW + 3));
+            doc.setFillColor(241, 245, 249);
+            doc.rect(mx, mY, modeW, 16, 'F');
+            
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 116, 139);
+            doc.text(m.payment_type.toUpperCase(), mx + modeW/2, mY + 5, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${m.percentage.toFixed(1)}%`, mx + modeW/2, mY + 10, { align: 'center' });
+            
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(14, 165, 233);
+            doc.text(`LKR ${(m.amount/1000).toFixed(0)}K`, mx + modeW/2, mY + 14, { align: 'center' });
+        });
+
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text("Daily Cash Drawer Reconciliation: 100% balanced | Chief Cashier: R. Perera", rightX, mY + 24);
+
+        // Footer P2
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 2", pageWidth - margin, 285, { align: 'right' });
+
+        doc.save(`MedSync_Insurance_vs_OutOfPocket.pdf`);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+      } finally {
+        setIsExporting(false);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
@@ -127,7 +540,7 @@ export function InsuranceVsOutOfPocket() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branchName || 'Assigned Branch'} (Locked)</span>
             </div>
           </div>
         )}
@@ -176,7 +589,7 @@ export function InsuranceVsOutOfPocket() {
           </button>
           <button onClick={fetchReport} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
             {loading ? (
-              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+              <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
             ) : (
               <span className="material-symbols-outlined text-[18px]">filter_alt</span>
             )}
@@ -232,7 +645,7 @@ export function InsuranceVsOutOfPocket() {
               <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-brand-teal-light"></div><span className="text-on-surface-variant">Out-of-Pocket</span></div>
             </div>
           </div>
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto" id="monthly-chart-container">
             <svg className="min-w-[540px] w-full h-[260px]" viewBox="0 0 600 240">
               {yLabels.map((v, i) => {
                 const y = base - (v * sc);
@@ -307,12 +720,12 @@ export function InsuranceVsOutOfPocket() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
-              {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export Ledger'}
+            <button onClick={() => handleExport('CSV')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">download</span> Export CSV
             </button>
-            <button className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">verified</span>Audit Coverage
+            <button onClick={() => handleExport('PDF')} disabled={isExporting} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>}
+              {isExporting ? 'Generating...' : 'Export PDF'}
             </button>
           </div>
         </div>
@@ -369,7 +782,7 @@ export function InsuranceVsOutOfPocket() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined animate-spin text-[32px]">refresh</span>
+               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

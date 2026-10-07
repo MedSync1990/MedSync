@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from asyncpg import Connection
 from typing import Optional
-from app.errors import ForbiddenError
+from app.errors import ForbiddenError, NotFoundError, ConflictError, AppValidationError
 from datetime import date, datetime
 from app.db import get_conn
 from app.dependencies import CurrentUser, require_roles, get_branch_scope, get_current_user, get_effective_branch_id
@@ -12,7 +13,8 @@ from app.schemas.reports import (
     OutstandingBalancesResponse, OutstandingBalanceItem,
     TreatmentCategoriesResponse, TreatmentCategoryItem,
     InsuranceVsOutOfPocketResponse, MonthlyLedgerItem, ProviderSplitItem, ClaimSlaItem, PaymentModeItem,
-    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate
+    PayoutHistoryItem, PayoutHistoryResponse, PayoutRequestItem, PayoutRequestsResponse, BankAccountsResponse, BankAccountItem,DoctorEarningsOverviewResponse,PayoutRequestCreate,
+    AdminPayoutRequestItem, AdminPayoutRequestsResponse, PayoutDecisionRequest
 )
 from app.schemas.common import PaginationParams
 
@@ -230,7 +232,7 @@ async def get_outstanding_balances(
             (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
             (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
             MAX(p.payment_date) as last_payment_date,
-            EXTRACT(DAY FROM (CURRENT_DATE - i.created_at::date)) as aging_days,
+            (CURRENT_DATE - i.created_at::date) as aging_days,
             i.status
         FROM invoices i
         JOIN appointments a ON i.appointment_id = a.appointment_id
@@ -260,7 +262,7 @@ async def get_outstanding_balances(
             total_amount=float(r["total_amount"]),
             paid_amount=float(r["paid_amount"]),
             due_amount=float(r["due_amount"]),
-            last_payment_date=r["last_payment_date"],
+            last_payment_date=r["last_payment_date"].date() if hasattr(r["last_payment_date"], "date") else r["last_payment_date"],
             aging_days=int(r["aging_days"]) if r["aging_days"] is not None else 0,
             status=r["status"]
         ) for r in records
@@ -286,14 +288,17 @@ async def get_treatment_categories(
             COUNT(ct.treatment_code) as usage_count,
             COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
         FROM treatment_catalogue tc
-        LEFT JOIN consultation_treatments ct ON tc.treatment_code = ct.treatment_code
-        LEFT JOIN consultations c ON ct.consultation_id = c.consultation_id
-        LEFT JOIN appointments a ON c.appointment_id = a.appointment_id AND a.status = 'Completed'
-        LEFT JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-        LEFT JOIN staff s ON das.doctor_id = s.user_id 
-        WHERE ($1::int IS NULL OR (s.branch_id = $1 AND s.branch_id IS NOT NULL) OR s.branch_id IS NULL)
-          AND ($2::date IS NULL OR das.date >= $2 OR das.date IS NULL)
-          AND ($3::date IS NULL OR das.date <= $3 OR das.date IS NULL)
+        LEFT JOIN (
+            SELECT ct2.treatment_code, ct2.unit_price, ct2.quantity
+            FROM consultation_treatments ct2
+            JOIN consultations c2 ON ct2.consultation_id = c2.consultation_id
+            JOIN appointments a2 ON c2.appointment_id = a2.appointment_id AND a2.status = 'Completed'
+            JOIN doctor_availability_slots das2 ON a2.slot_id = das2.slot_id
+            JOIN staff s2 ON das2.doctor_id = s2.user_id
+            WHERE ($1::int IS NULL OR s2.branch_id = $1)
+              AND ($2::date IS NULL OR das2.date >= $2)
+              AND ($3::date IS NULL OR das2.date <= $3)
+        ) ct ON tc.treatment_code = ct.treatment_code
         GROUP BY tc.treatment_code, tc.treatment_name, tc.category, tc.is_active
         ORDER BY total_revenue DESC, usage_count DESC
     """
@@ -304,7 +309,7 @@ async def get_treatment_categories(
     
     data = [
         TreatmentCategoryItem(
-            treatment_code=r["treatment_code"],
+            treatment_code=str(r["treatment_code"]),
             treatment_item=r["treatment_item"],
             category=r["category"],
             is_active=bool(r["is_active"]),
@@ -315,9 +320,140 @@ async def get_treatment_categories(
     return TreatmentCategoriesResponse(
         data=data, 
         total=len(data),
-        total_catalog_items=int(catalog_stats["total_items"]),
-        active_catalog_items=int(catalog_stats["active_items"])
+        total_catalog_items=int(catalog_stats["total_items"]) if catalog_stats and catalog_stats["total_items"] is not None else 0,
+        active_catalog_items=int(catalog_stats["active_items"]) if catalog_stats and catalog_stats["active_items"] is not None else 0
     )
+
+@router.get("/treatment-categories/pdf")
+async def get_treatment_categories_pdf(
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    branch_id: Optional[int] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    import weasyprint
+    from jinja2 import Environment, FileSystemLoader
+    from datetime import datetime
+    import os
+    
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
+    if actual_branch_id == 1:
+        branch_name = "Colombo Central Branch"
+    elif actual_branch_id is None:
+        branch_name = "All Branches"
+    else:
+        branch_name = f"Branch {actual_branch_id}"
+    
+    query = """
+        SELECT 
+            tc.treatment_code,
+            tc.treatment_name as treatment_item,
+            tc.category,
+            tc.is_active,
+            COUNT(ct.treatment_code) as usage_count,
+            COALESCE(SUM(ct.unit_price * ct.quantity), 0) as total_revenue
+        FROM treatment_catalogue tc
+        LEFT JOIN (
+            SELECT ct2.treatment_code, ct2.unit_price, ct2.quantity
+            FROM consultation_treatments ct2
+            JOIN consultations c2 ON ct2.consultation_id = c2.consultation_id
+            JOIN appointments a2 ON c2.appointment_id = a2.appointment_id AND a2.status = 'Completed'
+            JOIN doctor_availability_slots das2 ON a2.slot_id = das2.slot_id
+            JOIN staff s2 ON das2.doctor_id = s2.user_id
+            WHERE ($1::int IS NULL OR s2.branch_id = $1)
+              AND ($2::date IS NULL OR das2.date >= $2)
+              AND ($3::date IS NULL OR das2.date <= $3)
+        ) ct ON tc.treatment_code = ct.treatment_code
+        GROUP BY tc.treatment_code, tc.treatment_name, tc.category, tc.is_active
+        ORDER BY total_revenue DESC, usage_count DESC
+    """
+    records = await conn.fetch(query, actual_branch_id, start_date, end_date)
+    
+    total_treatments = sum(r["usage_count"] for r in records)
+    total_revenue = sum(r["total_revenue"] for r in records)
+    
+    # Calculate category stats
+    categories_dict = {}
+    for r in records:
+        c = r["category"]
+        if c not in categories_dict:
+            categories_dict[c] = {"name": c, "count": 0, "pct": 0.0}
+        categories_dict[c]["count"] += r["usage_count"]
+    
+    categories = list(categories_dict.values())
+    categories.sort(key=lambda x: x["count"], reverse=True)
+    
+    for c in categories:
+        c["pct"] = (c["count"] / total_treatments * 100) if total_treatments > 0 else 0
+        
+    items = []
+    for r in records:
+        if r["usage_count"] > 0:
+            items.append({
+                "category": r["category"],
+                "name": r["treatment_item"],
+                "count": r["usage_count"],
+                "pct": (r["usage_count"] / total_treatments * 100) if total_treatments > 0 else 0,
+                "revenue": r["total_revenue"]
+            })
+    
+    # Prepare template data
+    top_category = categories[0]["name"] if categories else "N/A"
+    
+    if start_date and end_date:
+        period_str = f"{start_date.strftime('%b %Y')} - {end_date.strftime('%b %Y')}"
+    elif start_date:
+        period_str = f"From {start_date.strftime('%b %Y')}"
+    elif end_date:
+        period_str = f"Until {end_date.strftime('%b %Y')}"
+    else:
+        period_str = "All Time"
+
+    # Determine prepared_for using the logged in user's name and role
+    prepared_for = f"{current_user.username}, {current_user.role}"
+    
+    # Generate an intelligent, dynamic summary
+    top_category_pct = categories[0]["pct"] if categories else 0
+    top_revenue_item = max(items, key=lambda x: x["revenue"]) if items else None
+    top_revenue_name = top_revenue_item["name"] if top_revenue_item else "N/A"
+    top_revenue_amount = top_revenue_item["revenue"] if top_revenue_item else 0
+    
+    period_display = "" if period_str == "All Time" else f" in {period_str}"
+    
+    dynamic_summary = (
+        f"{branch_name} performed <strong>{total_treatments} procedures</strong>{period_display}, "
+        f"generating <strong>LKR {total_revenue:,.2f}</strong> in total value. "
+        f"<strong>{top_category}</strong> led clinical demand, accounting for {top_category_pct:.1f}% of all patient volume. "
+        f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
+    )
+    
+    template_data = {
+        "branch_name": branch_name,
+        "generated_date": datetime.now().strftime("%d %b %Y"),
+        "period": period_str,
+        "prepared_for": prepared_for,
+        "top_category": top_category,
+        "summary_text": dynamic_summary,
+        "total_treatments": total_treatments,
+        "total_revenue": total_revenue,
+        "total_categories": len(categories_dict),
+        "categories": categories,
+        "items": items
+    }
+    
+    env = Environment(loader=FileSystemLoader("app/templates"))
+    template = env.get_template("treatment_report_template.html")
+    html_string = template.render(**template_data)
+    
+    pdf_bytes = weasyprint.HTML(string=html_string, base_url="file:///app/").write_pdf()
+    
+    return Response(
+        content=pdf_bytes, 
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=Treatment_Report.pdf"}
+    )
+
 
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
 async def get_insurance_vs_out_of_pocket(
@@ -630,3 +766,111 @@ async def create_doctor_payout_request(
     
     return {"message": "Payout request created successfully", "request_id": request_id}
     
+
+@router.get("/doctor-payments", response_model=AdminPayoutRequestsResponse)
+async def get_all_payout_requests(
+    branch_id: Optional[int] = None,
+    status: Optional[str] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+
+    """
+    Admin/Branch Manager: list all doctor payout requests.
+    Branch Managers are locked to their own branch.
+    """
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
+
+    query = """
+    SELECT 
+    r.request_id,
+    r.user_id,
+    u.first_name || ' ' || u.last_name AS doctor_name,
+    COALESCE(sp.name, 'General OPD') AS specialty,
+    b.name AS branch_name,
+    r.account_id,
+    ba.bank_name,
+    ba.account_number,
+    r.request_amount,
+    r.status,
+    r.request_date,
+    r.processed_date,
+    r.remarks
+    FROM staff_payout_requests r
+    JOIN staff s ON r.user_id = s.user_id
+    JOIN app_user u ON s.user_id = u.user_id
+    JOIN branch b ON s.branch_id = b.branch_id
+    LEFT JOIN doctor d ON s.user_id = d.user_id
+    LEFT JOIN doctor_specialty ds ON d.user_id = ds.user_id
+    LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+    JOIN staff_bank_accounts ba ON r.account_id = ba.account_id
+    WHERE ($1::int IS NULL OR s.branch_id = $1)
+    AND ($2::text IS NULL OR r.status = $2)
+    ORDER BY r.request_date DESC
+    """
+
+    records = await conn.fetch(query, actual_branch_id, status)
+    data = [AdminPayoutRequestItem(**dict(r)) for r in records]
+    return AdminPayoutRequestsResponse(data=data, total=len(data))
+
+@router.patch("/doctor-payments/{request_id}/pay")
+async def pay_payout_request(
+    request_id: int,
+    body: PayoutDecisionRequest,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    """Pay a pending payout request."""
+    row = await conn.fetchrow(
+        "SELECT request_id, status, user_id, account_id, request_amount FROM staff_payout_requests WHERE request_id = $1",
+        request_id
+    )
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Request not found.")
+    if row["status"] != "Pending":
+        raise HTTPException(status_code=400, detail="Request is not pending.")
+    
+    async with conn.transaction():
+        await conn.execute(
+            """
+            UPDATE staff_payout_requests
+            SET status = 'Paid',
+                processed_date = NOW(),
+                remarks = $2
+            WHERE request_id = $1
+            """,
+            request_id,
+            body.remarks
+        )
+
+        await conn.execute(
+            """
+            INSERT INTO staff_payouts (user_id, request_id, account_id, amount_paid, payment_reference, payment_method)
+            VALUES ($1, $2, $3, $4, $5, 'Bank Transfer')
+            """,
+            row["user_id"], request_id, row["account_id"], row["request_amount"], f"PAY-{request_id}"
+        )
+
+    return {"message": "Payout request marked as Paid.", "request_id": request_id}
+
+@router.patch("/doctor-payments/{request_id}/reject")
+async def reject_payout_request(
+    request_id: int,
+    body: PayoutDecisionRequest,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+):
+    """Reject a pending payout request. Remarks/reason is required."""
+    if not body.remarks or not body.remarks.strip():
+        raise HTTPException(status_code=400, detail="A reason is required when rejecting a payout.")
+
+    row = await conn.fetchrow(
+        "SELECT request_id, status FROM staff_payout_requests WHERE request_id = $1",
+        request_id
+    )
+
+    if not row:
+        raise NotFoundError(f"Payout request {request_id} not found.")
+    if row["status"] != "Pending":
+        raise ConflictError(f"Cannot reject — request is already '{row['status']}'.")

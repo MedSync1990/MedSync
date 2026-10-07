@@ -9,7 +9,7 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 import asyncpg
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import config
 from app.errors import (
@@ -20,6 +20,9 @@ from app.errors import (
     AppValidationError, validation_exception_handler,
     generic_exception_handler
 )
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+import logging
 from app.routers import (
     auth, branches, staff, doctors, specialties, appointments,
     patients, allergies, treatments, consultations, invoices,
@@ -55,6 +58,12 @@ app.add_exception_handler(ConflictError, conflict_exception_handler)  # type: ig
 app.add_exception_handler(ForbiddenError, forbidden_exception_handler)  # type: ignore
 app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)  # type: ignore
 app.add_exception_handler(AppValidationError, validation_exception_handler)  # type: ignore
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    logging.error(f"422 Error: {exc.errors()} Body: {await request.body()}")
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
 app.add_exception_handler(Exception, generic_exception_handler)
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])

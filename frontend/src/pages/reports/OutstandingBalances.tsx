@@ -4,6 +4,8 @@ import { recordPayment } from '../../api/billing';
 import type { OutstandingBalancesResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export function OutstandingBalances() {
   const [data, setData] = useState<OutstandingBalancesResponse | null>(null);
@@ -29,7 +31,6 @@ export function OutstandingBalances() {
 
   // Export
   const [isExporting, setIsExporting] = useState(false);
-  const [exportComplete, setExportComplete] = useState(false);
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   const fetchReport = () => {
@@ -43,34 +44,6 @@ export function OutstandingBalances() {
   useEffect(() => {
     fetchReport();
   }, []);
-
-  const handleExport = () => {
-    setIsExporting(true);
-    exportToCSV(filteredData, 'Outstanding_Balances');
-    setTimeout(() => {
-      setIsExporting(false);
-      setExportComplete(true);
-      setTimeout(() => setExportComplete(false), 2000);
-    }, 600);
-  };
-
-  const handleRecordPayment = async () => {
-    if (!selectedInv) return;
-    setIsRecordingPayment(true);
-    try {
-      await recordPayment(selectedInv.invoice_id, {
-        amount: selectedInv.due_amount,
-        payment_type: 'Cash'
-      });
-      const res = await getOutstandingBalances();
-      setData(res);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Failed to record payment', err);
-    } finally {
-      setIsRecordingPayment(false);
-    }
-  };
 
   const fmt = (n: number) => `LKR ${(Number(n) || 0).toLocaleString('en-US')}`;
 
@@ -97,8 +70,375 @@ export function OutstandingBalances() {
   // KPIs
   const totalOutstanding = filteredData.reduce((acc, curr) => acc + curr.due_amount, 0) || 0;
   const overdueInvoices = filteredData.length || 0;
-  const partiallyPaid = filteredData.filter(i => i.paid_amount > 0 && i.due_amount > 0).length || 0;
-  const fullyUnpaid = filteredData.filter(i => i.paid_amount === 0).length || 0;
+  const partiallyPaid = filteredData.filter(i => i.status === 'Partially Paid').length || 0;
+  const fullyUnpaid = filteredData.filter(i => i.status === 'Unpaid').length || 0;
+
+  const handleExport = async (type: string) => {
+    if (type === 'CSV') {
+      setIsExporting(true);
+      exportToCSV(filteredData, 'Outstanding_Balances');
+      setTimeout(() => {
+        setIsExporting(false);
+
+      }, 600);
+    } else if (type === 'PDF') {
+      try {
+        setIsExporting(true);
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Data Prep
+        const branchName = selectedBranch ? branches.find(b => b.branch_id === selectedBranch)?.name || 'Colombo Central Branch' : 'Colombo Central Branch';
+        const userName = user?.firstName ? `${user.firstName}, ${user.role}` : 'Chaminda, Branch Manager';
+        const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        
+        let agingText = 'All Overdue';
+        if (agingFilter === '0-30') agingText = '0-30 Days';
+        if (agingFilter === '31-60') agingText = '31-60 Days';
+        if (agingFilter === '60+') agingText = '60+ Days';
+
+        // ================= PAGE 1 =================
+        
+        // 1. Dark Navy Header Background
+        doc.setFillColor(15, 23, 42); // slate-900 (Navy)
+        doc.rect(0, 0, pageWidth, 55, 'F');
+        doc.setFillColor(14, 165, 233); // sky-500 (Blue)
+        doc.rect(0, 55, pageWidth, 2, 'F');
+
+        // 2. Header Text
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFont('helvetica', 'bold');
+        doc.text("FINANCIAL OPERATIONS / COLLECTIONS", margin, 15);
+
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'normal');
+        doc.text(branchName, margin, 20);
+
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Aging range: ${agingText} | Generated ${genDate}`, margin, 24);
+
+        // Title
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text("Outstanding Balances", margin, 42);
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text("Unpaid and partially paid invoices - collection risk and recovery status", margin, 48);
+
+        // 3. Header Logo (Inside white box)
+        const logoBoxW = 45;
+        const logoBoxH = 35;
+        const logoBoxX = pageWidth - margin - logoBoxW;
+        const logoBoxY = 10;
+
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 3, 3, 'F');
+
+        try {
+          const img = new Image();
+          img.src = '/logo.jpg';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const imgProps = doc.getImageProperties(img);
+          const imgW = 35;
+          const imgH = (imgProps.height * imgW) / imgProps.width;
+          const imgX = logoBoxX + (logoBoxW - imgW) / 2;
+          const imgY = logoBoxY + (logoBoxH - imgH) / 2;
+          doc.addImage(img, 'JPEG', imgX, imgY, imgW, imgH);
+        } catch (e) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(56, 189, 248);
+          doc.text("MEDSYNC", logoBoxX + 12, logoBoxY + 18);
+        }
+
+        // 4. Meta Info Grid
+        const metaY = 68;
+        const colW = contentWidth / 5;
+        const c1 = margin;
+        const c2 = margin + colW;
+        const c3 = margin + colW * 2;
+        const c4 = margin + colW * 3;
+        const c5 = margin + colW * 4 + 10;
+
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("REPORTING SCOPE", c1, metaY);
+        doc.text("AGING RANGE", c2, metaY);
+        doc.text("PATIENT SEARCH", c3, metaY);
+        doc.text("PREPARED FOR", c4, metaY);
+        doc.text("GENERATED", c5, metaY);
+
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont('helvetica', 'normal');
+        const trunc = (str: string, max: number) => str.length > max ? str.substring(0, max) + '...' : str;
+        doc.text(doc.splitTextToSize(branchName, colW - 5), c1, metaY + 4);
+        doc.text(agingText, c2, metaY + 4);
+        doc.text(searchQuery ? trunc(searchQuery, 15) : 'None applied', c3, metaY + 4);
+        doc.text(doc.splitTextToSize(userName, colW - 5), c4, metaY + 4);
+        doc.text(genDate, c5, metaY + 4);
+
+        // Line separator
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.line(margin, 82, pageWidth - margin, 82);
+
+        // 5. Executive Summary
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Executive Summary", margin, 96);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Key figures for the branch", margin, 101);
+
+        // Styled KPI Boxes
+        const kpiY = 106;
+        const kpiW = (contentWidth - 15) / 4;
+        const kpis = [
+            { label: "TOTAL OUTSTANDING", val: `LKR ${totalOutstanding.toLocaleString()}` },
+            { label: "OVERDUE INVOICES", val: `${overdueInvoices} invoices` },
+            { label: "PARTIALLY PAID", val: partiallyPaid.toString() },
+            { label: "FULLY UNPAID", val: fullyUnpaid.toString() }
+        ];
+
+        kpis.forEach((kpi, idx) => {
+            const x = margin + (idx * (kpiW + 5));
+            doc.setFillColor(241, 245, 249); // slate-100
+            doc.rect(x, kpiY, kpiW, 22, 'F');
+            doc.setFillColor(14, 165, 233); // sky-500
+            doc.rect(x, kpiY, kpiW, 1, 'F');
+
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 116, 139); // slate-500
+            doc.text(kpi.label, x + 4, kpiY + 7);
+
+            // Dynamic font sizing
+            let valFontSize = 18;
+            doc.setFontSize(valFontSize);
+            doc.setTextColor(15, 23, 42);
+            while (doc.getTextWidth(kpi.val) > kpiW - 8 && valFontSize > 8) {
+                valFontSize -= 1;
+                doc.setFontSize(valFontSize);
+            }
+            doc.text(kpi.val, x + 4, kpiY + 18);
+        });
+
+        // Summary Paragraph
+        const totalBranchInvCount = data?.data?.length || 0;
+        const totalBranchOut = (data?.data || []).reduce((acc, curr) => acc + curr.due_amount, 0);
+        const largestInv = [...filteredData].sort((a,b) => b.due_amount - a.due_amount)[0];
+        const oldest60Plus = filteredData.find(i => i.status === 'Unpaid' && i.aging_days > 60);
+
+        let largestStr = largestInv ? `The largest is ${largestInv.invoice_id} (${largestInv.patient_name}, LKR ${largestInv.due_amount.toLocaleString()}, ${largestInv.status.toLowerCase()}, ${getAgingCategory(largestInv.aging_days)} days)` : '';
+        let oldestStr = oldest60Plus && oldest60Plus.invoice_id !== largestInv?.invoice_id ? `, and ${oldest60Plus.invoice_id} (${oldest60Plus.patient_name}, LKR ${oldest60Plus.due_amount.toLocaleString()}) is an unpaid invoice aged over 60 days.` : '.';
+
+        const summaryPara = `${branchName} has ${totalBranchInvCount} overdue invoices with LKR ${totalBranchOut.toLocaleString()} outstanding overall. The ${overdueInvoices} invoices listed in this report carry LKR ${totalOutstanding.toLocaleString()} of that balance. ${largestStr}${oldestStr}`;
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105);
+        const splitSummary = doc.splitTextToSize(summaryPara, contentWidth);
+        doc.text(splitSummary, margin, kpiY + 32);
+
+        // 6. Collection Breakdown Section
+        let breakY = kpiY + 32 + (splitSummary.length * 5) + 6;
+
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Collection Breakdown", margin, breakY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Status of all overdue invoices and aging of the invoices listed below", margin, breakY + 5);
+
+        breakY += 12;
+        const halfW = (contentWidth / 2) - 5;
+        const rightX = margin + halfW + 10;
+
+        // Left Box: Collection Status
+        doc.setFillColor(241, 245, 249);
+        doc.rect(margin, breakY, halfW, 35, 'F');
+        doc.setFillColor(14, 165, 233);
+        doc.rect(margin, breakY, halfW, 1, 'F');
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Collection Status", margin + 4, breakY + 6);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`All ${filteredData.length} overdue invoices`, margin + 4, breakY + 10);
+
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(`${partiallyPaid}`, margin + 4, breakY + 18);
+        doc.setTextColor(200);
+        doc.text("|", margin + 16, breakY + 18);
+        doc.setTextColor(15, 23, 42);
+        doc.text(`${fullyUnpaid}`, margin + 22, breakY + 18);
+
+        const ppPct = overdueInvoices ? ((partiallyPaid/overdueInvoices)*100).toFixed(1) : "0.0";
+        const upPct = overdueInvoices ? ((fullyUnpaid/overdueInvoices)*100).toFixed(1) : "0.0";
+
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`• Partially Paid        ${partiallyPaid} invoices        ${ppPct}%`, margin + 4, breakY + 26);
+        doc.text(`• Fully Unpaid          ${fullyUnpaid} invoices        ${upPct}%`, margin + 4, breakY + 31);
+
+        // Right Box: Aging
+        doc.setFillColor(241, 245, 249);
+        doc.rect(rightX, breakY, halfW, 35, 'F');
+        doc.setFillColor(14, 165, 233);
+        doc.rect(rightX, breakY, halfW, 1, 'F');
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Aging of Listed Invoices", rightX + 4, breakY + 6);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Outstanding balance of the ${overdueInvoices} invoices in the ledger`, rightX + 4, breakY + 10);
+
+        let a30 = {amt:0, c:0}, a60 = {amt:0, c:0}, a90 = {amt:0, c:0};
+        filteredData.forEach(i => {
+            if(i.aging_days <= 30) { a30.amt += i.due_amount; a30.c++; }
+            else if(i.aging_days <= 60) { a60.amt += i.due_amount; a60.c++; }
+            else { a90.amt += i.due_amount; a90.c++; }
+        });
+
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`0-30 days          LKR ${a30.amt.toLocaleString()}          ${a30.c} inv.`, rightX + 4, breakY + 18);
+        doc.text(`31-60 days        LKR ${a60.amt.toLocaleString()}          ${a60.c} inv.`, rightX + 4, breakY + 24);
+        doc.text(`60+ days           LKR ${a90.amt.toLocaleString()}          ${a90.c} inv.`, rightX + 4, breakY + 30);
+
+        // 7. Invoice Ledger Table
+        let tableY = breakY + 45;
+
+        const tableColumn = ["PATIENT", "INVOICE #", "TOTAL", "PAID", "OUTSTANDING", "LAST PAYMENT", "STATUS", "AGING"];
+        const tableRows = filteredData.map(d => {
+            return [
+              `${d.patient_name}\n${d.patient_id}`,
+              d.invoice_id,
+              d.total_amount.toLocaleString(),
+              d.paid_amount.toLocaleString(),
+              d.due_amount.toLocaleString(),
+              (d.status === 'Unpaid' || !d.last_payment_date) ? '' : new Date(d.last_payment_date).toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'}),
+              d.status,
+              `${getAgingCategory(d.aging_days)}d`
+            ];
+        });
+
+        const totalPaid = filteredData.reduce((acc, curr) => acc + curr.paid_amount, 0);
+        const totalGross = filteredData.reduce((acc, curr) => acc + curr.total_amount, 0);
+        tableRows.push([
+            `Total (listed invoices)`, "", totalGross.toLocaleString(), totalPaid.toLocaleString(), totalOutstanding.toLocaleString(), "", "", ""
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: tableY,
+            theme: 'plain',
+            styles: { fontSize: 8, textColor: [71, 85, 105], cellPadding: { top: 4, right: 3, bottom: 4, left: 3 } },
+            headStyles: { textColor: [100, 116, 139], fontStyle: 'bold', fontSize: 7 },
+            columnStyles: {
+                2: { halign: 'right' },
+                3: { halign: 'right' },
+                4: { halign: 'right' }
+            },
+            didDrawPage: function (data) {
+              // Add a small dark navy header for subsequent pages
+              if (data.pageNumber > 1) {
+                doc.setFillColor(15, 23, 42);
+                doc.rect(0, 0, pageWidth, 20, 'F');
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text("MEDSYNC", margin, 12);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(148, 163, 184);
+                doc.text("| Outstanding Balances", margin + 22, 12);
+              }
+            },
+            margin: { top: 25 },
+            didDrawCell: function(data) {
+                if (data.row.section === 'body' || data.row.section === 'head') {
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
+            },
+            didParseCell: function(data) {
+                if (data.row.index === tableRows.length - 1) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.textColor = [15, 23, 42];
+                }
+            }
+        });
+
+        const finalY = (doc as any).lastAutoTable.finalY || 150;
+        const totalPages = (doc as any).internal.getNumberOfPages();
+
+        // Footer (all pages)
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.setFont('helvetica', 'normal');
+            if (i === totalPages) {
+              doc.text(`Page ${i} of ${totalPages} in the portal ledger, the remaining ${totalBranchInvCount - overdueInvoices} invoices are not included in this export. Amounts in LKR`, margin, finalY + 5);
+            }
+            doc.setTextColor(150);
+            doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential contains patient information`, margin, 285);
+            doc.text(`Page ${i}`, pageWidth - margin, 285, { align: 'right' });
+        }
+
+        doc.save(`MedSync_Outstanding_Balances.pdf`);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+      } finally {
+        setIsExporting(false);
+      }
+    }
+  };
+
+  const handleRecordPayment = async () => {
+    if (!selectedInv) return;
+    setIsRecordingPayment(true);
+    try {
+      await recordPayment(selectedInv.invoice_id, {
+        amount: selectedInv.due_amount,
+        payment_type: 'Cash'
+      });
+      const res = await getOutstandingBalances();
+      setData(res);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Failed to record payment', err);
+    } finally {
+      setIsRecordingPayment(false);
+    }
+  };
 
   const handleView = (inv: any) => {
     setSelectedInv(inv);
@@ -145,7 +485,7 @@ export function OutstandingBalances() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-              <span className="font-label-lg text-label-lg text-on-surface">{user?.branch_name || 'Assigned Branch'} (Locked)</span>
+              <span className="font-label-lg text-label-lg text-on-surface">{user?.branchName || 'Assigned Branch'} (Locked)</span>
             </div>
           </div>
         )}
@@ -185,7 +525,7 @@ export function OutstandingBalances() {
           </button>
           <button onClick={fetchReport} disabled={loading} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
             {loading ? (
-              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+              <span className="material-symbols-outlined text-[18px] ">hourglass_empty</span>
             ) : (
               <span className="material-symbols-outlined text-[18px]">filter_alt</span>
             )}
@@ -242,12 +582,12 @@ export function OutstandingBalances() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
-              {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export CSV'}
+            <button onClick={() => handleExport('CSV')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">download</span> Export CSV
             </button>
-            <button onClick={() => window.print()} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">print</span>Print
+            <button onClick={() => handleExport('PDF')} disabled={isExporting} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>}
+              {isExporting ? 'Generating...' : 'Export PDF'}
             </button>
           </div>
         </div>
@@ -269,8 +609,8 @@ export function OutstandingBalances() {
               {filteredData.map((d: any, i: number) => {
                 const paidAmt = d.paid_amount;
                 const dueAmt = d.due_amount;
-                const un = paidAmt === 0;
-                const st = un ? 'Unpaid' : 'Partially Paid';
+                const un = d.status === 'Unpaid';
+                const st = d.status;
                 const c = un ? 'bg-status-cancelled-bg text-status-cancelled-text' : 'bg-status-pending-bg text-status-pending-text';
                 const dot = un ? 'bg-status-cancelled-text' : 'bg-status-pending-text';
                 const initials = (d.patient_name || 'U').split(' ').map((n: string) => n[0]).join('').substring(0, 2);
@@ -319,7 +659,7 @@ export function OutstandingBalances() {
           )}
           {loading && (
              <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined animate-spin text-[32px]">refresh</span>
+               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>
@@ -379,7 +719,7 @@ export function OutstandingBalances() {
             <div className="p-space-md bg-surface-container-low flex justify-end gap-space-sm">
               <button onClick={() => setIsModalOpen(false)} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">Close</button>
               <button onClick={handleRecordPayment} disabled={isRecordingPayment} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5 disabled:opacity-50">
-                {isRecordingPayment ? <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span> : <span className="material-symbols-outlined text-[16px]">payments</span>}
+                {isRecordingPayment ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[16px]">payments</span>}
                 {isRecordingPayment ? 'Recording...' : 'Record Payment'}
               </button>
             </div>

@@ -248,11 +248,11 @@ INSERT INTO patient
     (user_id, blood_group, emergency_contact, contact_name,
      registered_branch, registered_date, is_active)
 VALUES
-    (16, 'O+',  '0711111111', 'Sunil Alwis',      1, CURRENT_DATE - 365, TRUE),
-    (17, 'A+',  '0712222222', 'Ranjith Ekanayake',2, CURRENT_DATE - 270, TRUE),
-    (18, 'B+',  '0713333333', 'Kamal Munasinghe', 3, CURRENT_DATE - 180, TRUE),
-    (19, 'AB+', '0714444444', 'Nimal Wijesinghe', 1, CURRENT_DATE - 90,  TRUE),
-    (20, 'O-',  '0715555555', 'Chaminda Liyanage',2, CURRENT_DATE - 30,  TRUE);
+    (16, 'O+',  '0711111111', 'Sunil Alwis',      1, CURRENT_DATE - 365, TRUE, FALSE),
+    (17, 'A+',  '0712222222', 'Ranjith Ekanayake',2, CURRENT_DATE - 270, TRUE, FALSE),
+    (18, 'B+',  '0713333333', 'Kamal Munasinghe', 3, CURRENT_DATE - 180, TRUE, FALSE),
+    (19, 'AB+', '0714444444', 'Nimal Wijesinghe', 1, CURRENT_DATE - 90,  TRUE, FALSE),
+    (20, 'O-',  '0715555555', 'Chaminda Liyanage',2, CURRENT_DATE - 30,  TRUE, FALSE);
 
 -- Patient allergies
 INSERT INTO patient_allergy (patient_id, allergy_id) VALUES

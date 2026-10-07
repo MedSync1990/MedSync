@@ -11,6 +11,7 @@ export const patientService = {
   }) => get<PaginatedResponse<PatientListItem>>('/patients', params),
   getById: (id: string | number) => get<PatientResponse>(`/patients/${id}`),
   create: (data: any) => post<PatientResponse>('/patients', data),
+  quickCreate: (data: any) => post<PatientResponse>('/patients/quick', data),
   update: (id: string | number, data: any) => put<PatientResponse>(`/patients/${id}`, data),
   getAllergies: () => get<AllergyItem[]>('/allergies'),
   getPatientAllergies: (id: string | number) => get<AllergyItem[]>(`/patients/${id}/allergies`),

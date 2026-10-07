@@ -1,5 +1,6 @@
 import React from 'react';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 
 interface TopBarProps {
   onThemeToggle?: () => void;
@@ -7,6 +8,7 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const { user } = useAuth();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
@@ -21,15 +23,29 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
   const branchName = user?.branchName || 'Colombo Central Branch';
   const avatarUrl = user?.avatarUrl || '/logo.jpg';
+
   return (
     <header
-      className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-shadow duration-200 ${isScrolled
-        ? 'shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
-        : 'shadow-[0_1px_4px_rgba(15,23,42,0.04)]'
+      className={`fixed top-0 right-0 h-topbar-height bg-surface-card/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-border-subtle transition-all duration-300 ${isCollapsed ? 'left-sidebar-collapsed-width' : 'left-sidebar-width'
+        } ${isScrolled
+          ? 'shadow-[0_4px_12px_rgba(15,23,42,0.08)]'
+          : 'shadow-[0_1px_4px_rgba(15,23,42,0.04)]'
         }`}
     >
-      {/* Greeting & Role Info */}
+      {/* Unified Single Sidebar Toggle Button & Greeting */}
       <div className="flex items-center gap-space-md">
+        <button
+          onClick={toggleSidebar}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200/80 shadow-xs active:scale-95"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {isCollapsed ? 'side_navigation' : 'menu_open'}
+          </span>
+        </button>
+
         <div className="flex flex-col">
           <div className="flex items-center gap-space-xs">
             <span className="font-headline-sm text-headline-sm text-brand-navy-deep">
@@ -50,14 +66,16 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
           <span>{branchName}</span>
         </div>
 
-        <button
-          onClick={onThemeToggle}
-          aria-label="Theme Toggle"
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[20px]">dark_mode</span>
-        </button>
+        {onThemeToggle && (
+          <button
+            onClick={onThemeToggle}
+            aria-label="Theme Toggle"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[20px]">dark_mode</span>
+          </button>
+        )}
 
         <button
           aria-label="Notifications"
@@ -85,3 +103,4 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
     </header>
   );
 };
+

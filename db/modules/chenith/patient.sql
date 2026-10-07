@@ -8,8 +8,10 @@ CREATE TABLE IF NOT EXISTS patient (
     contact_name      VARCHAR(100),
     registered_branch INT REFERENCES branch(branch_id),
     registered_date   DATE NOT NULL DEFAULT CURRENT_DATE,
-    is_active         BOOLEAN NOT NULL DEFAULT TRUE
+    is_active         BOOLEAN NOT NULL DEFAULT TRUE,
+    is_temp           BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE UNIQUE INDEX uq_patient_code ON patient(patient_code);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_patient_code ON patient(patient_code);
 CREATE INDEX IF NOT EXISTS idx_patient_registered_branch ON patient(registered_branch);
+CREATE INDEX IF NOT EXISTS idx_patient_is_temp ON patient(user_id) WHERE is_temp = TRUE;

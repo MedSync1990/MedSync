@@ -5,7 +5,7 @@
  * Owner: Ashen (these power Ashen's own report pages)
  */
 
-import { get, post } from './client';
+import { get, post, patch } from './client';
 import type {
   AppointmentsSummaryResponse,
   DoctorRevenueResponse,
@@ -115,6 +115,30 @@ export function getTreatmentCategories(
   return get<TreatmentCategoriesResponse>('/reports/treatment-categories', query);
 }
 
+/** Download Treatment Category PDF (A, BM) */
+export async function downloadTreatmentCategoriesPdf(
+  params?: TreatmentCategoriesParams,
+): Promise<Blob> {
+  const query = new URLSearchParams();
+  if (params?.branch) query.append('branch_id', String(params.branch));
+  if (params?.from) query.append('start_date', params.from);
+  if (params?.to) query.append('end_date', params.to);
+  
+  const rawBase = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
+  const cleanedBase = rawBase.replace(/\/+$/, '');
+  const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
+  
+  const response = await fetch(`${API_BASE_URL}/reports/treatment-categories/pdf?${query.toString()}`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to generate PDF');
+  }
+  return response.blob();
+}
+
 /** Insurance vs Out-of-Pocket report (A, BM) */
 export function getInsuranceVsOutOfPocket(
   params?: InsuranceVsOutOfPocketParams,
@@ -217,4 +241,54 @@ export function createDoctorPayoutRequest(
 ): Promise<{ message: string; request_id: number }> {
   // Assuming you have a 'post' function exported from './client'
   return post(`/reports/doctor-earnings/${doctorId}/payout-requests`, payload);
+}
+
+// ─── Admin Doctor Payment Approval ──────────────────────────────────────────
+
+export interface AdminPayoutRequestItem {
+  request_id: number;
+  user_id: number;
+  doctor_name: string;
+  specialty: string;
+  branch_name: string;
+  account_id: number;
+  bank_name: string;
+  account_number: string;
+  request_amount: number;
+  status: string;
+  request_date: string;
+  processed_date: string | null;
+  remarks: string | null;
+}
+
+export interface AdminPayoutRequestsResponse {
+  data: AdminPayoutRequestItem[];
+  total: number;
+}
+
+/** Get all doctor payout requests (Admin/Branch Manager view) */
+export function getAllPayoutRequests(params?: {
+  branch?: number;
+  status?: string;
+}): Promise<AdminPayoutRequestsResponse> {
+  return get<AdminPayoutRequestsResponse>('/reports/doctor-payments', {
+    branch_id: params?.branch,
+    status: params?.status,
+  });
+}
+
+/** Pay a payout request */
+export function payPayoutRequest(
+  requestId: number,
+  remarks?: string
+): Promise<{ message: string; request_id: number }> {
+  return patch(`/reports/doctor-payments/${requestId}/pay`, { remarks });
+}
+
+/** Reject a payout request */
+export function rejectPayoutRequest(
+  requestId: number,
+  remarks: string
+): Promise<{ message: string; request_id: number }> {
+  return patch(`/reports/doctor-payments/${requestId}/reject`, { remarks });
 }

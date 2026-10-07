@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
+import { CompleteRegistrationModal } from '../../components/CompleteRegistrationModal';
 import { useToast } from '../../context/ToastContext';
 import { appointmentService } from '../../services/appointmentService';
 import { patientService } from '../../services/patientService';
@@ -63,6 +64,7 @@ function getInitials(name: string): string {
 
 export const ManageAppointments: React.FC = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   // ─── Data State ────────────────────────────────────────────────────────────
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -109,6 +111,9 @@ export const ManageAppointments: React.FC = () => {
   const [drawerApt, setDrawerApt] = useState<AppointmentResponse | null>(null);
   const [drawerPatient, setDrawerPatient] = useState<PatientResponse | null>(null);
   const [loadingDrawerPatient, setLoadingDrawerPatient] = useState<boolean>(false);
+
+  // Complete Registration Modal
+  const [completingPatient, setCompletingPatient] = useState<any | null>(null);
 
   // ─── Initial Reference Data Fetching ───────────────────────────────────────
   useEffect(() => {
@@ -202,22 +207,22 @@ export const ManageAppointments: React.FC = () => {
     if (selectedStatus !== 'Cancelled') {
       result = result.filter(a => a.status?.toLowerCase() !== 'cancelled');
     }
-    
+
     if (!searchQuery.trim()) return result;
-    
+
     const q = searchQuery.toLowerCase().trim();
     return result.filter((apt) => {
       const code = (apt.appointment_code || '').toLowerCase();
       const patient = (apt.patient_name || '').toLowerCase();
+      const nic = (apt.patient_nic || '').toLowerCase();
       const doctor = (apt.doctor_name || '').toLowerCase();
       const branch = (apt.branch_name || '').toLowerCase();
-      const idStr = String(apt.patient_id);
       return (
         code.includes(q) ||
         patient.includes(q) ||
+        nic.includes(q) ||
         doctor.includes(q) ||
-        branch.includes(q) ||
-        idStr.includes(q)
+        branch.includes(q)
       );
     });
   }, [appointments, searchQuery, selectedStatus]);
@@ -620,8 +625,8 @@ export const ManageAppointments: React.FC = () => {
                       setPage(1);
                     }}
                     className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-colors ${selectedDoctor === 'all'
-                        ? 'bg-primary/10 text-primary font-bold'
-                        : 'hover:bg-surface-subtle text-brand-navy-deep font-medium'
+                      ? 'bg-primary/10 text-primary font-bold'
+                      : 'hover:bg-surface-subtle text-brand-navy-deep font-medium'
                       }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -682,15 +687,15 @@ export const ManageAppointments: React.FC = () => {
                             setPage(1);
                           }}
                           className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-colors ${isSelected
-                              ? 'bg-primary/10 text-primary font-bold'
-                              : 'hover:bg-surface-subtle text-brand-navy-deep'
+                            ? 'bg-primary/10 text-primary font-bold'
+                            : 'hover:bg-surface-subtle text-brand-navy-deep'
                             }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div
                               className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-label-sm shrink-0 ${isSelected
-                                  ? 'bg-primary text-on-primary'
-                                  : 'bg-surface-subtle text-secondary'
+                                ? 'bg-primary text-on-primary'
+                                : 'bg-surface-subtle text-secondary'
                                 }`}
                             >
                               {initials || 'DR'}
@@ -886,9 +891,7 @@ export const ManageAppointments: React.FC = () => {
                 <tr>
                   <td colSpan={7} className="px-space-md py-12 text-center text-outline">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[32px] text-primary animate-spin">
-                        progress_activity
-                      </span>
+                      <span className="material-symbols-outlined text-[32px] text-primary ">hourglass_empty</span>
                       <span className="font-body-sm text-body-sm font-medium">
                         Loading scheduled appointments...
                       </span>
@@ -944,6 +947,17 @@ export const ManageAppointments: React.FC = () => {
                             >
                               {apt.patient_name}
                             </span>
+                            {apt.is_temp && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-label-sm text-[10px] font-bold border border-amber-300">
+                                <span className="material-symbols-outlined text-[12px] text-amber-600">bolt</span>
+                                Walk-in
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5 font-mono-data text-[11px] text-outline font-medium">
+                            <span className="text-primary font-semibold">{apt.appointment_code || `APT-${apt.appointment_id}`}</span>
+                            <span>•</span>
+                            <span>NIC: {apt.is_temp || apt.patient_nic?.startsWith('999') ? 'Pending' : (apt.patient_nic || 'N/A')}</span>
                           </div>
                         </div>
                       </td>
@@ -954,9 +968,6 @@ export const ManageAppointments: React.FC = () => {
                           <div className="flex flex-col">
                             <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">
                               {apt.doctor_name}
-                            </span>
-                            <span className="font-body-sm text-[12px] text-outline">
-                              Consultant Specialist
                             </span>
                           </div>
                         </div>
@@ -1006,6 +1017,18 @@ export const ManageAppointments: React.FC = () => {
                       {/* 7. Actions */}
                       <td className="px-space-md py-3.5 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          {apt.is_temp && (
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/receptionist/register-patient?edit=${apt.patient_id}`)}
+                              title="Complete Full Registration for Walk-in Patient"
+                              className="h-7 px-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-sm text-[11px] font-bold flex items-center gap-1 transition-all shadow-xs mr-1 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">verified</span>
+                              <span>Complete Reg</span>
+                            </button>
+                          )}
+
                           {isScheduled && (
                             <>
                               <button
@@ -1184,9 +1207,7 @@ export const ManageAppointments: React.FC = () => {
                   </label>
                   {loadingSlots ? (
                     <div className="p-4 rounded-xl bg-surface-subtle text-center text-outline font-body-sm text-body-sm flex items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[18px] animate-spin text-primary">
-                        progress_activity
-                      </span>
+                      <span className="material-symbols-outlined text-[18px]  text-primary">hourglass_empty</span>
                       <span>Checking doctor availability...</span>
                     </div>
                   ) : rescheduleSlots.length === 0 ? (
@@ -1203,8 +1224,8 @@ export const ManageAppointments: React.FC = () => {
                             type="button"
                             onClick={() => setSelectedNewSlot(slot)}
                             className={`py-2 px-3 rounded-xl text-center font-label-sm text-label-sm transition-all font-semibold border ${isSelected
-                                ? 'bg-primary text-on-primary border-primary shadow-sm'
-                                : 'bg-surface-subtle hover:bg-surface-container text-brand-navy-deep border-border-subtle'
+                              ? 'bg-primary text-on-primary border-primary shadow-sm'
+                              : 'bg-surface-subtle hover:bg-surface-container text-brand-navy-deep border-border-subtle'
                               }`}
                           >
                             {formatTime(slot.start_time)}
@@ -1340,7 +1361,7 @@ export const ManageAppointments: React.FC = () => {
                         {loadingDrawerPatient ? (
                           'Loading patient profile...'
                         ) : drawerPatient ? (
-                          `NIC: ${drawerPatient.id_number || 'N/A'} · ${drawerPatient.address || 'Address unlisted'}`
+                          `NIC: ${drawerPatient.is_temp || drawerPatient.id_number?.startsWith('999') ? 'Pending Registration' : (drawerPatient.id_number || 'N/A')} · ${drawerPatient.address === 'Address Pending' ? 'Address Pending' : (drawerPatient.address || 'Address unlisted')}`
                         ) : (
                           `Patient ID #${drawerApt.patient_id}`
                         )}
@@ -1353,18 +1374,39 @@ export const ManageAppointments: React.FC = () => {
                       <span className="font-label-sm text-outline block font-semibold">Age / Gender</span>
                       <span className="text-brand-navy-deep font-medium">
                         {drawerPatient
-                          ? `${getAge(drawerPatient.date_of_birth)} Yrs · ${drawerPatient.gender}`
+                          ? `${drawerPatient.date_of_birth && drawerPatient.date_of_birth !== '1900-01-01' && drawerPatient.date_of_birth !== '1995-01-01' && getAge(drawerPatient.date_of_birth) > 0 && getAge(drawerPatient.date_of_birth) < 120 ? `${getAge(drawerPatient.date_of_birth)} Yrs` : 'Age Pending'} · ${drawerPatient.gender}`
                           : '—'}
                       </span>
                     </div>
                     <div>
                       <span className="font-label-sm text-outline block font-semibold">Contact Phone</span>
                       <span className="text-brand-navy-deep font-medium">
-                        {drawerPatient?.phone_number || '—'}
+                        {drawerPatient?.phone_number && drawerPatient.phone_number !== '0000000000' ? drawerPatient.phone_number : 'Not Provided'}
                       </span>
                     </div>
                   </div>
                 </div>
+
+                {/* Walk-in Profile Warning Banner */}
+                {drawerPatient?.is_temp && (
+                  <div className="p-4 rounded-xl bg-status-pending-bg/50 border border-amber-200 space-y-3 shadow-xs">
+                    <div className="flex items-center gap-2 text-amber-900 font-label-sm uppercase font-bold tracking-wider">
+                      <span className="material-symbols-outlined text-[20px] text-amber-600">person_alert</span>
+                      <span>Temporary Walk-in Profile</span>
+                    </div>
+                    <p className="font-body-sm text-body-sm text-amber-900 font-medium leading-relaxed">
+                      This patient is currently registered with temporary walk-in details. Upgrade this profile to register their official NIC, physical address, and clinical history.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/receptionist/register-patient?edit=${drawerPatient.patient_id}`)}
+                      className="w-full h-10 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-md text-label-md font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">verified</span>
+                      <span>Complete Full Registration</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Consultation Particulars */}
                 <div className="space-y-3">
@@ -1446,6 +1488,17 @@ export const ManageAppointments: React.FC = () => {
           </div>,
           document.body
         )}
+
+      {/* Complete Registration Modal */}
+      <CompleteRegistrationModal
+        isOpen={!!completingPatient}
+        patient={completingPatient}
+        onClose={() => setCompletingPatient(null)}
+        onSuccess={() => {
+          fetchAppointments();
+          if (drawerApt) openDetailsDrawer(drawerApt);
+        }}
+      />
     </div>
   );
 };

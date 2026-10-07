@@ -82,6 +82,9 @@ export interface AppointmentResponse {
   appointment_code: string;
   patient_id: number;
   patient_name: string;
+  patient_nic?: string | null;
+  is_walkin_patient?: boolean;
+  is_temp?: boolean;
   doctor_id: number;
   doctor_name: string;
   branch_id: number;
@@ -411,6 +414,10 @@ export interface PatientUpdateRequest {
   first_name?: string | null;
   middle_name?: string | null;
   last_name?: string | null;
+  id_number?: string | null;
+  birthdate?: string | null;
+  date_of_birth?: string | null;
+  gender?: Gender | string | null;
   address?: string | null;
   email?: string | null;
   phone_numbers?: string[] | null;
@@ -437,6 +444,7 @@ export interface PatientResponse {
   middle_name?: string | null;
   last_name: string;
   id_number: string;
+  is_temp?: boolean;
   phone_number: string;
   email?: string | null;
   date_of_birth: string;
@@ -462,10 +470,12 @@ export interface PatientListItem {
   phone_number: string;
   gender: 'Male' | 'Female' | 'Other';
   date_of_birth: string;
+  address?: string;
   registered_branch?: number | null;
   branch_name?: string | null;
   has_insurance: boolean;
   is_active: boolean;
+  is_temp?: boolean;
 }
 
 export interface PatientListResponse {
@@ -474,6 +484,23 @@ export interface PatientListResponse {
   page: number;
   limit: number;
 }
+
+export interface QuickPatientPayload {
+  first_name: string;
+  last_name?: string;
+  middle_name?: string;
+  id_number?: string;
+  is_temp?: boolean;
+  address?: string;
+  gender?: Gender;
+  date_of_birth?: string;
+  age?: number;
+  phone_number?: string;
+  phone_numbers?: string[];
+  email?: string;
+  registered_branch?: number;
+}
+
 
 // ─── Stats / Dashboard ─────────────────────────────────────────────────────
 
@@ -513,4 +540,60 @@ export interface BranchResponse {
   branch_manager_name?: string | null;
   staff_count?: number;
   is_active?: boolean;
+}
+
+// ─── Staff ──────────────────────────────────────────────────────────────────
+
+export interface StaffResponse {
+  user_id: number;
+  username: string;
+  is_active: boolean;
+  branch_id: number;
+  first_name: string;
+  last_name: string;
+  id_number: string;
+  email: string | null;
+  role_name: string;
+  phone_number: string | null;
+  address?: string | null;
+  birthdate?: string | null;
+  gender?: string | null;
+  license_number?: string | null;
+  specialty?: string | null;
+  branch_name?: string | null;
+  created_at?: string | null;
+  last_login_at?: string | null;
+  failed_login_attempts?: number;
+  locked_until?: string | null;
+}
+
+export interface StaffUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  email?: string;
+  phone_number?: string;
+  branch_id?: number;
+  is_active?: boolean;
+}
+
+export interface StaffCreatePayload {
+  role_id: number;
+  branch_id: number;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  id_number: string;
+  address: string;
+  birthdate: string;
+  gender: string;
+  email?: string;
+  phone_number: string;
+  specialty?: string;
+  license_number?: string;
+}
+
+export interface StaffListResponse {
+  data: StaffResponse[];
+  total: number;
 }

@@ -42,7 +42,7 @@ async def list_doctors(
     query = """
         SELECT
             d.user_id AS doctor_id,
-            TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name || ' ', ''), u.last_name)) AS full_name,
+            CONCAT_WS(' ', u.first_name, NULLIF(u.middle_name, ''), u.last_name) AS full_name,
             u.id_number,
             COALESCE(
                 ARRAY_AGG(DISTINCT c.phone_number) FILTER (WHERE c.phone_number IS NOT NULL),
@@ -104,12 +104,12 @@ async def get_doctor(
     Get detailed profile for a specific doctor.
     BM gets 404 for a doctor outside their branch.
     """
-    scoped_branch_id = get_branch_scope(user)
+    scoped_branch_id = user.branch_id if user.role == "Branch Manager" else None
 
     query = """
         SELECT
             d.user_id AS doctor_id,
-            TRIM(CONCAT(u.first_name, ' ', COALESCE(u.middle_name || ' ', ''), u.last_name)) AS full_name,
+            CONCAT_WS(' ', u.first_name, NULLIF(u.middle_name, ''), u.last_name) AS full_name,
             u.id_number,
             COALESCE(
                 ARRAY_AGG(DISTINCT c.phone_number) FILTER (WHERE c.phone_number IS NOT NULL),

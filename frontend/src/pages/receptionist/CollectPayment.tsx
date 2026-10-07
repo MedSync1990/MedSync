@@ -215,7 +215,7 @@ export default function CollectPayment() {
       {/* Loading state */}
       {loadingInvoice && (
         <div className="bg-surface-card rounded-xl shadow-sm p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
           <p className="font-label-lg text-label-lg text-brand-navy-deep">Loading invoice…</p>
         </div>
       )}
@@ -511,7 +511,7 @@ export default function CollectPayment() {
                     <button type="submit" disabled={submitting}
                       className="w-full h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed">
                       {submitting ? (
-                        <><div className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />Processing…</>
+                        <><span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>Processing…</>
                       ) : (
                         <>
                           <span className="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">check_circle</span>
