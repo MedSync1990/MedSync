@@ -12,6 +12,7 @@ export default function BranchAppointmentSummary() {
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isApplying, setIsApplying] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const { user } = useAuth();
   const [branches, setBranches] = useState<BranchResponse[]>([]);
@@ -564,7 +565,7 @@ export default function BranchAppointmentSummary() {
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-[#FB7185]"></div><span className="text-on-surface-variant">Cancelled</span></div>
           </div>
         </div>
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto" id="chart-container">
           <svg className="min-w-[560px] w-full h-[280px]" viewBox="0 0 700 250" role="img" aria-label="Stacked bar chart of daily appointments by outcome">
             {yAxisLabels.map((v, idx) => {
               const y = base - (v * sc);
@@ -610,7 +611,10 @@ export default function BranchAppointmentSummary() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => handleExport('CSV')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">download</span>Export CSV</button>
-            <button onClick={() => handleExport('PDF')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>Export PDF</button>
+            <button onClick={() => handleExport('PDF')} disabled={isExporting} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>}
+              {isExporting ? 'Generating...' : 'Export PDF'}
+            </button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -659,7 +663,7 @@ export default function BranchAppointmentSummary() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+               <span className="material-symbols-outlined text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

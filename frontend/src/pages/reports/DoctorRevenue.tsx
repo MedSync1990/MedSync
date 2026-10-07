@@ -3,10 +3,13 @@ import { getDoctorRevenue, exportToCSV } from '../../api/reports';
 import type { DoctorRevenueResponse, DoctorRevenueItem, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function DoctorRevenueReport() {
   const [data, setData] = useState<DoctorRevenueResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   
   const { user } = useAuth();
   const [branches, setBranches] = useState<BranchResponse[]>([]);
@@ -75,6 +78,8 @@ export default function DoctorRevenueReport() {
   // KPIs
   const totalClinicalRevenue = filteredDocs.reduce((sum: number, d: any) => sum + d.total_revenue, 0) || 0;
   const completedConsults = filteredDocs.reduce((sum: number, d: any) => sum + d.total_appointments, 0) || 0;
+  const totalConsultRevenue = filteredDocs.reduce((sum: number, d: any) => sum + d.consult_revenue, 0) || 0;
+  const totalProcRevenue = filteredDocs.reduce((sum: number, d: any) => sum + d.procedure_revenue, 0) || 0;
   const avgRevenue = filteredDocs.length ? totalClinicalRevenue / filteredDocs.length : 0;
   
   // Find top earning specialty
@@ -88,6 +93,416 @@ export default function DoctorRevenueReport() {
       topSpecialty = d.specialty;
     }
   });
+
+  const handleExport = async (type: string) => {
+    if (type === 'CSV') {
+      exportToCSV(filteredDocs, 'Doctor_Revenue');
+    } else if (type === 'PDF') {
+      try {
+        setIsExporting(true);
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 14;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Data Formatting
+        const branchName = selectedBranch ? branches.find(b => b.branch_id === selectedBranch)?.name || 'Colombo Central Branch' : 'Colombo Central Branch';
+        const userName = user?.firstName ? `${user.firstName}, ${user.role}` : 'Chaminda, Branch Manager';
+        
+        let dateInterval = 'All Time';
+        if (startDate && endDate) {
+            const sD = new Date(startDate);
+            const eD = new Date(endDate);
+            dateInterval = `${sD.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} - ${eD.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+        }
+        const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        // ================= PAGE 1 =================
+        
+        // 1. Dark Navy Header Background
+        doc.setFillColor(15, 23, 42); // slate-900 (Navy)
+        doc.rect(0, 0, pageWidth, 55, 'F');
+        
+        // Bright Blue Accent Line
+        doc.setFillColor(14, 165, 233); // sky-500 (Blue)
+        doc.rect(0, 55, pageWidth, 2, 'F');
+
+        // 2. Header Text (Left side)
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setFont('helvetica', 'bold');
+        doc.text("FINANCIAL OPERATIONS / BRANCH PERFORMANCE", margin, 15);
+        
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255); // white
+        doc.setFont('helvetica', 'normal');
+        doc.text(branchName, margin, 20);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.text(`Reporting period: ${dateInterval}`, margin, 24);
+
+        // Title
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255); // white
+        doc.text("Doctor Revenue", margin, 42);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184); // slate-400
+        doc.text("Revenue generated per doctor over a date range", margin, 48);
+
+        // 3. Header Logo (Right side inside white box)
+        const logoBoxW = 45;
+        const logoBoxH = 35;
+        const logoBoxX = pageWidth - margin - logoBoxW;
+        const logoBoxY = 10;
+        
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 3, 3, 'F');
+
+        try {
+          const img = new Image();
+          img.src = '/logo.jpg';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const imgProps = doc.getImageProperties(img);
+          const imgW = 35;
+          const imgH = (imgProps.height * imgW) / imgProps.width;
+          const imgX = logoBoxX + (logoBoxW - imgW) / 2;
+          const imgY = logoBoxY + (logoBoxH - imgH) / 2;
+          doc.addImage(img, 'JPEG', imgX, imgY, imgW, imgH); 
+        } catch (e) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(56, 189, 248); 
+          doc.text("MEDSYNC", logoBoxX + 12, logoBoxY + 18);
+        }
+
+        // 4. Meta Info Grid
+        const metaY = 68;
+        const colW = contentWidth / 5;
+        const c1 = margin;
+        const c2 = margin + colW;
+        const c3 = margin + colW * 2;
+        const c4 = margin + colW * 3;
+        const c5 = margin + colW * 4 + 10;
+
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); 
+        doc.text("REPORTING SCOPE", c1, metaY);
+        doc.text("DATE RANGE", c2, metaY);
+        doc.text("SPECIALTY", c3, metaY);
+        doc.text("PREPARED FOR", c4, metaY);
+        doc.text("GENERATED", c5, metaY);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105); 
+        doc.setFont('helvetica', 'normal');
+        const trunc = (str: string, max: number) => str.length > max ? str.substring(0, max) + '...' : str;
+        doc.text(doc.splitTextToSize(branchName, colW - 5), c1, metaY + 4);
+        doc.text(doc.splitTextToSize(dateInterval, colW - 5), c2, metaY + 4);
+        doc.text(doc.splitTextToSize(specialtyFilter, colW - 5), c3, metaY + 4);
+        doc.text(doc.splitTextToSize(userName, colW - 5), c4, metaY + 4);
+        doc.text(genDate, c5, metaY + 4);
+
+        // Line separator
+        doc.setDrawColor(226, 232, 240); 
+        doc.setLineWidth(0.5);
+        doc.line(margin, 82, pageWidth - margin, 82);
+
+        // 5. Executive Summary
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42); 
+        doc.text("Executive Summary", margin, 96);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139); 
+        doc.text("Key figures for the reporting period", margin, 101);
+
+        // Styled KPI Boxes
+        const kpiY = 106;
+        const kpiW = (contentWidth - 15) / 4; 
+        const kpis = [
+            { label: "TOTAL CLINICAL REVENUE", val: `LKR ${(totalClinicalRevenue/1000).toFixed(0)}K` },
+            { label: "COMPLETED CONSULTS", val: completedConsults.toString() },
+            { label: "TOP EARNING SPECIALTY", val: topSpecialty },
+            { label: "AVG REVENUE/DOCTOR", val: `LKR ${(Math.round(avgRevenue)/1000).toFixed(0)}K` }
+        ];
+
+        kpis.forEach((kpi, idx) => {
+            const x = margin + (idx * (kpiW + 5));
+            doc.setFillColor(241, 245, 249); 
+            doc.rect(x, kpiY, kpiW, 22, 'F');
+            doc.setFillColor(14, 165, 233); 
+            doc.rect(x, kpiY, kpiW, 1, 'F');
+            
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(100, 116, 139); 
+            doc.text(kpi.label, x + 4, kpiY + 7);
+            
+            // Dynamic font scaling for long values (like "General Medicine")
+            let valFontSize = 18;
+            doc.setFontSize(valFontSize);
+            doc.setFont('helvetica', 'bold');
+            while (doc.getTextWidth(kpi.val) > kpiW - 8 && valFontSize > 8) {
+                valFontSize -= 1;
+                doc.setFontSize(valFontSize);
+            }
+            
+            doc.setTextColor(15, 23, 42); 
+            doc.text(kpi.val, x + 4, kpiY + 18);
+        });
+
+        // Summary Paragraph
+        const topDoc = [...filteredDocs].sort((a, b) => b.total_revenue - a.total_revenue)[0];
+        const consultShare = totalClinicalRevenue > 0 ? ((totalConsultRevenue / totalClinicalRevenue) * 100).toFixed(1) : "0.0";
+        const procShare = totalClinicalRevenue > 0 ? ((totalProcRevenue / totalClinicalRevenue) * 100).toFixed(1) : "0.0";
+        
+        const summaryPara = `In this reporting period, the ${filteredDocs.length} practicing physicians at ${branchName} generated LKR ${totalClinicalRevenue.toLocaleString()} from ${completedConsults} completed appointments. ${topDoc ? `${topDoc.doctor_name} (${topDoc.specialty}) led with LKR ${topDoc.total_revenue.toLocaleString()}` : 'No revenue was recorded'}. Consultation charges made up ${consultShare}% of revenue and procedures & diagnostics ${procShare}%.`;
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105); 
+        const splitSummary = doc.splitTextToSize(summaryPara, contentWidth);
+        doc.text(splitSummary, margin, kpiY + 32);
+
+        // 6. Native JS Chart Section
+        let currentY = kpiY + 32 + (splitSummary.length * 5) + 6;
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Physician Revenue Contribution", margin, currentY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        
+        // Calculate dynamic benchmark
+        const maxDocRev = topDoc?.total_revenue || 100000;
+        const chartMax = Math.ceil(maxDocRev / 100000) * 100000; // Round up to nearest 100k
+        doc.text(`Comparative performance against the branch benchmark (LKR ${chartMax.toLocaleString()} maximum)`, margin, currentY + 5);
+
+        // Chart Legend
+        const lgX = margin;
+        const lgY = currentY + 12;
+        doc.setFillColor(15, 23, 42);
+        doc.rect(lgX, lgY, 3, 3, 'F');
+        doc.text("Consultations", lgX + 5, lgY + 3);
+        
+        doc.setFillColor(56, 189, 248);
+        doc.rect(lgX + 28, lgY, 3, 3, 'F');
+        doc.text("Procedures & Labs", lgX + 33, lgY + 3);
+
+        const barMaxWidth = contentWidth - 75; // Leave room for names and values
+        currentY += 24;
+
+        const top6Docs = [...filteredDocs].sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 6);
+
+        top6Docs.forEach((docData, idx) => {
+            // Labels
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${idx + 1}`, margin, currentY);
+            doc.text(trunc(docData.doctor_name, 25), margin + 6, currentY);
+            
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 116, 139);
+            doc.text(trunc(docData.specialty, 30), margin + 6, currentY + 4);
+
+            // Bars
+            const cW = (docData.consult_revenue / chartMax) * barMaxWidth;
+            const pW = (docData.procedure_revenue / chartMax) * barMaxWidth;
+            
+            doc.setFillColor(15, 23, 42); // Navy
+            doc.rect(margin + 50, currentY - 3, cW, 6, 'F');
+            doc.setFillColor(56, 189, 248); // Sky
+            doc.rect(margin + 50 + cW, currentY - 3, pW, 6, 'F');
+
+            // Values
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(`LKR ${docData.total_revenue.toLocaleString()}`, margin + 55 + cW + pW, currentY);
+            
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 116, 139);
+            const pct = totalClinicalRevenue > 0 ? ((docData.total_revenue / totalClinicalRevenue) * 100).toFixed(1) : "0.0";
+            doc.text(`(${pct}%)`, margin + 55 + cW + pW, currentY + 4);
+
+            currentY += 12;
+        });
+
+        // Footer P1
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 1", pageWidth - margin, 285, { align: 'right' });
+
+        // ================= PAGE 2 =================
+        doc.addPage();
+        
+        // 7. P2 Simple Navy Header
+        doc.setFillColor(15, 23, 42); // slate-900
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text("MEDSYNC", margin, 12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text("| Doctor Revenue", margin + 22, 12);
+        
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Physician Financial Summary", margin, 32);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`${filteredDocs.length} practicing physicians documented for this period`, margin, 37);
+
+        // 8. Formatted Data Table 
+        const tableColumn = ["#", "DOCTOR", "SPECIALTY", "APPTS", "CONSULTATION", "PROCEDURES", "TOTAL REVENUE", "SHARE"];
+        const tableRows = filteredDocs.map((d: any, i: number) => {
+            const share = totalClinicalRevenue > 0 ? ((d.total_revenue / totalClinicalRevenue) * 100).toFixed(1) + '%' : "0.0%";
+            return [
+              (i + 1).toString(), 
+              d.doctor_name, 
+              d.specialty, 
+              d.total_appointments.toString(), 
+              d.consult_revenue.toLocaleString(), 
+              d.procedure_revenue.toLocaleString(), 
+              d.total_revenue.toLocaleString(), 
+              share
+            ];
+        });
+        
+        // Total Row
+        tableRows.push([
+            `Total (${filteredDocs.length} physicians)`, "", "", completedConsults.toString(), totalConsultRevenue.toLocaleString(), totalProcRevenue.toLocaleString(), totalClinicalRevenue.toLocaleString(), "100.0%"
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 42,
+            theme: 'plain', 
+            styles: { fontSize: 8, textColor: [71, 85, 105], cellPadding: { top: 5, right: 3, bottom: 5, left: 3 } },
+            headStyles: { textColor: [100, 116, 139], fontStyle: 'bold', fontSize: 7 },
+            columnStyles: {
+                0: { cellWidth: 8 },
+                3: { halign: 'right' },
+                4: { halign: 'right' },
+                5: { halign: 'right' },
+                6: { halign: 'right' },
+                7: { halign: 'right' }
+            },
+            didDrawCell: function(data) {
+                if (data.row.section === 'body' || data.row.section === 'head') {
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
+            },
+            didParseCell: function(data) {
+                if (data.row.index === tableRows.length - 1) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.textColor = [15, 23, 42];
+                }
+            }
+        });
+
+        // Table Footer Caption
+        const finalY = (doc as any).lastAutoTable.finalY || 150;
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Showing ${tableRows.length > 1 ? tableRows.length - 1 : 0} active branch doctors. Average revenue per doctor = total clinical revenue / ${tableRows.length > 1 ? tableRows.length - 1 : 1} physicians. All amounts in LKR.`, margin, finalY + 5);
+
+        // 9. Key Observations Section
+        const obsY = finalY + 20;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text("Key Observations", margin, obsY);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Derived from the physician figures above", margin, obsY + 5);
+
+        const obsW = (contentWidth - 10) / 3;
+        
+        // Dynamic Observation Calculations
+        const highestVolDoc = [...filteredDocs].sort((a, b) => b.total_appointments - a.total_appointments)[0];
+        const highestProcDoc = [...filteredDocs].sort((a, b) => (b.procedure_revenue/b.total_revenue || 0) - (a.procedure_revenue/a.total_revenue || 0))[0];
+        
+        const topDocShare = totalClinicalRevenue > 0 && topDoc ? ((topDoc.total_revenue/totalClinicalRevenue)*100).toFixed(1) : "0.0";
+        const topDocRevPerAppt = topDoc && topDoc.total_appointments > 0 ? (topDoc.total_revenue / topDoc.total_appointments).toFixed(0) : 0;
+        
+        const volDocRevPerAppt = highestVolDoc && highestVolDoc.total_appointments > 0 ? (highestVolDoc.total_revenue / highestVolDoc.total_appointments).toFixed(0) : 0;
+        
+        const procDocShare = highestProcDoc && highestProcDoc.total_revenue > 0 ? ((highestProcDoc.procedure_revenue / highestProcDoc.total_revenue)*100).toFixed(1) : "0.0";
+
+        const observations = [
+            {
+                title: "Top Contributor",
+                desc: `${topDoc?.doctor_name || 'N/A'} generated LKR ${topDoc?.total_revenue?.toLocaleString() || 0}, ${topDocShare}% of branch revenue, from ${topDoc?.total_appointments || 0} completed appointments.`,
+                metric: `LKR ${Number(topDocRevPerAppt).toLocaleString()} per appt`
+            },
+            {
+                title: "Highest Volume",
+                desc: `${highestVolDoc?.doctor_name || 'N/A'} completed the most appointments (${highestVolDoc?.total_appointments || 0}) across the reporting period.`,
+                metric: `LKR ${Number(volDocRevPerAppt).toLocaleString()} per appt`
+            },
+            {
+                title: "Procedure Mix",
+                desc: `${highestProcDoc?.doctor_name || 'N/A'} earns the largest share from procedures (${procDocShare}% of their revenue); branch-wide, procedures are ${procShare}%.`,
+                metric: `LKR ${highestProcDoc?.procedure_revenue?.toLocaleString() || 0} procedures`
+            }
+        ];
+
+        observations.forEach((obs, idx) => {
+            const x = margin + (idx * (obsW + 5));
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(15, 23, 42);
+            doc.text(obs.title, x, obsY + 15);
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(71, 85, 105);
+            const splitDesc = doc.splitTextToSize(obs.desc, obsW);
+            doc.text(splitDesc, x, obsY + 22);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(14, 165, 233);
+            doc.text(obs.metric, x, obsY + 45);
+        });
+
+        // Footer P2
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`MedSync Branch Manager Portal | ${branchName} Confidential for internal use`, margin, 285);
+        doc.text("Page 2", pageWidth - margin, 285, { align: 'right' });
+
+        doc.save(`MedSync_Doctor_Revenue.pdf`);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+      } finally {
+        setIsExporting(false);
+      }
+    }
+  };
 
   const hasData = filteredDocs.length > 0;
   
@@ -292,11 +707,12 @@ export default function DoctorRevenueReport() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => exportToCSV(filteredDocs, 'Doctor_Revenue')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+            <button onClick={() => handleExport('CSV')} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
               <span className="material-symbols-outlined text-[16px]">download</span> Export CSV
             </button>
-            <button onClick={() => window.print()} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined text-[16px]">print</span> Print
+            <button onClick={() => handleExport('PDF')} disabled={isExporting} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>}
+              {isExporting ? 'Generating...' : 'Export PDF'}
             </button>
           </div>
         </div>
