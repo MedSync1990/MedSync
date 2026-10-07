@@ -20,12 +20,7 @@ export default function InvoiceSearch({
   onQuickLookup,
 }: InvoiceSearchProps) {
   const handleQueryChange = (value: string) => {
-    let nextValue = value;
-    if (searchType === 'invoice') {
-      nextValue = value.toUpperCase();
-      if (!nextValue.startsWith('INV-')) return;
-    }
-    onSearchQueryChange(nextValue);
+    onSearchQueryChange(searchType === 'invoice' ? value.toUpperCase() : value);
   };
 
   const handleTypeChange = (type: 'invoice' | 'nic') => {
@@ -71,9 +66,7 @@ export default function InvoiceSearch({
             className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
             id="invoiceSearchInput"
             placeholder={
-              searchType === 'invoice'
-                ? 'Enter Invoice Code (e.g. INV-000002)...'
-                : 'Enter Patient NIC (e.g. 900000000001)...'
+              'Enter Invoice Code or Patient NIC...'
             }
             type="text"
             value={searchQuery}
