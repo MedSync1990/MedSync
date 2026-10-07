@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+@page { size: A4 landscape; margin: 16mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 9px; color: #64748b; } }
+body { font-family: sans-serif; font-size: 10px; color: #0f172a; }
+header { background: #0f172a; color: white; padding: 20px; border-bottom: 4px solid #0ea5e9; }
+h1 { font-size: 25px; margin: 0 0 8px; } h2 { font-size: 15px; margin-top: 24px; }
+.metadata { color: #475569; line-height: 1.6; margin: 15px 0; }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+th { background: #e2e8f0; text-align: left; } td, th { padding: 8px; border-bottom: 1px solid #cbd5e1; overflow-wrap: anywhere; }
+thead { display: table-header-group; } tr { break-inside: avoid; } h2 { break-after: avoid; }
+</style></head><body><header><h1>{{ title }}</h1><div>MedSync | {{ branch_name }}</div></header>
+<div class="metadata">Generated: {{ generated_at }}<br>Prepared for: {{ prepared_for }}{% for filter in filters %}<br>{{ filter }}{% endfor %}</div>
+{% for section in sections %}<h2>{{ section.title }}</h2><table><thead><tr>{% for header in section.headers %}<th>{{ header }}</th>{% endfor %}</tr></thead><tbody>
+{% for row in section.rows %}<tr>{% for value in row %}<td>{% if value is float %}{{ "{:,.2f}".format(value) }}{% else %}{{ value if value is not none else '-' }}{% endif %}</td>{% endfor %}</tr>{% else %}<tr><td colspan="{{ section.headers|length }}">No data available for the selected criteria.</td></tr>{% endfor %}
+</tbody></table>{% endfor %}</body></html>

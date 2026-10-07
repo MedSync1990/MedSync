@@ -5,7 +5,7 @@
  * Owner: Ashen (these power Ashen's own report pages)
  */
 
-import { get, post, patch } from './client';
+import { get, post, patch, getBlob } from './client';
 import type {
   AppointmentsSummaryResponse,
   DoctorRevenueResponse,
@@ -267,4 +267,16 @@ export function rejectPayoutRequest(
   remarks: string
 ): Promise<{ message: string; request_id: number }> {
   return patch(`/reports/doctor-payments/${requestId}/reject`, { remarks });
+}
+export type ManagementPdfParams = Record<string, string | number | undefined>;
+export async function downloadManagementPdf(report: string, params: ManagementPdfParams): Promise<void> {
+  const blob = await getBlob(`/reports/${report}/pdf`, params);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${report}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

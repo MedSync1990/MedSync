@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getAppointmentsSummary, exportToCSV } from '../../api/reports';
+import { getAppointmentsSummary, exportToCSV, downloadManagementPdf } from '../../api/reports';
 import type { AppointmentsSummaryResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 
 export default function BranchAppointmentSummary() {
   const [data, setData] = useState<AppointmentsSummaryResponse | null>(null);
@@ -17,6 +14,7 @@ export default function BranchAppointmentSummary() {
   const { user } = useAuth();
   const [branches, setBranches] = useState<BranchResponse[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
+  const [appliedParams, setAppliedParams] = useState<Record<string, string | number | undefined>>({});
 
   useEffect(() => {
     if (user?.role === 'Administrator') {
@@ -33,6 +31,7 @@ export default function BranchAppointmentSummary() {
     const params: any = categoryFilter === 'all' ? {} : { appointment_type: typeMap[categoryFilter] };
     if (selectedBranch) params.branch = selectedBranch;
     return getAppointmentsSummary(Object.keys(params).length > 0 ? params : undefined).then(res => {
+      setAppliedParams({ branch_id: selectedBranch || undefined, appointment_type: params.appointment_type });
       setData(res);
     });
   };
@@ -51,6 +50,7 @@ export default function BranchAppointmentSummary() {
     setTimeout(() => {
       setIsApplying(true);
       getAppointmentsSummary().then(res => {
+        setAppliedParams({});
         setData(res);
         setIsApplying(false);
       });
@@ -63,34 +63,6 @@ export default function BranchAppointmentSummary() {
     } else if (type === 'PDF') {
       try {
         setIsExporting(true);
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const margin = 14;
-        const contentWidth = pageWidth - (margin * 2);
-
-        // Data Prep
-        const branchName = selectedBranch ? branches.find(b => b.branch_id === selectedBranch)?.name || 'Colombo Central Branch' : 'Colombo Central Branch';
-        const userName = user?.firstName ? `${user.firstName}, ${user.role}` : 'Chaminda, Branch Manager';
-        
-        const chartData = [...(data?.daily_data || [])];
-        const tableData = [...(data?.daily_data || [])].slice().reverse();
-
-        // Date Interval Formatting (e.g. "01 - 07 September 2026")
-        let dateInterval = 'N/A';
-        if (chartData.length > 0) {
-            const sD = new Date(chartData[0].date);
-            const eD = new Date(chartData[chartData.length - 1].date);
-            dateInterval = `${sD.toLocaleDateString('en-GB', { day: '2-digit' })} - ${eD.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`;
-        }
-        const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-
-        // KPIs
-        const totalScheduled = data?.total_scheduled || 0;
-        const totalCompleted = data?.total_completed || 0;
-        const totalCancelled = data?.total_cancelled || 0;
-        const totalWalkins = data?.total_walkins || 0;
-
-        // ================= PAGE 1 =================
         
         // 1. Dark Navy Header Background
         doc.setFillColor(15, 23, 42); // slate-900 (Navy)
@@ -422,7 +394,10 @@ export default function BranchAppointmentSummary() {
         doc.text("Page 2", pageWidth - margin, 285, { align: 'right' });
 
         doc.save(`MedSync_Branch_Appointment_Summary.pdf`);
+=======
+        await downloadManagementPdf('appointments-summary', { ...appliedParams });
       } catch (err) {
+        alert(err instanceof Error ? err.message : "Failed to generate PDF");
         console.error("PDF generation failed:", err);
       } finally {
         setIsExporting(false);

@@ -91,11 +91,12 @@ async function request<T>(
   path: string,
   body?: unknown,
   params?: Record<string, string | number | boolean | undefined | null>,
+  responseType: 'json' | 'blob' = 'json',
 ): Promise<T> {
   const url = `${API_BASE_URL}${path}${toQueryString(params)}`;
 
   const headers: Record<string, string> = {
-    Accept: 'application/json',
+    Accept: responseType === 'blob' ? 'application/pdf' : 'application/json',
   };
 
   // Attach body as JSON for mutating requests
@@ -122,7 +123,7 @@ async function request<T>(
   // Successful response — parse JSON (or return empty object for 204)
   if (response.ok) {
     if (response.status === 204) return {} as T;
-    return (await response.json()) as T;
+    return (await (responseType === 'blob' ? response.blob() : response.json())) as T;
   }
 
   // Error response — parse body and throw typed ApiError
@@ -169,4 +170,8 @@ export function patch<T>(path: string, body?: unknown): Promise<T> {
 /** DELETE request */
 export function del<T>(path: string): Promise<T> {
   return request<T>('DELETE', path);
+}
+
+export function getBlob(path: string, params?: Record<string, string | number | boolean | undefined | null>): Promise<Blob> {
+  return request<Blob>('GET', path, undefined, params, 'blob');
 }
