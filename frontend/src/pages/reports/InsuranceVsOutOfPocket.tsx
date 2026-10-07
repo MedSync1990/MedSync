@@ -28,7 +28,6 @@ export function InsuranceVsOutOfPocket() {
   const [searchPeriod, setSearchPeriod] = useState('');
 
   const [isExporting, setIsExporting] = useState(false);
-  const [, setExportComplete] = useState(false);
 
   const fetchReport = () => {
     setLoading(true);
@@ -91,8 +90,7 @@ export function InsuranceVsOutOfPocket() {
       exportToCSV(filteredData, 'Monthly_Settlement_Ledger');
       setTimeout(() => {
         setIsExporting(false);
-        setExportComplete(true);
-        setTimeout(() => setExportComplete(false), 2000);
+
       }, 600);
     } else if (type === 'PDF') {
       try {
