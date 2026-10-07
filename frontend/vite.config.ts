@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
+    // Windows Docker bind mounts can miss native file-change events.
+    watch: { usePolling: true, interval: 500 },
     port: 5173,
     proxy: {
       '/api': {
