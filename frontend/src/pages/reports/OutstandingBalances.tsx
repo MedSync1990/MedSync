@@ -675,22 +675,6 @@ export function OutstandingBalances() {
         </div>
       </div>
 
-      <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-        <div className="flex items-center gap-space-md">
-          <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[24px]">contact_phone</span></div>
-          <div><div className="font-headline-sm text-headline-sm text-on-surface">Need help with invoice escalation?</div><div className="font-body-sm text-body-sm text-secondary">Notify the patient liaison desk or send SMS reminders from central billing.</div></div>
-        </div>
-        <div className="flex items-center gap-space-sm">
-          <button onClick={(e) => {
-            const btn = e.currentTarget;
-            const originalText = btn.innerText;
-            btn.innerText = 'Links Sent!';
-            setTimeout(() => { btn.innerText = originalText; }, 2000);
-          }} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" type="button">Send Payment Links</button>
-          <a href="mailto:billing@medsync.com" className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary shadow-sm transition-colors flex items-center">Billing Help Desk</a>
-        </div>
-      </div>
-
       {isModalOpen && selectedInv && (
         <div className="fixed inset-0 z-[100] bg-brand-navy-deep/40 backdrop-blur-sm flex items-center justify-center p-space-md" onClick={() => setIsModalOpen(false)}>
           <div className="bg-surface-card rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>

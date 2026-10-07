@@ -69,18 +69,18 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-sidebar-width bg-white text-slate-700 z-50 flex flex-col justify-between border-r border-slate-200 shadow-sm">
+    <aside className="fixed left-0 top-0 h-screen w-sidebar-width bg-[#0F172A] text-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.15)]">
       <div className="flex flex-col flex-1 min-h-0">
         {/* Brand Header */}
-        <div className="h-topbar-height px-space-lg flex items-center gap-space-sm border-b border-slate-100">
-          <div className="w-9 h-9 rounded-xl overflow-hidden bg-primary flex items-center justify-center shadow-sm shrink-0 p-0.5">
-            <img src="/logo.jpg" alt="MedSync Logo" className="w-full h-full object-contain mix-blend-screen" />
+        <div className="h-topbar-height px-space-lg flex items-center gap-space-sm border-b border-white/10">
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-sm shrink-0 p-0.5">
+            <img src="/logo.jpg" alt="MedSync Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-headline-sm text-headline-sm text-slate-900 leading-tight truncate">
+            <span className="font-headline-sm text-headline-sm text-white leading-tight truncate">
               MedSync
             </span>
-            <span className="font-label-sm text-[10px] text-slate-500 tracking-wider uppercase truncate">
+            <span className="font-label-sm text-[10px] text-white/50 tracking-wider uppercase truncate">
               BRANCH MANAGER PORTAL
             </span>
           </div>
@@ -88,12 +88,12 @@ export const Sidebar: React.FC = () => {
 
         {/* Branch Location Indicator */}
         <div className="px-space-md py-space-sm">
-          <div className="flex items-center justify-between px-space-sm py-2 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
+          <div className="flex items-center justify-between px-space-sm py-2 rounded-lg bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-primary">location_on</span>
-              <span className="font-label-md text-label-md text-slate-700 truncate">{branchName}</span>
+              <span className="material-symbols-outlined text-[18px] text-brand-teal-light">location_on</span>
+              <span className="font-label-md text-label-md text-white/70 truncate">{branchName}</span>
             </div>
-            <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
+            <span className="material-symbols-outlined text-[18px] text-white/40">expand_more</span>
           </div>
         </div>
 
@@ -107,8 +107,8 @@ export const Sidebar: React.FC = () => {
               className={({ isActive }) =>
                 `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
                   isActive || isItemActive(standaloneItem.path)
-                    ? "bg-sky-50 text-primary font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-primary before:rounded-r"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`
               }
             >
@@ -116,7 +116,7 @@ export const Sidebar: React.FC = () => {
                 const active = isActive || isItemActive(standaloneItem.path);
                 return (
                   <>
-                    <span className={`material-symbols-outlined text-[20px] transition-colors ${active ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                    <span className={`material-symbols-outlined text-[20px] transition-colors ${active ? 'text-brand-teal-light' : 'text-white/50 group-hover:text-white'}`}>
                       {standaloneItem.icon}
                     </span>
                     <span className="font-label-md text-label-md">{standaloneItem.label}</span>
@@ -129,7 +129,7 @@ export const Sidebar: React.FC = () => {
           {/* Grouped Sections */}
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              <div className="px-space-sm pb-space-2xs font-label-sm text-[11px] text-slate-400 uppercase tracking-widest font-semibold">
+              <div className="px-space-sm pb-space-2xs font-label-sm text-[11px] text-white/40 uppercase tracking-widest font-semibold">
                 {section.header}
               </div>
               {section.items.map((item) => (
@@ -140,8 +140,8 @@ export const Sidebar: React.FC = () => {
                   className={({ isActive }) =>
                     `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
                       isActive || isItemActive(item.path)
-                        ? "bg-sky-50 text-primary font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-primary before:rounded-r"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
                     }`
                   }
                 >
@@ -149,7 +149,7 @@ export const Sidebar: React.FC = () => {
                     const active = isActive || isItemActive(item.path);
                     return (
                       <>
-                        <span className={`material-symbols-outlined text-[20px] transition-colors ${active ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                        <span className={`material-symbols-outlined text-[20px] transition-colors ${active ? 'text-brand-teal-light' : 'text-white/50 group-hover:text-white'}`}>
                           {item.icon}
                         </span>
                         <span className="font-label-md text-label-md">{item.label}</span>
@@ -164,9 +164,9 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Pinned Bottom Logout Action */}
-      <div className="p-space-md border-t border-slate-100 bg-slate-50/50">
-        <NavLink to="/logout" className="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-rose-500 hover:bg-rose-50 transition-all text-left">
-          <span className="material-symbols-outlined text-[20px] text-rose-400 group-hover:text-rose-600">logout</span>
+      <div className="p-space-md border-t border-white/10 bg-white/5">
+        <NavLink to="/logout" className="group flex items-center gap-space-sm px-space-sm h-10 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-all text-left">
+          <span className="material-symbols-outlined text-[20px] text-rose-400">logout</span>
           <span className="font-label-md text-label-md font-semibold">Logout</span>
         </NavLink>
       </div>
