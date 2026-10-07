@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { patientService } from '../../services/patientService';
-import { get, put } from '../../services/api';
+import { get } from '../../services/api';
 import { getPatientInsurance, verifyInsurance } from '../../api/billing';
 import { useAuth } from '../../context/AuthContext';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
