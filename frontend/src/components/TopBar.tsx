@@ -18,11 +18,13 @@ export const TopBar: React.FC = () => {
   const branchName = user?.branchName || 'Colombo';
 
   return (
-    <header className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-white/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-slate-200 transition-shadow duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
+    <header className={`fixed top-0 ${isCollapsed ? 'left-sidebar-collapsed-width' : 'left-sidebar-width'} right-0 h-topbar-height bg-white/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-slate-200 transition-[left,box-shadow] duration-300 ${isScrolled ? 'shadow-sm' : ''}`}>
       {/* Greeting & Role Info */}
       <div className="flex items-center gap-space-md">
         <button
           onClick={toggleSidebar}
+          aria-controls="app-sidebar"
+          aria-expanded={!isCollapsed}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200/80 shadow-xs active:scale-95"

@@ -1,0 +1,91 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>{{ title }}</title><style>
+@page { size: A4; margin: 17mm 18mm 17mm; @bottom-left { content: element(report-footer); width: 155mm; } @bottom-right { content: "Page " counter(page); width: 19mm; white-space: nowrap; font-family: Arial, sans-serif; font-size: 7pt; color: #64748b; } }
+@page:first { margin-top: 0; }
+* { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; font-size: 8.3pt; color: #14263d; margin: 0; line-height: 1.4; }
+.footer { position: running(report-footer); font-size: 6.6pt; color: #64748b; border-top: .5pt solid #d7e1ec; padding-top: 6pt; width: 155mm; }
+.header { background: #0f172a; color: white; border-bottom: 4pt solid #32bdf4; padding: 12mm 18mm 6mm; margin: 0 -18mm 6mm; min-height: 52mm; position: relative; }
+.header .logo { position: absolute; right: 18mm; top: 9mm; width: 40mm; height: 33mm; padding: 3mm; background: white; border-radius: 2mm; object-fit: contain; }
+.eyebrow { font-size: 6.7pt; color: #a4adbd; font-weight: bold; margin-bottom: 2pt; }
+.scope { font-size: 8pt; color: #d7dee8; max-width: 128mm; }
+h1 { font-size: 22pt; line-height: 1.12; margin: 7mm 0 2mm; letter-spacing: -.4pt; }
+.subtitle { color: #b5bece; font-size: 8.5pt; }
+.meta { display: flex; gap: 3mm; border-bottom: .6pt solid #d7e1ec; padding-bottom: 4mm; margin-bottom: 4mm; }
+.meta > div { flex: 1; min-width: 0; font-size: 7.8pt; overflow-wrap: anywhere; }
+.meta b { display: block; font-size: 7.4pt; }
+h2 { font-size: 15pt; line-height: 1.15; margin: 0 0 2pt; letter-spacing: -.25pt; break-after: avoid; }
+h3 { font-size: 10pt; margin: 0 0 2pt; }
+.caption { font-size: 8pt; color: #475569; margin-bottom: 3mm; break-after: avoid; }
+.kpis { display: flex; gap: 3mm; margin: 0 0 3mm; break-inside: avoid; }
+.kpi { flex: 1; min-width: 0; background: #f0f5fa; border-top: 2pt solid #006b9c; padding: 3mm; min-height: 19mm; }
+.kpi label { display: block; font-size: 6.5pt; color: #53617a; font-weight: bold; margin-bottom: 1.5mm; }
+.kpi strong { font-size: 12pt; line-height: 1.15; display: block; overflow-wrap: anywhere; }
+.summary { color: #364152; margin: 0 0 5mm; line-height: 1.55; }
+.block { margin-bottom: 4mm; }
+.panel { border: .6pt solid #d7e1ec; padding: 3mm; break-inside: avoid; }
+.accent { border-top: 2pt solid #32bdf4; }
+.legend { display: flex; gap: 5mm; font-size: 7.5pt; color: #475569; margin-bottom: 2mm; }
+.dot { display: inline-block; width: 7pt; height: 7pt; border-radius: 1pt; margin-right: 4pt; }
+svg { width: 100%; display: block; }
+.bar-row { margin-bottom: 3mm; break-inside: avoid; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-label { display: flex; justify-content: space-between; gap: 2mm; font-size: 8pt; margin-bottom: 1mm; }
+.bar-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.bar-description { font-weight: normal; color: #53617a; font-size: 7.5pt; }
+.bar-value { font-weight: bold; white-space: nowrap; }
+.share { color: #006b9c; font-weight: bold; min-width: 11mm; text-align: right; }
+.track { height: 7pt; background: #f0f5fa; border-radius: 4pt; overflow: hidden; display: flex; }
+.segment { height: 7pt; }
+.columns { display: flex; gap: 3mm; }
+.columns > .panel { flex: 1; min-width: 0; padding: 3mm; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7.4pt; border: .5pt solid #d7e1ec; }
+thead { display: table-header-group; }
+th { background: #f0f5fa; color: #53617a; font-size: 5.8pt; text-transform: uppercase; text-align: left; }
+th,td { padding: 1.8mm 1.2mm; border-bottom: .5pt solid #d7e1ec; overflow-wrap: anywhere; vertical-align: top; white-space: pre-line; }
+tr { break-inside: avoid; }
+.total td { background: #f0f5fa; font-weight: bold; border-top: 1pt solid #006b9c; }
+.note { font-size: 7pt; color: #64748b; margin-top: 1.5mm; }
+.detail-start { break-before: page; }
+.continuation { background: #0f172a; color: white; border-bottom: 2pt solid #32bdf4; margin: -17mm -18mm 8mm; padding: 5mm 18mm; font-size: 8pt; display: flex; justify-content: space-between; gap: 4mm; }
+.observations { display: flex; gap: 3mm; }
+.observation { flex: 1; border: .6pt solid #d7e1ec; border-top: 2pt solid #32bdf4; padding: 3mm; min-width: 0; break-inside: avoid; }
+.observation p { color: #475569; margin: 1mm 0 2mm; font-size: 8pt; }
+.observation strong { color: #00835f; font-size: 7.8pt; }
+.cards { display: flex; flex-wrap: wrap; gap: 3mm; }
+.card { flex: 1; min-width: 40mm; background: #f0f5fa; padding: 4mm; border-top: 2pt solid #32bdf4; break-inside: avoid; }
+.card label { font-size: 7pt; font-weight: bold; color: #53617a; display: block; }
+.card strong { display: block; font-size: 18pt; margin: 1mm 0; }
+.currency { font-size: 11.4pt !important; white-space: nowrap; }
+.insurance .panel svg { height: 54mm; }
+.insurance .bar-row { margin-bottom: 1.5mm; }
+.insurance .panel.accent { padding: 2.5mm; }
+.balances .columns { display: table; width: 100%; border-spacing: 2mm 0; }
+.balances .columns > .panel { display: table-cell; width: 50%; padding: 3mm; }
+.balances table { font-size: 7pt; }
+.balances .summary { margin-bottom: 3mm; }
+.empty { text-align: center; color: #64748b; padding: 6mm; }
+</style></head><body class="{{ 'insurance' if title == 'Insurance vs. Out-of-Pocket' else 'balances' if single_page else '' }}">
+<div class="footer">MedSync Branch Manager Portal | {{ branch_name }} | Confidential - {{ 'contains patient information' if single_page else 'for internal use' }}</div>
+<header class="header"><img class="logo" src="{{ logo_uri }}"><div class="eyebrow">{{ eyebrow }}</div><div class="scope">{{ branch_name }}<br>{{ 'Aging range' if single_page else 'Reporting period' }}: {{ period }}</div><h1>{{ title }}</h1><div class="subtitle">{{ subtitle }}</div></header>
+<div class="meta"><div><b>REPORTING SCOPE</b>{{ branch_name }}</div><div><b>{{ 'AGING RANGE' if single_page else 'DATE RANGE' }}</b>{{ period }}</div><div><b>{{ filter_label }}</b>{{ filter_value }}</div><div><b>PREPARED FOR</b>{{ prepared_for }}</div><div><b>GENERATED</b>{{ generated_at }}</div></div>
+{% if extra_filters %}<div class="note">{% for filter in extra_filters %}{{ filter }}{% if not loop.last %} | {% endif %}{% endfor %}</div>{% endif %}
+<h2>Executive Summary</h2><div class="caption">Key figures for {{ 'the branch' if single_page else 'the reporting period' }}</div><div class="kpis">{% for label,value in kpis %}<div class="kpi"><label>{{ label }}</label><strong class="{{ 'currency' if value.startswith('LKR') else '' }}">{{ value }}</strong></div>{% endfor %}</div><p class="summary">{{ summary }}</p>
+{% macro render_bars(item, boxed=true) %}
+{% if boxed %}<div class="panel accent">{% endif %}
+{% if item.legend %}<div class="legend">{% for label,color in item.legend %}<span><i class="dot" style="background: {{ color }}"></i>{{ label }}</span>{% endfor %}</div>{% endif %}
+{% for bar in item.bars %}<div class="bar-row"><div class="bar-label"><div class="bar-name"><b>{{ bar.name }}</b>{% if bar.description %}<span class="bar-description"> - {{ bar.description }}</span>{% endif %}</div><span class="bar-value">{{ bar.value }}</span>{% if bar.share %}<span class="share">{{ bar.share }}</span>{% endif %}</div><div class="track">{% for width,color in bar.segments %}<div class="segment" style="width: {{ width }}%; background: {{ color }}"></div>{% endfor %}</div></div>{% else %}<div class="empty">No data available for the selected criteria.</div>{% endfor %}
+{% if boxed %}</div>{% endif %}
+{% endmacro %}
+{% macro render_block(item) %}<section class="block"><h2>{{ item.title }}</h2><div class="caption">{{ item.subtitle }}</div>
+{% if item.kind == 'chart' %}<div class="panel"><div class="legend">{% for label,color in item.legend %}<span><i class="dot" style="background: {{ color }}"></i>{{ label }}</span>{% endfor %}</div>{{ item.chart }}</div>
+{% elif item.kind == 'bars' %}{{ render_bars(item) }}
+{% elif item.kind == 'columns' %}<div class="columns">{% for child in item.children %}<div class="panel accent"><h3>{{ child.title }}</h3><div class="note" style="margin-bottom: 2mm">{{ child.subtitle }}</div>{{ render_bars(child,false) }}</div>{% endfor %}</div>
+{% elif item.kind == 'cards' %}<div class="cards">{% for label,value,amount in item.cards %}<div class="card"><label>{{ label }}</label><strong>{{ value }}</strong><span>{{ amount }}</span></div>{% else %}<div class="empty">No recorded patient payments.</div>{% endfor %}</div>
+{% else %}<table>{% if item.headers|length == 8 %}<colgroup>{% set widths = [19,17,9,9,12,13,13,8] if single_page else [4,22,17,7,13,13,15,9] %}{% for width in widths %}<col style="width: {{ width }}%">{% endfor %}</colgroup>{% endif %}<thead><tr>{% for heading in item.headers %}<th>{{ heading }}</th>{% endfor %}</tr></thead><tbody>{% for row in item.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% else %}<tr><td colspan="{{ item.headers|length }}" class="empty">No data available for the selected criteria.</td></tr>{% endfor %}{% if item.totals %}<tr class="total">{% for cell in item.totals %}<td style="white-space: nowrap; font-size: 6.6pt">{{ cell }}</td>{% endfor %}</tr>{% endif %}</tbody></table>{% if item.note %}<div class="note">{{ item.note }}</div>{% endif %}
+{% endif %}</section>{% endmacro %}
+{% for item in overview %}{{ render_block(item) }}{% endfor %}
+<div class="{{ '' if single_page else 'detail-start' }}">{% if not single_page %}<div class="continuation"><b>MedSync | {{ title }}</b><span>{{ branch_name }} - {{ period }}</span></div>{% endif %}
+{% for item in details %}{{ render_block(item) }}{% endfor %}
+{% if observations %}<h2>Key Observations</h2><div class="caption">Derived from the figures above</div><div class="observations">{% for title,text,highlight in observations %}<div class="observation"><h3>{{ title }}</h3><p>{{ text }}</p><strong>{{ highlight }}</strong></div>{% endfor %}</div>{% endif %}</div>
+</body></html>
