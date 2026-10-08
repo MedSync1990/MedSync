@@ -59,13 +59,14 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
 
     csrf_token = generate_csrf_token()
     max_age = config.JWT_EXPIRY_MINUTES * 60
+    cookie_samesite = "none" if config.COOKIE_SECURE else "lax"
 
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
         secure=config.COOKIE_SECURE,
-        samesite="none",
+        samesite=cookie_samesite,
         max_age=max_age,
     )
 
@@ -74,7 +75,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         value=csrf_token,
         httponly=False,
         secure=config.COOKIE_SECURE,
-        samesite="none",
+        samesite=cookie_samesite,
         max_age=max_age,
     )
 
