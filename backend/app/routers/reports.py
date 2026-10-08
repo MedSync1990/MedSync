@@ -874,3 +874,116 @@ async def reject_payout_request(
         raise NotFoundError(f"Payout request {request_id} not found.")
     if row["status"] != "Pending":
         raise ConflictError(f"Cannot reject — request is already '{row['status']}'.")
+
+# PDF exports reuse the JSON report handlers so data and branch rules stay identical.
+async def _management_pdf(title, sections, conn, current_user, branch_id, filters):
+    from pathlib import Path
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from starlette.concurrency import run_in_threadpool
+    from datetime import timezone, timedelta
+    from app.report_design import build_design
+    import weasyprint
+
+    actual_branch_id = get_effective_branch_id(current_user, branch_id)
+    branch_name = "All Branches"
+    if actual_branch_id is not None:
+        branch_name = await conn.fetchval("SELECT name FROM branch WHERE branch_id = $1", actual_branch_id)
+        if not branch_name:
+            raise NotFoundError("Branch not found.")
+    template_dir = Path(__file__).resolve().parents[1] / "templates"
+    env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=select_autoescape(["html"]))
+    profile = await conn.fetchrow("SELECT first_name, last_name FROM app_user WHERE user_id = $1", current_user.user_id)
+    full_name = " ".join(str(profile[key] or "") for key in ("first_name", "last_name")).strip() if profile else current_user.username
+    design = build_design(title, sections, filters, branch_name)
+    logo = template_dir / "report_logo.png"
+    html = env.get_template("management_report.html").render(
+        **design, branch_name=branch_name,
+        generated_at=datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%d %b %Y"),
+        prepared_for=f"{full_name}, {current_user.role}", logo_uri=logo.as_uri(),
+    )
+    # Rendering is CPU intensive and must not block the async API event loop.
+    pdf = await run_in_threadpool(lambda: weasyprint.HTML(string=html).write_pdf())
+    filename = title.lower().replace(" ", "_") + ".pdf"
+    return Response(content=pdf, media_type="application/pdf", headers={
+        "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"
+    })
+
+
+def _report_section(title, items, columns):
+    return {"title": title, "headers": [label for key, label in columns],
+            "rows": [[getattr(item, key) for key, label in columns] for item in items]}
+
+
+def _report_period(start_date, end_date):
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(status_code=422, detail="Start date must be before end date.")
+    return f"Period: {start_date or 'Beginning'} to {end_date or 'Present'}"
+
+
+@router.get("/appointments-summary/pdf")
+async def appointments_summary_pdf(
+    start_date: Optional[date] = None, end_date: Optional[date] = None,
+    branch_id: Optional[int] = None, appointment_type: Optional[str] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+) -> Response:
+    period = _report_period(start_date, end_date)
+    report = await get_appointments_summary(start_date, end_date, branch_id, appointment_type, current_user, conn)
+    sections = [{"title": "Summary", "headers": ["Scheduled", "Completed", "Cancelled", "Walk-ins"],
+                 "rows": [[report.total_scheduled, report.total_completed, report.total_cancelled, report.total_walkins]]},
+                _report_section("Daily appointments", report.daily_data, [("date", "Date"), ("scheduled", "Scheduled"), ("completed", "Completed"), ("cancelled", "Cancelled")])]
+    return await _management_pdf("Branch Appointments", sections, conn, current_user, branch_id, [period, f"Appointment type: {appointment_type or 'All'}"])
+
+
+@router.get("/doctor-revenue/pdf")
+async def doctor_revenue_pdf(
+    start_date: Optional[date] = None, end_date: Optional[date] = None,
+    branch_id: Optional[int] = None, doctor_id: Optional[int] = None,
+    specialty: str = "", search: str = "",
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+) -> Response:
+    period = _report_period(start_date, end_date)
+    report = await get_doctor_revenue(start_date, end_date, branch_id, doctor_id, current_user, conn)
+    items = [r for r in report.data if (not specialty or specialty.lower() in r.specialty.lower()) and (not search or search.lower() in r.doctor_name.lower())]
+    sections = [_report_section("Doctor Revenue (LKR)", items, [("doctor_name", "Doctor"), ("specialty", "Specialty"), ("branch_name", "Branch"), ("total_appointments", "Appointments"), ("consult_revenue", "Consultations"), ("procedure_revenue", "Procedures"), ("total_revenue", "Total")])]
+    return await _management_pdf("Doctor Revenue", sections, conn, current_user, branch_id, [period, f"Specialty: {specialty or 'All'}", f"Doctor search: {search or 'All'}"])
+
+
+@router.get("/outstanding-balances/pdf")
+async def outstanding_balances_pdf(
+    branch_id: Optional[int] = None, search: str = "", aging: str = "all",
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+) -> Response:
+    if aging not in ("all", "0-30", "31-60", "60+"):
+        raise HTTPException(status_code=422, detail="Invalid aging filter.")
+    report = await get_outstanding_balances(branch_id, current_user, conn)
+    q = search.lower().strip()
+    items = [r for r in report.data if
+             (not q or any(q in str(v).lower() for v in (r.patient_name, r.patient_id, r.invoice_id))) and
+             (aging == "all" or aging == ("0-30" if r.aging_days <= 30 else "31-60" if r.aging_days <= 60 else "60+"))]
+    sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status"), ("patient_id", "Patient ID"), ("last_payment_date", "Last payment")])]
+    return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])
+
+
+@router.get("/insurance-vs-out-of-pocket/pdf")
+async def insurance_cash_pdf(
+    start_date: Optional[date] = None, end_date: Optional[date] = None,
+    branch_id: Optional[int] = None, provider: str = "all", search: str = "",
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+    conn: Connection = Depends(get_conn)
+) -> Response:
+    period = _report_period(start_date, end_date)
+    report = await get_insurance_vs_out_of_pocket(start_date, end_date, branch_id, current_user, conn)
+    ledger = [r for r in report.ledger if search.lower().strip() in r.period.lower()]
+    providers = [r for r in report.provider_split if provider == "all" or provider.lower() in r.provider_name.lower()]
+    slas = [r for r in report.claim_slas if provider == "all" or provider.lower() in r.provider_name.lower()]
+    sections = [
+        _report_section("Monthly settlement ledger (LKR)", ledger, [("period", "Period"), ("total_insurance_covered", "Insurance"), ("total_out_of_pocket", "Out of pocket"), ("total_revenue", "Total"), ("volume", "Invoices")]),
+        _report_section("Insurance providers (LKR)", providers, [("provider_name", "Provider"), ("amount", "Amount"), ("percentage", "Percentage")]),
+        _report_section("Claim settlement times", slas, [("provider_name", "Provider"), ("avg_days", "Average days")]),
+        _report_section("Payment modes (LKR)", report.payment_modes, [("payment_type", "Mode"), ("amount", "Amount"), ("percentage", "Percentage")]),
+    ]
+    sections[2]["average"] = report.avg_claim_days
+    return await _management_pdf("Insurance vs Cash", sections, conn, current_user, branch_id, [period, f"Provider: {provider}", f"Period search: {search or 'All'}"])

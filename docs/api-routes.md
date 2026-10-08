@@ -417,3 +417,15 @@ Carried over from `architecture.md` §9/§14, still open at the API-design level
 - Treatment-line correction/adjustment flow for an invoice that's already been generated.
 - Audit-log read endpoints (FR-AM-08/FR-UAC-06/5.2.5 require logging, but no `GET /audit-log`
   route is described anywhere in the source documents).
+
+### Management PDF exports
+Authenticated GET `/api/v1/reports/{report}/pdf` is available for `appointments-summary`,
+`doctor-revenue`, `outstanding-balances`, and `insurance-vs-out-of-pocket`.
+Administrator and Branch Manager roles are supported; doctor-revenue also permits Doctors
+with their existing self-only scope. Branch managers always use their assigned branch.
+PDFs reuse the JSON report queries and return `application/pdf` attachments with `Cache-Control: no-store`.
+Date reports accept `start_date`, `end_date`, `branch_id`; appointments also accept `appointment_type`.
+Doctor revenue accepts `doctor_id`, `specialty`, `search`; balances accept `branch_id`, `search`,
+`aging` (`all`, `0-30`, `31-60`, `60+`); insurance accepts `provider`, `search` (period).
+Frontend PDF exports use the last successfully applied branch/date/type filters and current local display filters.
+CSV exports remain available. Backend PDFs use printable tables rather than browser chart screenshots.
