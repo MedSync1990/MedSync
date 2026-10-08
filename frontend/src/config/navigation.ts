@@ -30,7 +30,11 @@ export const navigationConfig: NavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', roles: ['Administrator'] },
   { label: 'Manage Branches', path: '/admin/branches', roles: ['Administrator'] },
   { label: 'Manage Staff', path: '/admin/staff', roles: ['Administrator'] },
-  { label: 'Manage Doctors', path: '/admin/doctors', roles: ['Administrator', 'Branch Manager'] },
+  { label: 'Manage Doctors', path: '/admin/doctors', roles: ['Administrator'] },
+  { label: 'Doctors & Specialties', path: '/branch-manager/doctors', roles: ['Branch Manager'] },
+  { label: 'Manage Staff', path: '/admin/staff', roles: ['Branch Manager'] },
+  { label: 'Treatment Catalogue', path: '/branch-manager/treatment-catalogue', roles: ['Branch Manager'] },
+  { label: 'Doctor Payments', path: '/admin/doctor-payments', roles: ['Administrator'] },
   { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', roles: ['Administrator'] },
 
   // Reports
