@@ -23,6 +23,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
   const roleSubtitle = user?.roleTitle || user?.role || 'Staff';
   const branchName = user?.branchName || 'Colombo Central Branch';
   const avatarUrl = user?.avatarUrl || '/logo.jpg';
+  const isDoctor = user?.role === 'Doctor';
+  const doctorInitials = user
+    ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || 'DR'
+    : 'DR';
 
   return (
     <header
@@ -32,75 +36,130 @@ export const TopBar: React.FC<TopBarProps> = ({ onThemeToggle }) => {
           : 'shadow-[0_1px_4px_rgba(15,23,42,0.04)]'
         }`}
     >
-      {/* Unified Single Sidebar Toggle Button & Greeting */}
-      <div className="flex items-center gap-space-md">
-        <button
-          onClick={toggleSidebar}
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200/80 shadow-xs active:scale-95"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[20px]">
-            {isCollapsed ? 'side_navigation' : 'menu_open'}
-          </span>
-        </button>
-
-        <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs">
-            <span className="font-headline-sm text-headline-sm text-brand-navy-deep">
-              Good morning, {userName}
-            </span>
-            <span className="material-symbols-outlined text-brand-teal-light text-[20px]">verified</span>
+      {isDoctor ? (
+        <>
+          <div className="flex items-center gap-space-md">
+            <button
+              onClick={toggleSidebar}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isCollapsed ? 'side_navigation' : 'menu_open'}
+              </span>
+            </button>
+            <div className="hidden md:flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
+              <span className="text-brand-navy-deep">Home</span>
+              <span className="text-outline">/</span>
+              <span>Doctor Portal</span>
+            </div>
           </div>
-          <span className="font-body-sm text-body-sm text-secondary">
-            {branchName} · {roleSubtitle}
-          </span>
-        </div>
-      </div>
 
-      {/* Controls & Profile */}
-      <div className="flex items-center gap-space-md">
-        <div className="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md">
-          <span className="material-symbols-outlined text-[16px] text-status-completed-text">domain</span>
-          <span>{branchName}</span>
-        </div>
-
-        {onThemeToggle && (
-          <button
-            onClick={onThemeToggle}
-            aria-label="Theme Toggle"
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[20px]">dark_mode</span>
-          </button>
-        )}
-
-        <button
-          aria-label="Notifications"
-          className="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[20px]">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
-        </button>
-
-        <div className="h-7 w-[1px] bg-border-subtle"></div>
-
-        <div className="flex items-center gap-space-sm pl-space-xs">
-          <div className="text-right hidden sm:block">
-            <div className="font-label-lg text-label-lg text-brand-navy-deep leading-tight">{userName}</div>
-            <div className="font-body-sm text-body-sm text-secondary truncate max-w-[140px]">{user?.role}</div>
+          <div className="flex items-center gap-space-md">
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg border border-brand-teal-light/30 text-status-scheduled-text font-label-sm text-label-sm">
+              <span className="material-symbols-outlined text-[14px]">apartment</span>
+              <span>{branchName}</span>
+            </div>
+            <div className="h-5 w-px bg-border-subtle hidden lg:block"></div>
+            <button
+              aria-label="Notifications"
+              className="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">notifications</span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
+            </button>
+            <div className="h-5 w-px bg-border-subtle"></div>
+            <div className="flex items-center gap-space-sm pl-1">
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="font-label-md text-label-md text-brand-navy-deep leading-tight">
+                  Good morning, {userName}
+                </span>
+                <span className="font-body-sm text-body-sm text-outline leading-tight mt-0.5">
+                  {roleSubtitle} · {branchName}
+                </span>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-primary font-bold ring-2 ring-primary/20">
+                {doctorInitials}
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-outline">expand_more</span>
+            </div>
           </div>
-          <img
-            alt={userName}
-            className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
-            src={avatarUrl}
-          />
-        </div>
-      </div>
+        </>
+      ) : (
+        <>
+          {/* Unified Single Sidebar Toggle Button & Greeting */}
+          <div className="flex items-center gap-space-md">
+            <button
+              onClick={toggleSidebar}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200/80 shadow-xs active:scale-95"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isCollapsed ? 'side_navigation' : 'menu_open'}
+              </span>
+            </button>
+
+            <div className="flex flex-col">
+              <div className="flex items-center gap-space-xs">
+                <span className="font-headline-sm text-headline-sm text-brand-navy-deep">
+                  Good morning, {userName}
+                </span>
+                <span className="material-symbols-outlined text-brand-teal-light text-[20px]">verified</span>
+              </div>
+              <span className="font-body-sm text-body-sm text-secondary">
+                {branchName} · {roleSubtitle}
+              </span>
+            </div>
+          </div>
+
+          {/* Controls & Profile */}
+          <div className="flex items-center gap-space-md">
+            <div className="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md">
+              <span className="material-symbols-outlined text-[16px] text-status-completed-text">domain</span>
+              <span>{branchName}</span>
+            </div>
+
+            {onThemeToggle && (
+              <button
+                onClick={onThemeToggle}
+                aria-label="Theme Toggle"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">dark_mode</span>
+              </button>
+            )}
+
+            <button
+              aria-label="Notifications"
+              className="relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-subtle hover:text-on-surface transition-colors"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">notifications</span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-card"></span>
+            </button>
+
+            <div className="h-7 w-[1px] bg-border-subtle"></div>
+
+            <div className="flex items-center gap-space-sm pl-space-xs">
+              <div className="text-right hidden sm:block">
+                <div className="font-label-lg text-label-lg text-brand-navy-deep leading-tight">{userName}</div>
+                <div className="font-body-sm text-body-sm text-secondary truncate max-w-[140px]">{user?.role}</div>
+              </div>
+              <img
+                alt={userName}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
+                src={avatarUrl}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 };
-
