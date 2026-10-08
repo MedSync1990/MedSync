@@ -5,10 +5,10 @@ import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
 
 const actions = [
+  { title: 'Emergency Walk-in', description: 'Open booking and choose Walk-in', icon: 'emergency', to: '/receptionist/book-appointment', color: 'bg-sky-100 text-sky-700' },
   { title: 'Register Patient', description: 'Register a new patient', icon: 'person_add', to: '/receptionist/register-patient', color: 'bg-sky-100 text-sky-700' },
   { title: 'Book Appointment', description: 'Schedule a patient with a doctor', icon: 'event_available', to: '/receptionist/book-appointment', color: 'bg-sky-100 text-sky-700' },
   { title: 'Reschedule Appointment', description: 'Change an existing appointment', icon: 'edit_calendar', to: '/receptionist/appointments', color: 'bg-sky-100 text-sky-700' },
-  { title: 'Emergency Walk-in', description: 'Open booking and choose Walk-in', icon: 'emergency', to: '/receptionist/book-appointment', color: 'bg-sky-100 text-sky-700' },
   { title: 'Collect Payment', description: 'Record an invoice payment', icon: 'payments', to: '/receptionist/collect-payment', color: 'bg-sky-100 text-sky-700' },
 ];
 const statusColors: Record<string, string> = {
