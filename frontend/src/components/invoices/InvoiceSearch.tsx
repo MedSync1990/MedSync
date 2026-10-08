@@ -2,66 +2,22 @@ import type { FormEvent } from 'react';
 
 interface InvoiceSearchProps {
   searchQuery: string;
-  searchType: 'invoice' | 'nic';
   invoiceId?: string;
   onSearchQueryChange: (value: string) => void;
-  onSearchTypeChange: (type: 'invoice' | 'nic') => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onQuickLookup: () => void;
 }
 
 export default function InvoiceSearch({
   searchQuery,
-  searchType,
   invoiceId,
   onSearchQueryChange,
-  onSearchTypeChange,
   onSubmit,
   onQuickLookup,
 }: InvoiceSearchProps) {
-  const handleQueryChange = (value: string) => {
-    let nextValue = value;
-    if (searchType === 'invoice') {
-      nextValue = value.toUpperCase();
-      if (!nextValue.startsWith('INV-')) return;
-    }
-    onSearchQueryChange(nextValue);
-  };
-
-  const handleTypeChange = (type: 'invoice' | 'nic') => {
-    onSearchTypeChange(type);
-    onSearchQueryChange(type === 'invoice' ? 'INV-' : '');
-  };
-
   return (
     <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-md">
       <form onSubmit={onSubmit} className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        {/* Search type toggle */}
-        <div className="flex-shrink-0 flex bg-surface-subtle p-1 rounded-lg h-[42px]">
-          <button
-            type="button"
-            className={`flex-1 px-4 rounded-md font-label-md text-label-md transition-all ${
-              searchType === 'invoice'
-                ? 'bg-surface-card shadow-sm text-primary font-semibold'
-                : 'text-on-surface-variant hover:text-brand-navy-deep'
-            }`}
-            onClick={() => handleTypeChange('invoice')}
-          >
-            Invoice
-          </button>
-          <button
-            type="button"
-            className={`flex-1 px-4 rounded-md font-label-md text-label-md transition-all ${
-              searchType === 'nic'
-                ? 'bg-surface-card shadow-sm text-primary font-semibold'
-                : 'text-on-surface-variant hover:text-brand-navy-deep'
-            }`}
-            onClick={() => handleTypeChange('nic')}
-          >
-            NIC
-          </button>
-        </div>
-
         {/* Search input */}
         <div className="relative flex-1">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[20px] pointer-events-none">
@@ -70,21 +26,17 @@ export default function InvoiceSearch({
           <input
             className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
             id="invoiceSearchInput"
-            placeholder={
-              searchType === 'invoice'
-                ? 'Enter Invoice Code (e.g. INV-000002)...'
-                : 'Enter Patient NIC (e.g. 900000000001)...'
-            }
+            placeholder="Search by invoice code, patient name, patient code, NIC, or phone..."
             type="text"
             value={searchQuery}
-            onChange={(event) => handleQueryChange(event.target.value)}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
           />
-          {searchQuery && searchQuery !== 'INV-' && (
+          {searchQuery && (
             <button
               type="button"
               className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-brand-navy-deep transition-colors cursor-pointer"
               title="Clear search"
-              onClick={() => onSearchQueryChange(searchType === 'invoice' ? 'INV-' : '')}
+              onClick={() => onSearchQueryChange('')}
             >
               <span className="material-symbols-outlined text-[20px]">cancel</span>
             </button>
