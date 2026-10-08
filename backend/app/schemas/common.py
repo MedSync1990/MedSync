@@ -19,4 +19,3 @@ class PaginatedResponse(BaseModel, Generic[T]):
 class GenderEnum(str, Enum):
     Male = "Male"
     Female = "Female"
-    Other = "Other"

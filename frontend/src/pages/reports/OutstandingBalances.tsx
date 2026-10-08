@@ -31,7 +31,6 @@ export function OutstandingBalances() {
 
   // Export
   const [isExporting, setIsExporting] = useState(false);
-  const [exportComplete, setExportComplete] = useState(false);
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   const fetchReport = () => {
@@ -80,8 +79,7 @@ export function OutstandingBalances() {
       exportToCSV(filteredData, 'Outstanding_Balances');
       setTimeout(() => {
         setIsExporting(false);
-        setExportComplete(true);
-        setTimeout(() => setExportComplete(false), 2000);
+
       }, 600);
     } else if (type === 'PDF') {
       try {

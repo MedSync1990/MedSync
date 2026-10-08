@@ -1,0 +1,66 @@
+name: Deploy MedSync
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: medsync2026
+  ACR_LOGIN_SERVER: medsync2026.azurecr.io
+  BACKEND_APP: medsync
+  FRONTEND_APP: medsync-frontend
+  RESOURCE_GROUP: medsync-rg
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name $ACR_NAME
+
+      - name: Build and push backend
+        run: |
+          docker build \
+            -f backend/Dockerfile \
+            -t $ACR_LOGIN_SERVER/medsync-backend:latest \
+            ./backend
+
+          docker push $ACR_LOGIN_SERVER/medsync-backend:latest
+
+      - name: Build and push frontend
+        run: |
+          docker build \
+            -f frontend/Dockerfile \
+            --build-arg VITE_API_BASE_URL=https://medsync-drhqhwd2hyd9azg3.eastasia-01.azurewebsites.net/api/v1 \
+            -t $ACR_LOGIN_SERVER/medsync-frontend:latest \
+            ./frontend
+
+          docker push $ACR_LOGIN_SERVER/medsync-frontend:latest
+
+      - name: Restart backend
+        run: |
+          az webapp restart \
+            --resource-group $RESOURCE_GROUP \
+            --name $BACKEND_APP
+
+      - name: Restart frontend
+        run: |
+          az webapp restart \
+            --resource-group $RESOURCE_GROUP \
+            --name $FRONTEND_APP

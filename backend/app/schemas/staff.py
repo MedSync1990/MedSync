@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import date
+from .common import GenderEnum
 
 class StaffCreate(BaseModel):
     role_id: int
@@ -10,7 +11,7 @@ class StaffCreate(BaseModel):
     id_number: str
     address: Optional[str] = None
     birthdate: date
-    gender: str
+    gender: GenderEnum
     email: Optional[EmailStr] = None
     phone_number: str
     branch_id: int

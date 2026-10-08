@@ -197,10 +197,8 @@ const DoctorPayments: React.FC = () => {
   // KPIs
   const pendingList  = requests.filter((r) => r.status === 'Pending');
   const paidList     = requests.filter((r) => r.status === 'Paid');
-  const rejectedList = requests.filter((r) => r.status === 'Rejected');
   const pendingTotal = pendingList.reduce((s, r)  => s + r.request_amount, 0);
   const paidTotal    = paidList.reduce((s, r) => s + r.request_amount, 0);
-  const totalAmount  = requests.reduce((s, r) => s + r.request_amount, 0);
 
   // Decide (single)
   const handlePay = async (requestId: number, note: string) => {
@@ -242,20 +240,6 @@ const DoctorPayments: React.FC = () => {
       fetchData();
     } catch {
       showToast('Some approvals failed — please refresh.', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Quick approve single
-  const quickPay = async (requestId: number) => {
-    setSaving(true);
-    try {
-      await payPayoutRequest(requestId, '');
-      showToast('Payout processed ✓', 'success');
-      fetchData();
-    } catch (e: any) {
-      showToast(e?.message || 'Failed to process payment.', 'error');
     } finally {
       setSaving(false);
     }

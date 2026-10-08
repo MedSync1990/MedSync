@@ -1,8 +1,10 @@
 import React from 'react';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
 
 export const TopBar: React.FC = () => {
   const { user } = useAuth();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
@@ -19,6 +21,18 @@ export const TopBar: React.FC = () => {
     <header className={`fixed top-0 left-sidebar-width right-0 h-topbar-height bg-white/95 backdrop-blur-md z-40 px-space-lg flex items-center justify-between border-b border-slate-200 transition-shadow duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
       {/* Greeting & Role Info */}
       <div className="flex items-center gap-space-md">
+        <button
+          onClick={toggleSidebar}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200/80 shadow-xs active:scale-95"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {isCollapsed ? 'side_navigation' : 'menu_open'}
+          </span>
+        </button>
+
         <div className="flex flex-col">
           <div className="flex items-center gap-space-xs">
             <span className="font-headline-sm text-headline-sm text-slate-900 font-bold">
