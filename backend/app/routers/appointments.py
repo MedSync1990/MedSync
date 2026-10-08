@@ -11,6 +11,8 @@ from app.schemas.appointments import (
     AppointmentRescheduleRequest,
     AppointmentCompleteRequest,
     AppointmentCompleteResponse,
+    ConsultationResponse,
+    ConsultationTreatmentResponse,
     AppointmentResponse,
     AppointmentListResponse,
     DoctorSlotResponse,
@@ -21,6 +23,46 @@ from app.schemas.appointments import (
 from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidationError
 
 router = APIRouter()
+
+
+@router.get("/{id}/consultation", response_model=ConsultationResponse)
+async def get_appointment_consultation(
+    id: int,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Doctor", "Receptionist", "Administrator", "Branch Manager")),
+):
+    """Return the completed consultation and prescribed treatments for an appointment."""
+    row = await conn.fetchrow(
+        """
+        SELECT c.consultation_id, c.appointment_id, c.diagnosis,
+               c.consultation_notes, c.created_date
+        FROM consultations c
+        JOIN appointments a ON a.appointment_id = c.appointment_id
+        WHERE c.appointment_id = $1
+        """,
+        id,
+    )
+    if not row:
+        raise NotFoundError("Consultation not found.")
+
+    treatments = await conn.fetch(
+        """
+        SELECT ct.treatment_code AS treatment_id,
+               tc.treatment_name,
+               tc.category,
+               ct.quantity
+        FROM consultation_treatments ct
+        JOIN consultations c ON c.consultation_id = ct.consultation_id
+        JOIN treatment_catalogue tc ON tc.treatment_code = ct.treatment_code
+        WHERE c.appointment_id = $1
+        ORDER BY tc.treatment_name
+        """,
+        id,
+    )
+    return ConsultationResponse(
+        **dict(row),
+        treatments=[ConsultationTreatmentResponse(**dict(item)) for item in treatments],
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

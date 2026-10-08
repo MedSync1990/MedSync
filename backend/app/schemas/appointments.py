@@ -89,6 +89,22 @@ class AppointmentCompleteResponse(BaseModel):
     message: str
 
 
+class ConsultationTreatmentResponse(BaseModel):
+    treatment_id: int
+    treatment_name: str
+    category: Optional[str] = None
+    quantity: int
+
+
+class ConsultationResponse(BaseModel):
+    consultation_id: int
+    appointment_id: int
+    diagnosis: Optional[str] = None
+    consultation_notes: str
+    created_date: datetime
+    treatments: List[ConsultationTreatmentResponse] = Field(default_factory=list)
+
+
 # 6. GET /appointments/{id} & Item in List Response
 class AppointmentResponse(BaseModel):
     appointment_id: int
