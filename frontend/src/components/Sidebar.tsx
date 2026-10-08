@@ -21,7 +21,7 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   const { isCollapsed } = useSidebar();
   const userRole = user?.role;
-  const branchName = user?.branchName || 'Colombo';
+  const branchName = userRole === 'Administrator' ? 'All Branches' : user?.branchName || 'Assigned Branch';
 
   const standaloneItem: NavItem = (() => {
     switch (userRole) {
@@ -41,28 +41,57 @@ export const Sidebar: React.FC = () => {
       ],
     };
 
-    return [
-      {
-        header: 'REPORTS',
-        items: [
-          { label: 'Branch Appointments', path: '/reports/appointments-summary', icon: 'event_note', dataPath: 'report-branch-appointments' },
-          { label: 'Doctor Revenue', path: '/reports/doctor-revenue', icon: 'monitoring', dataPath: 'report-doctor-revenue' },
-          { label: 'Outstanding Balances', path: '/reports/outstanding-balances', icon: 'account_balance_wallet', dataPath: 'report-outstanding-balances' },
-          { label: 'Treatment Breakdown', path: '/reports/treatment-categories', icon: 'pie_chart', dataPath: 'report-treatment-breakdown' },
-          { label: 'Insurance vs. Cash', path: '/reports/insurance-vs-out-of-pocket', icon: 'health_and_safety', dataPath: 'report-insurance-vs-cash' },
-        ],
-      },
-      {
-        header: 'MANAGEMENT',
-        items: [
+    const reports: NavSection = {
+      header: 'REPORTS',
+      items: [
+        { label: 'Branch Appointments', path: '/reports/appointments-summary', icon: 'event_note', dataPath: 'report-branch-appointments' },
+        { label: 'Doctor Revenue', path: '/reports/doctor-revenue', icon: 'monitoring', dataPath: 'report-doctor-revenue' },
+        { label: 'Outstanding Balances', path: '/reports/outstanding-balances', icon: 'account_balance_wallet', dataPath: 'report-outstanding-balances' },
+        { label: 'Treatment Breakdown', path: '/reports/treatment-categories', icon: 'pie_chart', dataPath: 'report-treatment-breakdown' },
+        { label: 'Insurance vs. Cash', path: '/reports/insurance-vs-out-of-pocket', icon: 'health_and_safety', dataPath: 'report-insurance-vs-cash' },
+      ],
+    };
+    switch (userRole) {
+      case 'Administrator':
+        return [reports, { header: 'MANAGEMENT', items: [
+          { label: 'Manage Branches', path: '/admin/branches', icon: 'domain', dataPath: 'manage-branches' },
+          { label: 'Manage Staff & Users', path: '/admin/staff', icon: 'badge', dataPath: 'manage-staff' },
+          { label: 'Doctors & Specialties', path: '/admin/doctors', icon: 'stethoscope', dataPath: 'doctors-specialties' },
+          { label: 'Patients', path: '/receptionist/patients', icon: 'contact_page', dataPath: 'patients' },
+          { label: 'Treatment Catalogue', path: '/admin/treatment-catalogue', icon: 'medical_services', dataPath: 'treatment-catalogue' },
+          { label: 'Doctor Payments', path: '/admin/doctor-payments', icon: 'payments', dataPath: 'doctor-payments' },
+        ] }, systemSection];
+      case 'Branch Manager':
+        return [reports, { header: 'MANAGEMENT', items: [
+          { label: 'Branch Details', path: '/branch-manager/branch-details', icon: 'domain', dataPath: 'branch-details' },
           { label: 'Manage Staff', path: '/admin/staff', icon: 'badge', dataPath: 'manage-staff' },
           { label: 'Doctors & Specialties', path: '/branch-manager/doctors', icon: 'stethoscope', dataPath: 'doctors-specialties' },
           { label: 'Patients', path: '/receptionist/patients', icon: 'contact_page', dataPath: 'patients' },
           { label: 'Treatment Catalogue', path: '/branch-manager/treatment-catalogue', icon: 'medical_services', dataPath: 'treatment-catalogue' },
-        ],
-      },
-      systemSection,
-    ];
+        ] }, systemSection];
+      case 'Receptionist':
+        return [{ header: 'PATIENTS', items: [
+          { label: 'Register Patient', path: '/receptionist/register-patient', icon: 'person_add', dataPath: 'register-patient' },
+          { label: 'Patient Directory', path: '/receptionist/patients', icon: 'contact_page', dataPath: 'patients' },
+        ] }, { header: 'APPOINTMENTS', items: [
+          { label: 'Book Appointment', path: '/receptionist/book-appointment', icon: 'calendar_add_on', dataPath: 'book-appointment' },
+          { label: 'Manage Appointments', path: '/receptionist/appointments', icon: 'event_note', dataPath: 'appointments' },
+        ] }, { header: 'BILLING & PAYMENTS', items: [
+          { label: 'Invoices', path: '/receptionist/invoices', icon: 'receipt_long', dataPath: 'invoices' },
+          { label: 'Collect Payment', path: '/receptionist/collect-payment', icon: 'payments', dataPath: 'collect-payment' },
+          { label: 'Treatment Catalogue', path: '/receptionist/treatment-catalogue', icon: 'medical_services', dataPath: 'treatment-catalogue' },
+        ] }, systemSection];
+      case 'Doctor':
+        return [{ header: 'CLINICAL', items: [
+          { label: 'My Schedule', path: '/doctor/schedule', icon: 'calendar_month', dataPath: 'my-schedule' },
+          { label: 'Consultation', path: '/doctor/consultation', icon: 'clinical_notes', dataPath: 'consultation' },
+          { label: 'Treatment Catalogue', path: '/doctor/treatment-catalogue', icon: 'medical_services', dataPath: 'treatment-catalogue' },
+        ] }, { header: 'EARNINGS', items: [
+          { label: 'My Earnings', path: '/doctor/earnings', icon: 'account_balance_wallet', dataPath: 'my-earnings' },
+        ] }, systemSection];
+      default:
+        return [systemSection];
+    }
   })();
 
   const isItemActive = (itemPath: string) => {
@@ -90,7 +119,7 @@ export const Sidebar: React.FC = () => {
               MedSync
             </span>
             <span className="font-label-sm text-[10px] text-white/50 tracking-wider uppercase truncate">
-              BRANCH MANAGER PORTAL
+              {userRole ? `${userRole.toUpperCase()} PORTAL` : 'MEDSYNC PORTAL'}
             </span>
           </div>
         </div>
