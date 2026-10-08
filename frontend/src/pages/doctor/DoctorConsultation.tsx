@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import { getAppointment, listAppointments } from '../../api/appointments';
-import { put } from '../../api/client';
+import { get, put } from '../../api/client';
 import { listTreatments, type TreatmentApiItem } from '../../api/treatments';
 import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
 import type { AppointmentResponse } from '../../api/types';
@@ -10,6 +10,20 @@ import type { AppointmentResponse } from '../../api/types';
 interface AppointmentTreatment {
   treatment_id: number;
   quantity: number;
+}
+
+interface ConsultationRecord {
+  consultation_id: number;
+  appointment_id: number;
+  diagnosis?: string | null;
+  consultation_notes: string;
+  created_date: string;
+  treatments: Array<{
+    treatment_id: number;
+    treatment_name: string;
+    category?: string | null;
+    quantity: number;
+  }>;
 }
 
 function calculateAge(dob?: string | null): string {
@@ -39,6 +53,11 @@ export const DoctorConsultation: React.FC = () => {
   const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
   const [appointmentLoadError, setAppointmentLoadError] = useState<string | null>(null);
   const [patientSwitchOpen, setPatientSwitchOpen] = useState<boolean>(false);
+  const [historyOpen, setHistoryOpen] = useState<boolean>(false);
+  const [patientHistory, setPatientHistory] = useState<AppointmentResponse[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+  const [draftSaved, setDraftSaved] = useState<boolean>(false);
+  const [isDictating, setIsDictating] = useState<boolean>(false);
 
   // Allergy management modal state
   const [isAllergyModalOpen, setIsAllergyModalOpen] = useState<boolean>(false);
@@ -160,6 +179,118 @@ export const DoctorConsultation: React.FC = () => {
       .catch(() => setAppointmentLoadError('Unable to load the appointment.'));
   }, [activeAppointmentId, fetchPatientData]);
 
+  useEffect(() => {
+    if (!activeAppointmentId) return;
+    if (window.localStorage.getItem(`medsync-consultation-draft-${activeAppointmentId}`)) return;
+    get<ConsultationRecord>(`/appointments/${activeAppointmentId}/consultation`)
+      .then((record) => {
+        setDiagnosis(record.diagnosis || '');
+        setNotes(record.consultation_notes || '');
+        setSelectedTreatments(record.treatments.map((item) => ({
+          treatment_id: item.treatment_id,
+          quantity: item.quantity,
+        })));
+        setIsFinalized(true);
+      })
+      .catch(() => {
+        // A scheduled appointment does not have a consultation record yet.
+      });
+  }, [activeAppointmentId]);
+
+  useEffect(() => {
+    if (!activeAppointmentId) return;
+    const draft = window.localStorage.getItem(`medsync-consultation-draft-${activeAppointmentId}`);
+    if (!draft) return;
+    try {
+      const parsed = JSON.parse(draft) as { diagnosis?: string; notes?: string; followUpWeek?: string; treatments?: AppointmentTreatment[] };
+      setDiagnosis(parsed.diagnosis || '');
+      setNotes(parsed.notes || '');
+      setFollowUpWeek(parsed.followUpWeek || '4');
+      setSelectedTreatments(parsed.treatments || []);
+    } catch {
+      window.localStorage.removeItem(`medsync-consultation-draft-${activeAppointmentId}`);
+    }
+  }, [activeAppointmentId]);
+
+  useEffect(() => {
+    if (isFinalized || !activeAppointmentId || (!diagnosis && !notes && selectedTreatments.length === 0)) return;
+    const timer = window.setTimeout(() => {
+      window.localStorage.setItem(`medsync-consultation-draft-${activeAppointmentId}`, JSON.stringify({
+        diagnosis,
+        notes,
+        followUpWeek,
+        treatments: selectedTreatments,
+      }));
+      setDraftSaved(true);
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [activeAppointmentId, diagnosis, notes, followUpWeek, selectedTreatments, isFinalized]);
+
+  const loadPatientHistory = async () => {
+    if (!patient) return;
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const response = await listAppointments({ patient: patient.patient_id, limit: 20 });
+      setPatientHistory(response.data || []);
+    } catch {
+      setPatientHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const saveDraft = () => {
+    if (!activeAppointmentId) {
+      setCompletionError('An appointment ID is required before saving a draft.');
+      return;
+    }
+    window.localStorage.setItem(`medsync-consultation-draft-${activeAppointmentId}`, JSON.stringify({
+      diagnosis,
+      notes,
+      followUpWeek,
+      treatments: selectedTreatments,
+    }));
+    setDraftSaved(true);
+  };
+
+  const startVoiceDictation = () => {
+    const SpeechRecognition = (window as Window & {
+      SpeechRecognition?: new () => {
+        lang: string;
+        onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+      webkitSpeechRecognition?: new () => {
+        lang: string;
+        onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+    }).SpeechRecognition || (window as Window & {
+      webkitSpeechRecognition?: new () => {
+        lang: string;
+        onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+    }).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setCompletionError('Voice dictation is not supported by this browser.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setNotes((current) => `${current}${current ? ' ' : ''}${transcript}`);
+    };
+    recognition.onend = () => setIsDictating(false);
+    setIsDictating(true);
+    recognition.start();
+  };
+
   // Handle opening allergy modal
   const handleOpenAllergyModal = () => {
     setSelectedAllergyIds(allergies.map((a) => a.allergy_id));
@@ -264,6 +395,9 @@ export const DoctorConsultation: React.FC = () => {
       });
       setIsLoading(false);
       setIsFinalized(true);
+      if (activeAppointmentId) {
+        window.localStorage.removeItem(`medsync-consultation-draft-${activeAppointmentId}`);
+      }
       window.setTimeout(() => navigate('/doctor/dashboard', { replace: true }), 1200);
     } catch (error) {
       setIsLoading(false);
@@ -284,7 +418,7 @@ export const DoctorConsultation: React.FC = () => {
   const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Select a scheduled appointment';
 
   return (
-    <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-space-3xl">
+    <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-32">
       {/* Breadcrumb & Patient Context Header */}
       <div className="flex flex-col gap-space-sm">
         <nav className="flex items-center gap-space-2xs font-label-md text-label-md text-secondary">
@@ -297,6 +431,17 @@ export const DoctorConsultation: React.FC = () => {
           <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
           <span className="text-brand-navy-deep font-semibold">Consultation</span>
         </nav>
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Consultation</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+              {appointment?.status || 'Room 04'}
+            </span>
+          </div>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Record clinical notes, place orders and prescribe for the patient in consultation.
+          </p>
+        </div>
         {(appointmentLoadError || patientLoadError) && (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {appointmentLoadError || patientLoadError}
@@ -304,7 +449,7 @@ export const DoctorConsultation: React.FC = () => {
         )}
 
         {/* Patient Header Card */}
-        <div className="bg-surface-card rounded-2xl p-space-lg sm:p-space-xl border border-border-subtle shadow-sm flex flex-col gap-space-md relative">
+        <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col gap-space-md relative">
           {isLoadingPatient && (
             <div className="absolute inset-0 bg-surface-card/60 backdrop-blur-xs flex items-center justify-center rounded-2xl z-10">
               <div className="flex items-center gap-2 bg-surface-card px-4 py-2 rounded-xl shadow-md border border-border-subtle text-primary">
@@ -318,9 +463,9 @@ export const DoctorConsultation: React.FC = () => {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm border-b border-border-subtle/70">
             <div className="flex flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-space-sm">
-                <h1 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold tracking-tight">
-                  Consultation — {patientFullName}
-                </h1>
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold tracking-tight">
+                  {patientFullName}
+                </h2>
                 {/* Queue Status Pill */}
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
                   <span className="w-2 h-2 rounded-full bg-border-focus animate-pulse"></span>
@@ -415,6 +560,7 @@ export const DoctorConsultation: React.FC = () => {
               )}
 
               <button
+                onClick={loadPatientHistory}
                 className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
                 type="button"
               >
@@ -422,6 +568,7 @@ export const DoctorConsultation: React.FC = () => {
                 <span>Medical History</span>
               </button>
               <button
+                onClick={() => window.print()}
                 className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
                 type="button"
               >
@@ -744,8 +891,9 @@ export const DoctorConsultation: React.FC = () => {
         </div>
       )}
 
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-space-lg items-stretch">
       {/* Section 1: Notes & Diagnosis */}
-      <section className="bg-surface-card rounded-xl p-space-md sm:p-space-lg border border-border-subtle shadow-xs flex flex-col gap-space-md">
+      <section className="bg-surface-card rounded-xl p-space-md border-0 shadow-sm flex flex-col gap-space-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-subtle pb-space-sm">
           <div className="flex items-center gap-space-sm">
             <div className="w-7 h-7 rounded-full bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
@@ -841,9 +989,9 @@ export const DoctorConsultation: React.FC = () => {
                   <span className="material-symbols-outlined text-[18px]">post_add</span>
                 </button>
               </div>
-              <button className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-primary font-label-sm text-label-sm font-semibold hover:bg-status-scheduled-bg transition-colors" type="button">
+              <button onClick={startVoiceDictation} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-primary font-label-sm text-label-sm font-semibold hover:bg-status-scheduled-bg transition-colors" type="button">
                 <span className="material-symbols-outlined text-[16px]">mic</span>
-                <span>Voice Dictate</span>
+                <span>{isDictating ? 'Listening...' : 'Voice Dictate'}</span>
               </button>
             </div>
             <textarea
@@ -866,8 +1014,8 @@ export const DoctorConsultation: React.FC = () => {
       </section>
 
       {/* Section 2: Treatments & Clinical Orders */}
-      <section className="bg-surface-card rounded-xl p-space-md sm:p-space-lg border border-border-subtle shadow-xs flex flex-col gap-space-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border-b border-border-subtle pb-space-sm">
+      <section className="bg-surface-card rounded-xl p-0 border-0 shadow-sm flex flex-col gap-space-md overflow-hidden">
+        <div className="px-space-md pt-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border-b border-border-subtle pb-space-sm">
           <div className="flex items-center gap-space-sm">
             <div className="w-7 h-7 rounded-full bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
               2
@@ -889,7 +1037,7 @@ export const DoctorConsultation: React.FC = () => {
         </div>
 
         {/* Quick Add Search */}
-        <div className="flex flex-col gap-space-xs">
+        <div className="px-space-md flex flex-col gap-space-xs">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary">
               <span className="material-symbols-outlined text-[18px]">add_circle_outline</span>
@@ -958,9 +1106,10 @@ export const DoctorConsultation: React.FC = () => {
           </table>
         </div>
       </section>
+      </div>
 
       {/* Bottom Action Bar / Consultation Finalization */}
-      <section className="bg-surface-card rounded-xl p-space-md sm:p-space-lg border border-border-subtle shadow-xs flex flex-col gap-space-md">
+      <section className="sticky bottom-0 z-30 bg-surface-card/95 backdrop-blur-md rounded-xl p-space-md border-t border-border-subtle shadow-[0_-1px_4px_rgba(15,23,42,0.04)] flex flex-col gap-space-md">
         {/* Follow-up directive control */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
           <div className="flex items-center gap-space-sm">
@@ -1007,6 +1156,7 @@ export const DoctorConsultation: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-space-sm self-end lg:self-auto">
             <button
+              onClick={() => window.print()}
               className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"
               type="button"
             >
@@ -1014,6 +1164,7 @@ export const DoctorConsultation: React.FC = () => {
               <span>Print Clinical Summary</span>
             </button>
             <button
+              onClick={saveDraft}
               className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"
               type="button"
             >
@@ -1049,6 +1200,51 @@ export const DoctorConsultation: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {historyOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface-card rounded-2xl max-w-2xl w-full border border-border-subtle shadow-2xl overflow-hidden">
+            <div className="p-space-md border-b border-border-subtle flex items-center justify-between bg-surface-subtle">
+              <div>
+                <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep">Medical History</h3>
+                <p className="text-xs text-secondary">{patientFullName} · Previous appointments</p>
+              </div>
+              <button type="button" onClick={() => setHistoryOpen(false)} className="w-8 h-8 rounded-lg hover:bg-surface-card text-secondary flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="p-space-md max-h-[60vh] overflow-y-auto">
+              {historyLoading ? (
+                <div className="py-8 text-center text-sm text-secondary">Loading medical history...</div>
+              ) : patientHistory.length === 0 ? (
+                <div className="py-8 text-center text-sm text-secondary">No previous appointments found.</div>
+              ) : (
+                <div className="divide-y divide-border-subtle">
+                  {patientHistory.map((item) => (
+                    <div key={item.appointment_id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-label-md text-label-md text-brand-navy-deep">{item.appointment_code}</div>
+                        <div className="font-body-sm text-body-sm text-secondary">
+                          {item.appointment_date} · {item.appointment_type}
+                        </div>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${
+                        item.status === 'Completed'
+                          ? 'bg-status-completed-bg text-status-completed-text'
+                          : item.status === 'Cancelled'
+                            ? 'bg-status-cancelled-bg text-status-cancelled-text'
+                            : 'bg-status-scheduled-bg text-status-scheduled-text'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
