@@ -139,6 +139,11 @@ async function request<T>(
     errorBody.message = (errorBody as any).detail;
   }
 
+  // Dispatch a global event if the token is expired or missing so the app can log the user out
+  if (response.status === 401) {
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+  }
+
   throw new ApiError(response.status, errorBody);
 }
 

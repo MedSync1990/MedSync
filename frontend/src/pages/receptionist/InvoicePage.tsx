@@ -11,9 +11,8 @@ export default function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(invoiceId || '');
-  const initialType = (searchParams.get('type') as 'invoice' | 'nic') || 'invoice';
-  const [searchType, setSearchType] = useState<'invoice' | 'nic'>(initialType);
+  const initialSearch = invoiceId || searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +20,14 @@ export default function InvoicePage() {
   const urlSearchType = searchParams.get('type');
 
   useEffect(() => {
+    const querySearch = searchParams.get('search');
+    if (!invoiceId && querySearch) {
+      navigate(`/receptionist/invoices/${encodeURIComponent(querySearch)}?type=all`, {
+        replace: true,
+      });
+      return;
+    }
+
     setSearchQuery(invoiceId || '');
     if (invoiceId) {
       fetchInvoiceDetail(invoiceId);
@@ -29,7 +36,7 @@ export default function InvoicePage() {
       setError(null);
       fetchRecentInvoices();
     }
-  }, [invoiceId, urlSearchType]);
+  }, [invoiceId, urlSearchType, searchParams, navigate]);
 
   const fetchRecentInvoices = async () => {
     try {
@@ -51,7 +58,7 @@ export default function InvoicePage() {
     setLoading(true);
     setError(null);
     try {
-      const type = searchParams.get('type') || searchType;
+      const type = searchParams.get('type') || 'all';
       const response = await fetch(`${API_BASE_URL}/invoices/${encodeURIComponent(identifier)}?type=${type}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -75,7 +82,10 @@ export default function InvoicePage() {
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (searchQuery.trim()) navigate(`/receptionist/invoices/${searchQuery.trim()}?type=${searchType}`);
+    const identifier = searchQuery.trim();
+    if (identifier) {
+      navigate(`/receptionist/invoices/${encodeURIComponent(identifier)}?type=all`);
+    }
   };
 
   // When "Record Payment" is clicked, navigate to the Collect Payment page
@@ -120,10 +130,8 @@ export default function InvoicePage() {
       {/* Search Console */}
       <InvoiceSearch
         searchQuery={searchQuery}
-        searchType={searchType}
         invoiceId={invoiceId}
         onSearchQueryChange={setSearchQuery}
-        onSearchTypeChange={setSearchType}
         onSubmit={handleSearchSubmit}
         onQuickLookup={() => navigate('/receptionist/invoices/2')}
       />

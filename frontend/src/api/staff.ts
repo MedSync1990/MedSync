@@ -3,7 +3,7 @@ import type { StaffListResponse, StaffCreatePayload, StaffUpdatePayload } from '
 
 export function getStaffList(branchId?: number): Promise<StaffListResponse> {
   const query = branchId ? { branch_id: branchId } : undefined;
-  return get<StaffListResponse>('/staff', query);
+  return get<StaffListResponse>('/staff/', query);
 }
 
 export function createStaff(payload: StaffCreatePayload): Promise<{ message: string; user_id: number; username: string; temporary_password: string }> {

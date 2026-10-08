@@ -26,6 +26,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
         "http://127.0.0.1:4173",
+        "http://localhost:8080",
+        "https://medsync-frontend.azurewebsites.net"
     ]
 
     model_config = SettingsConfigDict(

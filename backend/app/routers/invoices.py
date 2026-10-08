@@ -57,9 +57,26 @@ async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_
         JOIN branch b ON s.branch_id = b.branch_id
         LEFT JOIN patient_insurance pi ON p.user_id = pi.patient_id
         LEFT JOIN insurance_policy_details ipd ON pi.policy_id = ipd.policy_id
-        WHERE ($1::boolean AND $4::text != 'nic' AND i.invoice_id = $2::int)
-           OR ($4::text != 'nic' AND UPPER(i.invoice_code) = UPPER($3::text))
-           OR ($4::text = 'nic' AND UPPER(pu.id_number) = UPPER($3::text))
+        WHERE (
+            ($4::text = 'invoice' AND (
+                ($1::boolean AND i.invoice_id = $2::int)
+                OR UPPER(i.invoice_code) = UPPER($3::text)
+            ))
+            OR ($4::text = 'nic' AND UPPER(pu.id_number) = UPPER($3::text))
+            OR ($4::text = 'all' AND (
+                ($1::boolean AND i.invoice_id = $2::int)
+                OR UPPER(i.invoice_code) LIKE '%' || UPPER($3::text) || '%'
+                OR UPPER(pu.id_number) LIKE '%' || UPPER($3::text) || '%'
+                OR UPPER(p.patient_code) LIKE '%' || UPPER($3::text) || '%'
+                OR UPPER(pu.first_name || ' ' || pu.last_name) LIKE '%' || UPPER($3::text) || '%'
+                OR EXISTS (
+                    SELECT 1
+                    FROM contact search_contact
+                    WHERE search_contact.user_id = pu.user_id
+                      AND search_contact.phone_number LIKE '%' || $3::text || '%'
+                )
+            ))
+        )
         ORDER BY i.created_at DESC
         LIMIT 1
     """
@@ -131,6 +148,8 @@ async def get_invoice_detail(
     if not inv:
         if search_type == "nic":
             raise AppValidationError([{"field": "identifier", "message": "Enter Valid NIC Number"}])
+        elif search_type == "all":
+            raise AppValidationError([{"field": "identifier", "message": "No invoice found matching the search"}])
         else:
             raise AppValidationError([{"field": "identifier", "message": "Enter Valid Invoice Code"}])
 

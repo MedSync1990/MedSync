@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { PageHeader } from '../../components/PageHeader';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { Modal } from '../../components/Modal';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
 import { appointmentService } from '../../services/appointmentService';
@@ -69,58 +71,79 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 }
 
 export const BookAppointment: React.FC = () => {
-  const { showToast } = useToast();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  // ─── Step 1: Patient Search & Selection State ──────────────────────────────
+  // ─── Step 1: Category State ────────────────────────────────────────────────
+  const [category, setCategory] = useState<AppointmentType>('Scheduled Visit');
+
+  // ─── Step 2: Patient Search & Selection State ──────────────────────────────
   const [patientSearch, setPatientSearch] = useState('');
   const [patientResults, setPatientResults] = useState<PatientListItem[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientListItem | null>(null);
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
-  const [searchParams] = useSearchParams();
-  const prefillPatientId = searchParams.get('patient_id');
+  const [] = useSearchParams();
 
-  useEffect(() => {
-    if (prefillPatientId) {
-      patientService.getById(prefillPatientId).then((res) => {
-        const p: PatientListItem = {
-          patient_id: res.patient_id,
-          patient_code: res.patient_code,
-          first_name: res.first_name,
-          last_name: res.last_name,
-          id_number: res.id_number,
-          phone_number: res.phone_number,
-          gender: res.gender,
-          date_of_birth: res.date_of_birth,
-          has_insurance: Boolean(res.has_insurance),
-          is_active: res.is_active,
-        };
-        setSelectedPatient(p);
-        setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
-      }).catch(() => {
-        showToast('Failed to load pre-filled patient', 'error');
-      });
+  // ─── Quick Walk-in Patient Modal State ─────────────────────────────────────
+  const [showQuickModal, setShowQuickModal] = useState(false);
+  const [quickForm, setQuickForm] = useState({
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    gender: 'Male' as 'Male' | 'Female',
+    age: '',
+  });
+  const [creatingQuickPatient, setCreatingQuickPatient] = useState(false);
+
+  const handleQuickRegisterAndSelect = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!quickForm.first_name.trim()) {
+      showToast('Patient First Name is required.', 'error');
+      return;
     }
-  }, [prefillPatientId]);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        patientDropdownRef.current &&
-        !patientDropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowPatientDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    setCreatingQuickPatient(true);
+    try {
+      const branchIdNum = selectedBranch && selectedBranch !== 'All' && !isNaN(parseInt(selectedBranch, 10))
+        ? parseInt(selectedBranch, 10)
+        : selectedDoctor?.branch_id;
 
-  // ─── Step 2: Category State ────────────────────────────────────────────────
-  const [category, setCategory] = useState<AppointmentType>('Scheduled Visit');
+      const res = await patientService.quickCreate({
+        first_name: quickForm.first_name.trim(),
+        last_name: quickForm.last_name.trim() || undefined,
+        phone_number: quickForm.phone_number.trim() || undefined,
+        gender: quickForm.gender,
+        age: quickForm.age ? parseInt(quickForm.age, 10) : undefined,
+        registered_branch: branchIdNum || undefined,
+      });
+
+      const p: PatientListItem = {
+        patient_id: res.patient_id,
+        patient_code: res.patient_code,
+        first_name: res.first_name,
+        last_name: res.last_name,
+        id_number: res.id_number,
+        phone_number: res.phone_number || '',
+        gender: res.gender,
+        date_of_birth: res.date_of_birth,
+        has_insurance: Boolean(res.has_insurance),
+        is_active: res.is_active,
+        branch_name: res.branch_name,
+      };
+
+      setSelectedPatient(p);
+      setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
+      setShowQuickModal(false);
+      setQuickForm({ first_name: '', last_name: '', phone_number: '', gender: 'Male', age: '' });
+      showToast(`Quick walk-in patient created & selected: ${res.first_name} ${res.last_name}`, 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to create quick walk-in patient', 'error');
+    } finally {
+      setCreatingQuickPatient(false);
+    }
+  };
 
   // ─── Step 3: Doctor, Branch, Specialty & Slot State ────────────────────────
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
@@ -406,51 +429,32 @@ export const BookAppointment: React.FC = () => {
   const isReadyToConfirm =
     category === 'Walk-in'
       ? Boolean(
-          selectedPatient &&
-          selectedDoctor &&
-          walkInStartTime &&
-          walkInEndTime &&
-          walkInEndTime > walkInStartTime &&
-          !conflictingSlot
-        )
+        selectedPatient &&
+        selectedDoctor &&
+        walkInStartTime &&
+        walkInEndTime &&
+        walkInEndTime > walkInStartTime &&
+        !conflictingSlot
+      )
       : Boolean(selectedPatient && selectedDoctor && selectedSlot);
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-        <div className="space-y-1">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
-              Home
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <Link to="/receptionist/appointments" className="hover:text-primary transition-colors">
-              Appointments
-            </Link>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-primary font-bold">Book an Appointment</span>
-          </div>
-
-          {/* Title */}
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
-              Book an Appointment
-            </h1>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Schedule a consultation with an available doctor in real time.
-          </p>
-        </div>
-      </div>
+    <div className="py-space-lg lg:py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
+      {/* Top Page Header */}
+      <PageHeader
+        title="Book an Appointment"
+        subtitle="Schedule a consultation with an available doctor in real time."
+        breadcrumbs={[
+          { label: 'Home', href: '/receptionist/dashboard' },
+          { label: 'Appointments', href: '/receptionist/appointments' },
+          { label: 'Book an Appointment' },
+        ]}
+      />
 
       <div className="space-y-space-lg">
         {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* STEP 1: FIND PATIENT                                               */}
+        {/* STEP 1: APPOINTMENT CATEGORY / TYPE                                */}
         {/* ─────────────────────────────────────────────────────────────────── */}
         <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
           {/* Step Header */}
@@ -461,20 +465,119 @@ export const BookAppointment: React.FC = () => {
               </span>
               <div>
                 <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
-                  Find Patient
+                  Select Appointment Type
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
-                  Select registered patient records or onboard a new patient
+                  Choose between scheduled consultation and walk-in appointment types.
                 </p>
               </div>
             </div>
-            <Link
-              to="/receptionist/register-patient"
-              className="flex items-center gap-1.5 font-label-md text-label-md text-primary hover:text-primary-container transition-colors font-semibold self-start sm:self-auto"
+          </div>
+
+          {/* Category Selection Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+            {/* 1. Scheduled Visit */}
+            <label
+              onClick={() => setCategory('Scheduled Visit')}
+              className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Scheduled Visit'
+                ? 'border-primary bg-status-scheduled-bg/30'
+                : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
+                }`}
             >
-              <span className="material-symbols-outlined text-[18px]">person_add</span>
-              <span>Register New Patient</span>
-            </Link>
+              <div className="flex items-center justify-between mb-2">
+                <span
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${category === 'Scheduled Visit'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-subtle text-secondary'
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">stethoscope</span>
+                </span>
+                {category === 'Scheduled Visit' ? (
+                  <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                ) : (
+                  <span className="w-4 h-4 rounded-full border border-outline"></span>
+                )}
+              </div>
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                Scheduled Visit
+              </span>
+              <span className="font-body-sm text-body-sm text-secondary mt-1">
+                Standard pre-booked doctor consultation slot
+              </span>
+            </label>
+
+            {/* 2. Walk-in */}
+            <label
+              onClick={() => setCategory('Walk-in')}
+              className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Walk-in'
+                ? 'border-primary bg-status-scheduled-bg/30'
+                : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
+                }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${category === 'Walk-in'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-subtle text-secondary'
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">directions_walk</span>
+                </span>
+                {category === 'Walk-in' ? (
+                  <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                ) : (
+                  <span className="w-4 h-4 rounded-full border border-outline"></span>
+                )}
+              </div>
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                Walk-in
+              </span>
+              <span className="font-body-sm text-body-sm text-secondary mt-1">
+                Immediate OPD queue &amp; quick patient onboarding
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* STEP 2: FIND / ONBOARD PATIENT                                    */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
+          {/* Step Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
+            <div className="flex items-center gap-space-sm">
+              <span className="w-7 h-7 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center font-bold">
+                2
+              </span>
+              <div>
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
+                  Find or Onboard Patient
+                </h2>
+                <p className="font-body-sm text-body-sm text-outline">
+                  Select an existing patient or quickly onboard a walk-in visitor
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-space-sm">
+              {category === 'Walk-in' && (
+                <button
+                  type="button"
+                  onClick={() => setShowQuickModal(true)}
+                  className="px-space-md h-[40px] rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">bolt</span>
+                  <span>Quick Walk-in</span>
+                </button>
+              )}
+              <Link
+                to="/receptionist/register-patient"
+                className="px-space-md h-[40px] rounded-lg bg-surface-card hover:bg-surface-subtle border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                <span>Full Registration</span>
+              </Link>
+            </div>
           </div>
 
           {!selectedPatient ? (
@@ -525,15 +628,30 @@ export const BookAppointment: React.FC = () => {
                       <span>Loading real patient records...</span>
                     </div>
                   ) : patientResults.length === 0 ? (
-                    <div className="p-4 text-center text-secondary text-body-sm space-y-1">
+                    <div className="p-4 text-center text-secondary text-body-sm space-y-2">
                       <div>No registered patients found{patientSearch.trim() ? ` matching "${patientSearch.trim()}"` : ''}.</div>
-                      <Link
-                        to="/receptionist/register-patient"
-                        className="text-primary hover:underline font-semibold text-label-sm inline-flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">person_add</span>
-                        Register New Patient
-                      </Link>
+                      <div className="flex items-center justify-center gap-3 pt-1">
+                        {category === 'Walk-in' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPatientDropdown(false);
+                              setShowQuickModal(true);
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-label-sm inline-flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">bolt</span>
+                            Quick Walk-in Onboard
+                          </button>
+                        )}
+                        <Link
+                          to="/receptionist/register-patient"
+                          className="text-primary hover:underline font-semibold text-label-sm inline-flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">person_add</span>
+                          Register New Patient
+                        </Link>
+                      </div>
                     </div>
                   ) : (
                     patientResults.map((p) => (
@@ -549,7 +667,12 @@ export const BookAppointment: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-semibold text-brand-navy-deep font-label-md text-label-md flex items-center gap-2">
-                              <span>{p.first_name} {p.last_name}</span>
+                              <span>{p.first_name} {p.last_name === '(Walk-in Patient)' ? '' : p.last_name}</span>
+                              {(p.is_temp || p.id_number?.startsWith('999')) && (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                                  ⚡ Walk-in Profile
+                                </span>
+                              )}
                               {p.branch_name && (
                                 <span className="px-1.5 py-0.2 rounded bg-surface-subtle border border-border-subtle text-[11px] text-secondary">
                                   {p.branch_name}
@@ -557,9 +680,9 @@ export const BookAppointment: React.FC = () => {
                               )}
                             </div>
                             <div className="text-outline text-body-sm flex items-center gap-2">
-                              <span>NIC: {p.id_number}</span>
+                              <span>NIC: {p.is_temp || p.id_number?.startsWith('999') ? 'Pending' : p.id_number}</span>
                               <span>•</span>
-                              <span>{p.phone_number || 'No phone'}</span>
+                              <span>{p.phone_number && p.phone_number !== '0000000000' ? p.phone_number : 'No phone'}</span>
                             </div>
                           </div>
                         </div>
@@ -593,8 +716,13 @@ export const BookAppointment: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                      {selectedPatient.first_name} {selectedPatient.last_name}
+                      {selectedPatient.first_name} {selectedPatient.last_name === '(Walk-in Patient)' ? '' : selectedPatient.last_name}
                     </span>
+                    {(selectedPatient.is_temp || selectedPatient.id_number?.startsWith('999')) && (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold flex items-center gap-1 border border-amber-300">
+                        <span>⚡</span> Walk-in (Pending Full Registration)
+                      </span>
+                    )}
                     <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-mono-data text-[11px] text-secondary">
                       {selectedPatient.patient_code || `PT-${String(selectedPatient.patient_id).padStart(6, '0')}`}
                     </span>
@@ -608,18 +736,15 @@ export const BookAppointment: React.FC = () => {
                         Self-Pay
                       </span>
                     )}
-                    {selectedPatient.branch_name && (
-                      <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-body-sm text-[11px] text-secondary">
-                        {selectedPatient.branch_name}
-                      </span>
-                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-body-sm text-body-sm text-secondary">
                     {selectedPatient.date_of_birth && (
                       <>
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[15px] text-outline">cake</span>
-                          {selectedPatient.date_of_birth} ({getAge(selectedPatient.date_of_birth)} yrs)
+                          {selectedPatient.date_of_birth && selectedPatient.date_of_birth !== '1900-01-01' && selectedPatient.date_of_birth !== '1995-01-01'
+                            ? `${selectedPatient.date_of_birth} (${getAge(selectedPatient.date_of_birth)} yrs)`
+                            : 'DOB Pending'}
                         </span>
                         <span>•</span>
                       </>
@@ -631,12 +756,12 @@ export const BookAppointment: React.FC = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">call</span>
-                      {selectedPatient.phone_number || 'N/A'}
+                      {selectedPatient.phone_number && selectedPatient.phone_number !== '0000000000' ? selectedPatient.phone_number : 'Pending'}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[15px] text-outline">badge</span>
-                      {selectedPatient.id_number}
+                      {selectedPatient.is_temp || selectedPatient.id_number?.startsWith('999') ? 'Pending Registration' : selectedPatient.id_number}
                     </span>
                   </div>
                 </div>
@@ -651,96 +776,6 @@ export const BookAppointment: React.FC = () => {
               </button>
             </div>
           )}
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* STEP 2: APPOINTMENT CATEGORY                                       */}
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
-          {/* Step Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
-            <div className="flex items-center gap-space-sm">
-              <span className="w-7 h-7 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center font-bold">
-                2
-              </span>
-              <div>
-                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
-                  Appointment Category
-                </h2>
-                <p className="font-body-sm text-body-sm text-outline">
-                  Pick the appointment type
-                </p>
-              </div>
-            </div>
-            <span className="px-2.5 py-1 rounded-full bg-surface-subtle font-label-sm text-label-sm text-secondary self-start sm:self-auto font-medium">
-              Standard Protocol
-            </span>
-          </div>
-
-          {/* Category Selection Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-            {/* 1. Doctor Consultation */}
-            <label
-              onClick={() => setCategory('Scheduled Visit')}
-              className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Scheduled Visit'
-                ? 'border-primary bg-status-scheduled-bg/30'
-                : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
-                }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${category === 'Scheduled Visit'
-                    ? 'bg-primary text-on-primary'
-                    : 'bg-surface-subtle text-secondary'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[20px]">stethoscope</span>
-                </span>
-                {category === 'Scheduled Visit' ? (
-                  <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                ) : (
-                  <span className="w-4 h-4 rounded-full border border-outline"></span>
-                )}
-              </div>
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                Doctor Consultation
-              </span>
-              <span className="font-body-sm text-body-sm text-secondary mt-1">
-                Scheduled specialized clinical visit
-              </span>
-            </label>
-
-            {/* 2. Walk-in */}
-            <label
-              onClick={() => setCategory('Walk-in')}
-              className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Walk-in'
-                ? 'border-primary bg-status-scheduled-bg/30'
-                : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
-                }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${category === 'Walk-in'
-                    ? 'bg-primary text-on-primary'
-                    : 'bg-surface-subtle text-secondary'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-                </span>
-                {category === 'Walk-in' ? (
-                  <span className="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                ) : (
-                  <span className="w-4 h-4 rounded-full border border-outline"></span>
-                )}
-              </div>
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
-                Walk-in
-              </span>
-              <span className="font-body-sm text-body-sm text-secondary mt-1">
-                Immediate triaged OPD queue
-              </span>
-            </label>
-          </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────────────── */}
@@ -1012,11 +1047,10 @@ export const BookAppointment: React.FC = () => {
                                       setWalkInEndTime(addMinutesToTime(val, 20));
                                     }
                                   }}
-                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
-                                    conflictingSlot
-                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
-                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
-                                  }`}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot
+                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                    }`}
                                 />
                               </div>
 
@@ -1028,11 +1062,10 @@ export const BookAppointment: React.FC = () => {
                                   type="time"
                                   value={walkInEndTime}
                                   onChange={(e) => setWalkInEndTime(e.target.value)}
-                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${
-                                    conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
-                                      ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
-                                      : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
-                                  }`}
+                                  className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
+                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
+                                    }`}
                                 />
                               </div>
 
@@ -1084,9 +1117,8 @@ export const BookAppointment: React.FC = () => {
                                 <div>
                                   <span className="font-bold">Schedule Overlap Detected:</span> The entered walk-in window ({formatTime(walkInStartTime)} – {formatTime(walkInEndTime)}) overlaps with an existing{' '}
                                   <span
-                                    className={`px-1.5 py-0.5 rounded font-bold ${
-                                      conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
-                                    }`}
+                                    className={`px-1.5 py-0.5 rounded font-bold ${conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
+                                      }`}
                                   >
                                     {conflictingSlot.status}
                                   </span>{' '}
@@ -1157,34 +1189,31 @@ export const BookAppointment: React.FC = () => {
                                     return (
                                       <span
                                         key={s.slot_id}
-                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${
-                                          isConflict
-                                            ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
-                                            : isBooked
+                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${isConflict
+                                          ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
+                                          : isBooked
                                             ? 'bg-red-50 border border-red-200 text-red-700 font-medium'
                                             : 'bg-teal-50 border border-teal-200 text-teal-700 font-medium'
-                                        }`}
+                                          }`}
                                       >
                                         <span
-                                          className={`w-1.5 h-1.5 rounded-full ${
-                                            isConflict
-                                              ? 'bg-red-600 animate-ping'
-                                              : isBooked
+                                          className={`w-1.5 h-1.5 rounded-full ${isConflict
+                                            ? 'bg-red-600 animate-ping'
+                                            : isBooked
                                               ? 'bg-red-500'
                                               : 'bg-teal-500'
-                                          }`}
+                                            }`}
                                         />
                                         <span>
                                           {formatTime(s.start_time)} – {formatTime(s.end_time)}
                                         </span>
                                         <span
-                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                            isConflict
-                                              ? 'bg-red-600 text-white'
-                                              : isBooked
+                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isConflict
+                                            ? 'bg-red-600 text-white'
+                                            : isBooked
                                               ? 'bg-red-100 text-red-800'
                                               : 'bg-teal-100 text-teal-800'
-                                          }`}
+                                            }`}
                                         >
                                           {isConflict ? 'Conflict' : s.status}
                                         </span>
@@ -1426,6 +1455,119 @@ export const BookAppointment: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Walk-in Onboard Modal */}
+      <Modal
+        isOpen={showQuickModal}
+        onClose={() => setShowQuickModal(false)}
+        title="Quick Walk-in Patient Onboard"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowQuickModal(false)}
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="quick-walkin-form"
+              disabled={creatingQuickPatient}
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {creatingQuickPatient ? (
+                <>
+                  <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">bolt</span>
+                  <span>Create &amp; Select Patient</span>
+                </>
+              )}
+            </button>
+          </>
+        }
+      >
+        <form id="quick-walkin-form" onSubmit={handleQuickRegisterAndSelect} className="space-y-4">
+          <p className="font-body-sm text-outline -mt-1 mb-2">
+            Fast onboarding for unregistered walk-in visits. Only first name is mandatory.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+                First Name <span className="text-error">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={quickForm.first_name}
+                onChange={(e) => setQuickForm({ ...quickForm, first_name: e.target.value })}
+                placeholder="e.g. Amara"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
+              />
+            </div>
+
+            <div>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+                Last Name <span className="text-outline text-[11px] font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={quickForm.last_name}
+                onChange={(e) => setQuickForm({ ...quickForm, last_name: e.target.value })}
+                placeholder="e.g. Perera"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+              Phone Number <span className="text-outline text-[11px] font-normal">(Optional)</span>
+            </label>
+            <input
+              type="tel"
+              value={quickForm.phone_number}
+              onChange={(e) => setQuickForm({ ...quickForm, phone_number: e.target.value })}
+              placeholder="e.g. 0771234567"
+              className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">Gender</label>
+              <select
+                value={quickForm.gender}
+                onChange={(e) => setQuickForm({ ...quickForm, gender: e.target.value as any })}
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+                Approx. Age <span className="text-outline text-[11px] font-normal">(Years)</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="120"
+                value={quickForm.age}
+                onChange={(e) => setQuickForm({ ...quickForm, age: e.target.value })}
+                placeholder="e.g. 35"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
+              />
+            </div>
+          </div>
+        </form>
+      </Modal>
 
       {/* Confirmation Modal */}
       {selectedPatient && selectedDoctor && (category === 'Walk-in' ? (walkInStartTime && walkInEndTime) : selectedSlot) && (

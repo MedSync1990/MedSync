@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSidebar } from '../context/SidebarContext';
+
 
 export interface NavItem {
   label: string;
@@ -17,6 +19,7 @@ export interface NavSection {
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const { isCollapsed } = useSidebar();
   const userRole = user?.role;
   const branchName = user?.branchName || 'Colombo';
 
@@ -69,7 +72,11 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-sidebar-width bg-[#0F172A] text-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.15)]">
+    <aside
+      className={`fixed left-0 top-0 h-screen transition-all duration-300 bg-[#0F172A] text-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(15,23,42,0.15)] ${
+        isCollapsed ? 'w-sidebar-collapsed-width' : 'w-sidebar-width'
+      }`}
+    >
       <div className="flex flex-col flex-1 min-h-0">
         {/* Brand Header */}
         <div className="h-topbar-height px-space-lg flex items-center gap-space-sm border-b border-white/10">
@@ -104,8 +111,9 @@ export const Sidebar: React.FC = () => {
             <NavLink
               to={standaloneItem.path}
               data-path={standaloneItem.dataPath}
+              title={isCollapsed ? standaloneItem.label : undefined}
               className={({ isActive }) =>
-                `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
+                `group flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-space-sm px-space-sm'} h-10 rounded-lg transition-all relative ${
                   isActive || isItemActive(standaloneItem.path)
                     ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
@@ -137,8 +145,9 @@ export const Sidebar: React.FC = () => {
                   key={item.path}
                   to={item.path}
                   data-path={item.dataPath}
+                  title={isCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `group flex items-center gap-space-sm px-space-sm h-10 rounded-lg transition-all relative ${
+                    `group flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-space-sm px-space-sm'} h-10 rounded-lg transition-all relative ${
                       isActive || isItemActive(item.path)
                         ? "bg-white/10 text-white font-semibold before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand-teal-light before:rounded-r"
                         : "text-white/70 hover:bg-white/5 hover:text-white"

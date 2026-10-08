@@ -58,9 +58,12 @@ export default function BranchAppointmentSummary() {
   };
 
   const handleExport = async (type: string) => {
+    setIsExporting(true);
     if (type === 'CSV') {
       exportToCSV(data?.daily_data || [], 'Branch_Appointment_Summary');
+      setIsExporting(false);
     } else if (type === 'PDF') {
+
       try {
         setIsExporting(true);
         await downloadManagementPdf('appointments-summary', { ...appliedParams });
@@ -70,6 +73,7 @@ export default function BranchAppointmentSummary() {
       } finally {
         setIsExporting(false);
       }
+
     }
   };
 

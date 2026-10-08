@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
-import type { AllergyItem } from '../../types';
 
 type Gender = 'Male' | 'Female';
 
@@ -26,15 +25,7 @@ export const RegisterPatient: React.FC = () => {
   const [streetAddress, setStreetAddress] = useState('');
   const [cityDistrict, setCityDistrict] = useState('');
 
-  // Allergy states
-  const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
-  const [selectedAllergies, setSelectedAllergies] = useState<number[]>([]);
   const [loadingEditData, setLoadingEditData] = useState<boolean>(false);
-  const [showAddMasterModal, setShowAddMasterModal] = useState<boolean>(false);
-  const [newAllergyCode, setNewAllergyCode] = useState<string>('');
-  const [newAllergyName, setNewAllergyName] = useState<string>('');
-  const [isCreatingMasterAllergy, setIsCreatingMasterAllergy] = useState<boolean>(false);
-  const [masterAllergyError, setMasterAllergyError] = useState<string | null>(null);
 
   // Phone numbers
   const [primaryPhone, setPrimaryPhone] = useState('');
@@ -63,16 +54,6 @@ export const RegisterPatient: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ id: string; name: string; nic: string } | null>(null);
 
-  // Load master allergies catalogue
-  useEffect(() => {
-    patientService
-      .getAllergies()
-      .then((al) => {
-        if (Array.isArray(al)) setMasterAllergies(al);
-      })
-      .catch(() => {});
-  }, []);
-
   // If in edit mode, fetch patient profile and populate fields
   useEffect(() => {
     if (!editId) return;
@@ -81,20 +62,18 @@ export const RegisterPatient: React.FC = () => {
       .getById(editId)
       .then((p) => {
         if (p) {
-          setFullName(`${p.first_name || ''} ${p.last_name || ''}`.trim());
-          setNicNumber(p.id_number || '');
-          setDateOfBirth(p.date_of_birth || '');
+          const lName = p.last_name === '(Walk-in Patient)' ? '' : (p.last_name || '');
+          setFullName(`${p.first_name || ''} ${lName}`.trim());
+          setNicNumber(p.id_number?.startsWith('999') ? '' : (p.id_number || ''));
+          setDateOfBirth(p.date_of_birth && p.date_of_birth !== '1995-01-01' ? p.date_of_birth : '');
           setGender((p.gender as Gender) || 'Male');
           setBloodGroup(p.blood_group || '');
           setEmailAddress(p.email || '');
-          setStreetAddress(p.address || '');
+          setStreetAddress(p.address === 'Address Pending' ? '' : (p.address || ''));
           setCityDistrict('');
           setPrimaryPhone(p.phone_number || '');
           setEmergencyName(p.contact_name || '');
           setEmergencyPhone(p.emergency_contact || '');
-          if (p.allergies && Array.isArray(p.allergies)) {
-            setSelectedAllergies(p.allergies.map((a) => a.allergy_id));
-          }
         }
       })
       .catch(() => {
@@ -159,6 +138,7 @@ export const RegisterPatient: React.FC = () => {
         const response = await patientService.update(editId, {
           first_name: firstName,
           last_name: lastName,
+          id_number: nicNumber.trim().toUpperCase(),
           address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
           birthdate: dateOfBirth,
           gender: gender,
@@ -167,7 +147,6 @@ export const RegisterPatient: React.FC = () => {
           blood_group: bloodGroup || null,
           emergency_contact: emergencyPhone.replace(/\D/g, ''),
           contact_name: emergencyName,
-          allergy_ids: selectedAllergies,
         });
 
         setSuccess({
@@ -190,7 +169,6 @@ export const RegisterPatient: React.FC = () => {
           emergency_contact: emergencyPhone.replace(/\D/g, ''),
           contact_name: emergencyName,
           registered_branch: 1,
-          allergy_ids: selectedAllergies,
           insurance:
             insuranceEnabled && policyNumber
               ? {
@@ -221,32 +199,6 @@ export const RegisterPatient: React.FC = () => {
       setError(message);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleCreateMasterAllergy = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newAllergyCode.trim() || !newAllergyName.trim()) {
-      setMasterAllergyError('Both allergy code and name are required.');
-      return;
-    }
-    setIsCreatingMasterAllergy(true);
-    setMasterAllergyError(null);
-    try {
-      const created = await patientService.createAllergy({
-        allergy_code: newAllergyCode.trim().toUpperCase(),
-        name: newAllergyName.trim(),
-      });
-      setMasterAllergies((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
-      setSelectedAllergies((prev) => [...prev, created.allergy_id]);
-      setShowAddMasterModal(false);
-      setNewAllergyCode('');
-      setNewAllergyName('');
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || 'Failed to add allergy to master catalogue.';
-      setMasterAllergyError(msg);
-    } finally {
-      setIsCreatingMasterAllergy(false);
     }
   };
 
@@ -285,7 +237,7 @@ export const RegisterPatient: React.FC = () => {
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">
             {isEditMode
-              ? 'Update personal, contact, emergency, and allergy information for this patient record.'
+              ? 'Update personal, contact, and emergency information for this patient record.'
               : 'Add a new patient record accessible across all island branches with centralized synchronization.'}
           </p>
         </div>
@@ -518,117 +470,6 @@ export const RegisterPatient: React.FC = () => {
               </span>
             </div>
 
-            {/* Known Allergies Multi-select */}
-            <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-3">
-              <label className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-status-cancelled-text text-[18px]">warning</span>
-                  Known Allergies & Clinical Alerts
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-outline text-body-sm font-normal hidden sm:inline">Click chips to toggle</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddMasterModal(!showAddMasterModal)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">add</span>
-                    <span>New Allergy</span>
-                  </button>
-                </div>
-              </label>
-
-              {/* Inline Master Allergy Creator */}
-              {showAddMasterModal && (
-                <div className="p-3 rounded-xl bg-surface-card border border-border-subtle shadow-xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-brand-navy-deep">
-                      Add New Allergy to Hospital Catalogue
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddMasterModal(false)}
-                      className="text-outline hover:text-brand-navy-deep"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                    </button>
-                  </div>
-                  {masterAllergyError && (
-                    <span className="text-xs text-rose-600 block">{masterAllergyError}</span>
-                  )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Code (e.g. ALG-IBU)"
-                      value={newAllergyCode}
-                      onChange={(e) => setNewAllergyCode(e.target.value)}
-                      className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-surface-subtle font-mono-data"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Name (e.g. Ibuprofen / NSAIDs)"
-                      value={newAllergyName}
-                      onChange={(e) => setNewAllergyName(e.target.value)}
-                      className="px-2.5 py-1.5 text-xs rounded-lg border border-border-subtle bg-surface-subtle"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddMasterModal(false)}
-                      className="px-2.5 py-1 text-xs rounded-md text-secondary hover:bg-surface-subtle"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isCreatingMasterAllergy}
-                      onClick={handleCreateMasterAllergy}
-                      className="px-3 py-1 text-xs rounded-md bg-primary text-on-primary font-semibold hover:bg-primary-container disabled:opacity-50"
-                    >
-                      {isCreatingMasterAllergy ? 'Adding...' : 'Add to Catalogue & Select'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="p-3 bg-surface-subtle rounded-lg flex flex-wrap gap-2 min-h-[46px] items-center border border-border-subtle/60">
-                {masterAllergies.length > 0 ? (
-                  masterAllergies.map((alg) => {
-                    const isSelected = selectedAllergies.includes(alg.allergy_id);
-                    return (
-                      <button
-                        key={alg.allergy_id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedAllergies((prev) =>
-                            prev.includes(alg.allergy_id)
-                              ? prev.filter((id) => id !== alg.allergy_id)
-                              : [...prev, alg.allergy_id]
-                          )
-                        }
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                          isSelected
-                            ? 'bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border shadow-xs'
-                            : 'bg-surface-card text-on-surface-variant hover:bg-surface-subtle border border-border-subtle'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-[14px]">
-                          {isSelected ? 'check_circle' : 'add_circle'}
-                        </span>
-                        <span>{alg.name}</span>
-                        <span className="opacity-60 text-[10px]">({alg.allergy_code})</span>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <span className="text-xs text-outline italic">Loading master allergies catalogue...</span>
-                )}
-              </div>
-              <span className="font-body-sm text-body-sm text-outline">
-                Selected allergies display as high-priority alert badges on doctor consultation and treatment screens.
-              </span>
-            </div>
           </div>
 
           {/* Patient Mobile Numbers Container */}
