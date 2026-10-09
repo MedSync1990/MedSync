@@ -34,10 +34,6 @@ export const PatientDirectory: React.FC = () => {
     }
   };
 
-  const getInitials = (first: string, last: string) => {
-    return `${first?.charAt(0) || 'P'}${last?.charAt(0) || 'T'}`.toUpperCase();
-  };
-
   const calculateAge = (dob: string) => {
     if (!dob) return 0;
     const diff = Date.now() - new Date(dob).getTime();
@@ -54,12 +50,7 @@ export const PatientDirectory: React.FC = () => {
       key: 'patient_code', 
       header: 'Patient ID',
       render: (r) => (
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-surface-container-low text-primary flex items-center justify-center font-mono-data text-label-sm font-semibold">
-            {getInitials(r.first_name, r.last_name === '(Walk-in Patient)' ? '' : r.last_name)}
-          </div>
-          <span className="font-mono-data text-mono-data font-semibold text-primary">{r.patient_code}</span>
-        </div>
+        <span className="font-mono-data text-mono-data font-semibold text-primary">{r.patient_code}</span>
       )
     },
     { 
@@ -72,23 +63,23 @@ export const PatientDirectory: React.FC = () => {
           : `${r.first_name} ${r.last_name}`;
 
         return (
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-3 min-w-[200px]">
+            <div className="flex flex-col">
               <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">
                 {displayName}
               </span>
-              {walkin && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[11px] font-bold border border-amber-200 shadow-xs">
-                  <span className="material-symbols-outlined text-[13px] text-amber-600">bolt</span>
-                  Walk-in
-                </span>
-              )}
+              <span className="font-body-sm text-body-sm text-outline mt-0.5">
+                {r.date_of_birth && r.date_of_birth !== '1900-01-01' && r.date_of_birth !== '1995-01-01' && calculateAge(r.date_of_birth) > 0 && calculateAge(r.date_of_birth) < 120
+                  ? `${calculateAge(r.date_of_birth)} yrs`
+                  : 'Age pending'} · {r.gender}
+              </span>
             </div>
-            <span className="font-body-sm text-body-sm text-outline mt-0.5">
-              {r.date_of_birth && r.date_of_birth !== '1900-01-01' && r.date_of_birth !== '1995-01-01' && calculateAge(r.date_of_birth) > 0 && calculateAge(r.date_of_birth) < 120
-                ? `${calculateAge(r.date_of_birth)} yrs`
-                : 'Age pending'} · {r.gender}
-            </span>
+            {walkin && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none">
+                <span className="material-symbols-outlined text-[11px] text-amber-600">bolt</span>
+                Walk-in
+              </span>
+            )}
           </div>
         );
       } 
@@ -155,11 +146,10 @@ export const PatientDirectory: React.FC = () => {
           {isWalkin(r) && (
             <button 
               onClick={() => navigate(`/receptionist/register-patient?edit=${r.patient_code}`)}
-              className="px-3 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-sm text-label-sm font-bold transition-all flex items-center gap-1.5 shadow-xs mr-1 cursor-pointer"
-              title="Complete Full Registration in Register Form"
+              className="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-all flex items-center justify-center shadow-xs cursor-pointer"
+              title="Complete Registration"
             >
-              <span className="material-symbols-outlined text-[15px]">verified</span>
-              <span>Complete Reg</span>
+              <span className="material-symbols-outlined text-[18px]">verified</span>
             </button>
           )}
 
@@ -181,11 +171,10 @@ export const PatientDirectory: React.FC = () => {
 
           <button 
             onClick={() => navigate(`/receptionist/book-appointment?patient_id=${r.patient_id}`)}
-            className="px-2.5 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary font-label-sm text-label-sm transition-all flex items-center gap-1 ml-1"
+            className="w-8 h-8 rounded-lg bg-status-scheduled-bg text-status-scheduled-text hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center"
             title="Book Appointment"
           >
-            <span className="material-symbols-outlined text-[15px]">event_available</span>
-            <span>Book</span>
+            <span className="material-symbols-outlined text-[18px]">event_available</span>
           </button>
         </div>
       ),
