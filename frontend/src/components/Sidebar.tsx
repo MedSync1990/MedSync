@@ -21,7 +21,6 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   const { isCollapsed } = useSidebar();
   const userRole = user?.role;
-  const branchName = userRole === 'Administrator' ? 'All Branches' : user?.branchName || 'Assigned Branch';
 
   const standaloneItem: NavItem = (() => {
     switch (userRole) {
@@ -121,17 +120,6 @@ export const Sidebar: React.FC = () => {
             <span className="font-label-sm text-[10px] text-white/50 tracking-wider uppercase truncate">
               {userRole ? `${userRole.toUpperCase()} PORTAL` : 'MEDSYNC PORTAL'}
             </span>
-          </div>
-        </div>
-
-        {/* Branch Location Indicator */}
-        <div className={`${isCollapsed ? 'px-2' : 'px-space-md'} py-space-sm`}>
-          <div title={isCollapsed ? branchName : undefined} aria-label={`Branch: ${branchName}`} className={`flex items-center py-2 rounded-lg bg-white/5 border border-white/5 transition-colors ${isCollapsed ? 'justify-center px-0' : 'justify-between px-space-sm'}`}>
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-brand-teal-light">location_on</span>
-              <span className={`${isCollapsed ? 'hidden' : ''} font-label-md text-label-md text-white/70 truncate`}>{branchName}</span>
-            </div>
-            {!isCollapsed && <span className="material-symbols-outlined text-[18px] text-white/40">expand_more</span>}
           </div>
         </div>
 

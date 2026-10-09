@@ -81,6 +81,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(null);
     };
 
+    const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const cleanedBase = rawBase.replace(/\/+$/, '');
+    const apiBase = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
+
+    fetch(`${apiBase}/auth/me`, { credentials: 'include' })
+      .then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then((data) => {
+        if (data) {
+          setUserState((prev) => {
+            const updated: UserProfile = {
+              id: data.user_id,
+              username: data.username,
+              firstName: data.first_name || '',
+              lastName: data.last_name || '',
+              role: data.role as UserRole,
+              roleTitle: `${data.role} Portal`,
+              branchId: data.branch_id,
+              branchName: data.branch_name || prev?.branchName || (data.branch_id ? `Branch #${data.branch_id}` : 'Central Branch'),
+            };
+            localStorage.setItem('current_user', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      })
+      .catch(() => {});
+
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
