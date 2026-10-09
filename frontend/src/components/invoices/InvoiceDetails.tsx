@@ -121,7 +121,9 @@ export default function InvoiceDetails({ invoiceData, onPrint, onRecordPayment }
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" 
             onClick={() => {
               // Points directly to the FastAPI PDF route we just built!
-              window.location.href = `http://localhost:8000/api/v1/invoices/${invoiceData.invoice_code}/pdf`;
+              const rawBase = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+              const baseUrl = rawBase.replace(/\/+$/, '');
+              window.location.href = `${baseUrl}/invoices/${invoiceData.invoice_code}/pdf`;
             }} 
             type="button"
           >

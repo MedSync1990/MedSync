@@ -1,4 +1,5 @@
 import asyncpg
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 
 from app.db import get_conn
@@ -59,9 +60,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
 
     csrf_token = generate_csrf_token()
     max_age = config.JWT_EXPIRY_MINUTES * 60
-    cookie_samesite = "none" if config.COOKIE_SECURE else "lax"
-
-    samesite_policy = "none" if config.COOKIE_SECURE else "lax"
+    samesite_policy: Literal["none", "lax"] = "none" if config.COOKIE_SECURE else "lax"
 
     response.set_cookie(
         key="access_token",
