@@ -537,18 +537,8 @@ export const DoctorConsultation: React.FC = () => {
           </div>
 
           {/* Bottom Grid: Clear, High-Visibility Patient Detail Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-space-sm">
-            {/* Tile 1: Patient ID */}
-            <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                Patient ID
-              </span>
-              <span className="font-mono-data text-mono-data font-bold text-primary text-base">
-                {patientView.patient_code || '—'}
-              </span>
-            </div>
-
-            {/* Tile 2: Age & Gender */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-sm">
+            {/* Tile 1: Age & Gender */}
             <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                 Demographics
@@ -558,7 +548,7 @@ export const DoctorConsultation: React.FC = () => {
               </span>
             </div>
 
-            {/* Tile 3: Blood Group */}
+            {/* Tile 2: Blood Group */}
             <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                 Blood Group
@@ -571,7 +561,7 @@ export const DoctorConsultation: React.FC = () => {
               </div>
             </div>
 
-            {/* Tile 4: NIC */}
+            {/* Tile 3: NIC */}
             <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                 National ID (NIC)
@@ -581,7 +571,7 @@ export const DoctorConsultation: React.FC = () => {
               </span>
             </div>
 
-            {/* Tile 5: Visit Type */}
+            {/* Tile 4: Visit Type */}
             <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                 Encounter Type
@@ -873,29 +863,6 @@ export const DoctorConsultation: React.FC = () => {
               type="text"
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button
-              onClick={() => setDiagnosis('I10 (Essential HTN)')}
-              className="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors"
-              type="button"
-            >
-              Essential hypertension
-            </button>
-            <button
-              onClick={() => setDiagnosis('Z95.55 (Coronary Stent)')}
-              className="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors"
-              type="button"
-            >
-              Coronary stent
-            </button>
-            <button
-              onClick={() => setDiagnosis('E78.5 (Dyslipidemia)')}
-              className="px-2.5 py-1 rounded bg-surface-subtle hover:bg-status-scheduled-bg hover:text-status-scheduled-text text-brand-navy-deep font-label-md text-label-md border border-border-subtle transition-colors"
-              type="button"
-            >
-              Dyslipidemia
-            </button>
-          </div>
         </div>
 
         {/* Notes Area */}
@@ -1005,14 +972,6 @@ export const DoctorConsultation: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-space-sm self-end lg:self-auto">
-            <button
-              onClick={() => window.print()}
-              className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[18px] text-secondary">print</span>
-              <span>Print Clinical Summary</span>
-            </button>
             <button
               onClick={saveDraft}
               className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"

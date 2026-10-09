@@ -127,42 +127,42 @@ export const DoctorSchedule: React.FC = () => {
 
         {/* 4 Quick Stat Counters */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-blue-50 border border-blue-200">
-            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
               <span className="material-symbols-outlined text-[20px]">check_circle</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-blue-700 font-bold leading-tight">6</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">6</div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Completed</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-blue-50 border border-blue-200">
-            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
               <span className="material-symbols-outlined text-[20px]">pending_actions</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-blue-700 font-bold leading-tight">8</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">8</div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Remaining To Do</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-blue-50 border border-blue-200">
-            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
               <span className="material-symbols-outlined text-[20px] animate-pulse">hourglass_top</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-blue-700 font-bold leading-tight">2</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">2</div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Waiting / Arrived</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-blue-50 border border-blue-200">
-            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
               <span className="material-symbols-outlined text-[20px]">schedule</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-blue-700 font-bold leading-tight">6</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">6</div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Upcoming Scheduled</div>
             </div>
           </div>
