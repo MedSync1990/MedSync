@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
+import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Modal } from '../../components/Modal';
 import { LoadingState } from '../../components/LoadingState';
@@ -84,7 +83,8 @@ export const BookAppointment: React.FC = () => {
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const patientDropdownRef = React.useRef<HTMLDivElement>(null);
-  const [] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   // ─── Quick Walk-in Patient Modal State ─────────────────────────────────────
   const [showQuickModal, setShowQuickModal] = useState(false);
@@ -231,6 +231,59 @@ export const BookAppointment: React.FC = () => {
     };
     loadInitialData();
   }, []);
+
+  // ─── Auto-select patient from URL parameter ────────────────────────────────
+  useEffect(() => {
+    if (location.state?.prefilledPatient) {
+      const res = location.state.prefilledPatient;
+      const p: PatientListItem = {
+        patient_id: res.patient_id,
+        patient_code: res.patient_code,
+        first_name: res.first_name,
+        last_name: res.last_name,
+        id_number: res.id_number,
+        phone_number: res.phone_number || '',
+        gender: res.gender,
+        date_of_birth: res.date_of_birth,
+        has_insurance: Boolean(res.has_insurance || (res as any).insurance_provider),
+        is_active: res.is_active,
+        branch_name: res.branch_name,
+      };
+      setSelectedPatient(p);
+      setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
+      window.history.replaceState({}, document.title);
+      return;
+    }
+
+    const patientIdParam = searchParams.get('patient_id');
+    if (patientIdParam) {
+      const loadPatientFromUrl = async () => {
+        try {
+          const res = await patientService.getById(patientIdParam);
+          if (res) {
+            const p: PatientListItem = {
+              patient_id: res.patient_id,
+              patient_code: res.patient_code,
+              first_name: res.first_name,
+              last_name: res.last_name,
+              id_number: res.id_number,
+              phone_number: res.phone_number || '',
+              gender: res.gender,
+              date_of_birth: res.date_of_birth,
+              has_insurance: Boolean(res.has_insurance || (res as any).insurance_provider),
+              is_active: res.is_active,
+              branch_name: res.branch_name,
+            };
+            setSelectedPatient(p);
+            setPatientSearch(`${res.first_name} ${res.last_name} (${res.patient_code})`);
+          }
+        } catch (error) {
+          showToast('Failed to auto-load patient details from URL', 'error');
+        }
+      };
+      loadPatientFromUrl();
+    }
+  }, [searchParams, location.state, showToast]);
 
   // ─── Patient Search Functions ──────────────────────────────────────────────
   const searchPatients = async (query?: string) => {
@@ -440,17 +493,33 @@ export const BookAppointment: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="py-space-lg lg:py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
-      {/* Top Page Header */}
-      <PageHeader
-        title="Book an Appointment"
-        subtitle="Schedule a consultation with an available doctor in real time."
-        breadcrumbs={[
-          { label: 'Home', href: '/receptionist/dashboard' },
-          { label: 'Appointments', href: '/receptionist/appointments' },
-          { label: 'Book an Appointment' },
-        ]}
-      />
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        <div className="space-y-1">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <Link to="/receptionist/appointments" className="hover:text-primary transition-colors">
+              Appointments
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Book an Appointment</span>
+          </div>
+
+          {/* Title */}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+              Book an Appointment
+            </h1>
+          </div>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Schedule a consultation with an available doctor in real time.
+          </p>
+        </div>
+      </div>
 
       <div className="space-y-space-lg">
         {/* ─────────────────────────────────────────────────────────────────── */}
@@ -1048,7 +1117,7 @@ export const BookAppointment: React.FC = () => {
                                     }
                                   }}
                                   className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot
-                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    ? 'border-error bg-error-container text-on-error-container focus:border-error focus:ring-1 focus:ring-error'
                                     : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
                                     }`}
                                 />
@@ -1063,7 +1132,7 @@ export const BookAppointment: React.FC = () => {
                                   value={walkInEndTime}
                                   onChange={(e) => setWalkInEndTime(e.target.value)}
                                   className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
-                                    ? 'border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-1 focus:ring-red-500'
+                                    ? 'border-error bg-error-container text-on-error-container focus:border-error focus:ring-1 focus:ring-error'
                                     : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
                                     }`}
                                 />
@@ -1110,14 +1179,14 @@ export const BookAppointment: React.FC = () => {
 
                             {/* Time conflict and validation messages */}
                             {conflictingSlot && (
-                              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[12px]">
-                                <span className="material-symbols-outlined text-[18px] text-red-600 shrink-0 mt-0.5">
+                              <div className="flex items-start gap-2 p-3 rounded-lg bg-error-container border border-error text-on-error-container text-[12px]">
+                                <span className="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">
                                   warning
                                 </span>
                                 <div>
                                   <span className="font-bold">Schedule Overlap Detected:</span> The entered walk-in window ({formatTime(walkInStartTime)} – {formatTime(walkInEndTime)}) overlaps with an existing{' '}
                                   <span
-                                    className={`px-1.5 py-0.5 rounded font-bold ${conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-red-200 text-red-950' : 'bg-teal-200 text-teal-950'
+                                    className={`px-1.5 py-0.5 rounded font-bold ${conflictingSlot.status?.toLowerCase() === 'booked' ? 'bg-error text-on-error' : 'bg-status-scheduled-bg text-status-scheduled-text'
                                       }`}
                                   >
                                     {conflictingSlot.status}
@@ -1128,8 +1197,8 @@ export const BookAppointment: React.FC = () => {
                             )}
 
                             {!conflictingSlot && walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime && (
-                              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[12px]">
-                                <span className="material-symbols-outlined text-[16px] text-red-600 shrink-0">
+                              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-error-container border border-error text-on-error-container text-[12px]">
+                                <span className="material-symbols-outlined text-[16px] text-error shrink-0">
                                   error
                                 </span>
                                 <span>Walk-in end time must be after start time ({formatTime(walkInStartTime)}).</span>
@@ -1153,22 +1222,22 @@ export const BookAppointment: React.FC = () => {
                                   </span>
                                   {!loadingSlots && slots.length > 0 && (
                                     <div className="flex items-center gap-1.5 text-[11px]">
-                                      <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold border border-red-200">
+                                      <span className="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold border border-error">
                                         {bookedSlots.length} Booked
                                       </span>
-                                      <span className="px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 font-bold border border-teal-200">
+                                      <span className="px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-bold border border-status-completed-text">
                                         {openSlots.length} Open
                                       </span>
                                     </div>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-3 text-[11px]">
-                                  <span className="inline-flex items-center gap-1.5 text-teal-700 font-medium">
-                                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                                  <span className="inline-flex items-center gap-1.5 text-status-completed-text font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-status-completed-text"></span>
                                     Open Slot
                                   </span>
-                                  <span className="inline-flex items-center gap-1.5 text-red-700 font-medium">
-                                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                  <span className="inline-flex items-center gap-1.5 text-error font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-error"></span>
                                     Booked Slot
                                   </span>
                                 </div>
@@ -1190,18 +1259,18 @@ export const BookAppointment: React.FC = () => {
                                       <span
                                         key={s.slot_id}
                                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono-data text-[11px] transition-all ${isConflict
-                                          ? 'bg-red-100 border-2 border-red-500 text-red-900 shadow-sm ring-2 ring-red-400 font-bold'
+                                          ? 'bg-error-container border-2 border-error text-on-error-container shadow-sm ring-2 ring-error font-bold'
                                           : isBooked
-                                            ? 'bg-red-50 border border-red-200 text-red-700 font-medium'
-                                            : 'bg-teal-50 border border-teal-200 text-teal-700 font-medium'
+                                            ? 'bg-red-50 border border-red-200 text-error font-medium'
+                                            : 'bg-teal-50 border border-teal-200 text-status-completed-text font-medium'
                                           }`}
                                       >
                                         <span
                                           className={`w-1.5 h-1.5 rounded-full ${isConflict
-                                            ? 'bg-red-600 animate-ping'
+                                            ? 'bg-error animate-ping'
                                             : isBooked
-                                              ? 'bg-red-500'
-                                              : 'bg-teal-500'
+                                              ? 'bg-error'
+                                              : 'bg-status-completed-text'
                                             }`}
                                         />
                                         <span>
@@ -1209,10 +1278,10 @@ export const BookAppointment: React.FC = () => {
                                         </span>
                                         <span
                                           className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isConflict
-                                            ? 'bg-red-600 text-white'
+                                            ? 'bg-error text-on-error'
                                             : isBooked
-                                              ? 'bg-red-100 text-red-800'
-                                              : 'bg-teal-100 text-teal-800'
+                                              ? 'bg-error-container text-on-error-container'
+                                              : 'bg-status-completed-bg text-status-completed-text'
                                             }`}
                                         >
                                           {isConflict ? 'Conflict' : s.status}
