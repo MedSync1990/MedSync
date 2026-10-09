@@ -91,7 +91,7 @@ export function Dashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
-              Good {greeting}, {user?.firstName || user?.username}
+              Good {greeting}, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}
             </h1>
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">

@@ -105,9 +105,18 @@ async def get_me(
         )
         if row:
             branch_name = row["name"]
+
+    user_row = await db.fetchrow(
+        "SELECT first_name, last_name FROM app_user WHERE user_id = $1;", current_user.user_id
+    )
+    first_name = user_row["first_name"] if user_row else None
+    last_name = user_row["last_name"] if user_row else None
+
     return MeResponse(
         user_id=current_user.user_id,
         username=current_user.username,
+        first_name=first_name,
+        last_name=last_name,
         role=current_user.role,
         branch_id=current_user.branch_id,
         branch_name=branch_name,
