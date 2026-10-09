@@ -376,7 +376,7 @@ export const DoctorConsultation: React.FC = () => {
   const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Select a scheduled appointment';
 
   return (
-    <div className="max-w-content-max-width mx-auto flex flex-col gap-space-lg pb-32">
+    <div className="w-full max-w-content-max-width mx-auto flex flex-col gap-space-lg py-space-md">
       {/* Breadcrumb & Patient Context Header */}
       <div className="flex flex-col gap-space-sm">
         <nav className="flex items-center gap-space-2xs font-label-md text-label-md text-secondary">
