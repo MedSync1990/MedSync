@@ -35,7 +35,7 @@ export const Sidebar: React.FC = () => {
     const systemSection: NavSection = {
       header: 'SYSTEM',
       items: [
-        { label: 'Settings', path: '/settings', icon: 'settings', dataPath: 'settings' },
+        { label: 'Profile', path: '/profile', icon: 'account_circle', dataPath: 'profile' },
         { label: 'Help Center', path: '/help-center', icon: 'help', dataPath: 'help-center' },
       ],
     };
