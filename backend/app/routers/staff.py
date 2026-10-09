@@ -17,9 +17,9 @@ def generate_temp_password(length=12):
 
 @router.get("/", response_model=Dict[str, Any])
 async def list_staff(
-    branch_id: int = None,
-    role_id: int = None,
-    is_active: bool = None,
+    branch_id: int | None = None,
+    role_id: int | None = None,
+    is_active: bool | None = None,
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
@@ -97,6 +97,10 @@ async def create_staff(
             payload.role_id, payload.first_name, payload.middle_name, payload.last_name, 
             payload.id_number, payload.address, payload.birthdate, payload.gender, payload.email
         )
+        
+        if not user_row:
+            raise HTTPException(status_code=500, detail="Failed to create user record.")
+            
         new_user_id = user_row['user_id']
 
         await db.execute(
@@ -104,8 +108,19 @@ async def create_staff(
             new_user_id, payload.phone_number
         )
 
-        username = f"{payload.first_name.lower()}.{payload.last_name.lower()}{new_user_id}"
-        temp_password = generate_temp_password()
+        # Format the role name to be a clean prefix (e.g. "Receptionist" -> "receptionist")
+        role_prefix = role_name.lower().replace(" ", "")
+        
+        # Count how many users have this role to append the number
+        role_count = await db.fetchval("SELECT COUNT(*) FROM app_user WHERE role_id = $1", payload.role_id)
+        
+        # Create the username (e.g. receptionist1, receptionist2)
+        username = f"{role_prefix}{role_count}"
+        
+        # Set the default temporary password to "medsync"
+        temp_password = "medsync"
+        
+        # Hash the password before saving
         hashed_pw = hash_password(temp_password)
 
         await db.execute(
@@ -117,9 +132,15 @@ async def create_staff(
         )
 
         if role_name == "Doctor":
-            spec_row = await db.fetchrow("SELECT specialty_id FROM specialty WHERE name = $1", payload.specialty)
+            spec_row = await db.fetchrow("SELECT specialty_id FROM specialty WHERE LOWER(name) = LOWER($1)", payload.specialty)
             if not spec_row:
-                spec_row = await db.fetchrow("INSERT INTO specialty (name) VALUES ($1) RETURNING specialty_id", payload.specialty)
+                try:
+                    spec_row = await db.fetchrow("INSERT INTO specialty (name) VALUES ($1) RETURNING specialty_id", payload.specialty)
+                except asyncpg.exceptions.UniqueViolationError:
+                    spec_row = await db.fetchrow("SELECT specialty_id FROM specialty WHERE LOWER(name) = LOWER($1)", payload.specialty)
+            
+            if not spec_row:
+                raise HTTPException(status_code=500, detail="Failed to create specialty record.")
             specialty_id = spec_row['specialty_id']
             
             await db.execute("INSERT INTO doctor (user_id, license_number) VALUES ($1, $2)", new_user_id, payload.license_number)
@@ -177,8 +198,8 @@ async def update_staff(
             
     async with db.transaction():
         # Update app_user
-        set_clauses = []
-        args = []
+        set_clauses: list[str] = []
+        args: list[Any] = []
         if payload.first_name is not None:
             args.append(payload.first_name)
             set_clauses.append(f"first_name = ${len(args)}")
@@ -202,8 +223,8 @@ async def update_staff(
             await db.execute("UPDATE contact SET phone_number = $1 WHERE user_id = $2", payload.phone_number, id)
             
         # Update branch or active status
-        staff_set = []
-        staff_args = []
+        staff_set: list[str] = []
+        staff_args: list[Any] = []
         if payload.branch_id is not None:
             staff_args.append(payload.branch_id)
             staff_set.append(f"branch_id = ${len(staff_args)}")

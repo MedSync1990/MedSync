@@ -121,41 +121,29 @@ export default function CollectPayment() {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[1600px] mx-auto px-space-md sm:px-space-lg lg:px-space-xl py-space-lg space-y-space-xl">
-
-      {/* Page header / breadcrumb */}
-      <div className="flex flex-col gap-1 pb-space-xs">
-        <nav
-          aria-label="Breadcrumbs"
-          className="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"
-        >
-          <Link
-            to="/receptionist/dashboard"
-            className="hover:text-primary transition-colors flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-[15px]">home</span>
-            <span>Home</span>
-          </Link>
-          <span className="text-outline/50">/</span>
-          <span>Billing &amp; Payments</span>
-          <span className="text-outline/50">/</span>
-          <span className="text-primary font-bold">Collect Payment</span>
-        </nav>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md mt-1">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
-                Collect Payment
-              </h1>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                Terminal Ready
-              </span>
-            </div>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-              Search an invoice or patient to view balance details and collect payment.
-            </p>
+    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        <div className="space-y-1">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-outline">Billing &amp; Payments</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Collect Payment</span>
           </div>
+
+          {/* Title */}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+              Collect Payment
+            </h1>
+          </div>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Search an invoice or patient to view balance details and collect payment.
+          </p>
         </div>
       </div>
 
