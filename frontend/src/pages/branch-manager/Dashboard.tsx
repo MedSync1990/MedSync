@@ -66,8 +66,6 @@ export default function BranchManagerDashboard() {
   const today = stats?.today_appointments;
   const total = today ? today.scheduled + today.completed + today.cancelled : 0;
   const branchName = user?.branchName || 'Your Branch';
-  const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: timezone }).format(new Date()));
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const dateLabel = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: timezone }).format(new Date());
   const specialtyGroups = new Map<string, DoctorResponse[]>();
   for (const doctor of doctors) {
@@ -90,7 +88,7 @@ export default function BranchManagerDashboard() {
           <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-medium text-secondary">
             <span className="rounded-full bg-sky-100 px-3 py-1 font-semibold uppercase tracking-wide text-primary">{error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}</span><span>{dateLabel}</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">{greeting},<br />{[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Manager'}</h1>
+          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Welcome,<br />{[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Manager'}</h1>
           <p className="mt-3 text-sm text-secondary">{branchName} · Branch Manager Overview</p>
 
         </div>
