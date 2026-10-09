@@ -55,8 +55,8 @@ export const Login = () => {
         const userProfile: UserProfile = {
           id: userData.user_id,
           username: userData.username,
-          firstName: userData.username,
-          lastName: '',
+          firstName: userData.first_name || '',
+          lastName: userData.last_name || '',
           role: userData.role as UserRole,
           roleTitle: `${userData.role} Portal`,
           branchId: userData.branch_id,

@@ -90,7 +90,7 @@ export function Dashboard() {
     <div className="w-full min-w-0 max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6 text-brand-navy-deep">
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-body-sm text-secondary"><span>MedSync</span><span aria-hidden="true" className="material-symbols-outlined">chevron_right</span><span className="text-brand-navy-deep">Dashboard</span></nav>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div><h1 className="font-display-lg text-display-lg">Good {greeting}, {user?.firstName || user?.username}</h1><p className="text-body-md text-secondary mt-1">{user?.branchName || 'Assigned Branch'} · Receptionist</p></div>
+        <div><h1 className="font-display-lg text-display-lg">Good {greeting}, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}</h1><p className="text-body-md text-secondary mt-1">{user?.branchName || 'Assigned Branch'} · Receptionist</p></div>
         <div className="text-body-sm text-secondary">{new Date(`${date}T12:00:00+05:30`).toLocaleDateString('en-GB', { timeZone: 'Asia/Colombo', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
       </div>
 
