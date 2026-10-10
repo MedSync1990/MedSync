@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, Path, Query ,Response
+from fastapi import APIRouter, Depends, Path, Query, Response, HTTPException
 from asyncpg import Connection, PostgresError, RaiseError
 from typing import List, Optional
 from datetime import datetime
 from app.db import get_conn
 from jinja2 import Environment, FileSystemLoader
-import weasyprint
+try:
+    import weasyprint
+except Exception:
+    weasyprint = None
 from app.dependencies import CurrentUser, require_roles, get_current_user
 from app.errors import NotFoundError, ConflictError, AppValidationError
 from app.schemas.invoices import (
@@ -367,6 +370,11 @@ async def download_invoice_pdf(
     )
     
     # 6. Generate the PDF
+    if weasyprint is None:
+        raise HTTPException(
+            status_code=500,
+            detail="PDF generation engine (WeasyPrint) is not installed or available on this host environment.",
+        )
     pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
     
     # 7. Return the PDF file directly to the browser

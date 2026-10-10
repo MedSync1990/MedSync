@@ -21,3 +21,7 @@ export function resetStaffPassword(userId: number, password: string): Promise<{ 
 export function deactivateStaff(userId: number): Promise<{ message: string; user_id: number }> {
   return put(`/staff/${userId}/deactivate`);
 }
+
+export function unlockStaff(userId: number): Promise<{ message: string; user_id: number }> {
+  return put(`/staff/${userId}/unlock`);
+}
