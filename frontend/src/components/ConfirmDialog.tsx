@@ -4,12 +4,13 @@ import { Modal } from './Modal';
 export interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
   isDestructive?: boolean;
+  showConfirm?: boolean;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -21,6 +22,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   isDestructive = false,
+  showConfirm = true,
 }) => {
   return (
     <Modal
@@ -36,23 +38,25 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           >
             {cancelLabel}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className={`px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 ${
-              isDestructive
-                ? 'bg-status-cancelled-bg text-status-cancelled-text hover:bg-rose-200 border border-status-cancelled-text/30'
-                : 'bg-primary hover:bg-primary-container text-on-primary'
-            }`}
-          >
-            {isDestructive && (
-              <span className="material-symbols-outlined text-[18px]">warning</span>
-            )}
-            <span>{confirmLabel}</span>
-          </button>
+          {showConfirm && (
+            <button
+              type="button"
+              onClick={() => {
+                onConfirm?.();
+                onClose();
+              }}
+              className={`px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 ${
+                isDestructive
+                  ? 'bg-status-cancelled-bg text-status-cancelled-text hover:bg-rose-200 border border-status-cancelled-text/30'
+                  : 'bg-primary hover:bg-primary-container text-on-primary'
+              }`}
+            >
+              {isDestructive && (
+                <span className="material-symbols-outlined text-[18px]">warning</span>
+              )}
+              <span>{confirmLabel}</span>
+            </button>
+          )}
         </>
       }
     >

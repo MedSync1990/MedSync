@@ -74,8 +74,6 @@ export function Dashboard() {
     return () => { signal.cancelled = true; window.clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, [load, refreshVersion]);
 
-  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Colombo', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
-  const greeting = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
   const overview = [
     { label: 'Appointments', value: counts?.total, icon: 'calendar_today', color: 'text-primary' },
     { label: 'Scheduled', value: counts?.scheduled, icon: 'schedule', color: 'text-status-scheduled-text' },
@@ -91,7 +89,7 @@ export function Dashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
-              Good {greeting}, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}
+              Welcome, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}
             </h1>
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant">

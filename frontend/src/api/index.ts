@@ -23,7 +23,7 @@ export type * from './types';
 export { login, logout, getMe } from './auth';
 
 // Branch endpoints
-export { listBranches } from './branches';
+export { listBranches, getBranch } from './branches';
 
 // Report endpoints
 export {

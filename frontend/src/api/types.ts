@@ -577,6 +577,12 @@ export interface StaffUpdatePayload {
   is_active?: boolean;
 }
 
+export interface StaffBankAccountCreate {
+  bank_name: string;
+  account_number: string;
+  bank_branch: string;
+}
+
 export interface StaffCreatePayload {
   role_id: number;
   branch_id: number;
@@ -591,9 +597,48 @@ export interface StaffCreatePayload {
   phone_number: string;
   specialty?: string;
   license_number?: string;
+  bank_accounts?: StaffBankAccountCreate[];
 }
 
 export interface StaffListResponse {
   data: StaffResponse[];
   total: number;
 }
+
+// ─── Profile (schemas/profile.py) ──────────────────────────────────────────
+
+export interface UserProfileData {
+  user_id: number;
+  username: string;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone_number: string | null;
+  birthdate: string | null;
+  gender: Gender | null;
+  marital_status: string | null;
+  address: string | null;
+  id_number: string | null;
+  role: string;
+  branch_id: number | null;
+  branch_name: string | null;
+}
+
+export interface ProfileUpdatePayload {
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  email?: string;
+  phone_number?: string;
+  birthdate?: string;
+  gender?: Gender;
+  marital_status?: string;
+  address?: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+

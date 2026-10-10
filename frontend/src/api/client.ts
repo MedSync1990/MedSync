@@ -135,8 +135,23 @@ async function request<T>(
   }
 
   // Normalise FastAPI's `{detail: "..."}` into our `{message: "..."}`
-  if ((errorBody as any).detail && !errorBody.message) {
-    errorBody.message = (errorBody as any).detail;
+  const rawDetail = (errorBody as any).detail;
+  if (rawDetail) {
+    if (typeof rawDetail === 'string') {
+      errorBody.message = rawDetail;
+    } else if (Array.isArray(rawDetail)) {
+      errorBody.message = rawDetail
+        .map((d: any) => {
+          const field = Array.isArray(d.loc)
+            ? d.loc.filter((item: any) => item !== 'body').join('.')
+            : '';
+          const msg = d.msg || 'Invalid value';
+          return field ? `${field.replace('_', ' ')}: ${msg}` : msg;
+        })
+        .join('; ');
+    } else if (typeof rawDetail === 'object') {
+      errorBody.message = JSON.stringify(rawDetail);
+    }
   }
 
   // Dispatch a global event if the token is expired or missing so the app can log the user out

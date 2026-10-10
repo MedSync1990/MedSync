@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 
@@ -92,7 +93,7 @@ export const TopBar: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-space-sm pl-space-xs cursor-pointer hover:opacity-80 transition-opacity">
+        <Link to="/profile" title="View Profile & Settings" className="flex items-center gap-space-sm pl-space-xs cursor-pointer hover:opacity-80 transition-opacity">
           <div className="text-right hidden sm:block">
             <div className="font-label-md text-label-md text-slate-900 font-bold">{userName}</div>
             <div className="font-body-sm text-[12px] text-slate-500">{roleSubtitle}</div>
@@ -100,7 +101,7 @@ export const TopBar: React.FC = () => {
           <div className={`w-9 h-9 rounded-full ${roleAvatar.bg} flex items-center justify-center ring-2 shadow-xs transition-transform transform hover:scale-105`}>
             <span className="material-symbols-outlined text-[19px]">{roleAvatar.icon}</span>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

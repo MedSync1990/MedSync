@@ -75,8 +75,13 @@ export const PatientDirectory: React.FC = () => {
               </span>
             </div>
             {walkin && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none">
-                <span className="material-symbols-outlined text-[11px] text-amber-600">bolt</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
+                <span
+                  className="material-symbols-outlined text-amber-600 leading-none select-none"
+                  style={{ fontSize: '11px', width: '11px', height: '11px' }}
+                >
+                  bolt
+                </span>
                 Walk-in
               </span>
             )}

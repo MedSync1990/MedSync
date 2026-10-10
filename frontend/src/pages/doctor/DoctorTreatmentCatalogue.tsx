@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Modal } from '../../components/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { createTreatment, deactivateTreatment, listTreatments, updateTreatment } from '../../api/treatments';
@@ -341,13 +342,40 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     reader.readAsText(file);
   };
 
+  const dashboardPath = user?.role === 'Administrator'
+    ? '/admin/dashboard'
+    : user?.role === 'Branch Manager'
+      ? '/branch-manager/dashboard'
+      : user?.role === 'Doctor'
+        ? '/doctor/dashboard'
+        : '/receptionist/dashboard';
+
+  const section = user?.role === 'Doctor'
+    ? 'Clinical'
+    : user?.role === 'Receptionist'
+      ? 'Billing & Payments'
+      : 'Management';
+
+  const breadcrumbs = [
+    { label: 'Home', to: dashboardPath },
+    { label: section },
+    { label: canEdit ? 'Manage Treatment Catalogue' : 'Treatment Catalogue' },
+  ];
+
   return (
     <div className="w-full max-w-content-max-width mx-auto py-space-lg space-y-space-lg">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-        <div>
-          <div className="flex items-center gap-space-xs mb-space-2xs">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Manage Treatment Catalogue</h1>
+        <div className="space-y-1">
+          {/* Breadcrumbs */}
+          <div className="mb-2">
+            <Breadcrumbs items={breadcrumbs} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-space-xs mb-space-2xs">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+              {canEdit ? 'Manage Treatment Catalogue' : 'Treatment Catalogue'}
+            </h1>
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-md text-label-md ${canEdit ? 'bg-primary/10 text-primary font-semibold' : 'bg-surface-subtle text-secondary'
               }`}>
               <span className="material-symbols-outlined text-[14px]">
