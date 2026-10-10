@@ -56,7 +56,16 @@ async def list_branches(
     """
     List branches. Admin sees all branches; Branch Manager sees only their own branch.
     """
-    if current_user.role == "Branch Manager" and current_user.branch_id:
+    effective_branch_id = current_user.branch_id
+    if current_user.role == "Branch Manager" and not effective_branch_id:
+        staff_bid = await conn.fetchval(
+            "SELECT branch_id FROM staff WHERE user_id = $1 AND is_active = TRUE",
+            current_user.user_id,
+        )
+        if staff_bid:
+            effective_branch_id = staff_bid
+
+    if current_user.role == "Branch Manager" and effective_branch_id:
         query = """
             SELECT 
                 b.branch_id,
@@ -87,7 +96,7 @@ async def list_branches(
             WHERE b.branch_id = $1
             ORDER BY b.name ASC;
         """
-        rows = await conn.fetch(query, current_user.branch_id)
+        rows = await conn.fetch(query, effective_branch_id)
     else:
         query = """
             SELECT 
@@ -132,7 +141,16 @@ async def get_branch(
     """
     Get branch profile by ID. BM restricted to own branch.
     """
-    if current_user.role == "Branch Manager" and current_user.branch_id != branch_id:
+    effective_branch_id = current_user.branch_id
+    if current_user.role == "Branch Manager" and not effective_branch_id:
+        staff_bid = await conn.fetchval(
+            "SELECT branch_id FROM staff WHERE user_id = $1 AND is_active = TRUE",
+            current_user.user_id,
+        )
+        if staff_bid:
+            effective_branch_id = staff_bid
+
+    if current_user.role == "Branch Manager" and effective_branch_id != branch_id:
         raise NotFoundError(f"Branch #{branch_id} not found.")
 
     b = await _fetch_branch(conn, branch_id)

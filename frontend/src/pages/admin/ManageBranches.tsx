@@ -59,7 +59,7 @@ export const ManageBranches: React.FC = () => {
 
       // Filter staff members who strictly have the Branch Manager role
       const eligibleManagers = staffList.filter(
-        (s) => s.role_name === 'Branch Manager' && s.is_active
+        (s: StaffResponse) => s.role_name === 'Branch Manager' && s.is_active
       );
       setManagersList(eligibleManagers);
     } catch (err: any) {
@@ -647,7 +647,7 @@ export const ManageBranches: React.FC = () => {
             }
             message={
               hasMembers
-                ? `This branch currently has ${deactivatingBranch.staff_count} active staff member${deactivatingBranch.staff_count > 1 ? 's' : ''} assigned. Branches with active staff cannot be deactivated. Please reassign or deactivate all staff members before deactivating this branch.`
+                ? `This branch currently has ${(deactivatingBranch.staff_count ?? 0)} active staff member${(deactivatingBranch.staff_count ?? 0) > 1 ? 's' : ''} assigned. Branches with active staff cannot be deactivated. Please reassign or deactivate all staff members before deactivating this branch.`
                 : `Are you sure you want to deactivate "${deactivatingBranch.name}"? This location will no longer accept new appointments.`
             }
             confirmLabel={isDeactivating ? 'Deactivating...' : 'Deactivate branch'}

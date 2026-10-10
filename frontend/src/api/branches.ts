@@ -19,6 +19,10 @@ export function listBranches(): Promise<BranchResponse[]> {
   return get<BranchResponse[]>('/branches');
 }
 
+export function getBranch(branchId: number): Promise<BranchResponse> {
+  return get<BranchResponse>(`/branches/${branchId}`);
+}
+
 export function createBranch(payload: BranchCreatePayload): Promise<BranchResponse> {
   return post<BranchResponse>('/branches', payload);
 }
