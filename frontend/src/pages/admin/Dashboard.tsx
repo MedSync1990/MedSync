@@ -27,9 +27,11 @@ export default function AdministratorDashboard() {
   const activityRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const inFlight = useRef(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const refresh = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
+    setIsRefreshing(true);
     try {
       const [overview, audit, branches] = await Promise.allSettled([getStatsOverview(), getRecentActivity({ limit: 50 }), listBranches()]);
       if (!mounted.current) return;
@@ -45,7 +47,10 @@ export default function AdministratorDashboard() {
       } else setBranchError(errorMessage(branches.reason));
     } finally {
       inFlight.current = false;
-      if (mounted.current) setLoading(false);
+      if (mounted.current) {
+        setIsRefreshing(false);
+        setLoading(false);
+      }
     }
   }, []);
   useEffect(() => {
@@ -65,7 +70,7 @@ export default function AdministratorDashboard() {
   return <div className="mx-auto flex w-full max-w-content-max-width flex-col gap-6 py-6 md:py-8">
     <section className="flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
       <div><p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">Enterprise Healthcare Network</p><h1 className="font-display-lg text-display-lg text-on-surface">Welcome, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Administrator'}</h1><p className="mt-2 flex items-center gap-2 text-sm text-secondary"><Icon name="verified_user" />Administrator · All Branches</p></div>
-      <div className="flex flex-col gap-3"><div className="flex flex-wrap items-center gap-3 text-xs text-secondary"><span className="rounded-full bg-surface-container-low px-3 py-2">{new Date().toLocaleDateString('en-GB', { timeZone: timezone, day: 'numeric', month: 'long', year: 'numeric' })}</span><button type="button" onClick={() => void refresh()} disabled={refreshing} className="flex items-center gap-1 rounded-lg px-3 py-2 font-semibold text-primary hover:bg-sky-50 disabled:opacity-50"><Icon name="refresh" />{refreshing ? 'Refreshing…' : 'Refresh'}</button></div><div className="flex flex-wrap gap-2"><Link to="/admin/staff" className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-primary shadow-sm"><Icon name="group_add" />Staff Portal</Link><Link to="/admin/branches" className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-primary shadow-sm"><Icon name="domain" />Branches</Link><button type="button" disabled={!activity.length || !!activityError} onClick={() => exportToCSV(activity, 'System_Audit')} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-tertiary disabled:opacity-50"><Icon name="download" />Export System Audit</button></div></div>
+      <div className="flex flex-col gap-3"><div className="flex flex-wrap items-center gap-3 text-xs text-secondary"><span className="rounded-full bg-surface-container-low px-3 py-2">{new Date().toLocaleDateString('en-GB', { timeZone: timezone, day: 'numeric', month: 'long', year: 'numeric' })}</span><button type="button" onClick={() => void refresh()} disabled={isRefreshing} className="flex items-center gap-1 rounded-lg px-3 py-2 font-semibold text-primary hover:bg-sky-50 disabled:opacity-50"><Icon name="refresh" />{isRefreshing ? 'Refreshing…' : 'Refresh'}</button></div><div className="flex flex-wrap gap-2"><Link to="/admin/staff" className={`${headerAction} bg-white text-primary`}><Icon name="group_add" />Staff Portal</Link><Link to="/admin/branches" className={`${headerAction} bg-white text-primary`}><Icon name="domain" />Branches</Link><button type="button" disabled={!activity.length || !!activityError} onClick={() => exportToCSV(activity, 'System_Audit')} className={`${headerAction} bg-primary text-white hover:bg-tertiary disabled:opacity-50`}><Icon name="download" />Export System Audit</button></div></div>
     </section>
     {error && <p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error}</p>}
     {loading && !stats ? <div role="status" className="grid grid-cols-2 gap-4 xl:grid-cols-4">{[0,1,2,3].map(index => <div key={index} className="h-32 animate-pulse rounded-xl bg-slate-100" />)}<span className="sr-only">Loading administrator dashboard</span></div> : stats && <section aria-label="Network overview" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
