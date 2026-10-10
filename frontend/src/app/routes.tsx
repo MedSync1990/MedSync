@@ -154,13 +154,6 @@ export const AppRoutes: React.FC = () => {
           {/* System & Global Routes */}
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Navigate to="/profile" replace />} />
-          {/* Help Center (Static override for public access / layout integration) */}
-          <Route path="/help-center" element={
-            <div className="py-6 max-w-4xl mx-auto">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Center</h1>
-              <p className="text-slate-600">User guides, documentation, and support resources.</p>
-            </div>
-          } />
 
           {/* Dynamic Role Dashboard & Treatment Catalogue redirects */}
           <Route path="/dashboard" element={<RoleDashboardRedirect />} />

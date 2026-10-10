@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 import { getMyProfile, updateMyProfile, changePassword } from '../api/profile';
 import type { UserProfileData, ProfileUpdatePayload, Gender } from '../api/types';
 
@@ -162,8 +163,27 @@ export const Profile: React.FC = () => {
 
   const fullName = [profile?.first_name, profile?.middle_name, profile?.last_name].filter(Boolean).join(' ') || profile?.username;
 
+  const dashboardPath = user?.role === 'Administrator'
+    ? '/admin/dashboard'
+    : user?.role === 'Branch Manager'
+      ? '/branch-manager/dashboard'
+      : user?.role === 'Doctor'
+        ? '/doctor/dashboard'
+        : '/receptionist/dashboard';
+
+  const breadcrumbs = [
+    { label: 'Home', to: dashboardPath },
+    { label: 'System' },
+    { label: 'Profile' },
+  ];
+
   return (
     <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      {/* Breadcrumbs */}
+      <div>
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+
       {/* Header Banner */}
       <div className="bg-surface-card border border-border-subtle rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
