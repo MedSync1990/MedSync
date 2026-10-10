@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional
 from fastapi import Depends, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.errors import UnauthorizedError, ForbiddenError
 from app.security import decode_access_token
 from app.db import get_conn, get_admin_conn  # adjust path if db.py lives elsewhere
+
+security = HTTPBearer(auto_error=False)
 
 @dataclass
 class CurrentUser:
@@ -12,8 +15,13 @@ class CurrentUser:
     branch_id: Optional[int]
     username: str
 
-async def get_current_user(request: Request) -> CurrentUser:
+async def get_current_user(
+    request: Request,
+    creds: Optional[HTTPAuthorizationCredentials] = Depends(security),
+) -> CurrentUser:
     token = request.cookies.get("access_token")
+    if not token and creds:
+        token = creds.credentials
     if not token:
         auth_header = request.headers.get("Authorization", "")
         if auth_header.lower().startswith("bearer "):
@@ -27,10 +35,12 @@ async def get_current_user(request: Request) -> CurrentUser:
     if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
         from app.config import config
         origin = request.headers.get("origin")
+        referer = request.headers.get("referer", "")
+        is_docs = "/docs" in referer or "/redoc" in referer
         
-        # If the request comes from our trusted frontend domain, we can rely on CORS 
+        # If the request comes from our trusted frontend domain or Swagger docs, we rely on CORS 
         # and the browser's Origin header for CSRF protection.
-        if not origin or origin not in config.CORS_ALLOWED_ORIGINS:
+        if not is_docs and (not origin or origin not in config.CORS_ALLOWED_ORIGINS):
             cookie_csrf = request.cookies.get("csrf_token")
             header_csrf = request.headers.get("X-CSRF-Token")
 
