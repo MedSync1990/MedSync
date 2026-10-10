@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getStaffList, createStaff, deactivateStaff, updateStaff, resetStaffPassword } from '../../api';
 import type { StaffResponse } from '../../api/types';
@@ -19,6 +20,7 @@ const timeAgo = (dateStr: string | null) => {
 
 export const ManageStaff: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [staff, setStaff] = useState<StaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -413,7 +415,7 @@ export const ManageStaff: React.FC = () => {
               <p className="text-body-md text-on-surface-variant">Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.</p>
             </div>
             <div className="flex gap-space-sm">
-              <button onClick={() => { resetForm(); setEditMode(false); setIsDrawerOpen(true); }} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
+              <button onClick={() => navigate('/admin/staff/add')} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
                 <span className="material-symbols-outlined text-[20px]">person_add</span>Add staff
               </button>
             </div>

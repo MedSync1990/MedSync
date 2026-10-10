@@ -146,6 +146,17 @@ async def create_staff(
             await db.execute("INSERT INTO doctor (user_id, license_number) VALUES ($1, $2)", new_user_id, payload.license_number)
             await db.execute("INSERT INTO doctor_specialty (user_id, specialty_id) VALUES ($1, $2)", new_user_id, specialty_id)
             
+        if payload.bank_accounts:
+            for acc in payload.bank_accounts:
+                if acc.bank_name and acc.account_number:
+                    await db.execute(
+                        """
+                        INSERT INTO staff_bank_accounts (user_id, bank_name, account_number, branch_name)
+                        VALUES ($1, $2, $3, $4)
+                        """,
+                        new_user_id, acc.bank_name, acc.account_number, acc.bank_branch
+                    )
+            
     return {
         "message": "Staff registered successfully",
         "user_id": new_user_id,

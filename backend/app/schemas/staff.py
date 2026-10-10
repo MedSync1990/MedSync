@@ -1,7 +1,12 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 from .common import GenderEnum
+
+class StaffBankAccount(BaseModel):
+    bank_name: str
+    account_number: str
+    bank_branch: str
 
 class StaffCreate(BaseModel):
     role_id: int
@@ -17,6 +22,7 @@ class StaffCreate(BaseModel):
     branch_id: int
     specialty: Optional[str] = None
     license_number: Optional[str] = None
+    bank_accounts: Optional[List[StaffBankAccount]] = None
 
 class StaffUpdate(BaseModel):
     first_name: Optional[str] = None
