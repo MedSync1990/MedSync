@@ -8,7 +8,7 @@ export default function DoctorRevenueReport() {
   const [data, setData] = useState<DoctorRevenueResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
-  
+
   const { user } = useAuth();
   const [branches, setBranches] = useState<BranchResponse[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<number | ''>('');
@@ -19,13 +19,13 @@ export default function DoctorRevenueReport() {
       listBranches().then(setBranches);
     }
   }, [user?.role]);
-  
+
   // Filters
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('All Specialties');
   const [searchDoctor, setSearchDoctor] = useState('');
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<DoctorRevenueItem | null>(null);
@@ -74,12 +74,12 @@ export default function DoctorRevenueReport() {
     const qMatch = !searchDoctor || doc.doctor_name.toLowerCase().includes(searchDoctor.toLowerCase());
     return sMatch && qMatch;
   }) || [];
-  
+
   // KPIs
   const totalClinicalRevenue = filteredDocs.reduce((sum: number, d: any) => sum + d.total_revenue, 0) || 0;
   const completedConsults = filteredDocs.reduce((sum: number, d: any) => sum + d.total_appointments, 0) || 0;
   const avgRevenue = filteredDocs.length ? totalClinicalRevenue / filteredDocs.length : 0;
-  
+
   // Find top earning specialty
   let topSpecialty = 'N/A';
   let maxRev = 0;
@@ -109,7 +109,7 @@ export default function DoctorRevenueReport() {
   };
 
   const hasData = filteredDocs.length > 0;
-  
+
   // Helper to format currency
   const fmt = (v: number) => `LKR ${(Number(v) || 0).toLocaleString('en-US')}`;
 
@@ -163,11 +163,11 @@ export default function DoctorRevenueReport() {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
               <span className="text-secondary">-</span>
               <div className="relative flex-1">
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function DoctorRevenueReport() {
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="search-doctor-input">Search Physician</label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
-              <input value={searchDoctor} onChange={e => setSearchDoctor(e.target.value)} className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" id="search-doctor-input" placeholder="Filter by doctor name..." type="text"/>
+              <input value={searchDoctor} onChange={e => setSearchDoctor(e.target.value)} className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" id="search-doctor-input" placeholder="Filter by doctor name..." type="text" />
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@ export default function DoctorRevenueReport() {
             </button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className={`w-full text-left border-collapse ${hasData ? '' : 'hidden'}`}>
             <thead>
@@ -372,7 +372,7 @@ export default function DoctorRevenueReport() {
               })}
             </tbody>
           </table>
-          
+
           {!hasData && !loading && (
             <div className="py-space-3xl px-space-md flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm">
@@ -389,11 +389,11 @@ export default function DoctorRevenueReport() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+              <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>
-        
+
         <div className="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
           <div className="text-body-sm font-body-sm text-secondary">
             Showing {filteredDocs.length} of {(data?.data || []).length || 0} active branch doctors · Period locked: Sep 01 – Sep 30, 2026
