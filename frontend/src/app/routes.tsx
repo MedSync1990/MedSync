@@ -9,6 +9,7 @@ import { LoadingState } from '../components/LoadingState';
 // Auth
 const Login = lazy(() => import('../pages/Login').then(m => ({ default: m.Login })));
 const Logout = lazy(() => import('../pages/logout').then(m => ({ default: m.Logout })));
+const Profile = lazy(() => import('../pages/Profile').then(m => ({ default: m.Profile || m.default })));
 
 // Receptionist
 const ReceptionistDashboard = lazy(() => import('../pages/receptionist/Dashboard'));
@@ -153,19 +154,8 @@ export const AppRoutes: React.FC = () => {
           </Route>
 
           {/* System & Global Routes */}
-          <Route path="/settings" element={
-            <div className="py-6 max-w-4xl mx-auto">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">Settings</h1>
-              <p className="text-slate-600">System settings and profile preferences.</p>
-            </div>
-          } />
-          {/* Help Center (Static override for public access / layout integration) */}
-          <Route path="/help-center" element={
-            <div className="py-6 max-w-4xl mx-auto">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Center</h1>
-              <p className="text-slate-600">User guides, documentation, and support resources.</p>
-            </div>
-          } />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Navigate to="/profile" replace />} />
 
           {/* Dynamic Role Dashboard & Treatment Catalogue redirects */}
           <Route path="/dashboard" element={<RoleDashboardRedirect />} />

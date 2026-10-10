@@ -1,8 +1,32 @@
+import { useAuth } from '../context/AuthContext';
+import { Breadcrumbs } from '../components/Breadcrumbs';
+
 export default function HelpCenter() {
+  const { user } = useAuth();
+
+  const dashboardPath = user?.role === 'Administrator'
+    ? '/admin/dashboard'
+    : user?.role === 'Branch Manager'
+      ? '/branch-manager/dashboard'
+      : user?.role === 'Doctor'
+        ? '/doctor/dashboard'
+        : '/receptionist/dashboard';
+
+  const breadcrumbs = [
+    { label: 'Home', to: dashboardPath },
+    { label: 'System' },
+    { label: 'Help Center' },
+  ];
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-space-lg px-space-sm py-space-lg md:px-space-md">
-      <header>
-        <h1 className="font-display-lg text-display-lg text-brand-navy-deep">Help Center</h1>
+      <header className="space-y-1">
+        {/* Breadcrumbs */}
+        <div className="mb-2">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
+
+        <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Help Center</h1>
         <p className="mt-1 font-body-md text-on-surface-variant">
           Quick guidance for common MedSync tasks and urgent support.
         </p>

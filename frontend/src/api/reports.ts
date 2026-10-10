@@ -124,16 +124,16 @@ export async function downloadTreatmentCategoriesPdf(
   if (params?.branch) query.append('branch_id', String(params.branch));
   if (params?.from) query.append('start_date', params.from);
   if (params?.to) query.append('end_date', params.to);
-  
+
   const rawBase = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1';
   const cleanedBase = rawBase.replace(/\/+$/, '');
   const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
-  
+
   const response = await fetch(`${API_BASE_URL}/reports/treatment-categories/pdf?${query.toString()}`, {
     method: 'GET',
     credentials: 'include'
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to generate PDF');
   }
@@ -157,18 +157,18 @@ export function getInsuranceVsOutOfPocket(
 export function exportToCSV(data: any[], filename: string) {
   if (!data || !data.length) return;
   const headers = Object.keys(data[0]);
-  const rows = data.map(row => 
+  const rows = data.map(row =>
     headers.map(header => {
       let cell = row[header] === null || row[header] === undefined ? '' : row[header];
       cell = String(cell).replace(/"/g, '""');
       return `"${cell}"`;
     }).join(',')
   );
-  
+
   const csvContent = [headers.join(','), ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  
+
   const link = document.createElement('a');
   link.setAttribute('href', url);
   link.setAttribute('download', `${filename}.csv`);
