@@ -39,6 +39,7 @@ const ManageStaff = lazy(() => import('../pages/admin/ManageStaff'));
 const ManageDoctors = lazy(() => import('../pages/admin/ManageDoctors'));
 const ManageTreatmentCatalogue = lazy(() => import('../pages/admin/ManageTreatmentCatalogue'));
 const DoctorPayments = lazy(() => import('../pages/admin/DoctorPayments'));
+const AddStaff = lazy(() => import('../pages/admin/AddStaff'));
 
 // Reports
 const ReportsIndex = lazy(() => import('../pages/reports/ReportsIndex').then(m => ({ default: m.ReportsIndex })));
@@ -130,6 +131,7 @@ export const AppRoutes: React.FC = () => {
           {/* Shared Staff Management Route */}
           <Route element={<RoleGuard allowedRoles={['Administrator', 'Branch Manager']} />}>
             <Route path="/admin/staff" element={<ManageStaff />} />
+            <Route path="/admin/staff/add" element={<AddStaff />} />
           </Route>
 
           {/* Admin Routes */}

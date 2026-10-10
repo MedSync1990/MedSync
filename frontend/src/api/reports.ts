@@ -18,8 +18,9 @@ import type {
 // ─── Query-param types ──────────────────────────────────────────────────────
 
 export interface AppointmentsSummaryParams {
-  branch?: number;
-  date?: string;   // ISO date (YYYY-MM-DD)
+  branch_id?: number;
+  start_date?: string;
+  end_date?: string;
   appointment_type?: string;
 }
 
@@ -60,9 +61,9 @@ export function getAppointmentsSummary(
   params?: AppointmentsSummaryParams,
 ): Promise<AppointmentsSummaryResponse> {
   const query = params ? {
-    branch_id: params.branch,
-    start_date: params.date, // frontend passes single 'date' string
-    end_date: params.date,
+    branch_id: params.branch_id,
+    start_date: params.start_date,
+    end_date: params.end_date,
     appointment_type: params.appointment_type,
   } : undefined;
   return get<AppointmentsSummaryResponse>('/reports/appointments-summary', query);

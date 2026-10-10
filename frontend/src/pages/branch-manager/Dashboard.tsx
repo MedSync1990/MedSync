@@ -7,7 +7,7 @@ import type { AppointmentResponse, DoctorResponse, StatsOverview } from '../../a
 
 const timezone = 'Asia/Colombo';
 const card = 'rounded-xl bg-surface-container-lowest shadow-sm';
-const action = 'inline-flex min-h-[42px] items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
+const action = 'inline-flex min-h-[42px] items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 const dateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const message = (error: unknown) => error instanceof Error ? error.message : 'Unable to load branch information.';
 
@@ -21,7 +21,6 @@ export default function BranchManagerDashboard() {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [appointmentError, setAppointmentError] = useState('');
   const [doctorError, setDoctorError] = useState('');
@@ -32,7 +31,6 @@ export default function BranchManagerDashboard() {
   const refresh = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
-    setRefreshing(true);
     try {
       const results = await Promise.allSettled([
         getStatsOverview({ branch: user?.branchId }),
@@ -50,7 +48,7 @@ export default function BranchManagerDashboard() {
       else setDoctorError(message(roster.reason));
     } finally {
       inFlight.current = false;
-      if (mounted.current) { setLoading(false); setRefreshing(false); }
+      if (mounted.current) setLoading(false);
     }
   }, [user?.branchId]);
 
@@ -83,7 +81,7 @@ export default function BranchManagerDashboard() {
   return <div className="mx-auto flex w-full max-w-content-max-width flex-col gap-space-lg py-space-lg">
     <section className={`${card} relative overflow-hidden p-space-xl`}>
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-surface-container-low" />
-      <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+      <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:flex-wrap lg:items-center">
         <div className="max-w-md">
           <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-medium text-secondary">
             <span className="rounded-full bg-sky-100 px-3 py-1 font-semibold uppercase tracking-wide text-primary">{error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}</span><span>{dateLabel}</span>
@@ -92,7 +90,7 @@ export default function BranchManagerDashboard() {
           <p className="mt-3 text-sm text-secondary">{branchName} · Branch Manager Overview</p>
 
         </div>
-        <div className="flex max-w-xl flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 lg:flex-nowrap">
           <Link to="/reports/appointments-summary" className={`${action} bg-primary text-white hover:bg-tertiary`}><Icon name="calendar_month" className="text-xl" />View Branch Appointments</Link>
           <Link to="/reports/doctor-revenue" className={`${action} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><Icon name="trending_up" className="text-xl" />Doctor Revenue</Link>
           <Link to="/branch-manager/branch-details" className={`${action} bg-surface-container text-on-surface hover:bg-surface-dim`}><Icon name="domain" className="text-xl" />Branch Details & Staff</Link>
@@ -100,11 +98,7 @@ export default function BranchManagerDashboard() {
       </div>
     </section>
 
-    <div className="flex flex-wrap items-center justify-end gap-3 text-xs text-secondary" aria-live="polite">
-      <span>{updatedAt ? `Last updated ${updatedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: timezone })} · Refreshes every 30 seconds` : 'Loading branch information…'}</span>
-      <button type="button" onClick={() => void refresh()} disabled={refreshing} className="inline-flex items-center gap-1 rounded-lg px-3 py-2 font-semibold text-primary hover:bg-sky-50 disabled:opacity-50"><Icon name="refresh" className={`text-lg ${refreshing ? 'animate-spin' : ''}`} />{refreshing ? 'Refreshing…' : 'Refresh'}</button>
-    </div>
-    {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error} Use Refresh to try again.</div>}
+    {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error} The dashboard will retry automatically.</div>}
     {loading && !stats ? <div role="status" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className={`${card} h-40 animate-pulse bg-slate-100`} />)}<span className="sr-only">Loading dashboard</span></div> : stats && <>
       <section aria-label="Branch overview statistics" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[

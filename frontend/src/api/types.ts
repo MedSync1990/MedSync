@@ -577,6 +577,12 @@ export interface StaffUpdatePayload {
   is_active?: boolean;
 }
 
+export interface StaffBankAccountCreate {
+  bank_name: string;
+  account_number: string;
+  bank_branch: string;
+}
+
 export interface StaffCreatePayload {
   role_id: number;
   branch_id: number;
@@ -591,6 +597,7 @@ export interface StaffCreatePayload {
   phone_number: string;
   specialty?: string;
   license_number?: string;
+  bank_accounts?: StaffBankAccountCreate[];
 }
 
 export interface StaffListResponse {

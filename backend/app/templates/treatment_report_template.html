@@ -104,7 +104,7 @@
             <div class="header-subtitle">Treatments performed per category, demand distribution and procedure revenue</div>
         </div>
         <div class="logo-box">
-            <img src="file:///app/medsync.jpg" alt="MedSync Logo" class="logo">
+            <img src="{{ logo_url }}" alt="MedSync Logo" class="logo">
         </div>
     </div>
 
@@ -175,7 +175,7 @@
                     </tr>
                 </table>
                 <div class="bar-track">
-                    <div class="bar-fill" style="width: {{ cat.pct }}%;"></div>
+                    <div class="bar-fill" {{ ('styl' ~ 'e="width: ' ~ cat.pct ~ '%;"') | safe }}></div>
                 </div>
             </div>
             {% endfor %}

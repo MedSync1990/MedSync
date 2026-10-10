@@ -346,6 +346,10 @@ async def download_invoice_pdf(
         })
 
     # 5. Load the template and fill in the REAL data
+    from pathlib import Path
+    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    logo_uri = logo_path.as_uri()
+
     template = env.get_template("invoice_template.html")
     rendered_html = template.render(
         invoice_code=inv["invoice_code"],
@@ -358,7 +362,8 @@ async def download_invoice_pdf(
         items=items,
         subtotal=f"{subtotal:,.2f}",
         insurance_coverage=f"{insurance_coverage:,.2f}",
-        total_due=f"{total_due:,.2f}"
+        total_due=f"{total_due:,.2f}",
+        logo_url=logo_uri
     )
     
     # 6. Generate the PDF
