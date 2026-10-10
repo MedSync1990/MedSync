@@ -68,6 +68,7 @@ export const Login = () => {
           roleTitle: `${userData.role} Portal`,
           branchId: userData.branch_id,
           branchName: userData.branch_name || (userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch'),
+          mustChangePassword: Boolean(userData.must_change_password),
         };
         setUser(userProfile);
         role = userData.role;

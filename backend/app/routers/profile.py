@@ -110,7 +110,7 @@ async def change_password(
 
     new_hash = hash_password(payload.new_password)
     await db.execute(
-        "UPDATE staff SET password_hash = $1 WHERE user_id = $2",
+        "UPDATE staff SET password_hash = $1, must_change_password = FALSE WHERE user_id = $2",
         new_hash,
         current_user.user_id,
     )

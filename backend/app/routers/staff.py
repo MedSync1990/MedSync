@@ -32,7 +32,8 @@ async def list_staff(
                d.license_number,
                sp.name as specialty,
                b.name as branch_name,
-               s.last_login_at, s.failed_login_attempts, s.locked_until
+               s.last_login_at, s.failed_login_attempts, s.locked_until,
+               COALESCE(s.must_change_password, FALSE) as must_change_password
         FROM staff s
         JOIN app_user a ON s.user_id = a.user_id
         JOIN role r ON a.role_id = r.role_id
@@ -132,8 +133,8 @@ async def create_staff(
 
         await db.execute(
             """
-            INSERT INTO staff (user_id, branch_id, username, password_hash)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO staff (user_id, branch_id, username, password_hash, must_change_password)
+            VALUES ($1, $2, $3, $4, TRUE)
             """,
             new_user_id, payload.branch_id, username, hashed_pw
         )
@@ -266,7 +267,10 @@ async def reset_staff_password(
             raise HTTPException(status_code=403, detail="You can only reset passwords for staff in your own branch.")
     
     hashed_pw = hash_password(payload.password)
-    await db.execute("UPDATE staff SET password_hash = $1 WHERE user_id = $2", hashed_pw, id)
+    await db.execute(
+        "UPDATE staff SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2", 
+        hashed_pw, id
+    )
     
     return {"message": "Password reset successfully", "temporary_password": payload.password}
 

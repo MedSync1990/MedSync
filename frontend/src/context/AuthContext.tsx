@@ -18,6 +18,7 @@ export interface UserProfile {
   branchId?: number;
   branchName?: string;
   avatarUrl?: string;
+  mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -102,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               roleTitle: `${data.role} Portal`,
               branchId: data.branch_id,
               branchName: data.branch_name || prev?.branchName || (data.branch_id ? `Branch #${data.branch_id}` : 'Central Branch'),
+              mustChangePassword: Boolean(data.must_change_password),
             };
             localStorage.setItem('current_user', JSON.stringify(updated));
             return updated;

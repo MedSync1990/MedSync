@@ -31,6 +31,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   message: string;
   user: MeResponse;
+  must_change_password?: boolean;
 }
 
 export interface MeResponse {
@@ -41,6 +42,7 @@ export interface MeResponse {
   role: string;
   branch_id: number | null;
   branch_name: string | null;
+  must_change_password?: boolean;
 }
 
 // ─── Appointments (schemas/appointments.py) ─────────────────────────────────

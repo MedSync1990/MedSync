@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS staff (
     username               VARCHAR(50) NOT NULL UNIQUE,
     password_hash          VARCHAR(255) NOT NULL,
     is_active              BOOLEAN NOT NULL DEFAULT TRUE,
+    must_change_password   BOOLEAN NOT NULL DEFAULT TRUE,
     failed_login_attempts  SMALLINT NOT NULL DEFAULT 0,
     locked_until           TIMESTAMPTZ,
     last_login_at          TIMESTAMPTZ
