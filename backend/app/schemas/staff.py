@@ -47,3 +47,4 @@ class StaffResponse(BaseModel):
     email: Optional[str] = None
     role_name: str
     phone_number: Optional[str] = None
+    must_change_password: Optional[bool] = None

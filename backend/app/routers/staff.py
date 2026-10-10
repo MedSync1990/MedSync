@@ -32,7 +32,8 @@ async def list_staff(
                d.license_number,
                sp.name as specialty,
                b.name as branch_name,
-               s.last_login_at, s.failed_login_attempts, s.locked_until
+               s.last_login_at, s.failed_login_attempts, s.locked_until,
+               COALESCE(s.must_change_password, FALSE) as must_change_password
         FROM staff s
         JOIN app_user a ON s.user_id = a.user_id
         JOIN role r ON a.role_id = r.role_id
@@ -78,6 +79,13 @@ async def create_staff(
     if not role:
         raise HTTPException(status_code=400, detail="Invalid role_id")
     role_name = role['role_name']
+    
+    # Role restriction checks
+    if role_name == "Patient":
+        raise HTTPException(status_code=400, detail="Patients cannot be registered via the staff management endpoint.")
+
+    if current_user.role == "Branch Manager" and role_name not in ["Doctor", "Receptionist"]:
+        raise HTTPException(status_code=403, detail="Branch Managers are only permitted to create Doctors and Receptionists.")
     
     if role_name == "Doctor":
         if not payload.specialty or not payload.license_number:
@@ -125,8 +133,8 @@ async def create_staff(
 
         await db.execute(
             """
-            INSERT INTO staff (user_id, branch_id, username, password_hash)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO staff (user_id, branch_id, username, password_hash, must_change_password)
+            VALUES ($1, $2, $3, $4, TRUE)
             """,
             new_user_id, payload.branch_id, username, hashed_pw
         )
@@ -170,13 +178,81 @@ async def deactivate_staff(
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
+    # 1. Prevent self-deactivation
+    if id == current_user.user_id:
+        raise HTTPException(status_code=400, detail="You cannot deactivate your own account.")
+
+    target_staff = await db.fetchrow(
+        """
+        SELECT s.branch_id, r.role_name 
+        FROM staff s 
+        JOIN app_user a ON s.user_id = a.user_id 
+        JOIN role r ON a.role_id = r.role_id 
+        WHERE s.user_id = $1
+        """, 
+        id
+    )
+    if not target_staff:
+        raise HTTPException(status_code=404, detail="Staff member not found.")
+
     if current_user.role == "Branch Manager":
-        staff_branch = await db.fetchval("SELECT branch_id FROM staff WHERE user_id = $1", id)
-        if staff_branch != current_user.branch_id:
+        if target_staff["branch_id"] != current_user.branch_id:
             raise HTTPException(status_code=403, detail="You can only deactivate staff in your own branch.")
+        if target_staff["role_name"] in ["Administrator", "Branch Manager"]:
+            raise HTTPException(status_code=403, detail="Branch Managers cannot deactivate Administrators or Branch Managers.")
+
+    # 2. Last remaining active administrator guard
+    if target_staff["role_name"] == "Administrator":
+        active_admin_count = await db.fetchval(
+            """
+            SELECT COUNT(*) FROM staff s 
+            JOIN app_user a ON s.user_id = a.user_id 
+            JOIN role r ON a.role_id = r.role_id 
+            WHERE r.role_name = 'Administrator' AND s.is_active = TRUE
+            """
+        )
+        if active_admin_count is not None and active_admin_count <= 1:
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot deactivate the last remaining active Administrator in the system."
+            )
+
+    # 3. Doctor upcoming appointments guard
+    if target_staff["role_name"] == "Doctor":
+        pending_appts = await db.fetchval(
+            """
+            SELECT COUNT(*) 
+            FROM appointments a
+            JOIN doctor_availability_slots s ON a.slot_id = s.slot_id
+            WHERE s.doctor_id = $1 AND s.date >= CURRENT_DATE AND a.status = 'Scheduled'
+            """,
+            id
+        )
+        if pending_appts and pending_appts > 0:
+            raise HTTPException(
+                status_code=409, 
+                detail=f"Cannot deactivate doctor with {pending_appts} upcoming scheduled appointment(s). Please reassign or cancel them first."
+            )
 
     await db.execute("SELECT fn_deactivate_staff($1)", id)
     return {"message": "Staff deactivated successfully", "user_id": id}
+
+@router.put("/{id}/unlock")
+async def unlock_staff(
+    id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn)
+):
+    if current_user.role == "Branch Manager":
+        staff_branch = await db.fetchval("SELECT branch_id FROM staff WHERE user_id = $1", id)
+        if staff_branch != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="You can only unlock staff in your own branch.")
+
+    await db.execute(
+        "UPDATE staff SET failed_login_attempts = 0, locked_until = NULL WHERE user_id = $1", 
+        id
+    )
+    return {"message": "Staff account unlocked successfully", "user_id": id}
 
 @router.put("/{id}/reset-password")
 async def reset_staff_password(
@@ -191,7 +267,10 @@ async def reset_staff_password(
             raise HTTPException(status_code=403, detail="You can only reset passwords for staff in your own branch.")
     
     hashed_pw = hash_password(payload.password)
-    await db.execute("UPDATE staff SET password_hash = $1 WHERE user_id = $2", hashed_pw, id)
+    await db.execute(
+        "UPDATE staff SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2", 
+        hashed_pw, id
+    )
     
     return {"message": "Password reset successfully", "temporary_password": payload.password}
 

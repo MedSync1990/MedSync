@@ -33,6 +33,11 @@ from app.routers import (
 async def lifespan(app: FastAPI):
     app.state.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL, min_size=1, max_size=5)
     app.state.admin_pool = await asyncpg.create_pool(dsn=config.get_admin_url(), min_size=1, max_size=5)
+    try:
+        async with app.state.admin_pool.acquire() as conn:
+            await conn.execute("ALTER TABLE staff ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT TRUE;")
+    except Exception as e:
+        logging.warning("Could not auto-migrate must_change_password column: %s", e)
     yield
     await app.state.pool.close()
     await app.state.admin_pool.close()

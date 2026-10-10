@@ -658,15 +658,11 @@ export const PatientProfile: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Name</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_name || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_name: e.target.value })} />
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.contact_name || ''} onChange={(e) => setEditData({ ...editData, contact_name: e.target.value })} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Phone</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_phone || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_phone: e.target.value })} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Relationship</label>
-                    <input type="text" placeholder="e.g. Spouse, Parent, Sibling" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_relationship || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_relationship: e.target.value })} />
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact || ''} onChange={(e) => setEditData({ ...editData, emergency_contact: e.target.value })} />
                   </div>
                 </div>
 
