@@ -41,13 +41,20 @@ export const Login = () => {
       });
 
       if (!response.ok) {
+        if (response.status >= 500) {
+          throw new Error('The login service is temporarily unavailable. Please try again shortly.');
+        }
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Invalid email or password.');
+        throw new Error(errorData.detail || 'Invalid username or password.');
       }
 
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: 'include',
       });
+
+      if (!meResponse.ok) {
+        throw new Error('Unable to load your account. Please try logging in again.');
+      }
 
       let role = 'Receptionist';
       if (meResponse.ok) {
@@ -69,7 +76,9 @@ export const Login = () => {
       const targetPath = ROLE_DASHBOARD_MAP[role] || '/receptionist/dashboard';
       navigate(targetPath, { replace: true });
     } catch (loginError) {
-      const message = loginError instanceof Error
+      const message = loginError instanceof TypeError
+        ? 'Unable to connect to the login service. Please try again shortly.'
+        : loginError instanceof Error
         ? loginError.message
         : 'Unable to connect to the server. Please try again later.';
       setError(message);
@@ -99,17 +108,19 @@ export const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-medium text-red-600">
+              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-medium text-red-600">
                 {error}
               </p>
             )}
 
             <div className="relative">
-              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-[#707881]">
-                person
-              </span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 fill-none stroke-current text-[#707881]" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+              </svg>
               <input
                 id="username"
+                aria-label="Username"
                 type="text"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -121,11 +132,13 @@ export const Login = () => {
             </div>
 
             <div className="relative">
-              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-[#707881]">
-                lock
-              </span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 fill-none stroke-current text-[#707881]" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="10" width="16" height="11" rx="2" />
+                <path d="M8 10V6a4 4 0 0 1 8 0v4M12 15v2" />
+              </svg>
               <input
                 id="password"
+                aria-label="Password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
