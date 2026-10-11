@@ -44,26 +44,28 @@ async def list_doctors(
             d.user_id AS doctor_id,
             CONCAT_WS(' ', u.first_name, NULLIF(u.middle_name, ''), u.last_name) AS full_name,
             u.id_number,
-            COALESCE(
-                ARRAY_AGG(DISTINCT c.phone_number) FILTER (WHERE c.phone_number IS NOT NULL),
-                '{}'
-            ) AS phone_numbers,
+            ph.phone_numbers,
             u.email,
             s.branch_id,
             b.name AS branch_name,
             d.license_number,
             s.is_active,
-            COALESCE(
-                ARRAY_AGG(DISTINCT sp.name) FILTER (WHERE sp.name IS NOT NULL),
-                '{}'
-            ) AS specialties
+            doc_sp.specialties
         FROM doctor d
         JOIN staff s ON d.user_id = s.user_id
         JOIN app_user u ON d.user_id = u.user_id
         JOIN branch b ON s.branch_id = b.branch_id
-        LEFT JOIN contact c ON u.user_id = c.user_id
-        LEFT JOIN doctor_specialty ds ON d.user_id = ds.user_id
-        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(ARRAY_AGG(c.phone_number ORDER BY c.contact_id), '{}') AS phone_numbers
+            FROM contact c
+            WHERE c.user_id = u.user_id
+        ) ph ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(ARRAY_AGG(sp.name ORDER BY sp.name), '{}') AS specialties
+            FROM doctor_specialty ds
+            JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+            WHERE ds.user_id = d.user_id
+        ) doc_sp ON TRUE
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND (
               $2::int IS NULL OR 
@@ -72,7 +74,6 @@ async def list_doctors(
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
-        GROUP BY d.user_id, u.first_name, u.middle_name, u.last_name, u.id_number, u.email, s.branch_id, b.name, d.license_number, s.is_active
         ORDER BY full_name ASC;
     """
 
@@ -111,29 +112,30 @@ async def get_doctor(
             d.user_id AS doctor_id,
             CONCAT_WS(' ', u.first_name, NULLIF(u.middle_name, ''), u.last_name) AS full_name,
             u.id_number,
-            COALESCE(
-                ARRAY_AGG(DISTINCT c.phone_number) FILTER (WHERE c.phone_number IS NOT NULL),
-                '{}'
-            ) AS phone_numbers,
+            ph.phone_numbers,
             u.email,
             s.branch_id,
             b.name AS branch_name,
             d.license_number,
             s.is_active,
-            COALESCE(
-                ARRAY_AGG(DISTINCT sp.name) FILTER (WHERE sp.name IS NOT NULL),
-                '{}'
-            ) AS specialties
+            doc_sp.specialties
         FROM doctor d
         JOIN staff s ON d.user_id = s.user_id
         JOIN app_user u ON d.user_id = u.user_id
         JOIN branch b ON s.branch_id = b.branch_id
-        LEFT JOIN contact c ON u.user_id = c.user_id
-        LEFT JOIN doctor_specialty ds ON d.user_id = ds.user_id
-        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(ARRAY_AGG(c.phone_number ORDER BY c.contact_id), '{}') AS phone_numbers
+            FROM contact c
+            WHERE c.user_id = u.user_id
+        ) ph ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(ARRAY_AGG(sp.name ORDER BY sp.name), '{}') AS specialties
+            FROM doctor_specialty ds
+            JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+            WHERE ds.user_id = d.user_id
+        ) doc_sp ON TRUE
         WHERE d.user_id = $1
-          AND ($2::int IS NULL OR s.branch_id = $2)
-        GROUP BY d.user_id, u.first_name, u.middle_name, u.last_name, u.id_number, u.email, s.branch_id, b.name, d.license_number, s.is_active;
+          AND ($2::int IS NULL OR s.branch_id = $2);
     """
 
     row = await conn.fetchrow(query, id, scoped_branch_id)
@@ -277,10 +279,11 @@ async def create_doctor(
         )
 
         # 2. Insert contact numbers
-        for phone in set(payload.phone_numbers):
-            await conn.execute(
+        phones = [(user_id, phone) for phone in set(payload.phone_numbers)]
+        if phones:
+            await conn.executemany(
                 "INSERT INTO contact (user_id, phone_number) VALUES ($1, $2);",
-                user_id, phone
+                phones,
             )
 
         # 3. Insert staff
@@ -297,10 +300,11 @@ async def create_doctor(
         )
 
         # 5. Insert specialties
-        for sp_id in set(payload.specialty_ids):
-            await conn.execute(
+        specs = [(user_id, sp_id) for sp_id in set(payload.specialty_ids)]
+        if specs:
+            await conn.executemany(
                 "INSERT INTO doctor_specialty (user_id, specialty_id) VALUES ($1, $2);",
-                user_id, sp_id
+                specs,
             )
 
     full_name = f"{payload.first_name} {payload.middle_name + ' ' if payload.middle_name else ''}{payload.last_name}".strip()
@@ -407,14 +411,15 @@ async def update_doctor_specialties(
             )
 
         # Add requested
-        for sp_id in ids_to_add:
-            await conn.execute(
+        if ids_to_add:
+            add_specs = [(id, sp_id) for sp_id in ids_to_add]
+            await conn.executemany(
                 """
                 INSERT INTO doctor_specialty (user_id, specialty_id)
                 VALUES ($1, $2)
                 ON CONFLICT (user_id, specialty_id) DO NOTHING;
                 """,
-                id, sp_id
+                add_specs,
             )
 
     return await get_doctor(id=id, conn=conn, user=user)
