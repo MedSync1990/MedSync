@@ -96,4 +96,5 @@ export {
   updateStaff,
   resetStaffPassword,
   deactivateStaff,
+  activateStaff,
 } from './staff';

@@ -88,6 +88,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetch(`${apiBase}/auth/me`, { credentials: 'include' })
       .then((res) => {
         if (res.ok) return res.json();
+        if (res.status === 401 || res.status === 403) {
+          setUser(null);
+          setToken(null);
+        }
         return null;
       })
       .then((data) => {

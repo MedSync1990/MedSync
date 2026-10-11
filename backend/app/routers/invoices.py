@@ -4,7 +4,6 @@ from typing import List, Optional
 from datetime import datetime
 from app.db import get_conn
 from jinja2 import Environment, FileSystemLoader
-import weasyprint
 from app.dependencies import CurrentUser, require_roles, get_current_user
 from app.errors import NotFoundError, ConflictError, AppValidationError
 from app.schemas.invoices import (
@@ -367,7 +366,12 @@ async def download_invoice_pdf(
     )
     
     # 6. Generate the PDF
-    pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    try:
+        import weasyprint
+        pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"PDF generation error: {e}")
     
     # 7. Return the PDF file directly to the browser
     return Response(
