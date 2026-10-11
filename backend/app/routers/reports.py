@@ -239,11 +239,13 @@ async def get_outstanding_balances(
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
         JOIN app_user u ON a.patient_id = u.user_id
-        LEFT JOIN (
-            SELECT user_id, phone_number,
-                   ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY contact_id ASC) as rn
+        LEFT JOIN LATERAL (
+            SELECT phone_number
             FROM contact
-        ) c ON u.user_id = c.user_id AND c.rn = 1
+            WHERE user_id = u.user_id
+            ORDER BY contact_id ASC
+            LIMIT 1
+        ) c ON TRUE
         LEFT JOIN payments p ON i.invoice_id = p.invoice_id
         WHERE i.status != 'Paid'
           AND ($1::int IS NULL OR s.branch_id = $1)
