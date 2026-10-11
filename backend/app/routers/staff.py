@@ -28,9 +28,9 @@ async def list_staff(
                a.first_name, a.last_name, a.id_number, a.email,
                a.address, a.birthdate, a.gender, a.created_at,
                r.role_name,
-               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number,
+               ph.phone_number,
                d.license_number,
-               sp.name as specialty,
+               doc_sp.specialty,
                b.name as branch_name,
                s.last_login_at, s.failed_login_attempts, s.locked_until,
                COALESCE(s.must_change_password, FALSE) as must_change_password
@@ -39,8 +39,19 @@ async def list_staff(
         JOIN role r ON a.role_id = r.role_id
         JOIN branch b ON s.branch_id = b.branch_id
         LEFT JOIN doctor d ON s.user_id = d.user_id
-        LEFT JOIN doctor_specialty ds ON s.user_id = ds.user_id
-        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+        LEFT JOIN LATERAL (
+            SELECT string_agg(sp.name, ', ' ORDER BY sp.name) AS specialty
+            FROM doctor_specialty ds
+            JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+            WHERE ds.user_id = s.user_id
+        ) doc_sp ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT c.phone_number
+            FROM contact c
+            WHERE c.user_id = s.user_id
+            ORDER BY c.contact_id ASC
+            LIMIT 1
+        ) ph ON TRUE
         WHERE 1=1
     """
     args = []
@@ -119,11 +130,15 @@ async def create_staff(
         # Format the role name to be a clean prefix (e.g. "Receptionist" -> "receptionist")
         role_prefix = role_name.lower().replace(" ", "")
         
-        # Count how many users have this role to append the number
-        role_count = await db.fetchval("SELECT COUNT(*) FROM app_user WHERE role_id = $1", payload.role_id)
-        
-        # Create the username (e.g. receptionist1, receptionist2)
-        username = f"{role_prefix}{role_count}"
+        # Generate unique username by counting current role holders and ensuring no collisions
+        count = await db.fetchval(
+            "SELECT COUNT(*) FROM staff s JOIN app_user u ON s.user_id = u.user_id WHERE u.role_id = $1",
+            payload.role_id,
+        ) + 1
+        username = f"{role_prefix}{count}"
+        while await db.fetchval("SELECT 1 FROM staff WHERE username = $1", username):
+            count += 1
+            username = f"{role_prefix}{count}"
         
         # Set the default temporary password to "medsync"
         temp_password = "medsync"
@@ -155,15 +170,19 @@ async def create_staff(
             await db.execute("INSERT INTO doctor_specialty (user_id, specialty_id) VALUES ($1, $2)", new_user_id, specialty_id)
             
         if payload.bank_accounts:
-            for acc in payload.bank_accounts:
-                if acc.bank_name and acc.account_number:
-                    await db.execute(
-                        """
-                        INSERT INTO staff_bank_accounts (user_id, bank_name, account_number, branch_name)
-                        VALUES ($1, $2, $3, $4)
-                        """,
-                        new_user_id, acc.bank_name, acc.account_number, acc.bank_branch
-                    )
+            bank_records = [
+                (new_user_id, acc.bank_name, acc.account_number, acc.bank_branch)
+                for acc in payload.bank_accounts
+                if acc.bank_name and acc.account_number
+            ]
+            if bank_records:
+                await db.executemany(
+                    """
+                    INSERT INTO staff_bank_accounts (user_id, bank_name, account_number, branch_name)
+                    VALUES ($1, $2, $3, $4)
+                    """,
+                    bank_records,
+                )
             
     return {
         "message": "Staff registered successfully",
