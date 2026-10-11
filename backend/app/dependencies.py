@@ -47,6 +47,22 @@ async def get_current_user(
             if not cookie_csrf or not header_csrf or cookie_csrf != header_csrf:
                 raise ForbiddenError("CSRF token missing or invalid.")
 
+    # Check if the user is deactivated
+    user_id = payload.get("user_id")
+    pool = getattr(request.app.state, "pool", None)
+    if pool and user_id:
+        try:
+            async with pool.acquire() as conn:
+                is_active = await conn.fetchval(
+                    "SELECT is_active FROM staff WHERE user_id = $1;", user_id
+                )
+                if is_active is False:
+                    raise UnauthorizedError("This account has been deactivated. Access denied.")
+        except UnauthorizedError:
+            raise
+        except Exception:
+            pass
+
     user = CurrentUser(
         user_id=payload["user_id"],
         role=payload["role"],

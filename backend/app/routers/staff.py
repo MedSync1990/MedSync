@@ -237,6 +237,23 @@ async def deactivate_staff(
     await db.execute("SELECT fn_deactivate_staff($1)", id)
     return {"message": "Staff deactivated successfully", "user_id": id}
 
+@router.put("/{id}/activate")
+async def activate_staff(
+    id: int, 
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn)
+):
+    staff_exists = await db.fetchrow("SELECT s.branch_id, s.is_active FROM staff s WHERE s.user_id = $1", id)
+    if not staff_exists:
+        raise HTTPException(status_code=404, detail="Staff member not found.")
+
+    if current_user.role == "Branch Manager":
+        if staff_exists["branch_id"] != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="You can only activate staff in your own branch.")
+
+    await db.execute("UPDATE staff SET is_active = TRUE WHERE user_id = $1", id)
+    return {"message": "Staff activated successfully", "user_id": id}
+
 @router.put("/{id}/unlock")
 async def unlock_staff(
     id: int,

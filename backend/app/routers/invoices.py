@@ -371,11 +371,21 @@ async def download_invoice_pdf(
     
     # 6. Generate the PDF
     if weasyprint is None:
+        try:
+            import weasyprint
+        except Exception:
+            weasyprint = None
+
+    if weasyprint is None:
         raise HTTPException(
             status_code=500,
             detail="PDF generation engine (WeasyPrint) is not installed or available on this host environment.",
         )
-    pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+
+    try:
+        pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation error: {e}")
     
     # 7. Return the PDF file directly to the browser
     return Response(

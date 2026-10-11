@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getStaffList, createStaff, deactivateStaff, updateStaff, resetStaffPassword, unlockStaff, listBranches } from '../../api';
+import { getStaffList, createStaff, deactivateStaff, activateStaff, updateStaff, resetStaffPassword, unlockStaff, listBranches } from '../../api';
 import type { StaffResponse } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -212,10 +212,9 @@ export const ManageStaff: React.FC = () => {
     if (!deactivatingStaff) return;
     try {
       await deactivateStaff(deactivatingStaff.user_id);
-      showToast(`${deactivatingStaff.first_name} deactivated`, 'success');
+      showToast(`${deactivatingStaff.first_name} deactivated — login and web app access revoked`, 'success');
       setDeactivatingStaff(null);
       fetchData();
-      if (selectedStaffId === deactivatingStaff.user_id) window.location.hash = '';
     } catch(err: any) {
       showToast(err.message || 'Failed to deactivate', 'error');
     }
@@ -231,11 +230,12 @@ export const ManageStaff: React.FC = () => {
     }
   };
 
-  const handleReactivate = async () => {
-    if (!reactivatingStaff) return;
+  const handleReactivate = async (target?: StaffResponse) => {
+    const staff = target || reactivatingStaff;
+    if (!staff) return;
     try {
-      await updateStaff(reactivatingStaff.user_id, { is_active: true });
-      showToast(`${reactivatingStaff.first_name} ${reactivatingStaff.last_name} reactivated successfully`, 'success');
+      await activateStaff(staff.user_id);
+      showToast(`${staff.first_name} ${staff.last_name} reactivated — web app access restored`, 'success');
       setReactivatingStaff(null);
       fetchData();
     } catch(err: any) {
@@ -310,7 +310,7 @@ export const ManageStaff: React.FC = () => {
                 <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">lock_reset</span>Reset password
                 </button>
-                {selectedStaff.is_active && (
+                {selectedStaff.is_active && selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() && (
                   <button onClick={() => handleUnlock(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-amber-700 text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
                     <span className="material-symbols-outlined text-[18px]">lock_open</span>Unlock account
                   </button>
@@ -320,8 +320,8 @@ export const ManageStaff: React.FC = () => {
                     <span className="material-symbols-outlined text-[18px]">person_off</span>Deactivate account
                   </button>
                 ) : (
-                  <button onClick={() => setReactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
-                    <span className="material-symbols-outlined text-[18px]">how_to_reg</span>Reactivate account
+                  <button onClick={() => setReactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>Reactivate account
                   </button>
                 )}
               </div>
@@ -584,9 +584,18 @@ export const ManageStaff: React.FC = () => {
                               <span className="material-symbols-outlined text-[18px]">lock_open</span>
                             </button>
                           )}
-                          <button onClick={(e) => { e.stopPropagation(); window.location.hash = `staff/${s.user_id}`; }} className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors">
+                          <button onClick={(e) => { e.stopPropagation(); window.location.hash = `staff/${s.user_id}`; }} className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" title="View details">
                             <span className="material-symbols-outlined text-[18px]">visibility</span>
                           </button>
+                          {s.is_active ? (
+                            <button onClick={(e) => { e.stopPropagation(); setDeactivatingStaff(s); }} className="p-1.5 rounded-lg text-error hover:bg-error-container/50 transition-colors" title="Deactivate account">
+                              <span className="material-symbols-outlined text-[18px]">person_off</span>
+                            </button>
+                          ) : (
+                            <button onClick={(e) => { e.stopPropagation(); setReactivatingStaff(s); }} className="p-1.5 rounded-lg text-status-completed-text hover:bg-status-completed-bg/50 transition-colors" title="Reactivate account">
+                              <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -762,8 +771,8 @@ export const ManageStaff: React.FC = () => {
         onClose={() => setDeactivatingStaff(null)} 
         onConfirm={handleDeactivate} 
         title="Deactivate this account?" 
-        message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} will lose access immediately. Their record and history are kept, and you can reactivate the account later. Reassign any upcoming appointments first if they are a doctor.`}
-        confirmLabel="Deactivate"
+        message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} (@${deactivatingStaff?.username}) will lose all access to the web app immediately and cannot log in. All existing data, appointments, and medical records will remain preserved in the database.`}
+        confirmLabel="Deactivate Account"
         isDestructive={true}
       />
       <ConfirmDialog 

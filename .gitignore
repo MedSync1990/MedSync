@@ -71,3 +71,12 @@ Thumbs.db
 *.log
 logs/
 .direnv/
+
+# ==========================
+# Local Scratch / Notes / Study tools
+# ==========================
+.archify/
+scratch/
+agentinstruction.md
+viva-prep*
+

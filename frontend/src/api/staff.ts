@@ -22,6 +22,10 @@ export function deactivateStaff(userId: number): Promise<{ message: string; user
   return put(`/staff/${userId}/deactivate`);
 }
 
+export function activateStaff(userId: number): Promise<{ message: string; user_id: number }> {
+  return put(`/staff/${userId}/activate`);
+}
+
 export function unlockStaff(userId: number): Promise<{ message: string; user_id: number }> {
   return put(`/staff/${userId}/unlock`);
 }
