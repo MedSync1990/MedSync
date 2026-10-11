@@ -295,22 +295,32 @@ async def list_patients(
             u.first_name,
             u.last_name,
             u.id_number,
-            COALESCE((SELECT phone_number FROM contact WHERE user_id = u.user_id LIMIT 1), '') AS phone_number,
+            COALESCE(ph.phone_number, '') AS phone_number,
             u.gender::text AS gender,
             u.birthdate::text AS date_of_birth,
             p.registered_branch,
             b.name AS branch_name,
-            EXISTS(
-                SELECT 1 FROM patient_insurance pi 
-                WHERE pi.patient_id = p.user_id 
-                  AND pi.is_active = TRUE 
-                  AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
-            ) AS has_insurance,
+            COALESCE(ins.has_insurance, FALSE) AS has_insurance,
             p.is_active,
             p.is_temp
         FROM patient p
         JOIN app_user u ON p.user_id = u.user_id
         LEFT JOIN branch b ON p.registered_branch = b.branch_id
+        LEFT JOIN LATERAL (
+            SELECT c.phone_number
+            FROM contact c
+            WHERE c.user_id = u.user_id
+            ORDER BY c.contact_id ASC
+            LIMIT 1
+        ) ph ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT EXISTS (
+                SELECT 1 FROM patient_insurance pi 
+                WHERE pi.patient_id = p.user_id 
+                  AND pi.is_active = TRUE 
+                  AND CURRENT_DATE BETWEEN pi.start_date AND pi.end_date
+            ) AS has_insurance
+        ) ins ON TRUE
         WHERE ($1::text IS NULL
            OR u.id_number ILIKE $1
            OR (u.first_name || ' ' || u.last_name) ILIKE $1
