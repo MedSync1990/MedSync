@@ -152,11 +152,11 @@ export function InsuranceVsOutOfPocket() {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
               <span className="text-secondary">-</span>
               <div className="relative flex-1">
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function InsuranceVsOutOfPocket() {
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="table-search-input">Search Period</label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
-              <input id="table-search-input" type="text" placeholder="Search period or amount..." value={searchPeriod} onChange={e => setSearchPeriod(e.target.value)} className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              <input id="table-search-input" type="text" placeholder="Search period or amount..." value={searchPeriod} onChange={e => setSearchPeriod(e.target.value)} className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
             </div>
           </div>
         </div>
@@ -286,18 +286,19 @@ export function InsuranceVsOutOfPocket() {
             {prov.map((p, i) => {
               const bgClass = i === 0 ? 'bg-primary' : i === 1 ? 'bg-tertiary' : i === 2 ? 'bg-brand-teal-light' : 'bg-secondary';
               return (
-              <div key={i} className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-body-sm font-body-sm">
-                  <span className="font-label-md text-label-md text-on-surface flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${bgClass}`}></span>{p.provider_name}
-                  </span>
-                  <span className="font-mono-data text-mono-data text-secondary">{fmt(p.amount)} ({p.percentage.toFixed(1)}%)</span>
+                <div key={i} className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-body-sm font-body-sm">
+                    <span className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${bgClass}`}></span>{p.provider_name}
+                    </span>
+                    <span className="font-mono-data text-mono-data text-secondary">{fmt(p.amount)} ({p.percentage.toFixed(1)}%)</span>
+                  </div>
+                  <div className="h-3 w-full bg-surface-subtle rounded-full overflow-hidden">
+                    <div className={`${bgClass} h-full rounded-full`} style={{ width: `${p.percentage}%` }}></div>
+                  </div>
                 </div>
-                <div className="h-3 w-full bg-surface-subtle rounded-full overflow-hidden">
-                  <div className={`${bgClass} h-full rounded-full`} style={{ width: `${p.percentage}%` }}></div>
-                </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
           <div className="mt-auto p-space-sm rounded-lg bg-surface-subtle flex items-start gap-space-sm">
             <span className="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">policy</span>
@@ -381,7 +382,7 @@ export function InsuranceVsOutOfPocket() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+              <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>
@@ -414,22 +415,23 @@ export function InsuranceVsOutOfPocket() {
               const init = r.provider_name.substring(0, 2).toUpperCase();
               const isGood = r.avg_days <= 5.0;
               return (
-              <div key={i} className="p-space-sm rounded-lg bg-surface-subtle flex items-center justify-between">
-                <div className="flex items-center gap-space-sm">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">{init}</span>
-                  <div>
-                    <div className="font-label-md text-label-md text-on-surface">{r.provider_name}</div>
-                    <div className="font-body-sm text-body-sm text-secondary">Claim Turnaround Time</div>
+                <div key={i} className="p-space-sm rounded-lg bg-surface-subtle flex items-center justify-between">
+                  <div className="flex items-center gap-space-sm">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">{init}</span>
+                    <div>
+                      <div className="font-label-md text-label-md text-on-surface">{r.provider_name}</div>
+                      <div className="font-body-sm text-body-sm text-secondary">Claim Turnaround Time</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono-data text-mono-data font-bold text-on-surface">{r.avg_days.toFixed(1)} Days</div>
+                    <div className={`font-label-sm text-label-sm font-semibold ${isGood ? 'text-status-completed-text' : 'text-status-pending-text'}`}>
+                      {isGood ? 'Under SLA (5d)' : 'Review Pending'}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-mono-data text-mono-data font-bold text-on-surface">{r.avg_days.toFixed(1)} Days</div>
-                  <div className={`font-label-sm text-label-sm font-semibold ${isGood ? 'text-status-completed-text' : 'text-status-pending-text'}`}>
-                    {isGood ? 'Under SLA (5d)' : 'Review Pending'}
-                  </div>
-                </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
           <div className="font-body-sm text-body-sm text-secondary flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px] text-primary">info</span>Claims over 7 days are flagged to the Financial Accounts team.

@@ -428,6 +428,10 @@ async def get_treatment_categories_pdf(
         f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
     )
     
+    from pathlib import Path
+    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    logo_uri = logo_path.as_uri()
+
     template_data = {
         "branch_name": branch_name,
         "generated_date": datetime.now().strftime("%d %b %Y"),
@@ -439,14 +443,15 @@ async def get_treatment_categories_pdf(
         "total_revenue": total_revenue,
         "total_categories": len(categories_dict),
         "categories": categories,
-        "items": items
+        "items": items,
+        "logo_url": logo_uri
     }
     
     env = Environment(loader=FileSystemLoader("app/templates"))
     template = env.get_template("treatment_report_template.html")
     html_string = template.render(**template_data)
     
-    pdf_bytes = weasyprint.HTML(string=html_string, base_url="file:///app/").write_pdf()
+    pdf_bytes = weasyprint.HTML(string=html_string).write_pdf()
     
     return Response(
         content=pdf_bytes, 

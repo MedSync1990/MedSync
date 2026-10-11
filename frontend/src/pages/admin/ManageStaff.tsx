@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getStaffList, createStaff, deactivateStaff, updateStaff, resetStaffPassword } from '../../api';
+import { getStaffList, createStaff, deactivateStaff, activateStaff, updateStaff, resetStaffPassword } from '../../api';
 import type { StaffResponse } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -19,6 +20,7 @@ const timeAgo = (dateStr: string | null) => {
 
 export const ManageStaff: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [staff, setStaff] = useState<StaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -203,12 +205,21 @@ export const ManageStaff: React.FC = () => {
     if (!deactivatingStaff) return;
     try {
       await deactivateStaff(deactivatingStaff.user_id);
-      showToast(`${deactivatingStaff.first_name} deactivated`, 'success');
+      showToast(`${deactivatingStaff.first_name} deactivated — login and web app access revoked`, 'success');
       setDeactivatingStaff(null);
       fetchData();
-      if (selectedStaffId === deactivatingStaff.user_id) window.location.hash = '';
     } catch(err: any) {
       showToast(err.message || 'Failed to deactivate', 'error');
+    }
+  };
+
+  const handleReactivate = async (target: StaffResponse) => {
+    try {
+      await activateStaff(target.user_id);
+      showToast(`${target.first_name} reactivated — web app access restored`, 'success');
+      fetchData();
+    } catch(err: any) {
+      showToast(err.message || 'Failed to reactivate', 'error');
     }
   };
 
@@ -279,9 +290,13 @@ export const ManageStaff: React.FC = () => {
                 <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">lock_reset</span>Reset password
                 </button>
-                {selectedStaff.is_active && (
+                {selectedStaff.is_active ? (
                   <button onClick={() => setDeactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-error-container/60 hover:bg-error-container text-error text-label-md flex items-center justify-center gap-1.5 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">person_off</span>Deactivate account
+                  </button>
+                ) : (
+                  <button onClick={() => handleReactivate(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>Reactivate account
                   </button>
                 )}
               </div>
@@ -413,7 +428,7 @@ export const ManageStaff: React.FC = () => {
               <p className="text-body-md text-on-surface-variant">Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.</p>
             </div>
             <div className="flex gap-space-sm">
-              <button onClick={() => { resetForm(); setEditMode(false); setIsDrawerOpen(true); }} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
+              <button onClick={() => navigate('/admin/staff/add')} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
                 <span className="material-symbols-outlined text-[20px]">person_add</span>Add staff
               </button>
             </div>
@@ -512,9 +527,20 @@ export const ManageStaff: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-space-md py-3 text-right whitespace-nowrap">
-                        <button onClick={(e) => { e.stopPropagation(); window.location.hash = `staff/${s.user_id}`; }} className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors">
-                          <span className="material-symbols-outlined text-[18px]">visibility</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={(e) => { e.stopPropagation(); window.location.hash = `staff/${s.user_id}`; }} className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" title="View details">
+                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                          </button>
+                          {s.is_active ? (
+                            <button onClick={(e) => { e.stopPropagation(); setDeactivatingStaff(s); }} className="p-1.5 rounded-lg text-error hover:bg-error-container/50 transition-colors" title="Deactivate account">
+                              <span className="material-symbols-outlined text-[18px]">person_off</span>
+                            </button>
+                          ) : (
+                            <button onClick={(e) => { e.stopPropagation(); handleReactivate(s); }} className="p-1.5 rounded-lg text-status-completed-text hover:bg-status-completed-bg/50 transition-colors" title="Reactivate account">
+                              <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -689,8 +715,8 @@ export const ManageStaff: React.FC = () => {
         onClose={() => setDeactivatingStaff(null)} 
         onConfirm={handleDeactivate} 
         title="Deactivate this account?" 
-        message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} will lose access immediately. Their record and history are kept, and you can reactivate the account later. Reassign any upcoming appointments first if they are a doctor.`}
-        confirmLabel="Deactivate"
+        message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} (@${deactivatingStaff?.username}) will lose all access to the web app immediately and cannot log in. All existing data, appointments, and medical records will remain preserved in the database.`}
+        confirmLabel="Deactivate Account"
         isDestructive={true}
       />
     </div>

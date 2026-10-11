@@ -83,7 +83,7 @@ async def register_patient(
             nic,
             payload.address.strip(),
             birthdate,
-            payload.gender,
+            payload.gender.value if payload.gender else None,
             payload.email.strip() if payload.email else None,
         )
 
@@ -543,7 +543,7 @@ async def update_patient(
             user_params.append(dob)
             user_updates.append(f"birthdate = ${len(user_params)}")
         if payload.gender is not None:
-            user_params.append(payload.gender)
+            user_params.append(payload.gender.value)
             user_updates.append(f"gender = ${len(user_params)}::gender_enum")
         if payload.address is not None:
             user_params.append(payload.address.strip())

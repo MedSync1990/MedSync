@@ -4,7 +4,6 @@ from typing import List, Optional
 from datetime import datetime
 from app.db import get_conn
 from jinja2 import Environment, FileSystemLoader
-import weasyprint
 from app.dependencies import CurrentUser, require_roles, get_current_user
 from app.errors import NotFoundError, ConflictError, AppValidationError
 from app.schemas.invoices import (
@@ -346,6 +345,10 @@ async def download_invoice_pdf(
         })
 
     # 5. Load the template and fill in the REAL data
+    from pathlib import Path
+    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    logo_uri = logo_path.as_uri()
+
     template = env.get_template("invoice_template.html")
     rendered_html = template.render(
         invoice_code=inv["invoice_code"],
@@ -358,11 +361,17 @@ async def download_invoice_pdf(
         items=items,
         subtotal=f"{subtotal:,.2f}",
         insurance_coverage=f"{insurance_coverage:,.2f}",
-        total_due=f"{total_due:,.2f}"
+        total_due=f"{total_due:,.2f}",
+        logo_url=logo_uri
     )
     
     # 6. Generate the PDF
-    pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    try:
+        import weasyprint
+        pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"PDF generation error: {e}")
     
     # 7. Return the PDF file directly to the browser
     return Response(

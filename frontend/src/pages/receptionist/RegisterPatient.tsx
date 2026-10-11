@@ -52,7 +52,7 @@ export const RegisterPatient: React.FC = () => {
   // Submission / feedback state
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ id: string; name: string; nic: string } | null>(null);
+  const [success, setSuccess] = useState<{ id: string; name: string; nic: string; rawPatient?: any } | null>(null);
 
   // If in edit mode, fetch patient profile and populate fields
   useEffect(() => {
@@ -140,7 +140,7 @@ export const RegisterPatient: React.FC = () => {
           last_name: lastName,
           id_number: nicNumber.trim().toUpperCase(),
           address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
-          birthdate: dateOfBirth,
+          birthdate: dateOfBirth || null,
           gender: gender,
           email: emailAddress || null,
           phone_number: primaryPhone.replace(/\D/g, ''),
@@ -153,6 +153,7 @@ export const RegisterPatient: React.FC = () => {
           id: response.patient_code || editId,
           name: `${response.first_name} ${response.last_name}`,
           nic: response.id_number,
+          rawPatient: response,
         });
       } else {
         const response = (await patientService.create({
@@ -161,7 +162,7 @@ export const RegisterPatient: React.FC = () => {
           last_name: lastName,
           id_number: nicNumber.trim().toUpperCase(),
           address: cityDistrict ? `${streetAddress}, ${cityDistrict}` : streetAddress,
-          birthdate: dateOfBirth,
+          birthdate: dateOfBirth || null,
           gender: gender,
           email: emailAddress || null,
           phone_numbers: allPhones,
@@ -189,6 +190,7 @@ export const RegisterPatient: React.FC = () => {
           id: assignedId,
           name: trimmedName,
           nic: nicNumber.trim().toUpperCase(),
+          rawPatient: response,
         });
       }
     } catch (err: any) {
@@ -1137,7 +1139,15 @@ export const RegisterPatient: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/receptionist/book-appointment')}
+                onClick={() => {
+                  if (success.rawPatient) {
+                    navigate('/receptionist/book-appointment', {
+                      state: { prefilledPatient: success.rawPatient }
+                    });
+                  } else {
+                    navigate(`/receptionist/book-appointment?patient_id=${success.id}`);
+                  }
+                }}
                 className="flex-1 h-[42px] rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>

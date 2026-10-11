@@ -23,6 +23,7 @@ export const DoctorEarnings: React.FC = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Overview State
   const [loadingOverview, setLoadingOverview] = useState(false);
@@ -31,9 +32,9 @@ export const DoctorEarnings: React.FC = () => {
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequestItem[]>([]);
   const [payouts, setPayouts] = useState<PayoutHistoryItem[]>([]);
 
-  const loadOverviewData = async () => {
+  const loadOverviewData = async (isRefresh = false) => {
     if (!user?.id) return;
-    setLoadingOverview(true);
+    if (!isRefresh) setLoadingOverview(true);
     try {
       const [overview, banks, requests, history] = await Promise.all([
         getDoctorEarningsOverview(user.id),
@@ -52,7 +53,7 @@ export const DoctorEarnings: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to load overview data', err);
     } finally {
-      setLoadingOverview(false);
+      if (!isRefresh) setLoadingOverview(false);
     }
   };
 
@@ -71,7 +72,8 @@ export const DoctorEarnings: React.FC = () => {
   };
 
   const handleConfirmPayout = async () => {
-    if (!user?.id || !bankAccountId) return;
+    if (!user?.id || !bankAccountId || isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await createDoctorPayoutRequest(user.id, {
         account_id: Number(bankAccountId),
@@ -80,11 +82,13 @@ export const DoctorEarnings: React.FC = () => {
       setShowConfirmModal(false);
       setShowSuccessAlert(true);
       setRequestAmount('');
-      loadOverviewData(); // Reload data
+      loadOverviewData(true); // Reload data silently
       setTimeout(() => setShowSuccessAlert(false), 5000);
     } catch (err: any) {
       setRequestError(err.message || 'Failed to submit request');
       setShowConfirmModal(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -429,9 +433,10 @@ export const DoctorEarnings: React.FC = () => {
               <button
                 type="button"
                 onClick={handleConfirmPayout}
-                className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors"
+                disabled={isSubmitting}
+                className={`h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                Confirm Request
+                {isSubmitting ? 'Confirming...' : 'Confirm Request'}
               </button>
             </div>
           </div>

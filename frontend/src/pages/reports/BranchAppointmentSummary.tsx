@@ -8,6 +8,8 @@ export default function BranchAppointmentSummary() {
   const [data, setData] = useState<AppointmentsSummaryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isApplying, setIsApplying] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -29,9 +31,11 @@ export default function BranchAppointmentSummary() {
       'walkin': 'Walk-in'
     };
     const params: any = categoryFilter === 'all' ? {} : { appointment_type: typeMap[categoryFilter] };
-    if (selectedBranch) params.branch = selectedBranch;
+    if (selectedBranch) params.branch_id = selectedBranch;
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
     return getAppointmentsSummary(Object.keys(params).length > 0 ? params : undefined).then(res => {
-      setAppliedParams({ branch_id: selectedBranch || undefined, appointment_type: params.appointment_type });
+      setAppliedParams({ branch_id: selectedBranch || undefined, appointment_type: params.appointment_type, start_date: startDate || undefined, end_date: endDate || undefined });
       setData(res);
     });
   };
@@ -47,6 +51,8 @@ export default function BranchAppointmentSummary() {
 
   const handleReset = () => {
     setCategoryFilter('all');
+    setStartDate('');
+    setEndDate('');
     setTimeout(() => {
       setIsApplying(true);
       getAppointmentsSummary().then(res => {
@@ -78,7 +84,7 @@ export default function BranchAppointmentSummary() {
   };
 
   const hasData = categoryFilter === 'all' && data && data.daily_data && data.daily_data.length > 0;
-  
+
   // Safe extraction for KPIs
   const totalScheduled = data?.total_scheduled || 0;
   const totalCompleted = data?.total_completed || 0;
@@ -93,7 +99,7 @@ export default function BranchAppointmentSummary() {
   const yAxisLabels = [0, dynamicMax * 0.2, dynamicMax * 0.4, dynamicMax * 0.6, dynamicMax * 0.8, dynamicMax].map(Math.round);
 
   return (
-    <div className="flex flex-col w-full gap-space-xl">
+    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col gap-space-2xs">
           <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
@@ -135,11 +141,17 @@ export default function BranchAppointmentSummary() {
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
         <div className="flex flex-wrap items-center gap-space-md flex-1">
-          <div className="flex flex-col gap-1 min-w-[260px]">
-            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="date-range">Date Interval</label>
-            <div className="relative flex items-center">
-              <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 pointer-events-none">date_range</span>
-              <input id="date-range" type="text" readOnly value="Sep 01, 2026 – Sep 07, 2026" className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer" />
+          <div className="flex flex-col gap-1 min-w-[280px]">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Date Range</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
+              <span className="text-secondary">-</span>
+              <div className="relative flex-1">
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-1 min-w-[220px]">
@@ -234,7 +246,7 @@ export default function BranchAppointmentSummary() {
               const ho = oth * sc;
               const hx = d.cancelled * sc;
               const displayDate = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-              
+
               return (
                 <g key={i}>
                   <rect x={x} y={base - hc} width={w} height={hc} fill="#006194" rx="3" />
@@ -312,7 +324,7 @@ export default function BranchAppointmentSummary() {
           )}
           {loading && (
             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined text-[32px]">hourglass_empty</span>
+              <span className="material-symbols-outlined text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

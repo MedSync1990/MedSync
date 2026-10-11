@@ -99,7 +99,7 @@ export default function TreatmentCategoryBreakdownReport() {
   // KPIs
   const totalTreatments = filteredData.reduce((sum, item) => sum + item.usage_count, 0) || 0;
   const totalRevenue = filteredData.reduce((sum, item) => sum + item.total_revenue, 0) || 0;
-  
+
   // Categories grouping for Chart and Bars
   const catMap: Record<string, { count: number, rev: number }> = {};
   filteredData.forEach(item => {
@@ -122,7 +122,7 @@ export default function TreatmentCategoryBreakdownReport() {
   // Donut chart logic
   const C = 2 * Math.PI * 80;
   let offset = 0;
-  
+
   const colors = [
     { stroke: '#006194', bg: 'bg-primary', light: 'bg-primary/10 text-primary' },
     { stroke: '#007cb1', bg: 'bg-tertiary-container', light: 'bg-tertiary-container/10 text-tertiary' },
@@ -184,11 +184,11 @@ export default function TreatmentCategoryBreakdownReport() {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <span className="material-symbols-outlined text-primary text-[18px] absolute left-3 top-2.5 pointer-events-none">event</span>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-10 pl-9 pr-2 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
               <span className="text-secondary">-</span>
               <div className="relative flex-1">
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               </div>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function TreatmentCategoryBreakdownReport() {
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="tableSearchInput">Search Treatment</label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
-              <input id="tableSearchInput" type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Filter treatment or category..." className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              <input id="tableSearchInput" type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Filter treatment or category..." className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
             </div>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function TreatmentCategoryBreakdownReport() {
             <svg className="w-48 h-48 -rotate-90" viewBox="0 0 200 200">
               {categories.map((c, i) => {
                 const d = C * c.pct / 100;
-                const s = <circle key={i} cx="100" cy="100" r="80" fill="none" stroke={getColor(c.name).stroke} strokeWidth="26" strokeDasharray={`${d.toFixed(1)} ${C.toFixed(1)}`} strokeDashoffset={(-offset).toFixed(1)}/>;
+                const s = <circle key={i} cx="100" cy="100" r="80" fill="none" stroke={getColor(c.name).stroke} strokeWidth="26" strokeDasharray={`${d.toFixed(1)} ${C.toFixed(1)}`} strokeDashoffset={(-offset).toFixed(1)} />;
                 offset += d;
                 return s;
               })}
@@ -284,7 +284,7 @@ export default function TreatmentCategoryBreakdownReport() {
             ))}
           </div>
         </div>
-        
+
         <div className="lg:col-span-7 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
           <div className="flex items-start justify-between">
             <div>
@@ -401,8 +401,8 @@ export default function TreatmentCategoryBreakdownReport() {
             </div>
           )}
           {loading && (
-             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+            <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
+              <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

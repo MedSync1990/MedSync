@@ -1,4 +1,5 @@
 import asyncpg
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 
 from app.db import get_conn
@@ -20,10 +21,16 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         FROM staff s
         JOIN app_user u ON u.user_id = s.user_id
         JOIN role r ON r.role_id = u.role_id
-        WHERE s.username = $1
+        WHERE s.username = $1 OR u.email = $1
         """,
         payload.username,
     )
+
+    if row is not None and not row["is_active"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been deactivated. You do not have access to the system. Please contact your branch manager.",
+        )
 
     password_ok = False
     if row is not None and row["is_active"]:
@@ -59,9 +66,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
 
     csrf_token = generate_csrf_token()
     max_age = config.JWT_EXPIRY_MINUTES * 60
-    cookie_samesite = "none" if config.COOKIE_SECURE else "lax"
-
-    samesite_policy = "none" if config.COOKIE_SECURE else "lax"
+    samesite_policy: Literal["none", "lax"] = "none" if config.COOKIE_SECURE else "lax"
 
     response.set_cookie(
         key="access_token",
@@ -99,6 +104,13 @@ async def get_me(
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn),
 ):
+    is_active = await db.fetchval("SELECT is_active FROM staff WHERE user_id = $1;", current_user.user_id)
+    if is_active is False:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account has been deactivated. Access denied.",
+        )
+
     branch_name = None
     if current_user.branch_id:
         row = await db.fetchrow(
@@ -106,9 +118,18 @@ async def get_me(
         )
         if row:
             branch_name = row["name"]
+
+    user_row = await db.fetchrow(
+        "SELECT first_name, last_name FROM app_user WHERE user_id = $1;", current_user.user_id
+    )
+    first_name = user_row["first_name"] if user_row else None
+    last_name = user_row["last_name"] if user_row else None
+
     return MeResponse(
         user_id=current_user.user_id,
         username=current_user.username,
+        first_name=first_name,
+        last_name=last_name,
         role=current_user.role,
         branch_id=current_user.branch_id,
         branch_name=branch_name,

@@ -55,11 +55,11 @@ export function OutstandingBalances() {
 
   const filteredData = (data?.data || []).filter(inv => {
     const q = searchQuery.toLowerCase().trim();
-    const searchMatch = !q || 
-      (inv.patient_name || '').toLowerCase().includes(q) || 
-      String(inv.patient_id || '').toLowerCase().includes(q) || 
+    const searchMatch = !q ||
+      (inv.patient_name || '').toLowerCase().includes(q) ||
+      String(inv.patient_id || '').toLowerCase().includes(q) ||
       (inv.invoice_id || '').toLowerCase().includes(q);
-    
+
     const agingMatch = agingFilter === 'all' || getAgingCategory(inv.aging_days) === agingFilter;
 
     return searchMatch && agingMatch;
@@ -169,7 +169,7 @@ export function OutstandingBalances() {
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="patient-search">Search Patient</label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
-              <input id="patient-search" type="text" placeholder="Patient name, ID, or invoice #" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-9 pr-9 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all"/>
+              <input id="patient-search" type="text" placeholder="Patient name, ID, or invoice #" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-9 pr-9 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 text-outline hover:text-on-surface" type="button" aria-label="Clear search">
                   <span className="material-symbols-outlined text-[18px]">close</span>
@@ -286,7 +286,7 @@ export function OutstandingBalances() {
                 const c = un ? 'bg-status-cancelled-bg text-status-cancelled-text' : 'bg-status-pending-bg text-status-pending-text';
                 const dot = un ? 'bg-status-cancelled-text' : 'bg-status-pending-text';
                 const initials = (d.patient_name || 'U').split(' ').map((n: string) => n[0]).join('').substring(0, 2);
-                
+
                 return (
                   <tr key={i} className="hover:bg-surface-subtle/70 transition-colors">
                     <td className="px-space-md py-3.5">
@@ -320,7 +320,7 @@ export function OutstandingBalances() {
               })}
             </tbody>
           </table>
-          
+
           {!hasData && !loading && (
             <div className="py-space-3xl px-space-md flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span className="material-symbols-outlined text-[32px]">folder_off</span></div>
@@ -330,8 +330,8 @@ export function OutstandingBalances() {
             </div>
           )}
           {loading && (
-             <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
-               <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
+            <div className="py-space-3xl px-space-md flex justify-center text-center text-secondary">
+              <span className="material-symbols-outlined  text-[32px]">hourglass_empty</span>
             </div>
           )}
         </div>

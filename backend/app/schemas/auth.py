@@ -9,6 +9,8 @@ class LoginResponse(BaseModel):
 class MeResponse(BaseModel):
     user_id: int
     username: str
+    first_name: str | None = None
+    last_name: str | None = None
     role: str
     branch_id: int | None = None
     branch_name: str | None = None

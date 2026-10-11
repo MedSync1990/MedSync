@@ -55,7 +55,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
         <div>
           <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
-            Welcome back, {user?.username}
+            Welcome back, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
             {user?.role === 'Administrator' ? 'Administrator · All Branches' : `${user?.branchName || 'Branch'} · ${user?.role}`}

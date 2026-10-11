@@ -18,7 +18,7 @@ function makeInitials(name: string): string {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-  Pending:  { label: 'Pending',  bg: 'bg-status-pending-bg',   text: 'text-status-pending-text',   dot: 'bg-status-pending-text'   },
+  Pending: { label: 'Pending', bg: 'bg-status-pending-bg', text: 'text-status-pending-text', dot: 'bg-status-pending-text' },
   Paid: { label: 'Paid', bg: 'bg-status-completed-bg', text: 'text-status-completed-text', dot: 'bg-status-completed-text' },
   Rejected: { label: 'Rejected', bg: 'bg-status-cancelled-bg', text: 'text-status-cancelled-text', dot: 'bg-status-cancelled-text' },
 };
@@ -171,7 +171,7 @@ const DoctorPayments: React.FC = () => {
 
   useEffect(() => {
     if (user?.role === 'Administrator') {
-      listBranches().then(setBranches).catch(() => {});
+      listBranches().then(setBranches).catch(() => { });
     }
   }, [user?.role]);
 
@@ -195,10 +195,10 @@ const DoctorPayments: React.FC = () => {
   }, [requests, statusFilter, searchQuery]);
 
   // KPIs
-  const pendingList  = requests.filter((r) => r.status === 'Pending');
-  const paidList     = requests.filter((r) => r.status === 'Paid');
-  const pendingTotal = pendingList.reduce((s, r)  => s + r.request_amount, 0);
-  const paidTotal    = paidList.reduce((s, r) => s + r.request_amount, 0);
+  const pendingList = requests.filter((r) => r.status === 'Pending');
+  const paidList = requests.filter((r) => r.status === 'Paid');
+  const pendingTotal = pendingList.reduce((s, r) => s + r.request_amount, 0);
+  const paidTotal = paidList.reduce((s, r) => s + r.request_amount, 0);
 
   // Decide (single)
   const handlePay = async (requestId: number, note: string) => {

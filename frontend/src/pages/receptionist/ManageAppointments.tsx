@@ -877,13 +877,13 @@ export const ManageAppointments: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/60 h-11 font-label-sm text-label-sm text-outline uppercase tracking-wider border-b border-border-subtle">
-                <th className="px-space-md w-[260px]">Patient Information</th>
-                <th className="px-space-md w-[220px]">Consultant</th>
-                <th className="px-space-md w-[130px]">Specialty</th>
-                <th className="px-space-md w-[200px]">Date / Time Slot</th>
-                <th className="px-space-md w-[130px]">Status</th>
-                <th className="px-space-md w-[160px]">Branch</th>
-                <th className="px-space-md w-[140px] text-right">Actions</th>
+                <th className="px-space-md w-[320px] min-w-[290px]">Patient Information</th>
+                <th className="px-space-md w-[200px]">Consultant</th>
+                <th className="px-space-md w-[120px]">Specialty</th>
+                <th className="px-space-md w-[180px]">Date / Time Slot</th>
+                <th className="px-space-md w-[120px]">Status</th>
+                <th className="px-space-md w-[150px]">Branch</th>
+                <th className="px-space-md w-[110px] text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle/70 font-body-md text-body-md">
@@ -939,26 +939,32 @@ export const ManageAppointments: React.FC = () => {
                     >
                       {/* 1. Patient Information */}
                       <td className="px-space-md py-3.5">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-3 min-w-0">
+                          <div className="flex flex-col min-w-0">
                             <span
-                              className={`font-label-lg text-label-lg font-semibold ${isCancelled ? 'text-brand-navy-deep line-through' : 'text-brand-navy-deep'
+                              className={`font-label-lg text-label-lg font-semibold whitespace-nowrap ${isCancelled ? 'text-brand-navy-deep line-through' : 'text-brand-navy-deep'
                                 }`}
+                              title={apt.patient_name}
                             >
                               {apt.patient_name}
                             </span>
-                            {apt.is_temp && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-label-sm text-[10px] font-bold border border-amber-300">
-                                <span className="material-symbols-outlined text-[12px] text-amber-600">bolt</span>
-                                Walk-in
+                            <div className="flex items-center gap-2 mt-0.5 font-mono-data text-[11px] text-outline font-medium whitespace-nowrap">
+                              <span className="text-primary font-semibold">{apt.appointment_code || `APT-${apt.appointment_id}`}</span>
+                              <span>•</span>
+                              <span>NIC: {apt.is_temp || apt.patient_nic?.startsWith('999') ? 'Pending' : (apt.patient_nic || 'N/A')}</span>
+                            </div>
+                          </div>
+                          {apt.is_temp && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
+                              <span
+                                className="material-symbols-outlined text-amber-600 leading-none select-none"
+                                style={{ fontSize: '11px', width: '11px', height: '11px' }}
+                              >
+                                bolt
                               </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5 font-mono-data text-[11px] text-outline font-medium">
-                            <span className="text-primary font-semibold">{apt.appointment_code || `APT-${apt.appointment_id}`}</span>
-                            <span>•</span>
-                            <span>NIC: {apt.is_temp || apt.patient_nic?.startsWith('999') ? 'Pending' : (apt.patient_nic || 'N/A')}</span>
-                          </div>
+                              Walk-in
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -1021,11 +1027,10 @@ export const ManageAppointments: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => navigate(`/receptionist/register-patient?edit=${apt.patient_id}`)}
-                              title="Complete Full Registration for Walk-in Patient"
-                              className="h-7 px-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-label-sm text-[11px] font-bold flex items-center gap-1 transition-all shadow-xs mr-1 cursor-pointer"
+                              className="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-all flex items-center justify-center shadow-xs cursor-pointer"
+                              title="Complete Registration"
                             >
-                              <span className="material-symbols-outlined text-[14px]">verified</span>
-                              <span>Complete Reg</span>
+                              <span className="material-symbols-outlined text-[18px]">verified</span>
                             </button>
                           )}
 
