@@ -9,39 +9,43 @@ from app.schemas.branches import BranchCreate, BranchUpdate, BranchResponse
 router = APIRouter()
 
 
-async def _fetch_branch(conn: asyncpg.Connection, branch_id: int) -> dict:
-    row = await conn.fetchrow(
-        """
+BRANCH_BASE_QUERY = """
+    SELECT 
+        b.branch_id,
+        b.name,
+        b.address,
+        b.phone_number,
+        b.is_active,
+        COALESCE(sc.staff_count, 0)::int AS staff_count,
+        bm.user_id AS branch_manager_id,
+        bm.full_name AS branch_manager_name
+    FROM branch b
+    LEFT JOIN (
+        SELECT branch_id, COUNT(*) AS staff_count
+        FROM staff
+        WHERE is_active = TRUE
+        GROUP BY branch_id
+    ) sc ON sc.branch_id = b.branch_id
+    LEFT JOIN LATERAL (
         SELECT 
-            b.branch_id,
-            b.name,
-            b.address,
-            b.phone_number,
-            b.is_active,
-            (SELECT COUNT(*) FROM staff s WHERE s.branch_id = b.branch_id AND s.is_active = TRUE) as staff_count,
-            (
-                SELECT s.user_id 
-                FROM staff s 
-                JOIN app_user u ON u.user_id = s.user_id 
-                JOIN role r ON r.role_id = u.role_id 
-                WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                ORDER BY s.user_id DESC
-                LIMIT 1
-            ) as branch_manager_id,
-            (
-                SELECT (u.first_name || ' ' || u.last_name) 
-                FROM staff s 
-                JOIN app_user u ON u.user_id = s.user_id 
-                JOIN role r ON r.role_id = u.role_id 
-                WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                ORDER BY s.user_id DESC
-                LIMIT 1
-            ) as branch_manager_name
-        FROM branch b
-        WHERE b.branch_id = $1;
-        """,
-        branch_id,
-    )
+            s.user_id,
+            (u.first_name || ' ' || u.last_name) AS full_name
+        FROM staff s
+        JOIN app_user u ON u.user_id = s.user_id
+        JOIN role r ON r.role_id = u.role_id
+        WHERE s.branch_id = b.branch_id 
+          AND r.role_name = 'Branch Manager' 
+          AND s.is_active = TRUE
+        ORDER BY s.user_id DESC
+        LIMIT 1
+    ) bm ON TRUE
+    WHERE ($1::int IS NULL OR b.branch_id = $1)
+    ORDER BY b.name ASC;
+"""
+
+
+async def _fetch_branch(conn: asyncpg.Connection, branch_id: int) -> dict:
+    row = await conn.fetchrow(BRANCH_BASE_QUERY, branch_id)
     if not row:
         raise NotFoundError(f"Branch #{branch_id} not found.")
     return dict(row)
@@ -65,69 +69,8 @@ async def list_branches(
         if staff_bid:
             effective_branch_id = staff_bid
 
-    if current_user.role == "Branch Manager" and effective_branch_id:
-        query = """
-            SELECT 
-                b.branch_id,
-                b.name,
-                b.address,
-                b.phone_number,
-                b.is_active,
-                (SELECT COUNT(*) FROM staff s WHERE s.branch_id = b.branch_id AND s.is_active = TRUE) as staff_count,
-                (
-                    SELECT s.user_id 
-                    FROM staff s 
-                    JOIN app_user u ON u.user_id = s.user_id 
-                    JOIN role r ON r.role_id = u.role_id 
-                    WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                    ORDER BY s.user_id DESC
-                    LIMIT 1
-                ) as branch_manager_id,
-                (
-                    SELECT (u.first_name || ' ' || u.last_name) 
-                    FROM staff s 
-                    JOIN app_user u ON u.user_id = s.user_id 
-                    JOIN role r ON r.role_id = u.role_id 
-                    WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                    ORDER BY s.user_id DESC
-                    LIMIT 1
-                ) as branch_manager_name
-            FROM branch b
-            WHERE b.branch_id = $1
-            ORDER BY b.name ASC;
-        """
-        rows = await conn.fetch(query, effective_branch_id)
-    else:
-        query = """
-            SELECT 
-                b.branch_id,
-                b.name,
-                b.address,
-                b.phone_number,
-                b.is_active,
-                (SELECT COUNT(*) FROM staff s WHERE s.branch_id = b.branch_id AND s.is_active = TRUE) as staff_count,
-                (
-                    SELECT s.user_id 
-                    FROM staff s 
-                    JOIN app_user u ON u.user_id = s.user_id 
-                    JOIN role r ON r.role_id = u.role_id 
-                    WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                    ORDER BY s.user_id DESC
-                    LIMIT 1
-                ) as branch_manager_id,
-                (
-                    SELECT (u.first_name || ' ' || u.last_name) 
-                    FROM staff s 
-                    JOIN app_user u ON u.user_id = s.user_id 
-                    JOIN role r ON r.role_id = u.role_id 
-                    WHERE s.branch_id = b.branch_id AND r.role_name = 'Branch Manager' AND s.is_active = TRUE 
-                    ORDER BY s.user_id DESC
-                    LIMIT 1
-                ) as branch_manager_name
-            FROM branch b
-            ORDER BY b.name ASC;
-        """
-        rows = await conn.fetch(query)
+    target_branch = effective_branch_id if current_user.role == "Branch Manager" else None
+    rows = await conn.fetch(BRANCH_BASE_QUERY, target_branch)
 
     return [BranchResponse(**dict(r)) for r in rows]
 

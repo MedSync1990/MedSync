@@ -6,6 +6,8 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     message: str
+    must_change_password: bool = False
+
 class MeResponse(BaseModel):
     user_id: int
     username: str
@@ -14,3 +16,4 @@ class MeResponse(BaseModel):
     role: str
     branch_id: int | None = None
     branch_name: str | None = None
+    must_change_password: bool = False

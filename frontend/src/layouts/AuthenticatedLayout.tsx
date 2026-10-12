@@ -4,12 +4,15 @@ import { Sidebar } from '../components/Sidebar';
 import { TopBar } from '../components/TopBar';
 import { useAuth } from '../context/AuthContext';
 import { SidebarProvider, useSidebar } from '../context/SidebarContext';
+import { FirstLoginGateModal } from '../components/FirstLoginGateModal';
 
 const AuthenticatedLayoutContent: React.FC = () => {
   const { isCollapsed } = useSidebar();
+  const { user } = useAuth();
 
   return (
     <div className="bg-canvas-bg font-body-md text-on-surface antialiased min-h-screen">
+      {user?.mustChangePassword && <FirstLoginGateModal />}
       <Sidebar />
       <div className={`transition-all duration-300 ${isCollapsed ? 'pl-sidebar-collapsed-width' : 'pl-sidebar-width'}`}>
         <TopBar />

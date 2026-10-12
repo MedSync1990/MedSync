@@ -42,65 +42,72 @@ async def get_stats_overview(
     """
     # Enforce scope if Branch Manager; ignore any conflicting client-supplied branch.
     effective_branch = get_effective_branch_id(current_user, branch)
-    
-    where_clause = ""
-    args = []
-    if effective_branch is not None:
-        where_clause = "WHERE branch_id = $1"
-        args.append(effective_branch)
-        
-    # Patients
-    if effective_branch is not None:
-        patients_count = await db.fetchval("SELECT COUNT(*) FROM patient WHERE is_active = TRUE AND registered_branch = $1", effective_branch)
-    else:
-        patients_count = await db.fetchval("SELECT COUNT(*) FROM patient WHERE is_active = TRUE")
-    
-    # Doctors
-    doc_query = f"SELECT COUNT(*) FROM staff WHERE is_active = TRUE AND user_id IN (SELECT user_id FROM app_user WHERE role_id = (SELECT role_id FROM role WHERE role_name = 'Doctor')) {where_clause.replace('WHERE', 'AND') if where_clause else ''}"
-    doctors_count = await db.fetchval(doc_query, *args)
-    
-    # Staff
-    staff_query = f"SELECT COUNT(*) FROM staff WHERE is_active = TRUE {where_clause.replace('WHERE', 'AND') if where_clause else ''}"
-    staff_count = await db.fetchval(staff_query, *args)
-    
-    # Branches
-    branches_count = await db.fetchval("SELECT COUNT(*) FROM branch WHERE is_active = TRUE")
-    
-    # Today's appointments
     today = date.today()
-    apt_query = """
-        SELECT a.status, COUNT(*) as count 
-        FROM appointments a
-        JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
-        JOIN staff s ON das.doctor_id = s.user_id
-        WHERE das.date = $1
+
+    query = """
+        WITH params AS (
+            SELECT $1::int AS branch_id, $2::date AS today_date
+        ),
+        patient_cnt AS (
+            SELECT COUNT(*)::int AS cnt
+            FROM patient p, params
+            WHERE p.is_active = TRUE
+              AND (params.branch_id IS NULL OR p.registered_branch = params.branch_id)
+        ),
+        doctor_cnt AS (
+            SELECT COUNT(*)::int AS cnt
+            FROM staff s
+            JOIN app_user u ON s.user_id = u.user_id
+            JOIN role r ON u.role_id = r.role_id
+            CROSS JOIN params
+            WHERE s.is_active = TRUE
+              AND r.role_name = 'Doctor'
+              AND (params.branch_id IS NULL OR s.branch_id = params.branch_id)
+        ),
+        staff_cnt AS (
+            SELECT COUNT(*)::int AS cnt
+            FROM staff s, params
+            WHERE s.is_active = TRUE
+              AND (params.branch_id IS NULL OR s.branch_id = params.branch_id)
+        ),
+        branch_cnt AS (
+            SELECT COUNT(*)::int AS cnt
+            FROM branch b
+            WHERE b.is_active = TRUE
+        ),
+        appt_counts AS (
+            SELECT
+                COUNT(*) FILTER (WHERE a.status = 'Scheduled')::int AS scheduled,
+                COUNT(*) FILTER (WHERE a.status = 'Completed')::int AS completed,
+                COUNT(*) FILTER (WHERE a.status = 'Cancelled')::int AS cancelled
+            FROM appointments a
+            JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
+            JOIN staff s ON das.doctor_id = s.user_id
+            CROSS JOIN params
+            WHERE das.date = params.today_date
+              AND (params.branch_id IS NULL OR s.branch_id = params.branch_id)
+        )
+        SELECT 
+            (SELECT cnt FROM patient_cnt) AS total_patients,
+            (SELECT cnt FROM doctor_cnt) AS total_doctors,
+            (SELECT cnt FROM staff_cnt) AS total_staff,
+            (SELECT cnt FROM branch_cnt) AS total_branches,
+            COALESCE((SELECT scheduled FROM appt_counts), 0) AS scheduled,
+            COALESCE((SELECT completed FROM appt_counts), 0) AS completed,
+            COALESCE((SELECT cancelled FROM appt_counts), 0) AS cancelled;
     """
-    apt_args: list[object] = [today]
-    if effective_branch is not None:
-        apt_query += " AND s.branch_id = $2"
-        apt_args.append(effective_branch)
-        
-    apt_query += " GROUP BY a.status"
-    appointments = await db.fetch(apt_query, *apt_args)
-    
-    scheduled = 0
-    completed = 0
-    cancelled = 0
-    
-    for row in appointments:
-        if row['status'] == 'Scheduled': scheduled = row['count']
-        elif row['status'] == 'Completed': completed = row['count']
-        elif row['status'] == 'Cancelled': cancelled = row['count']
-        
+    row = await db.fetchrow(query, effective_branch, today)
+    r = dict(row) if row else {}
+
     return StatsOverview(
-        total_patients=patients_count or 0,
-        total_doctors=doctors_count or 0,
-        total_staff=staff_count or 0,
-        total_branches=branches_count or 0,
+        total_patients=r.get("total_patients", 0),
+        total_doctors=r.get("total_doctors", 0),
+        total_staff=r.get("total_staff", 0),
+        total_branches=r.get("total_branches", 0),
         today_appointments=TodayAppointments(
-            scheduled=scheduled,
-            completed=completed,
-            cancelled=cancelled
+            scheduled=r.get("scheduled", 0),
+            completed=r.get("completed", 0),
+            cancelled=r.get("cancelled", 0),
         )
     )
 

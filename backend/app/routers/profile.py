@@ -108,9 +108,15 @@ async def change_password(
             detail="Current password is incorrect.",
         )
 
+    if payload.new_password == payload.current_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from your current password.",
+        )
+
     new_hash = hash_password(payload.new_password)
     await db.execute(
-        "UPDATE staff SET password_hash = $1 WHERE user_id = $2",
+        "UPDATE staff SET password_hash = $1, must_change_password = FALSE WHERE user_id = $2",
         new_hash,
         current_user.user_id,
     )

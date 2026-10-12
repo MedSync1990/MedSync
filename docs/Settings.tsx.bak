@@ -1,0 +1,362 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { getProfile, updateProfile, changePassword } from '../api';
+import type { UserProfileResponse } from '../api/types';
+
+export const Settings: React.FC = () => {
+  const { user, setUser } = useAuth();
+  const { showToast } = useToast();
+
+  const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Profile Edit Form State
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Password Change Form State
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    setLoading(true);
+    try {
+      const data = await getProfile();
+      setProfile(data);
+      setEmail(data.email || '');
+      setPhoneNumber(data.phone_number || '');
+      setAddress(data.address || '');
+    } catch (_err) {
+      showToast('Failed to load user profile.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      await updateProfile({
+        email: email.trim() || undefined,
+        phone_number: phoneNumber.trim() || undefined,
+        address: address.trim() || undefined,
+      });
+      showToast('Profile updated successfully!', 'success');
+      loadProfile();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update profile', 'error');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      showToast('New password must be at least 6 characters.', 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('New passwords do not match.', 'error');
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      await changePassword({
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
+      showToast('Password changed successfully!', 'success');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      if (user) {
+        setUser({ ...user, mustChangePassword: false });
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to change password', 'error');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-12 max-w-4xl mx-auto flex items-center justify-center text-slate-500">
+        <span className="material-symbols-outlined animate-spin text-[32px] text-primary mr-3">progress_activity</span>
+        <span>Loading account settings...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-8 max-w-5xl mx-auto w-full">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Account & System Settings</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Manage your personal contact details, security credentials, and access preferences.
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 mb-6">
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={`pb-3 px-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
+            activeTab === 'profile'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">person</span>
+          Personal Profile
+        </button>
+        <button
+          onClick={() => setActiveTab('security')}
+          className={`pb-3 px-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
+            activeTab === 'security'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">lock</span>
+          Security & Password
+          {user?.mustChangePassword && (
+            <span className="w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white"></span>
+          )}
+        </button>
+      </div>
+
+      {/* Profile Tab */}
+      {activeTab === 'profile' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Identity Card (Read Only) */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
+                {(profile?.first_name?.[0] || 'U') + (profile?.last_name?.[0] || '')}
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-slate-900 truncate">
+                  {profile?.first_name} {profile?.last_name}
+                </h3>
+                <p className="text-xs text-slate-500 font-mono">@{profile?.username}</p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 text-xs">Assigned Role</span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                  {profile?.role_name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 text-xs">Primary Branch</span>
+                <span className="font-medium text-slate-800">{profile?.branch_name || 'Central'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 text-xs">National Identity (NIC)</span>
+                <span className="font-mono text-xs font-medium text-slate-800">{profile?.id_number}</span>
+              </div>
+
+              {profile?.role_name === 'Doctor' && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 text-xs">SLMC License</span>
+                    <span className="font-mono text-xs font-semibold text-slate-800">
+                      {profile?.license_number || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 text-xs">Specialty</span>
+                    <span className="font-medium text-slate-800">{profile?.specialty || 'General'}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 leading-relaxed">
+              <span className="font-semibold text-slate-700">Administrative Note:</span> Official role, medical license, and branch assignments can only be modified by System Administrators.
+            </div>
+          </div>
+
+          {/* Editable Contact Information Form */}
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+            <h2 className="text-base font-bold text-slate-900 mb-1">Personal Contact Information</h2>
+            <p className="text-xs text-slate-500 mb-6">
+              Update your direct telephone contact, email notifications, and home address.
+            </p>
+
+            <form onSubmit={handleProfileSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Personal Phone Number</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">phone</span>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="0771234567"
+                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Email Address</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">mail</span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@hospital.lk"
+                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Residential Address</label>
+                <div className="relative">
+                  <textarea
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter your street address, city"
+                    className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-3 border-t border-slate-100">
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold text-sm transition-colors flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {savingProfile ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">save</span>
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Security Tab */}
+      {activeTab === 'security' && (
+        <div className="max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <span className="material-symbols-outlined text-[22px]">password</span>
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Change Password</h2>
+              <p className="text-xs text-slate-500">
+                Ensure your account uses a strong, private password of at least 6 characters.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Current Password</label>
+              <input
+                type={showPasswords ? 'text' : 'password'}
+                required
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Enter your current password"
+                className="w-full h-10 px-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">New Password</label>
+              <input
+                type={showPasswords ? 'text' : 'password'}
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter your new password (min. 6 characters)"
+                className="w-full h-10 px-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Confirm New Password</label>
+              <input
+                type={showPasswords ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your new password"
+                className="w-full h-10 px-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-mono"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="show-pw"
+                checked={showPasswords}
+                onChange={(e) => setShowPasswords(e.target.checked)}
+                className="rounded border-slate-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="show-pw" className="text-xs text-slate-600 select-none cursor-pointer">
+                Show passwords
+              </label>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              <button
+                type="submit"
+                disabled={savingPassword}
+                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold text-sm transition-colors flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {savingPassword ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]">lock_reset</span>
+                    Update Password
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Settings;

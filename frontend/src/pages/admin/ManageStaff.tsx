@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getStaffList, createStaff, deactivateStaff, activateStaff, updateStaff, resetStaffPassword } from '../../api';
+import { getStaffList, createStaff, deactivateStaff, activateStaff, updateStaff, resetStaffPassword, unlockStaff, listBranches } from '../../api';
 import type { StaffResponse } from '../../api/types';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -28,11 +28,13 @@ export const ManageStaff: React.FC = () => {
   // Data options
   const [roles, setRoles] = useState<{role_id: number, role_name: string}[]>([]);
   const [specialties, setSpecialties] = useState<{specialty_id: number, name: string}[]>([]);
+  const [branches, setBranches] = useState<{branch_id: number, name: string}[]>([]);
 
   // UI State
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [branchFilter, setBranchFilter] = useState('');
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
@@ -59,6 +61,7 @@ export const ManageStaff: React.FC = () => {
   
   // Actions state
   const [deactivatingStaff, setDeactivatingStaff] = useState<StaffResponse | null>(null);
+  const [reactivatingStaff, setReactivatingStaff] = useState<StaffResponse | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [resettingStaff, setResettingStaff] = useState<StaffResponse | null>(null);
   const [customPassword, setCustomPassword] = useState('');
@@ -67,6 +70,9 @@ export const ManageStaff: React.FC = () => {
     fetchData();
     get<{role_id: number, role_name: string}[]>('/auth/roles').then(setRoles).catch(() => {});
     get<{specialty_id: number, name: string}[]>('/specialties').then(setSpecialties).catch(() => {});
+    if (user?.role === 'Administrator') {
+      listBranches().then(res => setBranches(res)).catch(() => {});
+    }
     
     const handleHash = () => {
       const match = location.hash.match(/^#staff\/(\d+)$/);
@@ -93,10 +99,11 @@ export const ManageStaff: React.FC = () => {
     return staff.filter(s => {
       const matchQ = !q || [s.first_name, s.last_name, s.username, s.id_number, s.email, s.phone_number].some(v => v?.toLowerCase().includes(q));
       const matchR = !roleFilter || s.role_name === roleFilter;
+      const matchB = !branchFilter || String(s.branch_id) === branchFilter;
       const matchT = activeTab === 'all' || (activeTab === 'active' && s.is_active) || (activeTab === 'inactive' && !s.is_active);
-      return matchQ && matchR && matchT;
+      return matchQ && matchR && matchB && matchT;
     });
-  }, [staff, searchQuery, roleFilter, activeTab]);
+  }, [staff, searchQuery, roleFilter, branchFilter, activeTab]);
 
   const activeCount = staff.filter(s => s.is_active).length;
   // const lockedCount = 0; // Not fully tracked in backend list endpoint yet
@@ -213,13 +220,26 @@ export const ManageStaff: React.FC = () => {
     }
   };
 
-  const handleReactivate = async (target: StaffResponse) => {
+  const handleUnlock = async (staffMember: StaffResponse) => {
     try {
-      await activateStaff(target.user_id);
-      showToast(`${target.first_name} reactivated — web app access restored`, 'success');
+      await unlockStaff(staffMember.user_id);
+      showToast(`Account for ${staffMember.first_name} unlocked`, 'success');
       fetchData();
     } catch(err: any) {
-      showToast(err.message || 'Failed to reactivate', 'error');
+      showToast(err.message || 'Failed to unlock account', 'error');
+    }
+  };
+
+  const handleReactivate = async (target?: StaffResponse) => {
+    const staff = target || reactivatingStaff;
+    if (!staff) return;
+    try {
+      await activateStaff(staff.user_id);
+      showToast(`${staff.first_name} ${staff.last_name} reactivated — web app access restored`, 'success');
+      setReactivatingStaff(null);
+      fetchData();
+    } catch(err: any) {
+      showToast(err.message || 'Failed to reactivate account', 'error');
     }
   };
 
@@ -290,12 +310,17 @@ export const ManageStaff: React.FC = () => {
                 <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">lock_reset</span>Reset password
                 </button>
+                {selectedStaff.is_active && selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() && (
+                  <button onClick={() => handleUnlock(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-amber-700 text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[18px]">lock_open</span>Unlock account
+                  </button>
+                )}
                 {selectedStaff.is_active ? (
                   <button onClick={() => setDeactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-error-container/60 hover:bg-error-container text-error text-label-md flex items-center justify-center gap-1.5 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">person_off</span>Deactivate account
                   </button>
                 ) : (
-                  <button onClick={() => handleReactivate(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                  <button onClick={() => setReactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text text-label-md flex items-center justify-center gap-1.5 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">check_circle</span>Reactivate account
                   </button>
                 )}
@@ -389,9 +414,16 @@ export const ManageStaff: React.FC = () => {
                     <dt className="text-on-surface-variant">Failed attempts</dt>
                     <dd className="text-label-md font-medium">{selectedStaff.failed_login_attempts || 0}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3 items-center">
                     <dt className="text-on-surface-variant">Locked until</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() ? new Date(selectedStaff.locked_until).toLocaleString() : 'Not locked'}</dd>
+                    <dd className="text-label-md font-medium flex items-center justify-between">
+                      <span>{selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() ? new Date(selectedStaff.locked_until).toLocaleString() : 'Not locked'}</span>
+                      {((selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date()) || (selectedStaff.failed_login_attempts && selectedStaff.failed_login_attempts > 0)) && (
+                        <button onClick={() => handleUnlock(selectedStaff)} className="px-2.5 py-1 text-label-sm bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg flex items-center gap-1 transition-colors">
+                          <span className="material-symbols-outlined text-[16px]">lock_open</span>Unlock
+                        </button>
+                      )}
+                    </dd>
                   </div>
                 </dl>
               </section>
@@ -472,11 +504,11 @@ export const ManageStaff: React.FC = () => {
             </div>
 
             <div className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-3 items-center border-b border-surface-subtle">
-              <div className="lg:col-span-6 relative">
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-5' : 'lg:col-span-6'} relative`}>
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
                 <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card placeholder-outline focus:outline-none shadow-inner" placeholder="Search name, NIC, username..." />
               </div>
-              <div className="lg:col-span-3 relative">
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'} relative`}>
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">badge</span>
                 <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
                   <option value="">All roles</option>
@@ -484,8 +516,18 @@ export const ManageStaff: React.FC = () => {
                 </select>
                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
               </div>
-              <div className="lg:col-span-3">
-                <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setActiveTab('all'); }} className="h-10 px-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep text-label-md flex items-center gap-1.5 transition-colors">
+              {user?.role === 'Administrator' && (
+                <div className="lg:col-span-3 relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">apartment</span>
+                  <select value={branchFilter} onChange={e => setBranchFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
+                    <option value="">All branches</option>
+                    {branches.map(b => <option key={b.branch_id} value={String(b.branch_id)}>{b.name}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+                </div>
+              )}
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+                <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep text-label-md flex items-center gap-1.5 transition-colors">
                   <span className="material-symbols-outlined text-[18px]">restart_alt</span>Clear filters
                 </button>
               </div>
@@ -497,6 +539,7 @@ export const ManageStaff: React.FC = () => {
                   <tr className="bg-surface-subtle h-11 text-label-sm text-outline uppercase tracking-wider">
                     <th className="px-space-md font-semibold">Staff member</th>
                     <th className="px-space-md font-semibold">Role</th>
+                    {user?.role === 'Administrator' && <th className="px-space-md font-semibold">Branch</th>}
                     <th className="px-space-md font-semibold">NIC</th>
                     <th className="px-space-md font-semibold">Contact</th>
                     <th className="px-space-md font-semibold">Status</th>
@@ -516,18 +559,31 @@ export const ManageStaff: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-space-md py-3 whitespace-nowrap"><span className={`inline-flex px-2.5 py-0.5 rounded-full text-label-sm ${s.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'}`}>{s.role_name}</span></td>
+                      {user?.role === 'Administrator' && <td className="px-space-md py-3 whitespace-nowrap text-body-sm text-outline">{s.branch_name || `Branch #${s.branch_id}`}</td>}
                       <td className="px-space-md py-3 text-mono-data whitespace-nowrap">{s.id_number}</td>
                       <td className="px-space-md py-3">
                         <div className="text-mono-data">{s.phone_number || 'N/A'}</div>
                         <div className="text-body-sm text-outline">{s.email || 'No email'}</div>
                       </td>
                       <td className="px-space-md py-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm ${s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>{s.is_active ? 'Active' : 'Inactive'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm ${s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>{s.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                          {s.locked_until && new Date(s.locked_until) > new Date() && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label-sm bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                              <span className="material-symbols-outlined text-[14px]">lock</span>Locked
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-space-md py-3 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
+                          {s.locked_until && new Date(s.locked_until) > new Date() && (
+                            <button onClick={(e) => { e.stopPropagation(); handleUnlock(s); }} title="Unlock account" className="p-1.5 rounded-lg text-amber-700 hover:text-amber-900 hover:bg-amber-100/70 transition-colors">
+                              <span className="material-symbols-outlined text-[18px]">lock_open</span>
+                            </button>
+                          )}
                           <button onClick={(e) => { e.stopPropagation(); window.location.hash = `staff/${s.user_id}`; }} className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors" title="View details">
                             <span className="material-symbols-outlined text-[18px]">visibility</span>
                           </button>
@@ -536,7 +592,7 @@ export const ManageStaff: React.FC = () => {
                               <span className="material-symbols-outlined text-[18px]">person_off</span>
                             </button>
                           ) : (
-                            <button onClick={(e) => { e.stopPropagation(); handleReactivate(s); }} className="p-1.5 rounded-lg text-status-completed-text hover:bg-status-completed-bg/50 transition-colors" title="Reactivate account">
+                            <button onClick={(e) => { e.stopPropagation(); setReactivatingStaff(s); }} className="p-1.5 rounded-lg text-status-completed-text hover:bg-status-completed-bg/50 transition-colors" title="Reactivate account">
                               <span className="material-symbols-outlined text-[18px]">check_circle</span>
                             </button>
                           )}
@@ -546,16 +602,16 @@ export const ManageStaff: React.FC = () => {
                   ))}
                   {filteredStaff.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={6} className="p-space-xl text-center">
+                      <td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center">
                         <div className="w-14 h-14 rounded-full bg-surface-subtle flex items-center justify-center text-outline mx-auto mb-space-sm"><span className="material-symbols-outlined text-[28px]">search_off</span></div>
                         <h3 className="text-headline-sm">No staff match these filters</h3>
                         <p className="text-body-sm text-on-surface-variant mt-1 mb-space-md">Try a different search term or clear the filters.</p>
-                        <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setActiveTab('all'); }} className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary text-label-md">Clear filters</button>
+                        <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary text-label-md">Clear filters</button>
                       </td>
                     </tr>
                   )}
                   {loading && (
-                    <tr><td colSpan={6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px]  text-primary">hourglass_empty</span></td></tr>
+                    <tr><td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px]  text-primary">hourglass_empty</span></td></tr>
                   )}
                 </tbody>
               </table>
@@ -718,6 +774,15 @@ export const ManageStaff: React.FC = () => {
         message={`${deactivatingStaff?.first_name} ${deactivatingStaff?.last_name} (@${deactivatingStaff?.username}) will lose all access to the web app immediately and cannot log in. All existing data, appointments, and medical records will remain preserved in the database.`}
         confirmLabel="Deactivate Account"
         isDestructive={true}
+      />
+      <ConfirmDialog 
+        isOpen={!!reactivatingStaff} 
+        onClose={() => setReactivatingStaff(null)} 
+        onConfirm={handleReactivate} 
+        title="Reactivate staff account?" 
+        message={`Are you sure you want to reactivate the account for ${reactivatingStaff?.first_name} ${reactivatingStaff?.last_name}? They will be able to log in and access the system immediately.`}
+        confirmLabel="Reactivate Account"
+        isDestructive={false}
       />
     </div>
   );

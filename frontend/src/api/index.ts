@@ -38,6 +38,7 @@ export {
   getDoctorPayoutRequests,
   getDoctorPayouts,
   createDoctorPayoutRequest,
+  downloadDoctorPayoutSlipPdf,
 } from './reports';
 export type {
   AppointmentsSummaryParams,
@@ -97,4 +98,5 @@ export {
   resetStaffPassword,
   deactivateStaff,
   activateStaff,
+  unlockStaff,
 } from './staff';

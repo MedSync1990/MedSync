@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Payment Slip - {{ slip_no }}</title>
+    <style>
+        @page {
+            size: 210mm 110mm;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .slip-container {
+            width: 210mm;
+            height: 110mm;
+            padding: 9mm 14mm 7mm 14mm;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo-wrap {
+            max-width: 175px;
+        }
+
+        .logo-img {
+            max-height: 60px;
+            max-width: 170px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .slip-title {
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #112347;
+            letter-spacing: -0.015em;
+            margin-bottom: 6px;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .meta-table {
+            display: inline-table;
+            font-size: 10.5px;
+            line-height: 1.5;
+        }
+
+        .meta-row {
+            display: table-row;
+        }
+
+        .meta-label {
+            display: table-cell;
+            color: #64748b;
+            text-align: right;
+            padding-right: 12px;
+            white-space: nowrap;
+        }
+
+        .meta-value {
+            display: table-cell;
+            color: #0f172a;
+            font-weight: 500;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        /* ── ECG Divider ── */
+        .ecg-divider-wrap {
+            width: 100%;
+            height: 24px;
+            margin: 1.5mm 0 2mm 0;
+            position: relative;
+        }
+
+        .ecg-svg {
+            width: 100%;
+            height: 24px;
+            display: block;
+        }
+
+        /* ── Body ── */
+        .body-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex: 1;
+            padding-top: 1.5mm;
+        }
+
+        .col-left {
+            width: 50%;
+            padding-right: 15px;
+        }
+
+        .col-right {
+            width: 50%;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-label {
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        .doctor-name {
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.015em;
+            line-height: 1.15;
+            margin-bottom: 3px;
+        }
+
+        .doctor-sub {
+            font-size: 10px;
+            color: #334155;
+            line-height: 1.45;
+        }
+
+        .doctor-address {
+            color: #64748b;
+        }
+
+        .bank-details {
+            margin-top: 16px;
+        }
+
+        .bank-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        .bank-account {
+            font-size: 11px;
+            color: #334155;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        /* ── Right Column (Amounts) ── */
+        .net-wrapper {
+            margin-top: 8px;
+        }
+
+        .net-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .net-amount {
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #112347;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 2.5mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 8.5px;
+            color: #475569;
+            line-height: 1.45;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .footer-website {
+            color: #0284c7;
+            font-weight: 500;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="slip-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-wrap">
+                <img class="logo-img" src="{{ logo_url }}" alt="MedSync Logo">
+            </div>
+            <div class="header-right">
+                <div class="slip-title">Doctor payment slip</div>
+                <div class="meta-table">
+                    <div class="meta-row">
+                        <span class="meta-label">Slip no.</span>
+                        <span class="meta-value">{{ slip_no }}</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Issued</span>
+                        <span class="meta-value">{{ issued_date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECG Pulse Wave Divider -->
+        <div class="ecg-divider-wrap">
+            <svg class="ecg-svg" viewBox="0 0 1000 24" preserveAspectRatio="none">
+                <path d="M 0 12 L 240 12 L 248 12 L 253 15 L 260 2 L 268 22 L 275 6 L 282 17 L 288 12 L 1000 12"
+                      fill="none" stroke="#0ea5e9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+
+        <!-- Body Content -->
+        <div class="body-content">
+            <!-- Left Column: Doctor & Banking -->
+            <div class="col-left">
+                <div class="section-label">Paid to</div>
+                <div class="doctor-name">{{ doctor_name }}</div>
+                <div class="doctor-sub">Registration no. {{ registration_no }}</div>
+                <div class="doctor-sub doctor-address">{{ doctor_address }}</div>
+
+                <div class="bank-details">
+                    <div class="section-label">Sent by bank transfer to</div>
+                    <div class="bank-name">{{ bank_name }}</div>
+                    <div class="bank-account">Account {{ account_number }}</div>
+                </div>
+            </div>
+
+            <!-- Right Column: Net Payment -->
+            <div class="col-right">
+                <div class="net-wrapper">
+                    <div class="net-label">Net payment</div>
+                    <div class="net-amount">{{ net_payment }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-left">
+                <div>Generated by MedSync Health Care. No signature required.</div>
+                <div>{{ branch_address }}</div>
+            </div>
+            <div class="footer-right">
+                <div>Questions about this payment? Write to {{ contact_email }}</div>
+                <div>{{ branch_phone }}&nbsp;&nbsp;&nbsp;&nbsp;<span class="footer-website">{{ website }}</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

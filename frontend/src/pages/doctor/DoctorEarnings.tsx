@@ -5,7 +5,8 @@ import {
   getDoctorBankAccounts,
   getDoctorPayoutRequests,
   getDoctorPayouts,
-  createDoctorPayoutRequest
+  createDoctorPayoutRequest,
+  downloadDoctorPayoutSlipPdf
 } from '../../api';
 import type {
   DoctorEarningsOverviewResponse,
@@ -24,6 +25,7 @@ export const DoctorEarnings: React.FC = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [downloadingPayoutId, setDownloadingPayoutId] = useState<number | null>(null);
 
   // Overview State
   const [loadingOverview, setLoadingOverview] = useState(false);
@@ -89,6 +91,19 @@ export const DoctorEarnings: React.FC = () => {
       setShowConfirmModal(false);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDownloadSlip = async (payoutId: number, reference: string) => {
+    if (!user?.id) return;
+    try {
+      setDownloadingPayoutId(payoutId);
+      await downloadDoctorPayoutSlipPdf(user.id, payoutId, `Doctor_Payment_Slip_${reference || payoutId}.pdf`);
+    } catch (err: any) {
+      console.error('Failed to download payment slip', err);
+      alert(err.message || 'Failed to download payment slip');
+    } finally {
+      setDownloadingPayoutId(null);
     }
   };
 
@@ -371,12 +386,13 @@ export const DoctorEarnings: React.FC = () => {
                       <td className="px-space-md py-3.5 whitespace-nowrap text-secondary font-mono-data">{payment.bank_name} •••• {payment.account_number.slice(-4)}</td>
                       <td className="px-space-md py-3.5 whitespace-nowrap text-center">
                         <button
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors"
-                          onClick={() => alert(`Downloading remittance slip for ${payment.payment_reference} (PDF)`)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface-subtle hover:bg-surface-card text-brand-navy-deep font-label-sm text-label-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleDownloadSlip(payment.payout_id, payment.payment_reference)}
+                          disabled={downloadingPayoutId === payment.payout_id}
                           type="button"
                         >
                           <span className="material-symbols-outlined text-[15px] text-secondary">download</span>
-                          <span>Download Slip</span>
+                          <span>{downloadingPayoutId === payment.payout_id ? 'Downloading...' : 'Download Slip'}</span>
                         </button>
                       </td>
                     </tr>
