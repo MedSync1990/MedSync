@@ -12,6 +12,8 @@ from app.schemas.doctors import (
     DoctorSpecialtiesUpdate,
     DoctorResponse,
     DoctorCreateResponse,
+    DoctorScheduleItem,
+    DoctorScheduleUpdate,
 )
 from app.schemas.appointments import DoctorSlotResponse, SlotStatusEnum
 from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidationError
@@ -30,6 +32,7 @@ def generate_temp_password(length: int = 12) -> str:
 async def list_doctors(
     specialty_id: Optional[int] = Query(None, description="Filter by specialty ID"),
     branch_id: Optional[int] = Query(None, description="Filter by branch ID"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
     conn: Connection = Depends(get_db),
     user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
 ):
@@ -74,10 +77,11 @@ async def list_doctors(
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
+          AND ($3::boolean IS NULL OR s.is_active = $3)
         ORDER BY full_name ASC;
     """
 
-    rows = await conn.fetch(query, scoped_branch_id, specialty_id)
+    rows = await conn.fetch(query, scoped_branch_id, specialty_id, is_active)
     return [
         DoctorResponse(
             doctor_id=r["doctor_id"],
@@ -423,3 +427,104 @@ async def update_doctor_specialties(
             )
 
     return await get_doctor(id=id, conn=conn, user=user)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Doctor Weekly Schedule / Roster endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/{id}/schedule", response_model=List[DoctorScheduleItem])
+async def get_doctor_schedule(
+    id: int,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
+):
+    """
+    Get a doctor's weekly recurring shift schedule.
+    - Admin & Receptionist: any doctor
+    - Branch Manager: doctors in own branch
+    - Doctor: own schedule only
+    """
+    doc_row = await conn.fetchrow(
+        "SELECT s.branch_id FROM doctor d JOIN staff s ON d.user_id = s.user_id WHERE d.user_id = $1;",
+        id
+    )
+    if not doc_row:
+        raise NotFoundError("Doctor not found.")
+
+    if user.role == "Doctor" and user.user_id != id:
+        raise ForbiddenError("Doctors can only view their own schedule.")
+
+    if user.role == "Branch Manager" and user.branch_id is not None and doc_row["branch_id"] != user.branch_id:
+        raise NotFoundError("Doctor not found.")
+
+    rows = await conn.fetch(
+        """
+        SELECT 
+            schedule_id, 
+            doctor_id, 
+            day_of_week, 
+            start_time::text, 
+            end_time::text, 
+            slot_duration, 
+            is_active
+        FROM doctor_weekly_schedule
+        WHERE doctor_id = $1
+        ORDER BY day_of_week, start_time;
+        """,
+        id
+    )
+    return [DoctorScheduleItem(**dict(r)) for r in rows]
+
+
+@router.put("/{id}/schedule", response_model=List[DoctorScheduleItem])
+async def update_doctor_schedule(
+    id: int,
+    payload: DoctorScheduleUpdate,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+):
+    """
+    Update a doctor's weekly recurring shift schedule.
+    - Admin: any doctor
+    - Branch Manager: doctors in own branch
+    - Doctor: own schedule only
+    """
+    doc_row = await conn.fetchrow(
+        "SELECT s.branch_id FROM doctor d JOIN staff s ON d.user_id = s.user_id WHERE d.user_id = $1;",
+        id
+    )
+    if not doc_row:
+        raise NotFoundError("Doctor not found.")
+
+    if user.role == "Doctor" and user.user_id != id:
+        raise ForbiddenError("Doctors can only edit their own schedule.")
+
+    if user.role == "Branch Manager" and user.branch_id is not None and doc_row["branch_id"] != user.branch_id:
+        raise ForbiddenError("Branch Managers can only manage doctors in their own branch.")
+
+    # Validate shifts
+    for s in payload.schedules:
+        if s.end_time <= s.start_time:
+            raise AppValidationError(f"End time ({s.end_time}) must be after start time ({s.start_time}).")
+
+    async with conn.transaction():
+        # Replace existing schedule
+        await conn.execute("DELETE FROM doctor_weekly_schedule WHERE doctor_id = $1;", id)
+        for s in payload.schedules:
+            st = f"{s.start_time}:00" if len(s.start_time) == 5 else s.start_time
+            et = f"{s.end_time}:00" if len(s.end_time) == 5 else s.end_time
+            await conn.execute(
+                """
+                INSERT INTO doctor_weekly_schedule (doctor_id, day_of_week, start_time, end_time, slot_duration, is_active)
+                VALUES ($1, $2, $3::time, $4::time, $5, $6)
+                ON CONFLICT (doctor_id, day_of_week, start_time) 
+                DO UPDATE SET end_time = EXCLUDED.end_time, slot_duration = EXCLUDED.slot_duration, is_active = EXCLUDED.is_active;
+                """,
+                id, s.day_of_week, st, et, s.slot_duration, s.is_active
+            )
+
+        # Trigger dynamic slot generation for the rolling 14-day horizon
+        await conn.execute("SELECT fn_generate_slots_from_roster(14);")
+
+    return await get_doctor_schedule(id=id, conn=conn, user=user)

@@ -173,6 +173,20 @@ export interface DoctorCreateResponse extends DoctorResponse {
   temp_password: string;
 }
 
+export interface DoctorScheduleItem {
+  schedule_id?: number;
+  doctor_id?: number;
+  day_of_week: number; // 0=Sunday, 1=Monday ... 6=Saturday
+  start_time: string;
+  end_time: string;
+  slot_duration: number;
+  is_active: boolean;
+}
+
+export interface DoctorScheduleUpdate {
+  schedules: DoctorScheduleItem[];
+}
+
 // ─── Billing / Invoices ─────────────────────────────────────────────────────
 
 export interface InvoiceLineItem {
