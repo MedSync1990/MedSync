@@ -2,11 +2,10 @@ import type { InvoiceData } from '../../types/invoiceTypes';
 
 interface InvoiceDetailsProps {
   invoiceData: InvoiceData;
-  onPrint: () => void;
   onRecordPayment: () => void;
 }
 
-export default function InvoiceDetails({ invoiceData, onPrint, onRecordPayment }: InvoiceDetailsProps) {
+export default function InvoiceDetails({ invoiceData, onRecordPayment }: InvoiceDetailsProps) {
   return (
     <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm p-space-lg space-y-space-md print-invoice-area" id="invoiceDetailPanel">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
@@ -22,10 +21,6 @@ export default function InvoiceDetails({ invoiceData, onPrint, onRecordPayment }
             Issued: {new Date(invoiceData.created_at).toLocaleString()} · {invoiceData.unit_name} Branch
           </p>
         </div>
-        <button className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-semibold transition-colors no-print" onClick={onPrint} type="button">
-          <span className="material-symbols-outlined text-[22px]">print</span>
-          <span>Print</span>
-        </button>
       </div>
 
       <div className="bg-surface-subtle p-space-md rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-border-subtle">
@@ -112,11 +107,6 @@ export default function InvoiceDetails({ invoiceData, onPrint, onRecordPayment }
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-border-subtle no-print">
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" onClick={onPrint} type="button">
-            <span className="material-symbols-outlined text-[22px]">print</span>
-            <span>Print</span>
-          </button>
-          
           <button 
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-[17px] font-bold transition-colors" 
             onClick={() => {

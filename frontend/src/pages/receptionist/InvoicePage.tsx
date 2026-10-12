@@ -264,7 +264,6 @@ export default function InvoicePage() {
         ) : invoiceData ? (
           <InvoiceDetails
             invoiceData={invoiceData}
-            onPrint={() => window.print()}
             onRecordPayment={() => handleRecordPayment(invoiceData.invoice_code)}
           />
         ) : null}

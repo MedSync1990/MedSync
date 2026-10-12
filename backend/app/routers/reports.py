@@ -703,6 +703,111 @@ async def get_doctor_payouts(
     data = [PayoutHistoryItem(**dict(r)) for r in records]
     return PayoutHistoryResponse(data=data)
 
+@router.get("/doctor-earnings/{target_doctor_id}/payouts/{payout_id}/pdf")
+@router.get("/doctor-payouts/{payout_id}/pdf")
+async def download_doctor_payout_slip(
+    payout_id: int,
+    target_doctor_id: Optional[int] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    from pathlib import Path
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from starlette.concurrency import run_in_threadpool
+    from datetime import timedelta
+    import weasyprint
+
+    query = """
+    SELECT 
+        p.payout_id,
+        p.user_id,
+        p.request_id,
+        p.account_id,
+        p.amount_paid,
+        p.payment_reference,
+        p.payment_method,
+        p.payment_date,
+        u.first_name,
+        u.middle_name,
+        u.last_name,
+        u.address AS doctor_address,
+        u.email AS doctor_email,
+        d.license_number,
+        b.bank_name,
+        b.account_number,
+        b.branch_name AS bank_branch_name,
+        r.remarks,
+        r.request_date,
+        br.name AS branch_name,
+        br.address AS branch_address,
+        br.phone_number AS branch_phone
+    FROM staff_payouts p
+    JOIN staff s ON p.user_id = s.user_id
+    JOIN app_user u ON s.user_id = u.user_id
+    LEFT JOIN doctor d ON s.user_id = d.user_id
+    LEFT JOIN staff_bank_accounts b ON p.account_id = b.account_id
+    LEFT JOIN staff_payout_requests r ON p.request_id = r.request_id
+    LEFT JOIN branch br ON s.branch_id = br.branch_id
+    WHERE p.payout_id = $1
+    """
+    row = await conn.fetchrow(query, payout_id)
+    if not row:
+        raise NotFoundError(f"Payout #{payout_id} not found.")
+
+    doctor_user_id = row["user_id"]
+    if target_doctor_id is not None and target_doctor_id != doctor_user_id:
+        raise NotFoundError("Payout does not match target doctor.")
+
+    if current_user.role == "Doctor" and current_user.user_id != doctor_user_id:
+        raise ForbiddenError("Doctors can only download their own payout slips.")
+
+    payment_date = row["payment_date"]
+    issued_date = payment_date.strftime("%d %B %Y")
+
+    slip_no = f"MS-PS-{payment_date.year}-{row['payout_id']:04d}"
+    doctor_name = f"Dr. {row['first_name']} {row['last_name']}".strip()
+    license_no = row['license_number'] or "000000"
+    reg_no = license_no if license_no.startswith("SLMC") else f"SLMC-{license_no}"
+
+    bank_name_str = row['bank_name'] or "Commercial Bank, Anuradhapura"
+    if row['bank_branch_name']:
+        bank_name_str += f", {row['bank_branch_name']}"
+
+    template_dir = Path(__file__).resolve().parents[1] / "templates"
+    env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=select_autoescape(["html"]))
+
+    logo_file = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    if not logo_file.exists():
+        logo_file = template_dir / "report_logo.png"
+    logo_uri = logo_file.as_uri()
+
+    amount_val = float(row["amount_paid"])
+    html = env.get_template("doctor_payment_slip_template.html").render(
+        slip_no=slip_no,
+        issued_date=issued_date,
+        doctor_name=doctor_name,
+        registration_no=reg_no,
+        doctor_address=row["doctor_address"] or "123 Anywhere St., Any City",
+        bank_name=bank_name_str,
+        account_number=row["account_number"] or "1234567899956415",
+        net_payment=f"Rs. {amount_val:,.2f}",
+        branch_address=row["branch_address"] or "123 Anywhere St., Any City",
+        branch_phone=row["branch_phone"] or "+123-456-7890",
+        website="www.medsync.com",
+        contact_email="accounts@medsync.com",
+        logo_url=logo_uri
+    )
+
+    pdf_bytes = await run_in_threadpool(lambda: weasyprint.HTML(string=html).write_pdf())
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="Doctor_Payment_Slip_{slip_no}.pdf"',
+            "Cache-Control": "no-store"
+        }
+    )
+
 @router.post("/doctor-earnings/{target_doctor_id}/payout-requests")
 async def create_doctor_payout_request(
     target_doctor_id: int,
