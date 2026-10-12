@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 import secrets
 import string
 from typing import List, Optional
@@ -20,6 +20,12 @@ from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidati
 from app.security import hash_password
 
 router = APIRouter()
+
+
+def parse_time(val: str) -> time:
+    """Parse HH:MM or HH:MM:SS string to datetime.time."""
+    parts = val.strip().split(":")
+    return time(hour=int(parts[0]), minute=int(parts[1]), second=int(parts[2]) if len(parts) > 2 else 0)
 
 
 def generate_temp_password(length: int = 12) -> str:
@@ -503,26 +509,51 @@ async def update_doctor_schedule(
     if user.role == "Branch Manager" and user.branch_id is not None and doc_row["branch_id"] != user.branch_id:
         raise ForbiddenError("Branch Managers can only manage doctors in their own branch.")
 
-    # Validate shifts
+    # Validate shifts & check for same-day overlaps
+    day_shifts = {}
+    day_names = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday"}
     for s in payload.schedules:
-        if s.end_time <= s.start_time:
-            raise AppValidationError(f"End time ({s.end_time}) must be after start time ({s.start_time}).")
+        try:
+            st = parse_time(s.start_time)
+            et = parse_time(s.end_time)
+        except Exception:
+            raise ConflictError(f"Invalid time format: '{s.start_time}' or '{s.end_time}'. Please use HH:MM format.")
+
+        if et <= st:
+            d_name = day_names.get(s.day_of_week, f"Day {s.day_of_week}")
+            raise ConflictError(f"Shift end time ({s.end_time[:5]}) must be after start time ({s.start_time[:5]}) on {d_name}.")
+
+        if s.day_of_week not in day_shifts:
+            day_shifts[s.day_of_week] = []
+        for prev_st, prev_et in day_shifts[s.day_of_week]:
+            if st < prev_et and et > prev_st:
+                d_name = day_names.get(s.day_of_week, f"Day {s.day_of_week}")
+                raise ConflictError(
+                    f"Overlapping shifts found on {d_name} ({s.start_time[:5]} - {s.end_time[:5]}). Please adjust shift hours."
+                )
+        day_shifts[s.day_of_week].append((st, et))
 
     async with conn.transaction():
         # Replace existing schedule
         await conn.execute("DELETE FROM doctor_weekly_schedule WHERE doctor_id = $1;", id)
         for s in payload.schedules:
-            st = f"{s.start_time}:00" if len(s.start_time) == 5 else s.start_time
-            et = f"{s.end_time}:00" if len(s.end_time) == 5 else s.end_time
+            st = parse_time(s.start_time)
+            et = parse_time(s.end_time)
             await conn.execute(
                 """
                 INSERT INTO doctor_weekly_schedule (doctor_id, day_of_week, start_time, end_time, slot_duration, is_active)
-                VALUES ($1, $2, $3::time, $4::time, $5, $6)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (doctor_id, day_of_week, start_time) 
                 DO UPDATE SET end_time = EXCLUDED.end_time, slot_duration = EXCLUDED.slot_duration, is_active = EXCLUDED.is_active;
                 """,
                 id, s.day_of_week, st, et, s.slot_duration, s.is_active
             )
+
+        # Remove unbooked 'Open' future slots so deleted/changed shifts do not persist
+        await conn.execute(
+            "DELETE FROM doctor_availability_slots WHERE doctor_id = $1 AND date >= CURRENT_DATE AND status = 'Open';",
+            id
+        )
 
         # Trigger dynamic slot generation for the rolling 14-day horizon
         await conn.execute("SELECT fn_generate_slots_from_roster(14);")

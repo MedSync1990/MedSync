@@ -47,5 +47,9 @@ async def unauthorized_exception_handler(request: Request, exc: UnauthorizedErro
 async def validation_exception_handler(request: Request, exc: AppValidationError):
     return JSONResponse(status_code=422, content={"errors": exc.errors})
 
+import logging
+
 async def generic_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(status_code=500, content={"message": "An unexpected error occurred."})
+    logging.error(f"Unhandled 500 error on {request.method} {request.url.path}: {exc}", exc_info=True)
+    msg = str(exc) if str(exc) else "An unexpected error occurred."
+    return JSONResponse(status_code=500, content={"message": f"Server error: {msg}"})
