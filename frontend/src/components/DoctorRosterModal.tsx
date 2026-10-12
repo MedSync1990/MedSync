@@ -134,15 +134,35 @@ export const DoctorRosterModal: React.FC<DoctorRosterModalProps> = ({
   const handleSave = async () => {
     if (!doctorId) return;
 
-    // Validate
+    // Validate times
     for (const s of schedules) {
       if (!s.start_time || !s.end_time) {
         showToast('Please specify both start and end time for all shifts.', 'error');
         return;
       }
       if (s.end_time <= s.start_time) {
-        showToast(`End time must be after start time (${s.start_time} - ${s.end_time}).`, 'error');
+        const dayObj = DAY_NAMES.find((d) => d.index === s.day_of_week);
+        showToast(`End time must be after start time on ${dayObj?.name || 'shift'} (${s.start_time} - ${s.end_time}).`, 'error');
         return;
+      }
+    }
+
+    // Validate that shifts on the same day do not overlap
+    for (const day of [0, 1, 2, 3, 4, 5, 6]) {
+      const dayShifts = schedules.filter((s) => s.day_of_week === day);
+      for (let i = 0; i < dayShifts.length; i++) {
+        for (let j = i + 1; j < dayShifts.length; j++) {
+          const s1 = dayShifts[i];
+          const s2 = dayShifts[j];
+          if (s1.start_time < s2.end_time && s1.end_time > s2.start_time) {
+            const dayName = DAY_NAMES.find((d) => d.index === day)?.name || 'day';
+            showToast(
+              `Shifts on ${dayName} overlap (${s1.start_time} - ${s1.end_time} and ${s2.start_time} - ${s2.end_time}). Please adjust shift hours.`,
+              'error'
+            );
+            return;
+          }
+        }
       }
     }
 
@@ -153,7 +173,14 @@ export const DoctorRosterModal: React.FC<DoctorRosterModalProps> = ({
       onSaved?.();
       onClose();
     } catch (err: any) {
-      showToast(err?.message || 'Failed to update schedule', 'error');
+      const msg =
+        err?.body?.message ||
+        err?.message ||
+        (Array.isArray(err?.body?.errors)
+          ? err.body.errors.map((e: any) => e.message).join(', ')
+          : '') ||
+        'Failed to update schedule';
+      showToast(msg, 'error');
     } finally {
       setSaving(false);
     }
