@@ -337,7 +337,8 @@ async def get_treatment_categories_pdf(
     import weasyprint
     from jinja2 import Environment, FileSystemLoader
     from datetime import datetime
-    import os
+    from pathlib import Path
+    from starlette.concurrency import run_in_threadpool
     
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     if actual_branch_id == 1:
@@ -430,8 +431,9 @@ async def get_treatment_categories_pdf(
         f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
     )
     
-    from pathlib import Path
-    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    # Keep report assets inside app/, which is copied into the production image.
+    template_dir = Path(__file__).resolve().parent.parent / "templates"
+    logo_path = template_dir / "report_logo.png"
     logo_uri = logo_path.as_uri()
 
     template_data = {
@@ -449,11 +451,13 @@ async def get_treatment_categories_pdf(
         "logo_url": logo_uri
     }
     
-    env = Environment(loader=FileSystemLoader("app/templates"))
+    env = Environment(loader=FileSystemLoader(str(template_dir)))
     template = env.get_template("treatment_report_template.html")
     html_string = template.render(**template_data)
     
-    pdf_bytes = weasyprint.HTML(string=html_string).write_pdf()
+    pdf_bytes = await run_in_threadpool(
+        lambda: weasyprint.HTML(string=html_string, base_url=str(template_dir)).write_pdf()
+    )
     
     return Response(
         content=pdf_bytes, 
