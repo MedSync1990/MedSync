@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { createStaff, updateStaff } from '../../api';
+import { createStaff, updateStaff, listBranches, type BranchResponse } from '../../api';
 import { get } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -17,8 +17,10 @@ export const AddStaff: React.FC = () => {
   // Data options
   const [roles, setRoles] = useState<{role_id: number, role_name: string}[]>([]);
   const [specialties, setSpecialties] = useState<{specialty_id: number, name: string}[]>([]);
+  const [branches, setBranches] = useState<BranchResponse[]>([]);
 
   // Form State
+  const [fBranch, setFBranch] = useState<number | ''>(user?.branchId || 1);
   const [fFirst, setFFirst] = useState('');
   const [fMid, setFMid] = useState('');
   const [fLast, setFLast] = useState('');
@@ -43,7 +45,15 @@ export const AddStaff: React.FC = () => {
   useEffect(() => {
     get<{role_id: number, role_name: string}[]>('/auth/roles').then(setRoles).catch(() => {});
     get<{specialty_id: number, name: string}[]>('/specialties').then(setSpecialties).catch(() => {});
-  }, []);
+    listBranches().then(data => {
+      setBranches(data);
+      if (user?.branchId) {
+        setFBranch(user.branchId);
+      } else if (data.length > 0) {
+        setFBranch(data[0].branch_id);
+      }
+    }).catch(() => {});
+  }, [user?.branchId]);
 
   const handleAddPhone = () => {
     if (fPhones.length < 3) setFPhones([...fPhones, '']);
@@ -63,6 +73,11 @@ export const AddStaff: React.FC = () => {
     
     const selectedRole = roles.find(r => r.role_id === Number(fRole));
     if (!selectedRole && !isEditMode) { showToast('Please select a valid role.', 'error'); return; }
+
+    if (!isEditMode && user?.role === 'Administrator' && !fBranch) {
+      showToast('Please select a branch.', 'error');
+      return;
+    }
 
     if (!isEditMode && selectedRole?.role_name === 'Doctor' && (!fLicense.trim() || !fSpecialty)) {
       showToast('Doctors must have a specialty and a medical license number.', 'error');
@@ -89,7 +104,7 @@ export const AddStaff: React.FC = () => {
 
         const payload = {
           role_id: Number(fRole),
-          branch_id: user?.branchId || 1,
+          branch_id: user?.role === 'Administrator' ? Number(fBranch) : (user?.branchId || 1),
           first_name: fFirst.trim(),
           middle_name: fMid.trim() || undefined,
           last_name: fLast.trim(),
@@ -119,6 +134,7 @@ export const AddStaff: React.FC = () => {
     setFGender(''); setFAddr(''); setFEmail(''); setFRole('');
     setFPhones(['']); setFLicense(''); setFSpecialty('');
     setFBankAccounts([{ bank_name: '', account_number: '', bank_branch: '' }]);
+    setFBranch(user?.branchId || (branches[0]?.branch_id ?? 1));
   };
 
   const copyPw = () => {
@@ -128,7 +144,7 @@ export const AddStaff: React.FC = () => {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">
@@ -250,10 +266,28 @@ export const AddStaff: React.FC = () => {
                 {roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
               </select>
             </div>
-            <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-lg border border-border-subtle md:col-span-1 h-[42px] mt-[28px]">
-              <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
-              <span>Branch: <strong>{user?.branchName || 'Assigned Branch'}</strong></span>
-            </div>
+            {user?.role === 'Administrator' ? (
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-lg text-label-lg text-brand-navy-deep">Branch <span className="text-error font-bold">*</span></label>
+                <select
+                  required
+                  disabled={isEditMode}
+                  value={fBranch}
+                  onChange={e => setFBranch(e.target.value ? Number(e.target.value) : '')}
+                  className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus cursor-pointer"
+                >
+                  <option value="">Select a branch</option>
+                  {branches.map(b => (
+                    <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-lg border border-border-subtle md:col-span-1 h-[42px] mt-[28px]">
+                <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
+                <span>Branch: <strong>{user?.branchName || 'Assigned Branch'}</strong></span>
+              </div>
+            )}
             {roles.find(r => r.role_id === Number(fRole))?.role_name === 'Doctor' && (
               <>
                 <div className="flex flex-col gap-1.5">
