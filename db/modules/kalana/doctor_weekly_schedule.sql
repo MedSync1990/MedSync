@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS doctor_weekly_schedule (
     CONSTRAINT uq_doctor_day_shift UNIQUE (doctor_id, day_of_week, start_time)
 );
 
-CREATE INDEX IF NOT EXISTS idx_doc_weekly_schedule 
+CREATE INDEX IF NOT EXISTS idx_doc_weekly_schedule
     ON doctor_weekly_schedule(doctor_id, day_of_week, is_active);
 
 -- ============================================================================
@@ -42,7 +42,7 @@ BEGIN
         TRUE
     FROM (VALUES (1), (2), (3), (4), (5)) AS d(day_of_week)
     CROSS JOIN (
-        VALUES 
+        VALUES
             ('09:00:00'::time, '12:00:00'::time),
             ('14:00:00'::time, '16:30:00'::time)
     ) AS s(start_time, end_time)
@@ -73,7 +73,7 @@ SELECT
 FROM doctor d
 CROSS JOIN (VALUES (1), (2), (3), (4), (5)) AS days(day_of_week)
 CROSS JOIN (
-    VALUES 
+    VALUES
         ('09:00:00'::time, '12:00:00'::time),
         ('14:00:00'::time, '16:30:00'::time)
 ) AS shifts(start_time, end_time)
@@ -100,7 +100,7 @@ DECLARE
     v_inserted INT := 0;
 BEGIN
     WITH dynamic_slots AS (
-        SELECT 
+        SELECT
             dws.doctor_id,
             day_offset.day::date AS date,
             slot_chunk.slot_start::time AS start_time,
@@ -131,7 +131,7 @@ BEGIN
         SELECT 1 FROM doctor_availability_slots existing
         WHERE existing.doctor_id = ds.doctor_id
           AND existing.date = ds.date
-          AND tsrange(existing.date + existing.start_time, existing.date + existing.end_time, '[)') && 
+          AND tsrange(existing.date + existing.start_time, existing.date + existing.end_time, '[)') &&
               tsrange(ds.date + ds.start_time, ds.date + ds.end_time, '[)')
     )
     ON CONFLICT DO NOTHING;

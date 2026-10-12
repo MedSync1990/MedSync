@@ -1,8 +1,20 @@
 from datetime import datetime, timedelta, timezone
 import jwt
 import bcrypt
+from fastapi import Request
 from app.config import config
-from app.errors import UnauthorizedError
+from app.errors import UnauthorizedError, ForbiddenError
+
+
+def require_trusted_origin(request: Request) -> None:
+    """Protect browser mutations using the exact configured frontend/API origins.
+
+    Missing/null origins and Referer paths never grant access. Non-browser
+    clients should use bearer-only authentication on protected API routes.
+    """
+    origin = request.headers.get("origin")
+    if not origin or origin == "null" or origin not in config.CORS_ALLOWED_ORIGINS:
+        raise ForbiddenError("Untrusted or missing request origin.")
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()

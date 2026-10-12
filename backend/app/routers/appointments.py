@@ -193,6 +193,7 @@ async def list_appointments(
     """
     scoped_branch_id = user.branch_id if user.role == "Branch Manager" else branch
     scoped_doctor_id = user.user_id if user.role == "Doctor" else doctor
+    receptionist_branch_id = user.branch_id if (user.role == "Receptionist" and user.branch_id is not None) else None
     offset = (page - 1) * limit
     search_term = f"%{search.strip()}%" if search and search.strip() else None
 
@@ -208,6 +209,7 @@ async def list_appointments(
                 a.appointment_code ILIKE $6 OR
                 CONCAT_WS(' ', du.first_name, NULLIF(du.middle_name, ''), du.last_name) ILIKE $6
           ))
+          AND ($7::int IS NULL OR a.appointment_type::text != 'Walk-in' OR s.branch_id = $7)
     """
 
     count_query = f"""
@@ -219,7 +221,7 @@ async def list_appointments(
         JOIN app_user du ON das.doctor_id = du.user_id
         {base_where};
     """
-    total = await conn.fetchval(count_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term)
+    total = await conn.fetchval(count_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term, receptionist_branch_id)
 
     data_query = f"""
         SELECT
@@ -250,9 +252,9 @@ async def list_appointments(
         LEFT JOIN patient pt ON a.patient_id = pt.user_id
         {base_where}
         ORDER BY das.date DESC, das.start_time DESC
-        LIMIT $7 OFFSET $8;
+        LIMIT $8 OFFSET $9;
     """
-    rows = await conn.fetch(data_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term, limit, offset)
+    rows = await conn.fetch(data_query, scoped_branch_id, date, status, scoped_doctor_id, patient_id, search_term, receptionist_branch_id, limit, offset)
 
     items = [
         AppointmentResponse(
@@ -300,6 +302,10 @@ async def get_appointment(
 
     if user.role == "Branch Manager" and user.branch_id is not None and appt.branch_id != user.branch_id:
         raise NotFoundError("Appointment not found.")
+
+    if user.role == "Receptionist" and user.branch_id is not None:
+        if appt.appointment_type == AppointmentTypeEnum.walk_in and appt.branch_id != user.branch_id:
+            raise NotFoundError("Appointment not found.")
 
     return appt
 
@@ -364,9 +370,17 @@ async def create_walk_in_appointment(
     if not patient:
         raise NotFoundError("Patient not found.")
 
-    doctor = await conn.fetchval("SELECT user_id FROM doctor WHERE user_id = $1;", payload.doctor_id)
+    doctor = await conn.fetchrow(
+        "SELECT d.user_id, s.branch_id FROM doctor d JOIN staff s ON d.user_id = s.user_id WHERE d.user_id = $1;",
+        payload.doctor_id,
+    )
     if not doctor:
         raise NotFoundError("Doctor not found.")
+
+    # Receptionist branch scoping: quick walk-ins are restricted to receptionist's own branch
+    if user.role == "Receptionist" and user.branch_id is not None:
+        if doctor["branch_id"] != user.branch_id:
+            raise ForbiddenError("Receptionists can only create quick walk-in appointments for their own branch.")
 
     try:
         appt_id = await conn.fetchval(
