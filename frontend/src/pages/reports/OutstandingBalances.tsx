@@ -193,7 +193,7 @@ export function OutstandingBalances() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">account_balance_wallet</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalOutstanding)}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -201,7 +201,7 @@ export function OutstandingBalances() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">receipt_long</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{overdueInvoices} <span className="font-body-md text-body-md text-secondary font-normal">invoices</span></div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -209,7 +209,7 @@ export function OutstandingBalances() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">pie_chart</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{partiallyPaid}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>donut_small</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>donut_small</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -217,7 +217,7 @@ export function OutstandingBalances() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">block</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fullyUnpaid}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>money_off</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>money_off</span></div>
         </div>
       </div>
 

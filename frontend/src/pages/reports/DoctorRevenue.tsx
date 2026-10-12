@@ -220,7 +220,7 @@ export default function DoctorRevenueReport() {
             </div>
           </div>
           <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalClinicalRevenue)}</div></div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -230,7 +230,7 @@ export default function DoctorRevenueReport() {
             </div>
           </div>
           <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{completedConsults}</div></div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>calendar_today</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>calendar_today</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -240,7 +240,7 @@ export default function DoctorRevenueReport() {
             </div>
           </div>
           <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{topSpecialty}</div></div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>ecg_heart</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>ecg_heart</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -250,7 +250,7 @@ export default function DoctorRevenueReport() {
             </div>
           </div>
           <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(avgRevenue)}</div></div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>stacked_bar_chart</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>stacked_bar_chart</span></div>
         </div>
       </div>
 

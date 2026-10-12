@@ -204,7 +204,7 @@ export function InsuranceVsOutOfPocket() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">health_and_safety</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{insCoveragePct}%</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>shield</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>shield</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -212,7 +212,7 @@ export function InsuranceVsOutOfPocket() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">wallet</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{oopRatio}%</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -220,7 +220,7 @@ export function InsuranceVsOutOfPocket() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">receipt_long</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalBilled)}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -228,7 +228,7 @@ export function InsuranceVsOutOfPocket() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">timer</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{data?.avg_claim_days ? data.avg_claim_days.toFixed(1) : "0.0"} business days</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>schedule</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>schedule</span></div>
         </div>
       </div>
 

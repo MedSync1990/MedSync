@@ -186,7 +186,7 @@ export default function BranchAppointmentSummary() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">calendar_today</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalScheduled}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -194,7 +194,7 @@ export default function BranchAppointmentSummary() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">check_circle</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalCompleted}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>task_alt</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>task_alt</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -202,7 +202,7 @@ export default function BranchAppointmentSummary() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">cancel</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalCancelled}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event_busy</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event_busy</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -210,7 +210,7 @@ export default function BranchAppointmentSummary() {
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">transfer_within_a_station</span></div>
           </div>
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalWalkins}</div>
-          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>directions_walk</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>directions_walk</span></div>
         </div>
       </div>
 
