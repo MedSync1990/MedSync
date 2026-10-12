@@ -5,6 +5,7 @@ import { patientService } from '../../services/patientService';
 import { get } from '../../services/api';
 import { getPatientInsurance, verifyInsurance } from '../../api/billing';
 import { useAuth } from '../../context/AuthContext';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
 
 export const PatientProfile: React.FC = () => {
@@ -12,6 +13,8 @@ export const PatientProfile: React.FC = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
+
+  useDocumentTitle(patient ? `${patient.first_name} ${patient.last_name} · Patient Profile` : 'Patient Profile');
   const [balance, setBalance] = useState<number | null>(null);
   const [insurancePolicies, setInsurancePolicies] = useState<PatientInsuranceItem[]>([]);
   const [payments, setPayments] = useState<any[]>([]);

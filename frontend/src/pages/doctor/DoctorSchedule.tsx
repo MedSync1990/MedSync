@@ -4,8 +4,10 @@ import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { DoctorRosterModal } from '../../components/DoctorRosterModal';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export const DoctorSchedule: React.FC = () => {
+  useDocumentTitle('Doctor Schedule');
   const [activeTab, setActiveTab] = useState<'all' | 'remaining' | 'waiting' | 'upcoming' | 'completed'>('remaining');
   const [currentDateIndex, setCurrentDateIndex] = useState(1); // 1 = Today (Thursday)
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
