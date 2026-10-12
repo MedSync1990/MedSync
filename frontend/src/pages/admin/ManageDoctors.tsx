@@ -12,6 +12,7 @@ import { Modal } from '../../components/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
+import { DoctorRosterModal } from '../../components/DoctorRosterModal';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function initials(name?: string) {
@@ -464,6 +465,7 @@ export const ManageDoctors: React.FC = () => {
 
   // Modal state
   const [modalDoctor, setModalDoctor] = useState<DoctorResponse | null>(null);
+  const [rosterDoctor, setRosterDoctor] = useState<DoctorResponse | null>(null);
 
   // Edit / Delete Specialty State
   const [editingSpecialty, setEditingSpecialty] = useState<SpecialtyResponse | null>(null);
@@ -871,6 +873,17 @@ export const ManageDoctors: React.FC = () => {
                             <div className="flex items-center justify-end gap-space-xs">
                               <button
                                 type="button"
+                                onClick={() => setRosterDoctor(doctor)}
+                                className="px-space-sm h-8 rounded-lg bg-surface-container text-secondary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
+                                title="Manage Weekly Working Roster"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">
+                                  calendar_month
+                                </span>
+                                <span>Roster</span>
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => setModalDoctor(doctor)}
                                 className="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
                               >
@@ -1076,6 +1089,14 @@ export const ManageDoctors: React.FC = () => {
           onSave={handleModalSave}
         />
       )}
+
+      {/* Doctor Weekly Schedule Roster Modal */}
+      <DoctorRosterModal
+        isOpen={Boolean(rosterDoctor)}
+        doctorId={rosterDoctor?.doctor_id ?? null}
+        doctorName={rosterDoctor?.full_name}
+        onClose={() => setRosterDoctor(null)}
+      />
 
       {/* Edit Specialty Modal */}
       <Modal
