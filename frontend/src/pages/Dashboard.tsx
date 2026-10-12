@@ -49,12 +49,12 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col w-full px-space-md md:px-space-xl py-space-lg max-w-content-max-width mx-auto space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       
       {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
         <div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
             Welcome back, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">

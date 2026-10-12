@@ -212,30 +212,29 @@ export const ManageBranches: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
-      <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-        {/* Header Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
-              <span className="text-primary font-bold">Manage Branches</span>
-            </div>
-            <h1 className="text-display-lg tracking-tight">Manage Branches</h1>
-            <p className="text-body-md text-on-surface-variant">
-              Clinic branch locations across the healthcare network. Add locations, assign managers, and manage branch statuses.
-            </p>
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+      {/* Header Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <span className="text-primary font-bold">Manage Branches</span>
           </div>
-          <div className="flex gap-space-sm">
-            <button
-              type="button"
-              onClick={handleOpenAddDrawer}
-              className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors font-medium"
-            >
-              <span className="material-symbols-outlined text-[20px]">add_business</span>
-              Add branch
-            </button>
-          </div>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Manage Branches</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Clinic branch locations across the healthcare network. Add locations, assign managers, and manage branch statuses.
+          </p>
         </div>
+        <div className="flex gap-space-sm">
+          <button
+            type="button"
+            onClick={handleOpenAddDrawer}
+            className="h-[42px] px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-sm flex items-center gap-space-xs transition-all"
+          >
+            <span className="material-symbols-outlined text-[20px]">add_business</span>
+            <span>Add Branch</span>
+          </button>
+        </div>
+      </div>
 
         {/* KPI Metrics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
@@ -476,7 +475,7 @@ export const ManageBranches: React.FC = () => {
                           setSearchQuery('');
                           setStatusFilter('all');
                         }}
-                        className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary text-label-md"
+                        className="h-10 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-sm transition-all"
                       >
                         Clear filters
                       </button>
@@ -497,7 +496,6 @@ export const ManageBranches: React.FC = () => {
             </table>
           </div>
         </div>
-      </div>
 
       {/* Drawer for Add/Edit Branch */}
       {isDrawerOpen && (
@@ -621,7 +619,7 @@ export const ManageBranches: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-10 px-space-md rounded-xl text-label-md bg-border-focus hover:bg-status-scheduled-text text-on-primary shadow-sm flex items-center gap-2 font-bold transition-colors disabled:opacity-70"
+                  className="h-10 px-space-md rounded-xl text-label-md bg-primary hover:bg-primary-container text-on-primary shadow-sm flex items-center gap-2 font-bold transition-all disabled:opacity-70"
                 >
                   <span className="material-symbols-outlined text-[18px]">save</span>
                   {isSubmitting ? 'Saving...' : editingBranch ? 'Save changes' : 'Create branch'}

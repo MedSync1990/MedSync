@@ -376,7 +376,7 @@ export const DoctorConsultation: React.FC = () => {
   const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Select a scheduled appointment';
 
   return (
-    <div className="w-full max-w-content-max-width mx-auto flex flex-col gap-space-lg py-space-md">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-lg">
       {/* Breadcrumb & Patient Context Header */}
       <div className="flex flex-col gap-space-sm">
         <nav className="flex items-center gap-space-2xs font-label-md text-label-md text-secondary">
@@ -391,7 +391,7 @@ export const DoctorConsultation: React.FC = () => {
         </nav>
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Consultation</h1>
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Consultation</h1>
             <span className="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
               {appointment?.status || 'Room 04'}
             </span>
@@ -426,7 +426,7 @@ export const DoctorConsultation: React.FC = () => {
                 </h2>
                 {/* Queue Status Pill */}
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
-                  <span className="w-2 h-2 rounded-full bg-border-focus animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                   {appointment?.status || 'Loading appointment'}
                 </span>
               </div>

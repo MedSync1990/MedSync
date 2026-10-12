@@ -108,11 +108,11 @@ export const DoctorEarnings: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full pb-space-3xl max-w-content-max-width mx-auto">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
       {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pt-space-lg pb-space-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pb-space-md">
         <div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Payments & Earnings</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Payments &amp; Earnings</h1>
           <p className="font-body-md text-body-md text-secondary mt-0.5">
             View your hospital payments, monthly revenue share, and payout requests
           </p>

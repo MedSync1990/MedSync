@@ -52,7 +52,7 @@ export const DoctorSchedule: React.FC = () => {
   const waitingCount = appointments.filter((appointment) => appointment.status === 'Scheduled').length;
 
   return (
-    <div className="flex flex-col w-full py-space-md space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Breadcrumb & Schedule Mode Indicator */}
       <div className="flex flex-wrap items-center justify-between gap-y-space-xs">
         <nav aria-label="Breadcrumb" className="flex items-center gap-space-2xs text-secondary font-label-md text-label-md">
@@ -93,7 +93,7 @@ export const DoctorSchedule: React.FC = () => {
                   {currentDate.label}
                 </span>
                 {currentDate.isToday ? (
-                  <span className="px-2 py-0.5 rounded-md bg-border-focus text-on-primary font-label-sm text-label-sm font-bold tracking-wider uppercase">
+                  <span className="px-2 py-0.5 rounded-md bg-primary text-on-primary font-label-sm text-label-sm font-bold tracking-wider uppercase">
                     Today
                   </span>
                 ) : (
@@ -274,7 +274,7 @@ export const DoctorSchedule: React.FC = () => {
                       {appointment.status === 'Scheduled' ? (
                         <Link
                           to={`/doctor/consultation?appointmentId=${appointment.appointment_id}`}
-                          className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+                          className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
                         >
                           <span className="material-symbols-outlined text-[18px]">stethoscope</span>
                           <span>Start Consultation</span>
@@ -326,7 +326,7 @@ export const DoctorSchedule: React.FC = () => {
                   <td className="px-space-lg py-space-sm text-right">
                     <Link
                       to="/consultation"
-                      className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+                      className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
                     >
                       <span className="material-symbols-outlined text-[18px]">stethoscope</span>
                       <span>Start Consultation</span>
@@ -469,7 +469,7 @@ export const DoctorSchedule: React.FC = () => {
             </div>
             <button
               onClick={() => setCurrentDateIndex(1)}
-              className="h-10 px-space-lg rounded-xl bg-border-focus text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+              className="h-10 px-space-lg rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
               type="button"
             >
               Return to Today ({dates[1].label})

@@ -139,7 +139,7 @@ export const PatientProfile: React.FC = () => {
   }
 
   return (
-    <div className="py-6 px-space-md md:px-space-lg max-w-[1600px] mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <button
         onClick={() => navigate('/receptionist/patients')}
         className="inline-flex items-center text-primary hover:text-primary-container font-label-md text-label-md transition-colors mb-2"

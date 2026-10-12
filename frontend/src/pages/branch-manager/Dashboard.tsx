@@ -78,7 +78,7 @@ export default function BranchManagerDashboard() {
     { label: 'Cancelled', count: today?.cancelled ?? 0, color: 'bg-rose-100 text-rose-800', bar: 'bg-rose-500', note: 'Cancelled appointments' },
   ];
 
-  return <div className="mx-auto flex w-full max-w-content-max-width flex-col gap-space-lg py-space-lg">
+  return <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-lg">
     <section className={`${card} relative overflow-hidden p-space-xl`}>
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-surface-container-low" />
       <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:flex-wrap lg:items-center">
@@ -86,7 +86,7 @@ export default function BranchManagerDashboard() {
           <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-medium text-secondary">
             <span className="rounded-full bg-sky-100 px-3 py-1 font-semibold uppercase tracking-wide text-primary">{error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}</span><span>{dateLabel}</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Welcome,<br />{[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Manager'}</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Welcome,<br />{[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Manager'}</h1>
           <p className="mt-3 text-sm text-secondary">{branchName} · Branch Manager Overview</p>
 
         </div>

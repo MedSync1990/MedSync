@@ -154,7 +154,7 @@ export const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-space-lg max-w-content-max-width mx-auto w-full text-center py-16">
+      <div className="flex flex-col items-center justify-center w-full py-16">
         <span className="material-symbols-outlined text-[40px] text-primary animate-spin">progress_activity</span>
         <p className="font-body-md text-secondary mt-3">Loading profile details...</p>
       </div>
@@ -178,7 +178,7 @@ export const Profile: React.FC = () => {
   ];
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Breadcrumbs */}
       <div>
         <Breadcrumbs items={breadcrumbs} />

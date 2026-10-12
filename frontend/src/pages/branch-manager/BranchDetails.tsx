@@ -125,23 +125,22 @@ export const BranchDetails: React.FC = () => {
     : 0;
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
-      <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-        {/* ── Breadcrumb & Top Header ── */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
-              <span>Branch Management</span>
-              <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-              <span className="text-primary font-bold">Branch Details</span>
-            </div>
-            <h1 className="text-display-lg tracking-tight font-bold text-brand-navy-deep">
-              {branch ? `${branch.name} Branch` : 'Branch Details'}
-            </h1>
-            <p className="text-body-md text-on-surface-variant">
-              Comprehensive profile, location, and operational parameters for your branch. All details are read-only.
-            </p>
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+      {/* ── Breadcrumb & Top Header ── */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <span>Branch Management</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Branch Details</span>
           </div>
+          <h1 className="font-display-lg text-display-lg tracking-tight font-bold text-brand-navy-deep">
+            {branch ? `${branch.name} Branch` : 'Branch Details'}
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Comprehensive profile, location, and operational parameters for your branch. All details are read-only.
+          </p>
+        </div>
 
           <div className="flex flex-wrap items-center gap-space-sm">
             {/* Admin Branch Switcher */}
@@ -544,7 +543,6 @@ export const BranchDetails: React.FC = () => {
           </>
         )}
       </div>
-    </div>
   );
 };
 

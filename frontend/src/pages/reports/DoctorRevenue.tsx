@@ -114,7 +114,7 @@ export default function DoctorRevenueReport() {
   const fmt = (v: number) => `LKR ${(Number(v) || 0).toLocaleString('en-US')}`;
 
   return (
-    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-xl">
       {/* Locked Context & Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col gap-space-2xs">
@@ -124,7 +124,7 @@ export default function DoctorRevenueReport() {
             <span className="text-outline">/</span>
             <span className="text-secondary font-medium">Branch Performance</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Doctor Revenue</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Doctor Revenue</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">Revenue generated per doctor over a date range.</p>
         </div>
         {user?.role === 'Administrator' ? (
@@ -219,8 +219,8 @@ export default function DoctorRevenueReport() {
               <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
             </div>
           </div>
-          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fmt(totalClinicalRevenue)}</div></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">payments</span></div>
+          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalClinicalRevenue)}</div></div>
+          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -229,8 +229,8 @@ export default function DoctorRevenueReport() {
               <span className="material-symbols-outlined text-[20px]">event_available</span>
             </div>
           </div>
-          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{completedConsults}</div></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">calendar_today</span></div>
+          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{completedConsults}</div></div>
+          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>calendar_today</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -239,8 +239,8 @@ export default function DoctorRevenueReport() {
               <span className="material-symbols-outlined text-[20px]">cardiology</span>
             </div>
           </div>
-          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{topSpecialty}</div></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">ecg_heart</span></div>
+          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{topSpecialty}</div></div>
+          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>ecg_heart</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
@@ -249,8 +249,8 @@ export default function DoctorRevenueReport() {
               <span className="material-symbols-outlined text-[20px]">groups</span>
             </div>
           </div>
-          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fmt(avgRevenue)}</div></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">stacked_bar_chart</span></div>
+          <div><div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(avgRevenue)}</div></div>
+          <div className="absolute right-3 bottom-0.5 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>stacked_bar_chart</span></div>
         </div>
       </div>
 

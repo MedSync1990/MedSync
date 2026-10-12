@@ -64,11 +64,11 @@ export const ReportPageShell: React.FC<ReportPageShellProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full px-space-md md:px-space-xl py-space-lg max-w-content-max-width mx-auto space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-xl">
         <div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
             {title}
           </h1>
           <p className="font-body-md text-body-md text-secondary mt-1">

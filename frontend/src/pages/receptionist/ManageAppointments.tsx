@@ -416,7 +416,7 @@ export const ManageAppointments: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER, BREADCRUMBS & LIVE METRICS                       */}
       {/* ─────────────────────────────────────────────────────────────────── */}
