@@ -6,6 +6,7 @@ import { get, put } from '../../api/client';
 import { listTreatments, type TreatmentApiItem } from '../../api/treatments';
 import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
 import type { AppointmentResponse } from '../../api/types';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 interface AppointmentTreatment {
   treatment_id: number;
@@ -44,6 +45,8 @@ export const DoctorConsultation: React.FC = () => {
 
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
+
+  useDocumentTitle(patient ? `${patient.first_name} ${patient.last_name} · Consultation` : 'Consultation');
   const [allergies, setAllergies] = useState<AllergyItem[]>([]);
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
   const [availableTreatments, setAvailableTreatments] = useState<TreatmentApiItem[]>([]);

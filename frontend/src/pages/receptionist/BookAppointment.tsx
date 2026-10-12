@@ -201,15 +201,15 @@ export const BookAppointment: React.FC = () => {
       setLoadingDoctors(true);
       try {
         const [docsRes, specsRes, branchesRes] = await Promise.all([
-          get<DoctorResponse[]>('/doctors').catch(() => []),
+          get<DoctorResponse[]>('/doctors?is_active=true').catch(() => []),
           get<SpecialtyResponse[]>('/specialties').catch(() => []),
-          get<BranchResponse[]>('/branches').catch(() => []),
+          get<BranchResponse[]>('/branches?is_active=true').catch(() => []),
         ]);
-        setAllDoctors(docsRes || []);
+        setAllDoctors((docsRes || []).filter((d) => d.is_active !== false));
         setAllSpecialties(specsRes || []);
 
         if (branchesRes && branchesRes.length > 0) {
-          setAllBranches(branchesRes);
+          setAllBranches(branchesRes.filter((b) => b.is_active !== false));
         } else if (docsRes && docsRes.length > 0) {
           // Derive fallback branches from doctors list
           const unique = Array.from(new Set(docsRes.map((d) => d.branch_name).filter(Boolean)));
@@ -336,6 +336,7 @@ export const BookAppointment: React.FC = () => {
   // ─── Filtered Doctors ──────────────────────────────────────────────────────
   const filteredDoctors = useMemo(() => {
     return allDoctors.filter((doc) => {
+      if (doc.is_active === false) return false;
       const docName = doc.full_name;
       const matchesBranch =
         selectedBranch === 'All' ||
@@ -376,6 +377,10 @@ export const BookAppointment: React.FC = () => {
   };
 
   const handleExecuteBooking = async () => {
+    if (selectedDate < todayStr) {
+      showToast('Appointments cannot be booked for past dates.', 'error');
+      return;
+    }
     if (!selectedPatient) {
       showToast('Please search and select a patient first.', 'error');
       return;
@@ -480,7 +485,8 @@ export const BookAppointment: React.FC = () => {
   };
 
   const isReadyToConfirm =
-    category === 'Walk-in'
+    selectedDate >= todayStr &&
+    (category === 'Walk-in'
       ? Boolean(
         selectedPatient &&
         selectedDoctor &&
@@ -489,7 +495,7 @@ export const BookAppointment: React.FC = () => {
         walkInEndTime > walkInStartTime &&
         !conflictingSlot
       )
-      : Boolean(selectedPatient && selectedDoctor && selectedSlot);
+      : Boolean(selectedPatient && selectedDoctor && selectedSlot));
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -891,8 +897,17 @@ export const BookAppointment: React.FC = () => {
               </button>
               <input
                 type="date"
+                min={todayStr}
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val && val < todayStr) {
+                    showToast('Appointments cannot be booked for past dates.', 'error');
+                    setSelectedDate(todayStr);
+                    return;
+                  }
+                  setSelectedDate(val);
+                }}
                 className="h-[32px] px-2 text-label-sm font-semibold bg-surface-subtle border border-border-subtle rounded-md text-brand-navy-deep focus:outline-none focus:border-primary"
               />
             </div>
@@ -934,7 +949,7 @@ export const BookAppointment: React.FC = () => {
                   <span className="material-symbols-outlined text-[14px]">check</span>
                 )}
               </button>
-              {allBranches.map((b) => (
+              {allBranches.filter((b) => b.is_active !== false).map((b) => (
                 <button
                   key={b.branch_id}
                   type="button"

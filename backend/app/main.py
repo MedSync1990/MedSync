@@ -36,8 +36,10 @@ async def lifespan(app: FastAPI):
     try:
         async with app.state.admin_pool.acquire() as conn:
             await conn.execute("ALTER TABLE staff ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT TRUE;")
+        async with app.state.pool.acquire() as conn:
+            await conn.execute("SELECT fn_generate_slots_from_roster(14);")
     except Exception as e:
-        logging.warning("Could not auto-migrate must_change_password column: %s", e)
+        logging.warning("Startup initialization warning: %s", e)
     yield
     await app.state.pool.close()
     await app.state.admin_pool.close()
