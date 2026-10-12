@@ -1,18 +1,23 @@
 from datetime import date, time
+import secrets
+import string
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from asyncpg import Connection
 
 from app.dependencies import get_db, require_roles, get_branch_scope, CurrentUser
 from app.schemas.doctors import (
+    DoctorCreate,
     DoctorUpdate,
     DoctorSpecialtiesUpdate,
     DoctorResponse,
+    DoctorCreateResponse,
     DoctorScheduleItem,
     DoctorScheduleUpdate,
 )
 from app.schemas.appointments import DoctorSlotResponse, SlotStatusEnum
-from app.errors import NotFoundError, ConflictError, ForbiddenError
+from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidationError
+from app.security import hash_password
 
 router = APIRouter()
 
@@ -21,6 +26,12 @@ def parse_time(val: str) -> time:
     """Parse HH:MM or HH:MM:SS string to datetime.time."""
     parts = val.strip().split(":")
     return time(hour=int(parts[0]), minute=int(parts[1]), second=int(parts[2]) if len(parts) > 2 else 0)
+
+
+def generate_temp_password(length: int = 12) -> str:
+    """Generate a secure random temporary password."""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 @router.get("", response_model=List[DoctorResponse])
@@ -66,9 +77,9 @@ async def list_doctors(
         ) doc_sp ON TRUE
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND (
-              $2::int IS NULL OR 
+              $2::int IS NULL OR
               EXISTS (
-                  SELECT 1 FROM doctor_specialty ds2 
+                  SELECT 1 FROM doctor_specialty ds2
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
@@ -198,6 +209,131 @@ async def get_doctor_availability(
         for r in rows
     ]
 
+
+@router.post("", response_model=DoctorCreateResponse, status_code=status.HTTP_201_CREATED)
+async def create_doctor(
+    payload: DoctorCreate,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
+):
+    """
+    Register a doctor.
+    Creates app_user -> staff -> doctor -> doctor_specialty rows in a single transaction.
+    BM is locked to their own branch.
+    """
+    # Enforce Branch Manager branch lock
+    scoped_branch_id = get_branch_scope(user)
+    if scoped_branch_id is not None and payload.branch_id != scoped_branch_id:
+        raise ForbiddenError("Branch Managers can only register doctors for their own branch.")
+
+    # Check if branch exists
+    branch = await conn.fetchrow("SELECT name FROM branch WHERE branch_id = $1;", payload.branch_id)
+    if not branch:
+        raise NotFoundError(f"Branch ID {payload.branch_id} does not exist.")
+
+    # Check if NIC or License already exists
+    existing_nic = await conn.fetchrow("SELECT user_id FROM app_user WHERE id_number = $1;", payload.id_number)
+    if existing_nic:
+        raise ConflictError("A user with this NIC already exists.")
+
+    existing_license = await conn.fetchrow("SELECT user_id FROM doctor WHERE license_number = $1;", payload.license_number)
+    if existing_license:
+        raise ConflictError(f"Doctor with license number '{payload.license_number}' already exists.")
+
+    # Validate that all requested specialties exist
+    specialty_rows = await conn.fetch(
+        "SELECT specialty_id, name FROM specialty WHERE specialty_id = ANY($1::int[]);",
+        payload.specialty_ids
+    )
+    if len(specialty_rows) != len(set(payload.specialty_ids)):
+        raise AppValidationError([{"field": "specialty_ids", "message": "One or more specialty IDs are invalid."}])
+
+    # Get Doctor role_id
+    role_row = await conn.fetchrow("SELECT role_id FROM role WHERE role_name = 'Doctor';")
+    if not role_row:
+        raise NotFoundError("Doctor role not configured in database.")
+    role_id = role_row["role_id"]
+
+    # Generate credentials
+    temp_password = generate_temp_password()
+    hashed_pwd = hash_password(temp_password)
+    # Generate unique username
+    base_username = f"dr.{payload.last_name.lower().replace(' ', '')}"
+    username = base_username
+    suffix = 1
+    while await conn.fetchval("SELECT 1 FROM staff WHERE username = $1;", username):
+        username = f"{base_username}{suffix}"
+        suffix += 1
+
+    async with conn.transaction():
+        # 1. Insert into app_user
+        app_user_query = """
+            INSERT INTO app_user (
+                role_id, first_name, middle_name, last_name,
+                id_number, address, birthdate, gender, marital_status, email
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING user_id;
+        """
+        user_id = await conn.fetchval(
+            app_user_query,
+            role_id,
+            payload.first_name,
+            payload.middle_name,
+            payload.last_name,
+            payload.id_number,
+            payload.address,
+            payload.birthdate,
+            payload.gender.value,
+            payload.marital_status,
+            payload.email,
+        )
+        if not isinstance(user_id, int):
+            raise RuntimeError("Doctor registration did not return a valid user ID.")
+
+        # 2. Insert contact numbers
+        phones = [(user_id, phone) for phone in set(payload.phone_numbers)]
+        if phones:
+            await conn.executemany(
+                "INSERT INTO contact (user_id, phone_number) VALUES ($1, $2);",
+                phones,
+            )
+
+        # 3. Insert staff
+        staff_query = """
+            INSERT INTO staff (user_id, branch_id, username, password_hash, is_active)
+            VALUES ($1, $2, $3, $4, TRUE);
+        """
+        await conn.execute(staff_query, user_id, payload.branch_id, username, hashed_pwd)
+
+        # 4. Insert doctor
+        await conn.execute(
+            "INSERT INTO doctor (user_id, license_number) VALUES ($1, $2);",
+            user_id, payload.license_number
+        )
+
+        # 5. Insert specialties
+        specs = [(user_id, sp_id) for sp_id in set(payload.specialty_ids)]
+        if specs:
+            await conn.executemany(
+                "INSERT INTO doctor_specialty (user_id, specialty_id) VALUES ($1, $2);",
+                specs,
+            )
+
+    full_name = f"{payload.first_name} {payload.middle_name + ' ' if payload.middle_name else ''}{payload.last_name}".strip()
+
+    return DoctorCreateResponse(
+        doctor_id=user_id,
+        full_name=full_name,
+        id_number=payload.id_number,
+        phone_numbers=payload.phone_numbers,
+        email=payload.email,
+        branch_id=payload.branch_id,
+        branch_name=branch["name"],
+        license_number=payload.license_number,
+        is_active=True,
+        specialties=[r["name"] for r in specialty_rows],
+        temp_password=temp_password,
+    )
 
 
 @router.put("/{id}", response_model=DoctorResponse)
@@ -332,13 +468,13 @@ async def get_doctor_schedule(
 
     rows = await conn.fetch(
         """
-        SELECT 
-            schedule_id, 
-            doctor_id, 
-            day_of_week, 
-            start_time::text, 
-            end_time::text, 
-            slot_duration, 
+        SELECT
+            schedule_id,
+            doctor_id,
+            day_of_week,
+            start_time::text,
+            end_time::text,
+            slot_duration,
             is_active
         FROM doctor_weekly_schedule
         WHERE doctor_id = $1
@@ -409,7 +545,7 @@ async def update_doctor_schedule(
                 """
                 INSERT INTO doctor_weekly_schedule (doctor_id, day_of_week, start_time, end_time, slot_duration, is_active)
                 VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (doctor_id, day_of_week, start_time) 
+                ON CONFLICT (doctor_id, day_of_week, start_time)
                 DO UPDATE SET end_time = EXCLUDED.end_time, slot_duration = EXCLUDED.slot_duration, is_active = EXCLUDED.is_active;
                 """,
                 id, s.day_of_week, st, et, s.slot_duration, s.is_active
@@ -421,7 +557,5 @@ async def update_doctor_schedule(
             id
         )
 
-        # Trigger targeted slot generation for this doctor across the rolling 14-day horizon
+        # Generate slots only for the doctor whose schedule changed
         await conn.execute("SELECT fn_generate_slots_from_roster(14, $1);", id)
-
-    return await get_doctor_schedule(id=id, conn=conn, user=user)
