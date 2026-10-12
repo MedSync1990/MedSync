@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getOutstandingBalances, exportToCSV, downloadManagementPdf } from '../../api/reports';
-import { recordPayment } from '../../api/billing';
 import type { OutstandingBalancesResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
@@ -30,7 +29,6 @@ export function OutstandingBalances() {
 
   // Export
   const [isExporting, setIsExporting] = useState(false);
-  const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   const fetchReport = () => {
     setLoading(true);
@@ -91,24 +89,6 @@ export function OutstandingBalances() {
       } finally {
         setIsExporting(false);
       }
-    }
-  };
-
-  const handleRecordPayment = async () => {
-    if (!selectedInv) return;
-    setIsRecordingPayment(true);
-    try {
-      await recordPayment(selectedInv.invoice_id, {
-        amount: selectedInv.due_amount,
-        payment_type: 'Cash'
-      });
-      const res = await getOutstandingBalances();
-      setData(res);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Failed to record payment', err);
-    } finally {
-      setIsRecordingPayment(false);
     }
   };
 
@@ -374,10 +354,6 @@ export function OutstandingBalances() {
             </div>
             <div className="p-space-md bg-surface-container-low flex justify-end gap-space-sm">
               <button onClick={() => setIsModalOpen(false)} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">Close</button>
-              <button onClick={handleRecordPayment} disabled={isRecordingPayment} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5 disabled:opacity-50">
-                {isRecordingPayment ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[16px]">payments</span>}
-                {isRecordingPayment ? 'Recording...' : 'Record Payment'}
-              </button>
             </div>
           </div>
         </div>
