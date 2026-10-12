@@ -305,3 +305,21 @@ export async function downloadManagementPdf(report: string, params: ManagementPd
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/** Download Doctor Payout Slip PDF */
+export async function downloadDoctorPayoutSlipPdf(
+  doctorId: number,
+  payoutId: number,
+  filename?: string
+): Promise<void> {
+  const blob = await getBlob(`/reports/doctor-earnings/${doctorId}/payouts/${payoutId}/pdf`);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || `Doctor_Payment_Slip_${payoutId}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
