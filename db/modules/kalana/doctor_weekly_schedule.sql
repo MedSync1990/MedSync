@@ -48,6 +48,9 @@ BEGIN
     ) AS s(start_time, end_time)
     ON CONFLICT (doctor_id, day_of_week, start_time) DO NOTHING;
 
+    -- Generate slots for the next 14 days immediately for this new doctor
+    PERFORM fn_generate_slots_from_roster(14, NEW.user_id);
+
     RETURN NEW;
 END;
 $$;
@@ -80,9 +83,14 @@ ON CONFLICT (doctor_id, day_of_week, start_time) DO NOTHING;
 -- Function: fn_generate_slots_from_roster
 -- Description: Generates rolling concrete slots in doctor_availability_slots
 --              from each doctor's weekly roster for active doctors.
+--              If p_doctor_id is passed, generates only for that specific doctor.
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION fn_generate_slots_from_roster(p_days_ahead INT DEFAULT 14)
+DROP FUNCTION IF EXISTS fn_generate_slots_from_roster(INT);
+CREATE OR REPLACE FUNCTION fn_generate_slots_from_roster(
+    p_days_ahead INT DEFAULT 14,
+    p_doctor_id  INT DEFAULT NULL
+)
 RETURNS INT
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -113,6 +121,7 @@ BEGIN
             ) AS t
         ) AS slot_chunk
         WHERE dws.is_active = TRUE
+          AND (p_doctor_id IS NULL OR dws.doctor_id = p_doctor_id)
           AND EXTRACT(DOW FROM day_offset.day)::int = dws.day_of_week
     )
     INSERT INTO doctor_availability_slots (doctor_id, date, start_time, end_time, status)

@@ -128,25 +128,6 @@ export interface SpecialtyResponse {
 
 // ─── Doctors (schemas/doctors.py) ───────────────────────────────────────────
 
-export interface DoctorBase {
-  first_name: string;
-  middle_name?: string | null;
-  last_name: string;
-  id_number: string;
-  address: string;
-  marital_status?: string | null;
-  birthdate: string;
-  gender: Gender;
-  phone_numbers: string[];
-  email?: string | null;
-  branch_id: number;
-}
-
-export interface DoctorCreate extends DoctorBase {
-  license_number: string;
-  specialty_ids: number[];
-}
-
 export interface DoctorUpdate {
   license_number: string;
 }
@@ -167,10 +148,6 @@ export interface DoctorResponse {
   license_number: string;
   is_active: boolean;
   specialties: string[];
-}
-
-export interface DoctorCreateResponse extends DoctorResponse {
-  temp_password: string;
 }
 
 export interface DoctorScheduleItem {
