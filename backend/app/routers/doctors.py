@@ -77,9 +77,9 @@ async def list_doctors(
         ) doc_sp ON TRUE
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND (
-              $2::int IS NULL OR 
+              $2::int IS NULL OR
               EXISTS (
-                  SELECT 1 FROM doctor_specialty ds2 
+                  SELECT 1 FROM doctor_specialty ds2
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
@@ -249,7 +249,7 @@ async def create_doctor(
         raise AppValidationError([{"field": "specialty_ids", "message": "One or more specialty IDs are invalid."}])
 
     # Get Doctor role_id
-    role_row = await conn.fetchrow("SELECT role_id FROM role WHERE name = 'Doctor';")
+    role_row = await conn.fetchrow("SELECT role_id FROM role WHERE role_name = 'Doctor';")
     if not role_row:
         raise NotFoundError("Doctor role not configured in database.")
     role_id = role_row["role_id"]
@@ -287,6 +287,8 @@ async def create_doctor(
             payload.marital_status,
             payload.email,
         )
+        if not isinstance(user_id, int):
+            raise RuntimeError("Doctor registration did not return a valid user ID.")
 
         # 2. Insert contact numbers
         phones = [(user_id, phone) for phone in set(payload.phone_numbers)]
@@ -466,13 +468,13 @@ async def get_doctor_schedule(
 
     rows = await conn.fetch(
         """
-        SELECT 
-            schedule_id, 
-            doctor_id, 
-            day_of_week, 
-            start_time::text, 
-            end_time::text, 
-            slot_duration, 
+        SELECT
+            schedule_id,
+            doctor_id,
+            day_of_week,
+            start_time::text,
+            end_time::text,
+            slot_duration,
             is_active
         FROM doctor_weekly_schedule
         WHERE doctor_id = $1
@@ -543,7 +545,7 @@ async def update_doctor_schedule(
                 """
                 INSERT INTO doctor_weekly_schedule (doctor_id, day_of_week, start_time, end_time, slot_duration, is_active)
                 VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (doctor_id, day_of_week, start_time) 
+                ON CONFLICT (doctor_id, day_of_week, start_time)
                 DO UPDATE SET end_time = EXCLUDED.end_time, slot_duration = EXCLUDED.slot_duration, is_active = EXCLUDED.is_active;
                 """,
                 id, s.day_of_week, st, et, s.slot_duration, s.is_active
@@ -555,7 +557,5 @@ async def update_doctor_schedule(
             id
         )
 
-        # Trigger dynamic slot generation for the rolling 14-day horizon
-        await conn.execute("SELECT fn_generate_slots_from_roster(14);")
-
-    return await get_doctor_schedule(id=id, conn=conn, user=user)
+        # Generate slots only for the doctor whose schedule changed
+        await conn.execute("SELECT fn_generate_slots_from_roster(14, $1);", id)

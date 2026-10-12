@@ -22,12 +22,32 @@ from app.errors import (
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from datetime import datetime, timedelta
 import logging
 from app.routers import (
     auth, branches, staff, doctors, specialties, appointments,
     patients, allergies, treatments, consultations, invoices,
     payments, insurance, reports, stats, profile
 )
+
+async def midnight_slot_generator_task(app: FastAPI):
+    """Background worker that triggers rolling slot generation every night at 00:00."""
+    while True:
+        try:
+            now = datetime.now()
+            tomorrow = now.date() + timedelta(days=1)
+            next_midnight = datetime.combine(tomorrow, datetime.min.time())
+            seconds_until_midnight = (next_midnight - now).total_seconds()
+            await asyncio.sleep(seconds_until_midnight)
+
+            async with app.state.pool.acquire() as conn:
+                inserted = await conn.fetchval("SELECT fn_generate_slots_from_roster(14);")
+                logging.info("Midnight slot generation completed: %s new slots generated.", inserted)
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logging.error("Midnight slot generator failed: %s", e)
+            await asyncio.sleep(3600)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,10 +57,18 @@ async def lifespan(app: FastAPI):
         async with app.state.admin_pool.acquire() as conn:
             await conn.execute("ALTER TABLE staff ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT TRUE;")
         async with app.state.pool.acquire() as conn:
-            await conn.execute("SELECT fn_generate_slots_from_roster(14);")
+            inserted = await conn.fetchval("SELECT fn_generate_slots_from_roster(14);")
+            logging.info("Initial startup slot generation: %s slots created/verified.", inserted)
     except Exception as e:
         logging.warning("Startup initialization warning: %s", e)
+
+    worker_task = asyncio.create_task(midnight_slot_generator_task(app))
     yield
+    worker_task.cancel()
+    try:
+        await worker_task
+    except asyncio.CancelledError:
+        pass
     await app.state.pool.close()
     await app.state.admin_pool.close()
 

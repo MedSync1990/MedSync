@@ -9,7 +9,7 @@ class DoctorBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=60)
     middle_name: Optional[str] = Field(None, max_length=60)
     last_name: str = Field(..., min_length=1, max_length=60)
-    
+
     id_number: str = Field(
         ...,
         pattern=r"^([0-9]{9}[VvXx]|[0-9]{12})$",

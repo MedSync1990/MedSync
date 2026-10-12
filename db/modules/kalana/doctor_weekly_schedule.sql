@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS doctor_weekly_schedule (
     CONSTRAINT uq_doctor_day_shift UNIQUE (doctor_id, day_of_week, start_time)
 );
 
-CREATE INDEX IF NOT EXISTS idx_doc_weekly_schedule 
+CREATE INDEX IF NOT EXISTS idx_doc_weekly_schedule
     ON doctor_weekly_schedule(doctor_id, day_of_week, is_active);
 
 -- ============================================================================
@@ -42,11 +42,14 @@ BEGIN
         TRUE
     FROM (VALUES (1), (2), (3), (4), (5)) AS d(day_of_week)
     CROSS JOIN (
-        VALUES 
+        VALUES
             ('09:00:00'::time, '12:00:00'::time),
             ('14:00:00'::time, '16:30:00'::time)
     ) AS s(start_time, end_time)
     ON CONFLICT (doctor_id, day_of_week, start_time) DO NOTHING;
+
+    -- Generate slots for the next 14 days immediately for this new doctor
+    PERFORM fn_generate_slots_from_roster(14, NEW.user_id);
 
     RETURN NEW;
 END;
@@ -70,7 +73,7 @@ SELECT
 FROM doctor d
 CROSS JOIN (VALUES (1), (2), (3), (4), (5)) AS days(day_of_week)
 CROSS JOIN (
-    VALUES 
+    VALUES
         ('09:00:00'::time, '12:00:00'::time),
         ('14:00:00'::time, '16:30:00'::time)
 ) AS shifts(start_time, end_time)
@@ -80,9 +83,14 @@ ON CONFLICT (doctor_id, day_of_week, start_time) DO NOTHING;
 -- Function: fn_generate_slots_from_roster
 -- Description: Generates rolling concrete slots in doctor_availability_slots
 --              from each doctor's weekly roster for active doctors.
+--              If p_doctor_id is passed, generates only for that specific doctor.
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION fn_generate_slots_from_roster(p_days_ahead INT DEFAULT 14)
+DROP FUNCTION IF EXISTS fn_generate_slots_from_roster(INT);
+CREATE OR REPLACE FUNCTION fn_generate_slots_from_roster(
+    p_days_ahead INT DEFAULT 14,
+    p_doctor_id  INT DEFAULT NULL
+)
 RETURNS INT
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -92,7 +100,7 @@ DECLARE
     v_inserted INT := 0;
 BEGIN
     WITH dynamic_slots AS (
-        SELECT 
+        SELECT
             dws.doctor_id,
             day_offset.day::date AS date,
             slot_chunk.slot_start::time AS start_time,
@@ -113,6 +121,7 @@ BEGIN
             ) AS t
         ) AS slot_chunk
         WHERE dws.is_active = TRUE
+          AND (p_doctor_id IS NULL OR dws.doctor_id = p_doctor_id)
           AND EXTRACT(DOW FROM day_offset.day)::int = dws.day_of_week
     )
     INSERT INTO doctor_availability_slots (doctor_id, date, start_time, end_time, status)
@@ -122,7 +131,7 @@ BEGIN
         SELECT 1 FROM doctor_availability_slots existing
         WHERE existing.doctor_id = ds.doctor_id
           AND existing.date = ds.date
-          AND tsrange(existing.date + existing.start_time, existing.date + existing.end_time, '[)') && 
+          AND tsrange(existing.date + existing.start_time, existing.date + existing.end_time, '[)') &&
               tsrange(ds.date + ds.start_time, ds.date + ds.end_time, '[)')
     )
     ON CONFLICT DO NOTHING;
