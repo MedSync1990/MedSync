@@ -205,6 +205,9 @@ async def register_quick_patient(
         else:
             nic = f"999{int(date.today().strftime('%y%m%d'))}V"
 
+    # Determine registering branch: receptionists registering quick walk-ins are pinned to their branch
+    effective_branch = current_user.branch_id if (current_user.role == "Receptionist" and current_user.branch_id is not None) else payload.registered_branch
+
     # standard PatientCreateRequest using defaults
     full_payload = PatientCreateRequest(
         first_name=payload.first_name,
@@ -216,7 +219,7 @@ async def register_quick_patient(
         birthdate=payload.resolved_birthdate,
         phone_number=payload.phone_number or (payload.phone_numbers[0] if payload.phone_numbers else None) or "0000000000",
         phone_numbers=payload.phone_numbers,
-        registered_branch=payload.registered_branch,
+        registered_branch=effective_branch,
         is_temp=True,
     )
 
