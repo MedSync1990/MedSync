@@ -17,17 +17,29 @@ AS $$
 DECLARE
     -- temporary variables
     v_status slot_status_enum;
+    v_date DATE;
+    v_is_active BOOLEAN;
     v_appointment_id INT;
 BEGIN
     -- Lock the slot row so two concurrent bookings can't both pass the status check.
-    SELECT status INTO v_status
-    FROM doctor_availability_slots
-    WHERE slot_id = p_slot_id
-    FOR UPDATE;  -- places row level write lock to prevent race conditions
+    SELECT das.status, das.date, s.is_active
+    INTO v_status, v_date, v_is_active
+    FROM doctor_availability_slots das
+    JOIN staff s ON das.doctor_id = s.user_id
+    WHERE das.slot_id = p_slot_id
+    FOR UPDATE OF das;  -- places row level write lock to prevent race conditions
 
     -- if sql statement returned zero rows
     IF NOT FOUND THEN
         RAISE EXCEPTION 'slot % does not exist', p_slot_id USING ERRCODE = 'P0002'; -- no_data_found err code
+    END IF;
+
+    IF NOT v_is_active THEN
+        RAISE EXCEPTION 'cannot book appointment with a deactivated doctor' USING ERRCODE = '22000';
+    END IF;
+
+    IF v_date < CURRENT_DATE THEN
+        RAISE EXCEPTION 'cannot book appointment for past date %', v_date USING ERRCODE = '22000';
     END IF;
 
     IF v_status <> 'Open' THEN

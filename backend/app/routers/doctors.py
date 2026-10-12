@@ -30,6 +30,7 @@ def generate_temp_password(length: int = 12) -> str:
 async def list_doctors(
     specialty_id: Optional[int] = Query(None, description="Filter by specialty ID"),
     branch_id: Optional[int] = Query(None, description="Filter by branch ID"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
     conn: Connection = Depends(get_db),
     user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
 ):
@@ -74,10 +75,11 @@ async def list_doctors(
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
+          AND ($3::boolean IS NULL OR s.is_active = $3)
         ORDER BY full_name ASC;
     """
 
-    rows = await conn.fetch(query, scoped_branch_id, specialty_id)
+    rows = await conn.fetch(query, scoped_branch_id, specialty_id, is_active)
     return [
         DoctorResponse(
             doctor_id=r["doctor_id"],

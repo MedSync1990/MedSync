@@ -333,6 +333,10 @@ async def book_appointment(
         err_msg = str(e)
         if "is no longer available" in err_msg or "does not exist" in err_msg:
             raise ConflictError("This doctor is no longer available at the selected time. Please choose another slot.")
+        if "deactivated doctor" in err_msg:
+            raise ConflictError("Cannot book an appointment with a deactivated doctor.")
+        if "past date" in err_msg:
+            raise ConflictError("Cannot book an appointment for a past date.")
         raise ConflictError(err_msg)
     if appt_id is None:
         raise ConflictError("Failed to create appointment: No ID returned.")
@@ -377,6 +381,10 @@ async def create_walk_in_appointment(
         err_msg = str(e)
         if "is already booked over this time range" in err_msg or "excl_slot_overlap" in err_msg:
             raise ConflictError("This doctor is already booked over this time range. Please choose another time.")
+        if "deactivated doctor" in err_msg:
+            raise ConflictError("Cannot create a walk-in appointment with a deactivated doctor.")
+        if "past date" in err_msg:
+            raise ConflictError("Cannot create a walk-in appointment for a past date.")
         raise ConflictError(err_msg)
 
     if appt_id is None:

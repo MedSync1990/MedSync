@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 import asyncpg
 
 from app.dependencies import require_roles, CurrentUser, get_db
@@ -40,12 +40,13 @@ BRANCH_BASE_QUERY = """
         LIMIT 1
     ) bm ON TRUE
     WHERE ($1::int IS NULL OR b.branch_id = $1)
+      AND ($2::boolean IS NULL OR b.is_active = $2)
     ORDER BY b.name ASC;
 """
 
 
 async def _fetch_branch(conn: asyncpg.Connection, branch_id: int) -> dict:
-    row = await conn.fetchrow(BRANCH_BASE_QUERY, branch_id)
+    row = await conn.fetchrow(BRANCH_BASE_QUERY, branch_id, None)
     if not row:
         raise NotFoundError(f"Branch #{branch_id} not found.")
     return dict(row)
@@ -54,6 +55,7 @@ async def _fetch_branch(conn: asyncpg.Connection, branch_id: int) -> dict:
 @router.get("", response_model=List[BranchResponse])
 @router.get("/", response_model=List[BranchResponse])
 async def list_branches(
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
     conn: asyncpg.Connection = Depends(get_db),
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist")),
 ):
@@ -70,7 +72,7 @@ async def list_branches(
             effective_branch_id = staff_bid
 
     target_branch = effective_branch_id if current_user.role == "Branch Manager" else None
-    rows = await conn.fetch(BRANCH_BASE_QUERY, target_branch)
+    rows = await conn.fetch(BRANCH_BASE_QUERY, target_branch, is_active)
 
     return [BranchResponse(**dict(r)) for r in rows]
 
