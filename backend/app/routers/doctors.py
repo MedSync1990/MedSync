@@ -421,7 +421,7 @@ async def update_doctor_schedule(
             id
         )
 
-        # Trigger dynamic slot generation for the rolling 14-day horizon
-        await conn.execute("SELECT fn_generate_slots_from_roster(14);")
+        # Trigger targeted slot generation for this doctor across the rolling 14-day horizon
+        await conn.execute("SELECT fn_generate_slots_from_roster(14, $1);", id)
 
     return await get_doctor_schedule(id=id, conn=conn, user=user)
