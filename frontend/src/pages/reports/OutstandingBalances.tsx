@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getOutstandingBalances, exportToCSV, downloadManagementPdf } from '../../api/reports';
 import type { OutstandingBalancesResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
@@ -123,32 +124,46 @@ export function OutstandingBalances() {
           <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Outstanding Balances</h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">Patients with unpaid or partially paid invoices. Monitor collection risks and invoice recovery status.</p>
         </div>
-        {user?.role === 'Administrator' ? (
-          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[20px]">domain</span>
+        <div className="flex flex-wrap items-center gap-space-sm">
+          {user?.role === 'Administrator' ? (
+            <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined text-[20px]">domain</span>
+              </div>
+              <div className="flex flex-col">
+                <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
+                <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
+                  <option value="">All Branches</option>
+                  {branches.map(b => (
+                    <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <label htmlFor="branch-select" className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</label>
-              <select id="branch-select" value={selectedBranch} onChange={e => setSelectedBranch(e.target.value ? Number(e.target.value) : '')} className="bg-transparent font-label-lg text-label-lg text-on-surface outline-none cursor-pointer border-none p-0 focus:ring-0">
-                <option value="">All Branches</option>
-                {branches.map(b => (
-                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
-                ))}
-              </select>
+          ) : (
+            <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined text-[20px]">lock</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
+                <span className="font-label-lg text-label-lg text-on-surface">{user?.branchName || 'Assigned Branch'} (Locked)</span>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-space-sm px-space-md py-2 rounded-xl bg-surface-container-low shadow-sm">
-            <div className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[20px]">lock</span>
+          )}
+
+          <Link
+            to="/receptionist/invoices"
+            className="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle hover:border-primary/50 text-brand-navy-deep hover:text-primary font-label-md text-label-md shadow-xs hover:shadow-sm transition-all group"
+            title="Search, lookup, and view all invoices (paid & unpaid)"
+          >
+            <div className="w-7 h-7 rounded-lg bg-surface-subtle group-hover:bg-primary-fixed flex items-center justify-center text-primary transition-colors">
+              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
             </div>
-            <div className="flex flex-col">
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Reporting Scope</span>
-              <span className="font-label-lg text-label-lg text-on-surface">{user?.branchName || 'Assigned Branch'} (Locked)</span>
-            </div>
-          </div>
-        )}
+            <span className="font-semibold whitespace-nowrap">Search All Invoices</span>
+            <span className="material-symbols-outlined text-[16px] text-outline group-hover:text-primary group-hover:translate-x-0.5 transition-all">arrow_forward</span>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-surface-card rounded-xl p-space-md shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
@@ -320,7 +335,12 @@ export function OutstandingBalances() {
               <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span className="material-symbols-outlined text-[32px]">folder_off</span></div>
               <h4 className="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>
               <p className="font-body-md text-body-md text-on-surface-variant max-w-md mt-1">Adjust the aging range or search for another patient identifier or invoice number.</p>
-              <button onClick={handleReset} className="mt-space-md px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors">Clear Filters</button>
+              <div className="mt-space-md flex flex-wrap items-center justify-center gap-2">
+                <button onClick={handleReset} className="px-4 py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">Clear Filters</button>
+                <Link to="/receptionist/invoices" className="px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5 shadow-sm">
+                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>Search All Invoices (Paid &amp; Unpaid)
+                </Link>
+              </div>
             </div>
           )}
           {loading && (

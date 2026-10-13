@@ -303,13 +303,6 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     { label: canEdit ? 'Manage Treatment Catalogue' : 'Treatment Catalogue' },
   ];
 
-  if (loading) {
-    return (
-      <div className="w-full max-w-content-max-width mx-auto py-space-lg" role="status" aria-live="polite">
-        <LoadingState message="Loading treatment catalogue…" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
@@ -346,7 +339,8 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
             <button
               type="button"
               onClick={() => importInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs"
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">file_upload</span>
               <span>Import Procedures</span>
@@ -354,14 +348,16 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs"
+              disabled={loading || Boolean(loadError)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-medium hover:bg-surface-subtle transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">download</span>
               <span>Export Catalogue (CSV)</span>
             </button>
             <button
               onClick={handleOpenAddModal}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-label-lg text-label-lg font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-label-lg text-label-lg font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               type="button"
             >
               <span className="material-symbols-outlined text-[20px]">add</span>
@@ -387,14 +383,14 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
         <StatCard
           icon="format_list_bulleted"
           label="Total Catalogued"
-          value={totalCatalogued}
+          value={loading ? '…' : loadError ? '—' : totalCatalogued}
           iconBg="bg-status-scheduled-bg"
           iconColor="text-status-scheduled-text"
         />
         <StatCard
           icon="check_circle"
           label="Insurance Eligible"
-          value={insuranceEligibleCount}
+          value={loading ? '…' : loadError ? '—' : insuranceEligibleCount}
           iconBg="bg-status-completed-bg"
           iconColor="text-status-completed-text"
           valueColor="text-status-completed-text"
@@ -402,7 +398,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
         <StatCard
           icon="do_not_disturb_on"
           label="Out-of-Pocket Only"
-          value={outOfPocketCount}
+          value={loading ? '…' : loadError ? '—' : outOfPocketCount}
           iconBg="bg-status-cancelled-bg"
           iconColor="text-status-cancelled-text"
           valueColor="text-status-cancelled-text"
@@ -440,7 +436,9 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
           {/* View Count */}
           <div className="flex items-center gap-space-sm justify-between lg:justify-end">
             <div className="text-secondary font-label-md text-label-md">
-              Showing <span className="font-bold text-brand-navy-deep">{filteredTreatments.length}</span> items
+              {loading ? 'Loading items…' : loadError ? 'Items unavailable' : (
+                <>Showing <span className="font-bold text-brand-navy-deep">{filteredTreatments.length}</span> items</>
+              )}
             </div>
           </div>
           {loadError && (
@@ -481,7 +479,13 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-subtle font-body-md text-body-md text-on-surface">
-              {filteredTreatments.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-space-md" role="status" aria-live="polite">
+                    <LoadingState message="Loading treatment catalogue…" />
+                  </td>
+                </tr>
+              ) : filteredTreatments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-space-md py-space-xl text-center text-secondary">
                     {loadError ? 'Treatment catalogue could not be loaded.' : 'No treatments match the current search or category filter.'}
