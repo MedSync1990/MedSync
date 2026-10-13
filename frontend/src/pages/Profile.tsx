@@ -184,8 +184,8 @@ export const Profile: React.FC = () => {
         <Breadcrumbs items={breadcrumbs} />
       </div>
 
-      {/* Header Banner */}
-      <div className="bg-surface-card border border-border-subtle rounded-2xl p-space-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+      {/* Open profile header shared by all roles */}
+      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-space-lg">
         <div className="flex items-center gap-space-md">
           <div>
             <h1 className="font-display-lg text-display-lg font-bold text-brand-navy-deep">{fullName}</h1>

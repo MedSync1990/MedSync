@@ -392,14 +392,14 @@ export const RegisterPatient: React.FC = () => {
   };
 
   return (
-    <div className="page-content">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -415,7 +415,7 @@ export const RegisterPatient: React.FC = () => {
 
           {/* Title */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
               {isEditMode ? 'Update Patient Profile' : 'Register Patient'}
             </h1>
             {isEditMode && editId && (
@@ -427,7 +427,7 @@ export const RegisterPatient: React.FC = () => {
           <p className="font-body-md text-body-md text-on-surface-variant">
             {isEditMode
               ? 'Update personal, contact, and emergency information for this patient record.'
-              : 'Create a patient record with personal details, emergency contacts, and optional insurance.'}
+              : 'Add a new patient record accessible across all island branches with centralized synchronization.'}
           </p>
         </div>
       </div>
@@ -451,14 +451,14 @@ export const RegisterPatient: React.FC = () => {
       {/* Main Patient Registration Multi-section Form */}
       <form id="patientRegistrationForm" className="space-y-space-xl" onSubmit={handleSubmit}>
         {/* SECTION 1: Personal Details */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md border-b border-border-subtle gap-space-sm">
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
             <div className="flex items-start sm:items-center gap-space-md">
-              <div className="w-9 h-9 rounded-full bg-surface-container-low text-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
                 1
               </div>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">
                   Personal Details
                 </h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
@@ -475,7 +475,7 @@ export const RegisterPatient: React.FC = () => {
             {/* Full Name */}
             <div className="flex flex-col gap-1.5 lg:col-span-2">
               <label
-                className="font-label-md text-label-md text-on-surface flex items-center justify-between"
+                className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between"
                 htmlFor="fullName"
               >
                 <span>
@@ -497,7 +497,7 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="e.g., Priyantha Dharmasena"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
               <span className="font-body-sm text-body-sm text-outline">
@@ -509,12 +509,12 @@ export const RegisterPatient: React.FC = () => {
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                 <label
-                  className="font-label-md text-label-md text-on-surface"
+                  className="font-label-lg text-label-lg text-brand-navy-deep"
                   htmlFor="nicNumber"
                 >
                   National Identity Card (NIC) <span className="text-error font-bold">*</span>
                 </label>
-                <span className="font-label-sm text-label-sm bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase">
+                <span className="font-label-sm text-[10px] bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase">
                   SL Standard
                 </span>
               </div>
@@ -530,7 +530,7 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="198734201844 or 873421844V"
                   value={nicNumber}
                   onChange={(e) => setNicNumber(e.target.value.toUpperCase())}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-mono-data text-mono-data text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider"
                 />
                 {isValidNic && (
                   <span
@@ -543,7 +543,7 @@ export const RegisterPatient: React.FC = () => {
               </div>
               {isValidNic ? (
                 <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">verified</span> Valid NIC format
+                  <span className="material-symbols-outlined text-[14px]">verified</span> Valid 12-digit computerized NIC verified
                 </span>
               ) : (
                 <span className="font-body-sm text-body-sm text-outline">
@@ -556,14 +556,14 @@ export const RegisterPatient: React.FC = () => {
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                 <label
-                  className="font-label-md text-label-md text-on-surface"
+                  className="font-label-lg text-label-lg text-brand-navy-deep"
                   htmlFor="dateOfBirth"
                 >
                   Date of Birth <span className="text-error font-bold">*</span>
                 </label>
                 <span
                   id="calculatedAgeBadge"
-                  className="font-label-sm text-label-sm bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase"
+                  className="font-label-sm text-[10px] bg-surface-container text-primary font-bold px-1.5 py-0.5 rounded tracking-wide uppercase"
                 >
                   {age !== null ? `${age} yrs` : 'Age'}
                 </span>
@@ -579,7 +579,7 @@ export const RegisterPatient: React.FC = () => {
                   required
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
               <span className="font-body-sm text-body-sm text-outline">Format: MM / DD / YYYY</span>
@@ -587,14 +587,14 @@ export const RegisterPatient: React.FC = () => {
 
             {/* Gender */}
             <div className="flex flex-col gap-1.5">
-              <label className="font-label-md text-label-md text-on-surface">
+              <label className="font-label-lg text-label-lg text-brand-navy-deep">
                 Gender <span className="text-error font-bold">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-2 h-10 p-1 bg-surface-subtle rounded-lg">
+              <div className="grid grid-cols-2 gap-2 h-[42px] p-1 bg-surface-subtle rounded-lg">
                 {(['Male', 'Female'] as Gender[]).map((opt) => (
                   <label
                     key={opt}
-                    className={`flex items-center justify-center gap-1.5 rounded-md focus-within:ring-2 focus-within:ring-border-focus focus-within:ring-offset-2 cursor-pointer text-center font-label-md text-label-md transition-all select-none ${
+                    className={`flex items-center justify-center gap-1.5 rounded-md cursor-pointer text-center font-label-md text-label-md transition-all select-none ${
                       gender === opt
                         ? 'bg-surface-card text-primary shadow-sm font-semibold'
                         : 'text-on-surface-variant hover:text-on-surface'
@@ -623,7 +623,7 @@ export const RegisterPatient: React.FC = () => {
             {/* Blood Group */}
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="bloodGroup"
               >
                 Blood Group{' '}
@@ -638,7 +638,7 @@ export const RegisterPatient: React.FC = () => {
                   name="bloodGroup"
                   value={bloodGroup}
                   onChange={(e) => setBloodGroup(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
                 >
                   <option value="">Select blood type</option>
                   <option value="A+">A Positive (A+)</option>
@@ -667,7 +667,7 @@ export const RegisterPatient: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[22px]">contact_phone</span>
                 <div>
-                  <span className="font-label-md text-label-md text-on-surface">
+                  <span className="font-label-lg text-label-lg text-brand-navy-deep">
                     Patient Mobile Numbers
                   </span>
                   <span className="text-error font-bold">*</span>
@@ -676,7 +676,7 @@ export const RegisterPatient: React.FC = () => {
               <button
                 type="button"
                 onClick={addSecondaryPhone}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md transition-all shadow-sm self-start sm:self-auto cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md transition-all shadow-sm self-start sm:self-auto cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">add_call</span>
                 <span>Add Another Number</span>
@@ -691,7 +691,7 @@ export const RegisterPatient: React.FC = () => {
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm uppercase font-bold tracking-wider">
                       <span className="material-symbols-outlined text-[14px]">star</span> Primary
                     </span>
-                    <span className="font-label-md text-label-md text-on-surface font-semibold">
+                    <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">
                       Primary Mobile <span className="text-error font-bold">*</span>
                     </span>
                   </div>
@@ -704,7 +704,7 @@ export const RegisterPatient: React.FC = () => {
                           aria-label="Country Code"
                           value={primaryCountryCode}
                           onChange={(e) => setPrimaryCountryCode(e.target.value)}
-                          className="h-10 pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                          className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
                         >
                           {COUNTRY_CODES.map((c) => (
                             <option key={c.code} value={c.code}>
@@ -731,7 +731,7 @@ export const RegisterPatient: React.FC = () => {
                             if (!primaryPhoneTouched) setPrimaryPhoneTouched(true);
                           }}
                           onBlur={() => setPrimaryPhoneTouched(true)}
-                          className={`w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
+                          className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
                             primaryPhoneTouched && !primaryValidation.isValid
                               ? 'border border-error focus:ring-error'
                               : primaryValidation.isValid
@@ -805,7 +805,7 @@ export const RegisterPatient: React.FC = () => {
                               aria-label="Secondary Country Code"
                               value={phone.countryCode}
                               onChange={(e) => updateSecondaryPhone(idx, 'countryCode', e.target.value)}
-                              className="h-10 pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                              className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
                             >
                               {COUNTRY_CODES.map((c) => (
                                 <option key={c.code} value={c.code}>
@@ -830,7 +830,7 @@ export const RegisterPatient: React.FC = () => {
                                   cleanPhoneInput(e.target.value, phone.countryCode)
                                 )
                               }
-                              className={`w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
+                              className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
                                 hasValue && !secVal.isValid
                                   ? 'border border-error focus:ring-error'
                                   : hasValue && secVal.isValid
@@ -894,7 +894,7 @@ export const RegisterPatient: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
             <div className="flex flex-col gap-1.5 md:col-span-1">
               <label
-                className="font-label-md text-label-md text-on-surface flex items-center justify-between"
+                className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between"
                 htmlFor="emailAddress"
               >
                 <span>
@@ -913,13 +913,13 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="priyantha.d@gmail.com"
                   value={emailAddress}
                   onChange={(e) => setEmailAddress(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
             </div>
             <div className="flex flex-col gap-1.5 md:col-span-2">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="streetAddress"
               >
                 Residential Address <span className="text-error font-bold">*</span>
@@ -936,7 +936,7 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="Street address line e.g., No. 42/B, Flower Road"
                   value={streetAddress}
                   onChange={(e) => setStreetAddress(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
               <span className="font-body-sm text-body-sm text-outline">
@@ -945,7 +945,7 @@ export const RegisterPatient: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="cityDistrict"
               >
                 City / District
@@ -961,7 +961,7 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="e.g., Colombo 07"
                   value={cityDistrict}
                   onChange={(e) => setCityDistrict(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
             </div>
@@ -969,14 +969,14 @@ export const RegisterPatient: React.FC = () => {
         </div>
 
         {/* SECTION 2: Emergency Contact */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md border-b border-border-subtle gap-space-sm">
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
             <div className="flex items-start sm:items-center gap-space-md">
-              <div className="w-9 h-9 rounded-full bg-surface-container-low text-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
                 2
               </div>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">
                   Emergency Contact
                 </h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
@@ -992,7 +992,7 @@ export const RegisterPatient: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg pt-2">
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="emergencyName"
               >
                 Contact Full Name <span className="text-error font-bold">*</span>
@@ -1009,7 +1009,7 @@ export const RegisterPatient: React.FC = () => {
                   placeholder="e.g., Anoma Dharmasena"
                   value={emergencyName}
                   onChange={(e) => setEmergencyName(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                 />
               </div>
               <span className="font-body-sm text-body-sm text-outline">Primary point of legal contact</span>
@@ -1017,7 +1017,7 @@ export const RegisterPatient: React.FC = () => {
 
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="emergencyRelation"
               >
                 Relationship <span className="text-error font-bold">*</span>
@@ -1032,7 +1032,7 @@ export const RegisterPatient: React.FC = () => {
                   required
                   value={emergencyRelation}
                   onChange={(e) => setEmergencyRelation(e.target.value)}
-                  className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
+                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
                 >
                   <option value="">Select relationship</option>
                   <option value="Spouse">Spouse / Partner</option>
@@ -1051,7 +1051,7 @@ export const RegisterPatient: React.FC = () => {
 
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-label-md text-label-md text-on-surface"
+                className="font-label-lg text-label-lg text-brand-navy-deep"
                 htmlFor="emergencyPhone"
               >
                 Emergency Phone Number <span className="text-error font-bold">*</span>
@@ -1062,7 +1062,7 @@ export const RegisterPatient: React.FC = () => {
                     aria-label="Emergency Country Code"
                     value={emergencyCountryCode}
                     onChange={(e) => setEmergencyCountryCode(e.target.value)}
-                    className="h-10 pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                    className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
                   >
                     {COUNTRY_CODES.map((c) => (
                       <option key={c.code} value={c.code}>
@@ -1087,7 +1087,7 @@ export const RegisterPatient: React.FC = () => {
                       if (!emergencyPhoneTouched) setEmergencyPhoneTouched(true);
                     }}
                     onBlur={() => setEmergencyPhoneTouched(true)}
-                    className={`w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-on-surface focus:outline-none focus:ring-2 transition-all ${
+                    className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 transition-all ${
                       emergencyPhoneTouched && !emergencyValidation.isValid
                         ? 'border border-error focus:ring-error'
                         : emergencyValidation.isValid
@@ -1147,7 +1147,7 @@ export const RegisterPatient: React.FC = () => {
                 id="altContactFields"
               >
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-label-md text-label-md text-on-surface">
+                  <label className="font-label-lg text-label-lg text-brand-navy-deep">
                     Alternate Contact Name
                   </label>
                   <input
@@ -1155,22 +1155,22 @@ export const RegisterPatient: React.FC = () => {
                     placeholder="e.g. Bandula Dharmasena"
                     value={altContactName}
                     onChange={(e) => setAltContactName(e.target.value)}
-                    className="w-full h-10 bg-surface-card rounded-lg px-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus"
+                    className="w-full h-[42px] bg-surface-card rounded-lg px-3 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-label-md text-label-md text-on-surface">Relationship</label>
+                  <label className="font-label-lg text-label-lg text-brand-navy-deep">Relationship</label>
                   <input
                     type="text"
                     placeholder="e.g. Brother / Colleague"
                     value={altRelation}
                     onChange={(e) => setAltRelation(e.target.value)}
-                    className="w-full h-10 bg-surface-card rounded-lg px-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus"
+                    className="w-full h-[42px] bg-surface-card rounded-lg px-3 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="font-label-md text-label-md text-on-surface">Contact Number</label>
+                    <label className="font-label-lg text-label-lg text-brand-navy-deep">Contact Number</label>
                     <button
                       type="button"
                       onClick={() => setShowAlternateContact(false)}
@@ -1185,7 +1185,7 @@ export const RegisterPatient: React.FC = () => {
                         aria-label="Alternate Contact Country Code"
                         value={altCountryCode}
                         onChange={(e) => setAltCountryCode(e.target.value)}
-                        className="h-10 pl-3 pr-7 bg-surface-card hover:bg-surface-subtle border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                        className="h-[42px] pl-3 pr-7 bg-surface-card hover:bg-surface-subtle border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
                       >
                         {COUNTRY_CODES.map((c) => (
                           <option key={c.code} value={c.code}>
@@ -1207,7 +1207,7 @@ export const RegisterPatient: React.FC = () => {
                           if (!altPhoneTouched) setAltPhoneTouched(true);
                         }}
                         onBlur={() => setAltPhoneTouched(true)}
-                        className={`w-full h-10 bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-on-surface focus:outline-none focus:ring-2 transition-all ${
+                        className={`w-full h-[42px] bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 transition-all ${
                           altPhoneTouched && !altValidation.isValid
                             ? 'border border-error focus:ring-error'
                             : altValidation.isValid && altPhone.trim()
@@ -1239,15 +1239,15 @@ export const RegisterPatient: React.FC = () => {
         </div>
 
         {/* SECTION 3: Health Insurance */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md border-b border-border-subtle gap-space-sm">
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-3">
             <div className="flex items-start sm:items-center gap-space-md">
-              <div className="w-9 h-9 rounded-full bg-surface-container-low text-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
                 3
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                  <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">
                     Health Insurance
                   </h2>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-highest text-on-secondary-container font-label-sm text-label-sm font-semibold">
@@ -1260,7 +1260,7 @@ export const RegisterPatient: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 bg-surface-subtle px-3.5 py-2 rounded-xl self-start sm:self-auto">
-              <span className="font-label-md text-label-md text-on-surface">
+              <span className="font-label-md text-label-md text-brand-navy-deep">
                 Add insurance details now
               </span>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -1271,7 +1271,7 @@ export const RegisterPatient: React.FC = () => {
                   onChange={(e) => setInsuranceEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-outline-variant peer-focus-visible:ring-2 peer-focus-visible:ring-border-focus peer-focus-visible:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-border-focus"></div>
+                <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
           </div>
@@ -1281,7 +1281,7 @@ export const RegisterPatient: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pt-2">
                 <div className="flex flex-col gap-1.5 lg:col-span-2">
                   <label
-                    className="font-label-md text-label-md text-on-surface"
+                    className="font-label-lg text-label-lg text-brand-navy-deep"
                     htmlFor="insuranceProvider"
                   >
                     Insurance Provider <span className="text-error font-bold">*</span>
@@ -1295,7 +1295,7 @@ export const RegisterPatient: React.FC = () => {
                       name="insuranceProvider"
                       value={insuranceProvider}
                       onChange={(e) => setInsuranceProvider(e.target.value)}
-                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
+                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-8 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
                     >
                       <option value="">Select Insurer</option>
                       <option value="SLIC">Sri Lanka Insurance Corporation (SLIC)</option>
@@ -1318,7 +1318,7 @@ export const RegisterPatient: React.FC = () => {
 
                 <div className="flex flex-col gap-1.5 lg:col-span-2">
                   <label
-                    className="font-label-md text-label-md text-on-surface"
+                    className="font-label-lg text-label-lg text-brand-navy-deep"
                     htmlFor="policyNumber"
                   >
                     Policy / Member Number <span className="text-error font-bold">*</span>
@@ -1334,7 +1334,7 @@ export const RegisterPatient: React.FC = () => {
                       placeholder="e.g., POL-SLIC-992014"
                       value={policyNumber}
                       onChange={(e) => setPolicyNumber(e.target.value)}
-                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-mono-data text-mono-data text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all tracking-wider"
+                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all tracking-wider"
                     />
                   </div>
                   <span className="font-body-sm text-body-sm text-outline">
@@ -1344,7 +1344,7 @@ export const RegisterPatient: React.FC = () => {
 
                 <div className="flex flex-col gap-1.5">
                   <label
-                    className="font-label-md text-label-md text-on-surface"
+                    className="font-label-lg text-label-lg text-brand-navy-deep"
                     htmlFor="policyStartDate"
                   >
                     Policy Effective Date
@@ -1359,14 +1359,14 @@ export const RegisterPatient: React.FC = () => {
                       type="date"
                       value={policyStartDate}
                       onChange={(e) => setPolicyStartDate(e.target.value)}
-                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label
-                    className="font-label-md text-label-md text-on-surface"
+                    className="font-label-lg text-label-lg text-brand-navy-deep"
                     htmlFor="policyEndDate"
                   >
                     Policy Expiration Date
@@ -1381,14 +1381,14 @@ export const RegisterPatient: React.FC = () => {
                       type="date"
                       value={policyEndDate}
                       onChange={(e) => setPolicyEndDate(e.target.value)}
-                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5 lg:col-span-2">
                   <label
-                    className="font-label-md text-label-md text-on-surface"
+                    className="font-label-lg text-label-lg text-brand-navy-deep"
                     htmlFor="corporateAffiliation"
                   >
                     Corporate Employer / Scheme (Optional)
@@ -1404,7 +1404,7 @@ export const RegisterPatient: React.FC = () => {
                       placeholder="e.g. John Keells Holdings / Dialog Axiata"
                       value={corporateAffiliation}
                       onChange={(e) => setCorporateAffiliation(e.target.value)}
-                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-4 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
                 </div>
@@ -1428,7 +1428,7 @@ export const RegisterPatient: React.FC = () => {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="ui-card p-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md">
+        <div className="bg-surface-card rounded-xl shadow-sm p-space-md sm:p-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-md">
           <div className="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
             <span className="material-symbols-outlined text-outline text-[18px]">info</span>
             <span>
@@ -1439,14 +1439,14 @@ export const RegisterPatient: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="h-10 px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-on-surface font-label-lg text-label-lg transition-all cursor-pointer flex items-center justify-center"
+              className="h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg transition-all cursor-pointer flex items-center justify-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="h-10 px-6 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60"
+              className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60"
             >
               <span className="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">
                 {isEditMode ? 'save' : 'person_add'}
@@ -1476,7 +1476,7 @@ export const RegisterPatient: React.FC = () => {
               <span className="material-symbols-outlined text-[36px]">check</span>
             </div>
             <div className="space-y-1">
-              <h3 className="font-headline-md text-headline-md text-on-surface">
+              <h3 className="font-headline-md text-headline-md text-brand-navy-deep">
                 {isEditMode ? 'Patient Profile Updated!' : 'Patient Registered Successfully!'}
               </h3>
               <p className="font-body-md text-body-md text-on-surface-variant">
@@ -1494,26 +1494,26 @@ export const RegisterPatient: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-outline">Patient:</span>
-                <span className="font-label-md text-label-md text-on-surface" id="modalPatientName">
+                <span className="font-label-md text-label-md text-brand-navy-deep" id="modalPatientName">
                   {success.name}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-outline">NIC:</span>
-                <span className="font-mono-data text-mono-data text-on-surface">
+                <span className="font-mono-data text-mono-data text-brand-navy-deep">
                   {success.nic}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-outline">Branch Origin:</span>
-                <span className="text-on-surface font-medium">Colombo Central (Desk 01)</span>
+                <span className="text-brand-navy-deep font-medium">Colombo Central (Desk 01)</span>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => navigate('/receptionist/patients')}
-                className="flex-1 h-10 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
+                className="flex-1 h-[42px] rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer"
               >
                 Patient Directory
               </button>
@@ -1528,7 +1528,7 @@ export const RegisterPatient: React.FC = () => {
                     navigate(`/receptionist/book-appointment?patient_id=${success.id}`);
                   }
                 }}
-                className="flex-1 h-10 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-md text-label-md transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 h-[42px] rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
                 <span>Book Appointment</span>

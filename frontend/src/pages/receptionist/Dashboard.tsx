@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
+import { DashboardWelcome, dashboardAction } from '../../components/DashboardWelcome';
 import { StatusBadge } from '../../components/StatusBadge';
 
 const actions = [
@@ -40,39 +41,6 @@ export function Dashboard() {
   const [counts, setCounts] = useState<{ total: number; scheduled: number; completed: number; cancelled: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Live Time state matching Doctor Dashboard design
-  const [liveTime, setLiveTime] = useState(() => {
-    return (
-      new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Colombo',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }).format(new Date()) + ' IST'
-    );
-  });
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setLiveTime(
-        new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Colombo',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        }).format(new Date()) + ' IST'
-      );
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const todayLabel = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Colombo',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
 
   useEffect(() => {
     const updateDate = () => {
@@ -134,40 +102,12 @@ export function Dashboard() {
   const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
 
   return (
-    <div className="page-content min-h-[calc(100vh-theme(spacing.topbar-height))]">
-      {/* Top Level Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs mb-1">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-semibold">
-              Reception Desk
-            </span>
-          </div>
-          <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">Overview</h1>
-          <p className="font-body-md text-body-md text-secondary mt-0.5">
-            {user?.branchName || 'Assigned Branch'} · Receptionist
-          </p>
-        </div>
-
-        {/* Date & Time pill matching Doctor Dashboard image */}
-        <div className="flex items-center gap-space-sm self-start md:self-auto">
-          <div className="ui-card flex items-center px-4 py-2">
-            <span className="material-symbols-outlined text-[18px] text-primary mr-2">event_available</span>
-            <span className="font-label-md text-label-md text-on-surface font-semibold">{todayLabel}</span>
-            <span className="mx-2 text-secondary opacity-40">|</span>
-            <span className="font-mono-data text-mono-data text-secondary">{liveTime}</span>
-          </div>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => setRefreshVersion((v) => v + 1)}
-            className="ui-card w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-subtle transition-colors disabled:opacity-50"
-            title="Refresh dashboard data"
-            aria-label="Refresh dashboard data"
-          >
-            <span className={`material-symbols-outlined text-[20px] ${loading ? 'animate-spin' : ''}`}>refresh</span>
-          </button>
-        </div>
+    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pt-space-lg pb-space-xl">
+      <div className="mb-space-lg">
+        <DashboardWelcome subtitle={`${user?.branchName || 'Assigned Branch'} · Receptionist`} status={error ? 'Connection issue' : counts ? 'Operational live' : 'Connecting'}>
+          <Link to="/receptionist/book-appointment" className={`${dashboardAction} bg-primary text-white hover:bg-tertiary`}><span aria-hidden="true" className="material-symbols-outlined text-xl">calendar_month</span>Book Appointment</Link>
+          <Link to="/receptionist/register-patient" className={`${dashboardAction} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><span aria-hidden="true" className="material-symbols-outlined text-xl">person_add</span>Register Patient</Link>
+        </DashboardWelcome>
       </div>
 
       {error && (

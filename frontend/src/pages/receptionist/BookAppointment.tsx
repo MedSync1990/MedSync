@@ -560,11 +560,11 @@ export const BookAppointment: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="page-content">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -578,7 +578,7 @@ export const BookAppointment: React.FC = () => {
 
           {/* Title */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
               Book an Appointment
             </h1>
           </div>
@@ -592,7 +592,7 @@ export const BookAppointment: React.FC = () => {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* STEP 1: APPOINTMENT CATEGORY / TYPE                                */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-md">
+        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
           {/* Step Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
             <div className="flex items-center gap-space-sm">
@@ -600,7 +600,7 @@ export const BookAppointment: React.FC = () => {
                 1
               </span>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
                   Select Appointment Type
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
@@ -635,7 +635,7 @@ export const BookAppointment: React.FC = () => {
                   <span className="w-4 h-4 rounded-full border border-outline"></span>
                 )}
               </div>
-              <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                 Scheduled Visit
               </span>
               <span className="font-body-sm text-body-sm text-secondary mt-1">
@@ -666,7 +666,7 @@ export const BookAppointment: React.FC = () => {
                   <span className="w-4 h-4 rounded-full border border-outline"></span>
                 )}
               </div>
-              <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                 Walk-in
               </span>
               <span className="font-body-sm text-body-sm text-secondary mt-1">
@@ -679,7 +679,7 @@ export const BookAppointment: React.FC = () => {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* STEP 2: FIND / ONBOARD PATIENT                                    */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-md">
+        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
           {/* Step Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
             <div className="flex items-center gap-space-sm">
@@ -687,7 +687,7 @@ export const BookAppointment: React.FC = () => {
                 2
               </span>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
                   Find or Onboard Patient
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
@@ -700,7 +700,7 @@ export const BookAppointment: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowQuickModal(true)}
-                  className="px-space-md h-[40px] rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
+                  className="px-space-md h-[40px] rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px]">bolt</span>
                   <span>Quick Walk-in</span>
@@ -708,7 +708,7 @@ export const BookAppointment: React.FC = () => {
               )}
               <Link
                 to="/receptionist/register-patient"
-                className="px-space-md h-[40px] rounded-lg bg-surface-card hover:bg-surface-subtle border border-border-subtle text-on-surface font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
+                className="px-space-md h-[40px] rounded-lg bg-surface-card hover:bg-surface-subtle border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">person_add</span>
                 <span>Full Registration</span>
@@ -736,7 +736,7 @@ export const BookAppointment: React.FC = () => {
                       }
                     }}
                     placeholder="Search by NIC, Patient Name, Phone, or ID (e.g. 198821400293 or Priyantha)..."
-                    className="w-full h-10 pl-10 pr-4 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus transition-all"
+                    className="w-full h-[42px] pl-10 pr-4 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus transition-all"
                   />
                   {searchingPatients && (
                     <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline font-label-sm text-label-sm animate-pulse flex items-center gap-1">
@@ -748,7 +748,7 @@ export const BookAppointment: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => searchPatients(patientSearch)}
-                  className="w-full sm:w-auto h-10 px-space-lg bg-surface-subtle hover:bg-border-subtle border border-border-subtle text-on-surface font-label-md text-label-md rounded-lg flex items-center justify-center gap-1.5 transition-all font-semibold"
+                  className="w-full sm:w-auto h-[42px] px-space-lg bg-surface-subtle hover:bg-border-subtle border border-border-subtle text-brand-navy-deep font-label-md text-label-md rounded-lg flex items-center justify-center gap-1.5 transition-all font-semibold"
                 >
                   <span className="material-symbols-outlined text-[18px]">manage_search</span>
                   <span>Lookup</span>
@@ -802,15 +802,15 @@ export const BookAppointment: React.FC = () => {
                             {p.last_name[0]}
                           </div>
                           <div>
-                            <div className="font-semibold text-on-surface font-label-md text-label-md flex items-center gap-2">
+                            <div className="font-semibold text-brand-navy-deep font-label-md text-label-md flex items-center gap-2">
                               <span>{p.first_name} {p.last_name === '(Walk-in Patient)' ? '' : p.last_name}</span>
                               {(p.is_temp || p.id_number?.startsWith('999')) && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-body-sm font-bold">
+                                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
                                   ⚡ Walk-in Profile
                                 </span>
                               )}
                               {p.branch_name && (
-                                <span className="px-1.5 py-0.2 rounded bg-surface-subtle border border-border-subtle text-body-sm text-secondary">
+                                <span className="px-1.5 py-0.2 rounded bg-surface-subtle border border-border-subtle text-[11px] text-secondary">
                                   {p.branch_name}
                                 </span>
                               )}
@@ -831,7 +831,7 @@ export const BookAppointment: React.FC = () => {
                           >
                             {p.has_insurance ? 'Insured' : 'Self-Pay'}
                           </span>
-                          <span className="px-2.5 py-1 rounded-full bg-surface border border-border-subtle font-mono-data text-body-sm text-secondary font-medium">
+                          <span className="px-2.5 py-1 rounded-full bg-surface border border-border-subtle font-mono-data text-[12px] text-secondary font-medium">
                             {p.patient_code || `PT-${String(p.patient_id).padStart(6, '0')}`}
                           </span>
                         </div>
@@ -851,24 +851,24 @@ export const BookAppointment: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                    <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                       {selectedPatient.first_name} {selectedPatient.last_name === '(Walk-in Patient)' ? '' : selectedPatient.last_name}
                     </span>
                     {(selectedPatient.is_temp || selectedPatient.id_number?.startsWith('999')) && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-body-sm font-bold flex items-center gap-1 border border-amber-300">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold flex items-center gap-1 border border-amber-300">
                         <span>⚡</span> Walk-in (Pending Full Registration)
                       </span>
                     )}
-                    <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-mono-data text-body-sm text-secondary">
+                    <span className="px-2 py-0.5 rounded-full bg-surface-card border border-border-subtle font-mono-data text-[11px] text-secondary">
                       {selectedPatient.patient_code || `PT-${String(selectedPatient.patient_id).padStart(6, '0')}`}
                     </span>
                     {selectedPatient.has_insurance ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[11px] font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-status-completed-text"></span>
                         Insured
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-secondary font-label-sm text-label-sm font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-subtle text-secondary font-label-sm text-[11px] font-semibold">
                         Self-Pay
                       </span>
                     )}
@@ -905,7 +905,7 @@ export const BookAppointment: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedPatient(null)}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-card border border-border-subtle hover:bg-surface-subtle font-label-sm text-label-sm text-secondary hover:text-on-surface transition-all self-start md:self-auto font-semibold"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-card border border-border-subtle hover:bg-surface-subtle font-label-sm text-label-sm text-secondary hover:text-brand-navy-deep transition-all self-start md:self-auto font-semibold"
               >
                 <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
                 <span>⇄ Change Patient</span>
@@ -917,7 +917,7 @@ export const BookAppointment: React.FC = () => {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* STEP 3: DOCTOR & SPECIALTY SELECTION                               */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-md">
+        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-md">
           {/* Step Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
             <div className="flex items-center gap-space-sm">
@@ -925,7 +925,7 @@ export const BookAppointment: React.FC = () => {
                 3
               </span>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
                   Doctor &amp; Specialty Selection
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
@@ -941,7 +941,7 @@ export const BookAppointment: React.FC = () => {
                 onClick={() => setSelectedDate(todayStr)}
                 className={`px-3 py-1 rounded-md text-label-sm font-semibold transition-all ${selectedDate === todayStr
                   ? 'bg-primary text-on-primary shadow-sm'
-                  : 'bg-surface-subtle text-outline hover:text-on-surface'
+                  : 'bg-surface-subtle text-outline hover:text-brand-navy-deep'
                   }`}
               >
                 Today
@@ -951,7 +951,7 @@ export const BookAppointment: React.FC = () => {
                 onClick={() => setSelectedDate(tomorrowStr)}
                 className={`px-3 py-1 rounded-md text-label-sm font-semibold transition-all ${selectedDate === tomorrowStr
                   ? 'bg-primary text-on-primary shadow-sm'
-                  : 'bg-surface-subtle text-outline hover:text-on-surface'
+                  : 'bg-surface-subtle text-outline hover:text-brand-navy-deep'
                   }`}
               >
                 Tomorrow
@@ -969,7 +969,7 @@ export const BookAppointment: React.FC = () => {
                   }
                   setSelectedDate(val);
                 }}
-                className="h-[32px] px-2 text-label-sm font-semibold bg-surface-subtle border border-border-subtle rounded-md text-on-surface focus:outline-none focus:border-primary"
+                className="h-[32px] px-2 text-label-sm font-semibold bg-surface-subtle border border-border-subtle rounded-md text-brand-navy-deep focus:outline-none focus:border-primary"
               />
             </div>
           </div>
@@ -985,7 +985,7 @@ export const BookAppointment: React.FC = () => {
                 value={doctorSearch}
                 onChange={(e) => setDoctorSearch(e.target.value)}
                 placeholder="Search by doctor name or branch..."
-                className="w-full h-10 pl-10 pr-4 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus"
+                className="w-full h-[42px] pl-10 pr-4 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus"
               />
             </div>
           </div>
@@ -997,7 +997,7 @@ export const BookAppointment: React.FC = () => {
                 Clinic Branch
               </label>
               {category === 'Walk-in' && isReceptionist && (effectiveUserBranchName || userBranchId) && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-bold border border-brand-teal-light/40 shadow-2xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-[11px] font-bold border border-brand-teal-light/40 shadow-2xs">
                   <span className="material-symbols-outlined text-[13px]">lock</span>
                   Locked to your branch for Quick Walk-ins
                 </span>
@@ -1015,7 +1015,7 @@ export const BookAppointment: React.FC = () => {
                   <span>{effectiveUserBranchName || `Branch #${userBranchId}`} (Your Branch)</span>
                   <span className="material-symbols-outlined text-[14px]">check</span>
                 </button>
-                <span className="text-body-sm text-outline font-body-sm italic">
+                <span className="text-[12px] text-outline font-body-sm italic">
                   Quick walk-ins are restricted to doctors in your physical branch.
                 </span>
               </div>
@@ -1026,7 +1026,7 @@ export const BookAppointment: React.FC = () => {
                   onClick={() => setSelectedBranch('All')}
                   className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch === 'All'
                     ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
-                    : 'bg-surface border border-border-subtle text-secondary hover:text-on-surface'
+                    : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
                     }`}
                 >
                   <span className="material-symbols-outlined text-[15px]">apartment</span>
@@ -1042,7 +1042,7 @@ export const BookAppointment: React.FC = () => {
                     onClick={() => setSelectedBranch(b.name)}
                     className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch.toLowerCase() === b.name.toLowerCase()
                       ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
-                      : 'bg-surface border border-border-subtle text-secondary hover:text-on-surface'
+                      : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
                       }`}
                   >
                     <span className="material-symbols-outlined text-[15px]">location_on</span>
@@ -1067,7 +1067,7 @@ export const BookAppointment: React.FC = () => {
                 onClick={() => setSelectedSpecialty('All')}
                 className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedSpecialty === 'All'
                   ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
-                  : 'bg-surface border border-border-subtle text-secondary hover:text-on-surface'
+                  : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
                   }`}
               >
                 <span>All Specialties</span>
@@ -1082,7 +1082,7 @@ export const BookAppointment: React.FC = () => {
                   onClick={() => setSelectedSpecialty(s.name)}
                   className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedSpecialty === s.name
                     ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
-                    : 'bg-surface border border-border-subtle text-secondary hover:text-on-surface'
+                    : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
                     }`}
                 >
                   <span>{s.name}</span>
@@ -1096,7 +1096,7 @@ export const BookAppointment: React.FC = () => {
 
           {/* Doctors List Count Header */}
           <div className="flex items-center justify-between pt-space-xs text-secondary font-label-md text-label-md">
-            <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+            <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
               Available Doctors ({filteredDoctors.length} found)
             </span>
             <span className="font-body-sm text-body-sm text-outline">
@@ -1123,7 +1123,7 @@ export const BookAppointment: React.FC = () => {
                       : 'border border-border-subtle bg-surface-card hover:border-border-focus/40'
                       }`}
                   >
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-sm border-b border-border-subtle">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm border-b border-border-subtle">
                       <div className="flex items-center gap-space-md">
                         {/* Doctor Avatar / Initials */}
                         <div className="w-14 h-14 rounded-full bg-surface-container-high border border-border-subtle text-primary flex items-center justify-center font-headline-md text-headline-md font-bold ring-2 ring-primary/20">
@@ -1133,13 +1133,13 @@ export const BookAppointment: React.FC = () => {
                         </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                            <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
                               {doc.full_name}
                             </h3>
-                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-[11px] font-semibold">
                               #{doc.license_number}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[11px] font-semibold">
                               On Duty
                             </span>
                           </div>
@@ -1186,16 +1186,16 @@ export const BookAppointment: React.FC = () => {
                           /* Walk-in Manual Time Slot Config */
                           <div className="p-space-md rounded-xl bg-status-scheduled-bg/25 border border-brand-teal-light/40 space-y-space-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 text-on-surface font-headline-sm font-semibold">
+                              <div className="flex items-center gap-2 text-brand-navy-deep font-headline-sm font-semibold">
                                 <span className="material-symbols-outlined text-primary text-[22px]">
                                   more_time
                                 </span>
                                 <span>Manual Walk-in Time Slot</span>
-                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-body-sm font-bold">
+                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                                   Emergency / On-Demand
                                 </span>
                               </div>
-                              <span className="font-mono-data text-body-sm text-secondary">
+                              <span className="font-mono-data text-[12px] text-secondary">
                                 Date: <strong>{selectedDate}</strong>
                               </span>
                             </div>
@@ -1220,7 +1220,7 @@ export const BookAppointment: React.FC = () => {
                                   }}
                                   className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot
                                     ? 'border-error bg-error-container text-on-error-container focus:border-error focus:ring-1 focus:ring-error'
-                                    : 'bg-surface border-border-subtle text-on-surface focus:border-primary'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
                                     }`}
                                 />
                               </div>
@@ -1235,7 +1235,7 @@ export const BookAppointment: React.FC = () => {
                                   onChange={(e) => setWalkInEndTime(e.target.value)}
                                   className={`w-full h-[40px] px-3 rounded-lg border font-mono-data focus:outline-none font-semibold text-[15px] transition-colors ${conflictingSlot || (walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime)
                                     ? 'border-error bg-error-container text-on-error-container focus:border-error focus:ring-1 focus:ring-error'
-                                    : 'bg-surface border-border-subtle text-on-surface focus:border-primary'
+                                    : 'bg-surface border-border-subtle text-brand-navy-deep focus:border-primary'
                                     }`}
                                 />
                               </div>
@@ -1252,7 +1252,7 @@ export const BookAppointment: React.FC = () => {
                                       setWalkInStartTime(now);
                                       setWalkInEndTime(addMinutesToTime(now, 15));
                                     }}
-                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-on-surface font-label-sm font-semibold transition-colors text-label-sm flex items-center justify-center gap-1"
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px] flex items-center justify-center gap-1"
                                   >
                                     <span className="material-symbols-outlined text-[15px]">schedule</span>
                                     Now (+15m)
@@ -1262,7 +1262,7 @@ export const BookAppointment: React.FC = () => {
                                     onClick={() => {
                                       if (walkInStartTime) setWalkInEndTime(addMinutesToTime(walkInStartTime, 20));
                                     }}
-                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-on-surface font-label-sm font-semibold transition-colors text-label-sm"
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px]"
                                   >
                                     +20 min
                                   </button>
@@ -1271,7 +1271,7 @@ export const BookAppointment: React.FC = () => {
                                     onClick={() => {
                                       if (walkInStartTime) setWalkInEndTime(addMinutesToTime(walkInStartTime, 30));
                                     }}
-                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-on-surface font-label-sm font-semibold transition-colors text-label-sm"
+                                    className="flex-1 h-full rounded-lg bg-surface border border-border-subtle hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-sm font-semibold transition-colors text-[12px]"
                                   >
                                     +30 min
                                   </button>
@@ -1281,7 +1281,7 @@ export const BookAppointment: React.FC = () => {
 
                             {/* Time conflict and validation messages */}
                             {conflictingSlot && (
-                              <div className="flex items-start gap-2 p-3 rounded-lg bg-error-container border border-error text-on-error-container text-body-sm">
+                              <div className="flex items-start gap-2 p-3 rounded-lg bg-error-container border border-error text-on-error-container text-[12px]">
                                 <span className="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">
                                   warning
                                 </span>
@@ -1299,7 +1299,7 @@ export const BookAppointment: React.FC = () => {
                             )}
 
                             {!conflictingSlot && walkInEndTime && walkInStartTime && walkInEndTime <= walkInStartTime && (
-                              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-error-container border border-error text-on-error-container text-body-sm">
+                              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-error-container border border-error text-on-error-container text-[12px]">
                                 <span className="material-symbols-outlined text-[16px] text-error shrink-0">
                                   error
                                 </span>
@@ -1308,22 +1308,22 @@ export const BookAppointment: React.FC = () => {
                             )}
 
                             {!conflictingSlot && walkInStartTime && walkInEndTime && walkInEndTime > walkInStartTime && (
-                              <div className="flex items-center gap-1.5 text-status-completed-text text-body-sm font-medium">
+                              <div className="flex items-center gap-1.5 text-status-completed-text text-[12px] font-medium">
                                 <span className="material-symbols-outlined text-[16px]">check_circle</span>
                                 Time slot available &amp; no schedule conflicts detected.
                               </div>
                             )}
 
                             {/* Reference: doctor's existing pre-scheduled slots */}
-                            <div className="pt-2 border-t border-border-subtle/60 text-body-sm text-secondary space-y-2">
+                            <div className="pt-2 border-t border-border-subtle/60 text-[12px] text-secondary space-y-2">
                               <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-on-surface flex items-center gap-1.5">
+                                  <span className="font-semibold text-brand-navy-deep flex items-center gap-1.5">
                                     <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
                                     Doctor's Existing Schedule on {selectedDate}:
                                   </span>
                                   {!loadingSlots && slots.length > 0 && (
-                                    <div className="flex items-center gap-1.5 text-body-sm">
+                                    <div className="flex items-center gap-1.5 text-[11px]">
                                       <span className="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold border border-error">
                                         {bookedSlots.length} Booked
                                       </span>
@@ -1333,7 +1333,7 @@ export const BookAppointment: React.FC = () => {
                                     </div>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-3 text-body-sm">
+                                <div className="flex items-center gap-3 text-[11px]">
                                   <span className="inline-flex items-center gap-1.5 text-status-completed-text font-medium">
                                     <span className="w-2 h-2 rounded-full bg-status-completed-text"></span>
                                     Open Slot
@@ -1398,7 +1398,7 @@ export const BookAppointment: React.FC = () => {
                         ) : (
                           /* Pre-scheduled Slots Chips */
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                            <span className="font-label-sm text-label-sm text-on-surface min-w-[140px] font-semibold flex items-center gap-1.5">
+                            <span className="font-label-sm text-label-sm text-brand-navy-deep min-w-[140px] font-semibold flex items-center gap-1.5">
                               <span className="material-symbols-outlined text-[16px] text-primary">
                                 today
                               </span>
@@ -1452,7 +1452,7 @@ export const BookAppointment: React.FC = () => {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* STEP 4: CONFIRM BOOKING SUMMARY                                    */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg">
+        <div className="bg-surface-card rounded-xl border border-border-subtle p-space-lg lg:p-space-xl shadow-sm space-y-space-lg">
           {/* Step Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm border-b border-border-subtle">
             <div className="flex items-center gap-space-sm">
@@ -1460,7 +1460,7 @@ export const BookAppointment: React.FC = () => {
                 4
               </span>
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold leading-tight">
                   Confirm Booking Summary
                 </h2>
                 <p className="font-body-sm text-body-sm text-outline">
@@ -1493,7 +1493,7 @@ export const BookAppointment: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px] text-primary">person</span>
               </div>
               <div>
-                <p className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                   {selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name}` : '—'}
                 </p>
                 <p className="font-mono-data text-mono-data text-secondary">
@@ -1531,7 +1531,7 @@ export const BookAppointment: React.FC = () => {
                 </span>
               </div>
               <div>
-                <p className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                   {selectedDoctor ? selectedDoctor.full_name : '—'}
                 </p>
                 <p className="font-body-sm text-body-sm text-secondary">
@@ -1539,7 +1539,7 @@ export const BookAppointment: React.FC = () => {
                 </p>
               </div>
               <div className="space-y-0.5 pt-1 border-t border-border-subtle font-body-sm text-body-sm text-secondary">
-                <p className="font-semibold text-on-surface">
+                <p className="font-semibold text-brand-navy-deep">
                   License #{selectedDoctor?.license_number || '—'}
                 </p>
                 <p>{selectedDoctor?.branch_name ? `${selectedDoctor.branch_name} Branch` : 'Clinic Branch'}</p>
@@ -1555,7 +1555,7 @@ export const BookAppointment: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px] text-primary">schedule</span>
               </div>
               <div>
-                <p className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                   {category === 'Walk-in' ? selectedDate : selectedSlot ? selectedSlot.date : selectedDate}
                 </p>
                 <p className="font-label-lg text-label-lg text-primary font-bold">
@@ -1589,13 +1589,13 @@ export const BookAppointment: React.FC = () => {
                 </span>
               </div>
               <div>
-                <p className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <p className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
                   {selectedDoctor?.branch_name ? `${selectedDoctor.branch_name} Branch` : 'Colombo Central Branch'}
                 </p>
                 <p className="font-body-sm text-body-sm text-secondary">Outpatient Clinic Wing</p>
               </div>
               <div className="pt-1 border-t border-border-subtle font-body-sm text-body-sm text-secondary">
-                <p className="text-body-sm leading-snug text-outline">
+                <p className="text-[11px] leading-snug text-outline">
                   {category === 'Walk-in'
                     ? 'Walk-in triage queue with immediate consultation reservation.'
                     : 'Slots operate strictly on a 15-minute grace window per clinic guidelines.'}
@@ -1609,7 +1609,7 @@ export const BookAppointment: React.FC = () => {
             <button
               type="button"
               onClick={handleResetForm}
-              className="w-full sm:w-auto h-10 px-space-lg rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-secondary hover:text-on-surface font-label-md text-label-md transition-all font-semibold"
+              className="w-full sm:w-auto h-[42px] px-space-lg rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep font-label-md text-label-md transition-all font-semibold"
             >
               Cancel &amp; Reset Form
             </button>
@@ -1618,7 +1618,7 @@ export const BookAppointment: React.FC = () => {
               type="button"
               disabled={!isReadyToConfirm || submitting}
               onClick={() => setShowConfirmModal(true)}
-              className="w-full sm:w-auto h-10 px-space-xl rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm flex items-center justify-center gap-2 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto h-[42px] px-space-xl rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm flex items-center justify-center gap-2 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
               <span>{submitting ? 'Booking...' : category === 'Walk-in' ? 'Book Walk-in' : 'Book Appointment'}</span>
@@ -1637,7 +1637,7 @@ export const BookAppointment: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowQuickModal(false)}
-              className="px-space-md h-10 font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all"
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all"
             >
               Cancel
             </button>
@@ -1645,7 +1645,7 @@ export const BookAppointment: React.FC = () => {
               type="submit"
               form="quick-walkin-form"
               disabled={creatingQuickPatient}
-              className="px-space-md h-10 font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all bg-primary hover:bg-tertiary text-on-primary flex items-center justify-center gap-2 disabled:opacity-50"
+              className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {creatingQuickPatient ? (
                 <>
@@ -1669,7 +1669,7 @@ export const BookAppointment: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-label-sm font-semibold text-on-surface mb-1">
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
                 First Name <span className="text-error">*</span>
               </label>
               <input
@@ -1678,44 +1678,44 @@ export const BookAppointment: React.FC = () => {
                 value={quickForm.first_name}
                 onChange={(e) => setQuickForm({ ...quickForm, first_name: e.target.value })}
                 placeholder="e.g. Amara"
-                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
               />
             </div>
 
             <div>
-              <label className="block text-label-sm font-semibold text-on-surface mb-1">
-                Last Name <span className="text-outline text-body-sm font-normal">(Optional)</span>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+                Last Name <span className="text-outline text-[11px] font-normal">(Optional)</span>
               </label>
               <input
                 type="text"
                 value={quickForm.last_name}
                 onChange={(e) => setQuickForm({ ...quickForm, last_name: e.target.value })}
                 placeholder="e.g. Perera"
-                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-label-sm font-semibold text-on-surface mb-1">
-              Phone Number <span className="text-outline text-body-sm font-normal">(Optional)</span>
+            <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+              Phone Number <span className="text-outline text-[11px] font-normal">(Optional)</span>
             </label>
             <input
               type="tel"
               value={quickForm.phone_number}
               onChange={(e) => setQuickForm({ ...quickForm, phone_number: e.target.value })}
               placeholder="e.g. 0771234567"
-              className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus"
+              className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-label-sm font-semibold text-on-surface mb-1">Gender</label>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">Gender</label>
               <select
                 value={quickForm.gender}
                 onChange={(e) => setQuickForm({ ...quickForm, gender: e.target.value as any })}
-                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -1723,8 +1723,8 @@ export const BookAppointment: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-label-sm font-semibold text-on-surface mb-1">
-                Approx. Age <span className="text-outline text-body-sm font-normal">(Years)</span>
+              <label className="block text-label-sm font-semibold text-brand-navy-deep mb-1">
+                Approx. Age <span className="text-outline text-[11px] font-normal">(Years)</span>
               </label>
               <input
                 type="number"
@@ -1733,7 +1733,7 @@ export const BookAppointment: React.FC = () => {
                 value={quickForm.age}
                 onChange={(e) => setQuickForm({ ...quickForm, age: e.target.value })}
                 placeholder="e.g. 35"
-                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-on-surface focus:outline-none focus:border-border-focus"
+                className="w-full h-[40px] px-3 rounded-lg bg-surface border border-border-subtle font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:border-border-focus"
               />
             </div>
           </div>

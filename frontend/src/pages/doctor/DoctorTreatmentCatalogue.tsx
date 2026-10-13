@@ -305,7 +305,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
 
 
   return (
-    <div className="w-full max-w-content-max-width mx-auto py-space-lg space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
         <div className="space-y-1">

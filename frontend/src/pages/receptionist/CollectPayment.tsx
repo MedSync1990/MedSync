@@ -121,8 +121,8 @@ export default function CollectPayment() {
   };
 
   return (
-    <div className="page-content">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
           <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">

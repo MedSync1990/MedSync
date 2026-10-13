@@ -17,6 +17,7 @@ export default function InvoicePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recentInvoices, setRecentInvoices] = useState<RecentInvoiceItem[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unpaid' | 'paid'>('unpaid');
   const urlSearchType = searchParams.get('type');
 
   useEffect(() => {
@@ -34,13 +35,13 @@ export default function InvoicePage() {
     } else {
       setInvoiceData(null);
       setError(null);
-      fetchRecentInvoices();
+      fetchRecentInvoices(statusFilter);
     }
-  }, [invoiceId, urlSearchType, searchParams, navigate]);
+  }, [invoiceId, urlSearchType, searchParams, navigate, statusFilter]);
 
-  const fetchRecentInvoices = async () => {
+  const fetchRecentInvoices = async (filter: 'all' | 'unpaid' | 'paid' = statusFilter) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/invoices/recent`, {
+      const response = await fetch(`${API_BASE_URL}/invoices/recent?status=${filter}&limit=25`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -95,8 +96,8 @@ export default function InvoicePage() {
   };
 
   return (
-    <div className="page-content">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
           <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
@@ -134,27 +135,74 @@ export default function InvoicePage() {
       <div className="w-full">
         {!invoiceId ? (
           <div className="w-full">
-            {recentInvoices.length > 0 ? (
-              <div className="ui-card overflow-hidden">
-                {/* Section header — matches RegisterPatient card headers */}
-                <div className="flex items-center gap-space-md p-space-md md:p-space-lg pb-0">
+            <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+              {/* Section header with status filter tabs */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-space-lg sm:p-space-xl pb-space-md border-b border-border-subtle/50">
+                <div className="flex items-center gap-space-md">
                   <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                   </div>
                   <div>
-                    <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">
-                      Recent Unpaid Invoices
+                    <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">
+                      {statusFilter === 'all'
+                        ? 'Recent Invoices'
+                        : statusFilter === 'paid'
+                          ? 'Recent Paid Invoices'
+                          : 'Recent Unpaid Invoices'}
                     </h2>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                      Invoices with outstanding balances awaiting payment
+                      {statusFilter === 'all'
+                        ? 'Recent billing invoices and payment statuses'
+                        : statusFilter === 'paid'
+                          ? 'Settled invoices with completed payments'
+                          : 'Invoices with outstanding balances awaiting payment'}
                     </p>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto mt-space-md">
+                {/* Filter Tabs */}
+                <div className="inline-flex p-1 bg-surface-subtle rounded-lg border border-border-subtle self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('all')}
+                    className={`px-3 py-1.5 rounded-md font-label-md text-label-md transition-all cursor-pointer ${
+                      statusFilter === 'all'
+                        ? 'bg-surface-card text-primary font-semibold shadow-xs'
+                        : 'text-on-surface-variant hover:text-brand-navy-deep'
+                    }`}
+                  >
+                    All Invoices
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('unpaid')}
+                    className={`px-3 py-1.5 rounded-md font-label-md text-label-md transition-all cursor-pointer ${
+                      statusFilter === 'unpaid'
+                        ? 'bg-surface-card text-primary font-semibold shadow-xs'
+                        : 'text-on-surface-variant hover:text-brand-navy-deep'
+                    }`}
+                  >
+                    Unpaid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('paid')}
+                    className={`px-3 py-1.5 rounded-md font-label-md text-label-md transition-all cursor-pointer ${
+                      statusFilter === 'paid'
+                        ? 'bg-surface-card text-primary font-semibold shadow-xs'
+                        : 'text-on-surface-variant hover:text-brand-navy-deep'
+                    }`}
+                  >
+                    Paid
+                  </button>
+                </div>
+              </div>
+
+              {recentInvoices.length > 0 ? (
+                <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-y border-border-subtle bg-surface-subtle">
+                      <tr className="border-b border-border-subtle bg-surface-subtle">
                         <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Date</th>
                         <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Invoice Number</th>
                         <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Patient</th>
@@ -209,23 +257,22 @@ export default function InvoicePage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              /* Empty state — matches RegisterPatient / UI guidelines §5 */
-              <div className="ui-card border-dashed p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
-                <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[36px]">receipt_long</span>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-headline-md text-headline-md text-on-surface">
-                    Enter an Invoice Code or Patient NIC to Search
+              ) : (
+                <div className="p-space-xl text-center flex flex-col items-center justify-center space-y-space-sm">
+                  <div className="w-12 h-12 rounded-full bg-surface-subtle flex items-center justify-center text-outline">
+                    <span className="material-symbols-outlined text-[28px]">receipt_long</span>
+                  </div>
+                  <h3 className="font-headline-sm text-headline-sm text-brand-navy-deep">
+                    No {statusFilter === 'all' ? '' : statusFilter} invoices found
                   </h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
-                    Use the search console above to load real patient invoice details and treatment breakdowns.
+                  <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
+                    {statusFilter === 'all'
+                      ? 'No recent invoices were found in the system.'
+                      : `There are currently no recent ${statusFilter} invoices recorded.`}
                   </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ) : loading ? (
           /* Loading state — matches UI guidelines §5 */

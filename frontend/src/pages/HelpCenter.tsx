@@ -19,7 +19,7 @@ export default function HelpCenter() {
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-space-lg px-space-sm py-space-lg md:px-space-md">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-lg">
       <header className="space-y-1">
         {/* Breadcrumbs */}
         <div className="mb-2">

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { DashboardWelcome, dashboardAction } from '../../components/DashboardWelcome';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
 
 export const DoctorDashboard: React.FC = () => {
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
 
@@ -17,30 +20,14 @@ export const DoctorDashboard: React.FC = () => {
 
   const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
   const completedAppointments = appointments.filter((item) => item.status === 'Completed').length;
-  const todayLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg">
-      {/* Top Level Welcome & Date Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs mb-1">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
-              Live Session
-            </span>
-          </div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Overview</h1>
-        </div>
-
-        {/* Quick Date & Roster Controls */}
-        <div className="flex items-center gap-space-sm self-start md:self-auto">
-          <div className="flex items-center bg-surface-card rounded-xl px-space-md py-2 shadow-sm border border-border-subtle">
-            <span className="material-symbols-outlined text-[18px] text-primary mr-2">event_available</span>
-            <span className="font-label-lg text-label-lg text-brand-navy-deep">{todayLabel}</span>
-            <span className="mx-2 text-secondary opacity-40">|</span>
-            <span className="font-mono-data text-mono-data text-secondary">09:58 AM IST</span>
-          </div>
-        </div>
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
+      <div className="mb-space-lg">
+        <DashboardWelcome subtitle={`${user?.branchName || 'Assigned Branch'} · Doctor`} status="Clinical Dashboard">
+          <Link to="/doctor/schedule" className={`${dashboardAction} bg-primary text-white hover:bg-tertiary`}><span aria-hidden="true" className="material-symbols-outlined text-xl">calendar_month</span>My Schedule</Link>
+          <Link to="/doctor/earnings" className={`${dashboardAction} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><span aria-hidden="true" className="material-symbols-outlined text-xl">trending_up</span>My Earnings</Link>
+        </DashboardWelcome>
       </div>
 
       {/* Widget 1: Key Metric Cards Grid (Stretched to 2 columns to fill width) */}
