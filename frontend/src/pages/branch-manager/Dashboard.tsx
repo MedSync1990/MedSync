@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { DashboardWelcome, dashboardAction as action } from '../../components/DashboardWelcome';
 import { useAuth } from '../../context/AuthContext';
 import { getStatsOverview, listAppointments } from '../../api';
 import { get } from '../../api/client';
@@ -7,7 +8,6 @@ import type { AppointmentResponse, DoctorResponse, StatsOverview } from '../../a
 
 const timezone = 'Asia/Colombo';
 const card = 'rounded-xl bg-surface-container-lowest shadow-sm';
-const action = 'inline-flex min-h-[42px] items-center justify-center gap-2 whitespace-nowrap rounded-lg px-space-md font-label-md text-label-md font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 const dateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const message = (error: unknown) => error instanceof Error ? error.message : 'Unable to load branch information.';
 
@@ -64,7 +64,6 @@ export default function BranchManagerDashboard() {
   const today = stats?.today_appointments;
   const total = today ? today.scheduled + today.completed + today.cancelled : 0;
   const branchName = user?.branchName || 'Your Branch';
-  const dateLabel = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: timezone }).format(new Date());
   const specialtyGroups = new Map<string, DoctorResponse[]>();
   for (const doctor of doctors) {
     for (const specialty of doctor.specialties.length ? doctor.specialties : ['General OPD']) {
@@ -79,24 +78,11 @@ export default function BranchManagerDashboard() {
   ];
 
   return <div className="mx-auto flex w-full max-w-content-max-width flex-col gap-space-xl py-space-xl">
-    <section className={`${card} relative overflow-hidden p-space-md`}>
-      <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-surface-container-low" />
-      <div className="relative flex flex-col justify-between gap-space-lg lg:flex-row lg:flex-wrap lg:items-center">
-        <div className="max-w-md">
-          <div className="mb-space-sm flex flex-wrap items-center gap-space-sm font-body-sm text-body-sm font-medium text-secondary">
-            <span className="rounded-full bg-sky-100 px-space-sm py-1 font-semibold uppercase tracking-wide text-primary">{error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}</span><span>{dateLabel}</span>
-          </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Welcome,<br />{[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Manager'}</h1>
-          <p className="mt-space-sm font-body-md text-body-md text-secondary">{branchName} · Branch Manager Overview</p>
-
-        </div>
-        <div className="flex flex-wrap gap-space-sm lg:flex-nowrap">
+    <DashboardWelcome subtitle={`${branchName} · Branch Manager`} status={error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}>
           <Link to="/reports/appointments-summary" className={`${action} bg-primary text-white hover:bg-tertiary`}><Icon name="calendar_month" className="text-xl" />View Branch Appointments</Link>
           <Link to="/reports/doctor-revenue" className={`${action} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><Icon name="trending_up" className="text-xl" />Doctor Revenue</Link>
           <Link to="/branch-manager/branch-details" className={`${action} bg-surface-container text-on-surface hover:bg-surface-dim`}><Icon name="domain" className="text-xl" />Branch Details & Staff</Link>
-        </div>
-      </div>
-    </section>
+    </DashboardWelcome>
 
     {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-space-md font-body-md text-body-md text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error} The dashboard will retry automatically.</div>}
     {loading && !stats ? <div role="status" className="grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className={`${card} h-40 animate-pulse bg-slate-100`} />)}<span className="sr-only">Loading dashboard</span></div> : stats && <>

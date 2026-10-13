@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { DashboardWelcome, dashboardAction as headerAction } from '../../components/DashboardWelcome';
 import { getStatsOverview, getRecentActivity, listBranches } from '../../api';
 import { exportToCSV } from '../../api/reports';
 import type { ActivityItem, BranchResponse, StatsOverview } from '../../api/types';
 
 const panel = 'rounded-xl bg-surface-card p-6 shadow-sm md:p-7';
-const headerAction = 'inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm';
 const timezone = 'Asia/Colombo';
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : 'Unable to load dashboard data.';
 const appointmentCount = (stats: StatsOverview) => stats.today_appointments.scheduled + stats.today_appointments.completed + stats.today_appointments.cancelled;
@@ -14,7 +13,6 @@ function Icon({ name, className = 'text-xl' }: { name: string; className?: strin
 interface BranchVolume { branch: BranchResponse; count: number | null }
 
 export default function AdministratorDashboard() {
-  const { user } = useAuth();
   const [stats, setStats] = useState<StatsOverview | null>(null);
   const [volumes, setVolumes] = useState<BranchVolume[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -27,11 +25,9 @@ export default function AdministratorDashboard() {
   const activityRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const inFlight = useRef(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const refresh = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
-    setIsRefreshing(true);
     try {
       const [overview, audit, branches] = await Promise.allSettled([getStatsOverview(), getRecentActivity({ limit: 50 }), listBranches()]);
       if (!mounted.current) return;
@@ -48,7 +44,6 @@ export default function AdministratorDashboard() {
     } finally {
       inFlight.current = false;
       if (mounted.current) {
-        setIsRefreshing(false);
         setLoading(false);
       }
     }
@@ -68,10 +63,11 @@ export default function AdministratorDashboard() {
   const timeLabel = (value: string | Date) => new Date(value).toLocaleString('en-GB', { timeZone: timezone, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 
   return <div className="mx-auto flex w-full max-w-content-max-width flex-col gap-6 py-6 md:py-8">
-    <section className="flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
-      <div><p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">Enterprise Healthcare Network</p><h1 className="font-display-lg text-display-lg text-on-surface">Welcome, {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Administrator'}</h1><p className="mt-2 flex items-center gap-2 text-sm text-secondary"><Icon name="verified_user" />Administrator · All Branches</p></div>
-      <div className="flex flex-col gap-3"><div className="flex flex-wrap items-center gap-3 text-xs text-secondary"><span className="rounded-full bg-surface-container-low px-3 py-2">{new Date().toLocaleDateString('en-GB', { timeZone: timezone, day: 'numeric', month: 'long', year: 'numeric' })}</span><button type="button" onClick={() => void refresh()} disabled={isRefreshing} className="flex items-center gap-1 rounded-lg px-3 py-2 font-semibold text-primary hover:bg-sky-50 disabled:opacity-50"><Icon name="refresh" />{isRefreshing ? 'Refreshing…' : 'Refresh'}</button></div><div className="flex flex-wrap gap-2"><Link to="/admin/staff" className={`${headerAction} bg-white text-primary`}><Icon name="group_add" />Staff Portal</Link><Link to="/admin/branches" className={`${headerAction} bg-white text-primary`}><Icon name="domain" />Branches</Link><button type="button" disabled={!activity.length || !!activityError} onClick={() => exportToCSV(activity, 'System_Audit')} className={`${headerAction} bg-primary text-white hover:bg-tertiary disabled:opacity-50`}><Icon name="download" />Export System Audit</button></div></div>
-    </section>
+    <DashboardWelcome subtitle="All Branches · Administrator" status={error ? 'Connection issue' : updatedAt ? 'Operational live' : 'Connecting'}>
+      <Link to="/admin/staff" className={`${headerAction} bg-primary text-white hover:bg-tertiary`}><Icon name="group_add" />Staff Portal</Link>
+      <Link to="/admin/branches" className={`${headerAction} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><Icon name="domain" />Branches</Link>
+      <button type="button" disabled={!activity.length || !!activityError} onClick={() => exportToCSV(activity, 'System_Audit')} className={`${headerAction} bg-surface-container text-on-surface hover:bg-surface-dim disabled:opacity-50`}><Icon name="download" />Export System Audit</button>
+    </DashboardWelcome>
     {error && <p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error}</p>}
     {loading && !stats ? <div role="status" className="grid grid-cols-2 gap-4 xl:grid-cols-4">{[0,1,2,3].map(index => <div key={index} className="h-32 animate-pulse rounded-xl bg-slate-100" />)}<span className="sr-only">Loading administrator dashboard</span></div> : stats && <section aria-label="Network overview" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
       { label: 'Total Active Patients', value: stats.total_patients, icon: 'person_check', note: 'Active patient records across the network', color: 'bg-sky-50 text-primary' },
