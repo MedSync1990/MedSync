@@ -18,58 +18,6 @@ const timeAgo = (dateStr: string | null) => {
   return `${Math.round(mins / 1440)} days ago`;
 };
 
-interface StatCardProps {
-  icon: string;
-  label: string;
-  value: string | number;
-  iconBg: string;
-  iconColor: string;
-  valueColor?: string;
-  subtext?: string;
-  watermarkIcon?: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({
-  icon,
-  label,
-  value,
-  iconBg,
-  iconColor,
-  valueColor,
-  subtext,
-  watermarkIcon,
-}) => (
-  <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
-    <div className="flex items-center justify-between mb-space-sm">
-      <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block truncate">
-        {label}
-      </span>
-      <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
-      >
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-      </div>
-    </div>
-    <div className="flex items-baseline gap-2 z-10">
-      <span
-        className={`font-headline-lg text-headline-lg font-bold tracking-tight ${valueColor ?? 'text-on-surface'}`}
-      >
-        {value}
-      </span>
-      {subtext && (
-        <span className="font-body-sm text-body-sm text-on-surface-variant">
-          {subtext}
-        </span>
-      )}
-    </div>
-    {watermarkIcon && (
-      <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center">
-        <span className="material-symbols-outlined !text-[90px] leading-none select-none" style={{ fontSize: '90px' }}>{watermarkIcon}</span>
-      </div>
-    )}
-  </div>
-);
-
 export const ManageStaff: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -304,17 +252,17 @@ export const ManageStaff: React.FC = () => {
   const selectedStaff = selectedStaffId ? staff.find(s => s.user_id === selectedStaffId) : null;
 
   return (
-    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
+    <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
       {selectedStaff ? (
         // DETAIL VIEW
-        <div className="w-full">
-          <div className="space-y-1 mb-space-lg">
-            <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+        <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full">
+          <div className="space-y-space-2xs mb-space-lg">
+            <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">
               <a href="#" onClick={(e) => { e.preventDefault(); window.location.hash=''; }} className="hover:text-primary">Manage Staff</a>
               <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               <span className="text-primary font-bold">{selectedStaff.first_name} {selectedStaff.last_name}</span>
             </div>
-            <a href="#" onClick={(e) => { e.preventDefault(); window.location.hash=''; }} className="inline-flex items-center gap-1 text-label-md text-primary hover:underline">
+            <a href="#" onClick={(e) => { e.preventDefault(); window.location.hash=''; }} className="inline-flex items-center gap-space-2xs font-label-md text-label-md text-primary hover:underline">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>Back to staff list
             </a>
           </div>
@@ -322,57 +270,57 @@ export const ManageStaff: React.FC = () => {
           <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-space-lg items-start">
             <aside className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
               <div className="p-space-lg flex items-center gap-space-md">
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-headline-md shrink-0 ${selectedStaff.is_active ? 'bg-secondary-container text-on-secondary-fixed' : 'bg-surface-subtle text-outline'}`}>
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center font-headline-md text-headline-md shrink-0 ${selectedStaff.is_active ? 'bg-secondary-container text-on-secondary-fixed' : 'bg-surface-subtle text-outline'}`}>
                   {initials(selectedStaff.first_name, selectedStaff.last_name)}
                 </div>
-                <div className="min-w-0 space-y-1">
-                  <h1 className="text-headline-md leading-tight">{selectedStaff.first_name} {selectedStaff.last_name}</h1>
-                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-label-sm ${selectedStaff.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'}`}>{selectedStaff.role_name}</span>
+                <div className="min-w-0 space-y-space-2xs">
+                  <h1 className="font-headline-md text-headline-md leading-tight">{selectedStaff.first_name} {selectedStaff.last_name}</h1>
+                  <span className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${selectedStaff.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'}`}>{selectedStaff.role_name}</span>
                 </div>
               </div>
               <div className="px-space-lg divide-y divide-surface-subtle border-t border-surface-subtle">
-                <div className="flex items-center justify-between gap-3 py-2.5">
+                <div className="flex items-center justify-between gap-space-sm py-2.5">
                   <span className="text-on-surface-variant">Status</span>
-                  <span className={`text-right font-medium flex items-center gap-1.5 ${selectedStaff.is_active ? 'text-primary' : 'text-outline'}`}>
+                  <span className={`text-right font-medium flex items-center gap-space-xs ${selectedStaff.is_active ? 'text-primary' : 'text-outline'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${selectedStaff.is_active ? 'bg-primary' : 'bg-outline'}`}></div>
                     {selectedStaff.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-3 py-2.5">
+                <div className="flex items-center justify-between gap-space-sm py-2.5">
                   <span className="text-on-surface-variant">Username</span>
-                  <span className="text-right font-medium font-mono">@{selectedStaff.username}</span>
+                  <span className="text-right font-medium font-mono-data">@{selectedStaff.username}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 py-2.5">
+                <div className="flex items-center justify-between gap-space-sm py-2.5">
                   <span className="text-on-surface-variant">Branch</span>
                   <span className="text-right font-medium">{selectedStaff.branch_name || 'N/A'}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 py-2.5">
+                <div className="flex items-center justify-between gap-space-sm py-2.5">
                   <span className="text-on-surface-variant">Last sign-in</span>
                   <span className="text-right font-medium">{timeAgo(selectedStaff.last_login_at || null)}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 py-2.5">
+                <div className="flex items-center justify-between gap-space-sm py-2.5">
                   <span className="text-on-surface-variant">Created</span>
                   <span className="text-right font-medium">{selectedStaff.created_at ? new Date(selectedStaff.created_at).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}) : 'N/A'}</span>
                 </div>
               </div>
-              <div className="p-space-lg space-y-2 border-t border-surface-subtle bg-surface-subtle/50">
-                <button onClick={() => handleEditClick(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-primary hover:bg-brand-navy-deep text-on-primary text-label-md flex items-center justify-center gap-1.5 transition-colors">
+              <div className="p-space-lg space-y-space-xs border-t border-surface-subtle bg-surface-subtle/50">
+                <button onClick={() => handleEditClick(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-primary hover:bg-brand-navy-deep text-on-primary font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors">
                   <span className="material-symbols-outlined text-[18px]">edit</span>Edit details
                 </button>
-                <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                <button onClick={() => setResettingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">lock_reset</span>Reset password
                 </button>
                 {selectedStaff.is_active && selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() && (
-                  <button onClick={() => handleUnlock(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-amber-700 text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                  <button onClick={() => handleUnlock(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-amber-700 font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors shadow-sm">
                     <span className="material-symbols-outlined text-[18px]">lock_open</span>Unlock account
                   </button>
                 )}
                 {selectedStaff.is_active ? (
-                  <button onClick={() => setDeactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-error-container/60 hover:bg-error-container text-error text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                  <button onClick={() => setDeactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-error-container/60 hover:bg-error-container text-error font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors">
                     <span className="material-symbols-outlined text-[18px]">person_off</span>Deactivate account
                   </button>
                 ) : (
-                  <button onClick={() => setReactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text text-label-md flex items-center justify-center gap-1.5 transition-colors">
+                  <button onClick={() => setReactivatingStaff(selectedStaff)} className="w-full h-10 px-space-md rounded-xl bg-status-completed-bg/80 hover:bg-status-completed-bg text-status-completed-text font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors">
                     <span className="material-symbols-outlined text-[18px]">check_circle</span>Reactivate account
                   </button>
                 )}
@@ -380,71 +328,71 @@ export const ManageStaff: React.FC = () => {
             </aside>
             <div className="space-y-space-md min-w-0">
               <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-[20px] text-primary">person</span>
-                  <h2 className="text-headline-sm">Personal information</h2>
+                  <h2 className="font-headline-sm text-headline-sm">Personal information</h2>
                 </div>
                 <dl className="divide-y divide-surface-subtle">
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Full name</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.first_name} {selectedStaff.last_name}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.first_name} {selectedStaff.last_name}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">NIC</dt>
-                    <dd className="text-label-md font-medium font-mono">{selectedStaff.id_number}</dd>
+                    <dd className="text-label-md font-medium font-mono-data">{selectedStaff.id_number}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Date of birth</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.birthdate ? new Date(selectedStaff.birthdate).toLocaleDateString() : 'N/A'}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.birthdate ? new Date(selectedStaff.birthdate).toLocaleDateString() : 'N/A'}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Gender</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.gender || 'N/A'}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.gender || 'N/A'}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Address</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.address || 'N/A'}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.address || 'N/A'}</dd>
                   </div>
                 </dl>
               </section>
               <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-[20px] text-primary">contacts</span>
-                  <h2 className="text-headline-sm">Contact</h2>
+                  <h2 className="font-headline-sm text-headline-sm">Contact</h2>
                 </div>
                 <dl className="divide-y divide-surface-subtle">
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Phone number</dt>
-                    <dd className="text-label-md font-medium font-mono">{selectedStaff.phone_number || 'N/A'}</dd>
+                    <dd className="text-label-md font-medium font-mono-data">{selectedStaff.phone_number || 'N/A'}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Email</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.email || 'N/A'}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.email || 'N/A'}</dd>
                   </div>
                 </dl>
               </section>
                             <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-[20px] text-primary">badge</span>
-                  <h2 className="text-headline-sm">Account and access</h2>
+                  <h2 className="font-headline-sm text-headline-sm">Account and access</h2>
                 </div>
                 <dl className="divide-y divide-surface-subtle">
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Username</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.username}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.username}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Role</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.role_name}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.role_name}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Branch</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.branch_name || 'N/A'}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.branch_name || 'N/A'}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3 items-center">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm items-center">
                     <dt className="text-on-surface-variant">Status</dt>
-                    <dd className="text-label-md font-medium">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-bold ${selectedStaff.is_active ? 'bg-secondary-container text-primary' : 'bg-surface-subtle text-outline'}`}>
+                    <dd className="font-label-md text-label-md font-medium">
+                      <span className={`inline-flex items-center gap-space-xs px-2 py-0.5 rounded-full font-label-sm text-label-sm font-bold ${selectedStaff.is_active ? 'bg-secondary-container text-primary' : 'bg-surface-subtle text-outline'}`}>
                         <div className={`w-1.5 h-1.5 rounded-full ${selectedStaff.is_active ? 'bg-primary' : 'bg-outline'}`}></div>
                         {selectedStaff.is_active ? 'Active' : 'Inactive'}
                       </span>
@@ -453,25 +401,25 @@ export const ManageStaff: React.FC = () => {
                 </dl>
               </section>
               <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2">
+                <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-[20px] text-primary">security</span>
-                  <h2 className="text-headline-sm">Sign-in security</h2>
+                  <h2 className="font-headline-sm text-headline-sm">Sign-in security</h2>
                 </div>
                 <dl className="divide-y divide-surface-subtle">
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Last sign-in</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.last_login_at ? new Date(selectedStaff.last_login_at).toLocaleString() : 'Never'} <span className="text-on-surface-variant font-normal">· {timeAgo(selectedStaff.last_login_at || null)}</span></dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.last_login_at ? new Date(selectedStaff.last_login_at).toLocaleString() : 'Never'} <span className="text-on-surface-variant font-normal">· {timeAgo(selectedStaff.last_login_at || null)}</span></dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                     <dt className="text-on-surface-variant">Failed attempts</dt>
-                    <dd className="text-label-md font-medium">{selectedStaff.failed_login_attempts || 0}</dd>
+                    <dd className="font-label-md text-label-md font-medium">{selectedStaff.failed_login_attempts || 0}</dd>
                   </div>
-                  <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3 items-center">
+                  <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm items-center">
                     <dt className="text-on-surface-variant">Locked until</dt>
-                    <dd className="text-label-md font-medium flex items-center justify-between">
+                    <dd className="font-label-md text-label-md font-medium flex items-center justify-between">
                       <span>{selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date() ? new Date(selectedStaff.locked_until).toLocaleString() : 'Not locked'}</span>
                       {((selectedStaff.locked_until && new Date(selectedStaff.locked_until) > new Date()) || (selectedStaff.failed_login_attempts && selectedStaff.failed_login_attempts > 0)) && (
-                        <button onClick={() => handleUnlock(selectedStaff)} className="px-2.5 py-1 text-label-sm bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg flex items-center gap-1 transition-colors">
+                        <button onClick={() => handleUnlock(selectedStaff)} className="px-2.5 py-1 font-label-sm text-label-sm bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg flex items-center gap-space-2xs transition-colors">
                           <span className="material-symbols-outlined text-[16px]">lock_open</span>Unlock
                         </button>
                       )}
@@ -481,18 +429,18 @@ export const ManageStaff: React.FC = () => {
               </section>
               {selectedStaff.role_name === 'Doctor' && (
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-space-md py-space-sm bg-status-scheduled-bg border-b border-brand-teal-light/30 flex items-center gap-2">
+                  <div className="px-space-md py-space-sm bg-status-scheduled-bg border-b border-brand-teal-light/30 flex items-center gap-space-xs">
                     <span className="material-symbols-outlined text-[20px] text-primary">local_hospital</span>
-                    <h2 className="text-headline-sm text-primary">Clinical Details</h2>
+                    <h2 className="font-headline-sm text-headline-sm text-primary">Clinical Details</h2>
                   </div>
                   <dl className="divide-y divide-surface-subtle">
-                    <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                       <dt className="text-on-surface-variant">License Number</dt>
-                      <dd className="text-label-md font-medium font-mono">{selectedStaff.license_number || 'N/A'}</dd>
+                      <dd className="text-label-md font-medium font-mono-data">{selectedStaff.license_number || 'N/A'}</dd>
                     </div>
-                    <div className="grid grid-cols-[170px_1fr] gap-4 px-space-md py-3">
+                    <div className="grid grid-cols-[170px_1fr] gap-space-md px-space-md py-space-sm">
                       <dt className="text-on-surface-variant">Specialty</dt>
-                      <dd className="text-label-md font-medium">{selectedStaff.specialty || 'N/A'}</dd>
+                      <dd className="font-label-md text-label-md font-medium">{selectedStaff.specialty || 'N/A'}</dd>
                     </div>
                   </dl>
                 </section>
@@ -502,282 +450,135 @@ export const ManageStaff: React.FC = () => {
         </div>
       ) : (
         // LIST VIEW
-        <>
-          {/* Header Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+        <div className="py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+            <div className="space-y-space-2xs">
+              <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">
                 <span className="text-primary font-bold">Manage Staff</span>
               </div>
-              <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
-                Manage Staff
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.
-              </p>
+              <h1 className="font-display-lg text-display-lg tracking-tight">Manage Staff</h1>
+              <p className="font-body-md text-body-md text-on-surface-variant">Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.</p>
             </div>
-            <div className="flex flex-wrap items-center gap-space-sm self-start lg:self-auto">
-              <button
-                type="button"
-                onClick={() => navigate('/admin/staff/add')}
-                className="h-[42px] px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold flex items-center gap-space-xs shadow-sm transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">person_add</span>
-                <span>Add Staff</span>
+            <div className="flex gap-space-sm">
+              <button onClick={() => navigate('/admin/staff/add')} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+                <span className="material-symbols-outlined text-[20px]">person_add</span>Add staff
               </button>
             </div>
           </div>
 
-          {/* ── Stat ribbon (KPI cards with watermarks) ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-sm mb-space-lg">
-            <StatCard
-              icon="badge"
-              label="Total Accounts"
-              value={staff.length}
-              subtext={`${activeCount} active`}
-              iconBg="bg-surface-container-high"
-              iconColor="text-primary"
-              watermarkIcon="badge"
-            />
-            <StatCard
-              icon="stethoscope"
-              label="Doctors"
-              value={staff.filter(s => s.role_name === 'Doctor').length}
-              iconBg="bg-status-scheduled-bg"
-              iconColor="text-status-scheduled-text"
-              watermarkIcon="stethoscope"
-            />
-            <StatCard
-              icon="support_agent"
-              label="Receptionists"
-              value={staff.filter(s => s.role_name === 'Receptionist').length}
-              iconBg="bg-status-pending-bg"
-              iconColor="text-status-pending-text"
-              watermarkIcon="support_agent"
-            />
-            <StatCard
-              icon="person_off"
-              label="Inactive Accounts"
-              value={staff.length - activeCount}
-              iconBg="bg-status-cancelled-bg"
-              iconColor="text-status-cancelled-text"
-              valueColor="text-status-cancelled-text"
-              watermarkIcon="person_off"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+            <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">badge</span></div>
+              <div><p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Total accounts</p><div className="flex items-baseline gap-space-xs"><span className="font-headline-md text-headline-md">{staff.length}</span><span className="font-body-sm text-body-sm text-on-surface-variant">{activeCount} active</span></div></div>
+            </div>
+            <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">stethoscope</span></div>
+              <div><p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Doctors</p><div className="flex items-baseline gap-space-xs"><span className="font-headline-md text-headline-md">{staff.filter(s => s.role_name === 'Doctor').length}</span></div></div>
+            </div>
+            <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-status-pending-bg text-status-pending-text flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">support_agent</span></div>
+              <div><p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Receptionists</p><div className="flex items-baseline gap-space-xs"><span className="font-headline-md text-headline-md">{staff.filter(s => s.role_name === 'Receptionist').length}</span></div></div>
+            </div>
+            <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-surface-subtle text-outline flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">person_off</span></div>
+              <div><p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Inactive</p><div className="flex items-baseline gap-space-xs"><span className="font-headline-md text-headline-md">{staff.length - activeCount}</span></div></div>
+            </div>
           </div>
 
-          {/* ── Main card ── */}
-          <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-            {/* Table Card Subheader with Tabs */}
-            <div className="p-space-lg bg-surface-card border-b border-border-subtle">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-                <div>
-                  <h2 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                    Staff Directory
-                  </h2>
-                  <p className="font-body-sm text-body-sm text-outline mt-0.5">
-                    Showing {filteredStaff.length} of {staff.length} accounts
-                  </p>
-                </div>
+          <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs border-b border-border-subtle">
+              <span className="font-headline-sm text-headline-sm">Branch staff</span>
+              <span className="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-surface-card">Showing {filteredStaff.length} of {staff.length}</span>
+            </div>
+            
+            <div className="px-space-md border-b border-border-subtle flex gap-space-lg overflow-x-auto">
+              {[
+                { id: 'all', label: 'All', count: staff.length },
+                { id: 'active', label: 'Active', count: activeCount },
+                { id: 'inactive', label: 'Inactive', count: staff.length - activeCount }
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`h-11 -mb-px border-b-2 font-label-md text-label-md whitespace-nowrap ${activeTab === tab.id ? 'border-border-focus text-brand-navy-deep' : 'border-transparent text-outline hover:text-brand-navy-deep'}`}>
+                  {tab.label} <span className="ml-1 font-label-sm text-label-sm text-outline">{tab.count}</span>
+                </button>
+              ))}
+            </div>
 
-                {/* Segmented Pill Tabs */}
-                <div className="flex items-center gap-space-xs p-1 bg-surface-subtle rounded-xl self-start sm:self-auto">
-                  {[
-                    { id: 'all', label: 'All', count: staff.length, icon: 'group' },
-                    { id: 'active', label: 'Active', count: activeCount, icon: 'check_circle' },
-                    { id: 'inactive', label: 'Inactive', count: staff.length - activeCount, icon: 'person_off' }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-space-xs px-space-md py-2 rounded-lg font-label-lg text-label-lg font-bold transition-all ${
-                        activeTab === tab.id
-                          ? 'bg-surface-card text-primary shadow-sm'
-                          : 'text-on-surface-variant hover:text-on-surface'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                      <span>{tab.label}</span>
-                      <span className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm font-bold ${
-                        activeTab === tab.id
-                          ? 'bg-status-scheduled-bg text-status-scheduled-text'
-                          : 'bg-surface-container text-on-surface-variant'
-                      }`}>
-                        {tab.count}
-                      </span>
-                    </button>
-                  ))}
+            <div className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-space-sm items-center border-b border-surface-subtle">
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-5' : 'lg:col-span-6'} relative`}>
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card placeholder-outline focus:outline-none shadow-inner" placeholder="Search name, NIC, username..." />
+              </div>
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'} relative`}>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">badge</span>
+                <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
+                  <option value="">All roles</option>
+                  {roles.map(r => <option key={r.role_id} value={r.role_name}>{r.role_name}</option>)}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+              </div>
+              {user?.role === 'Administrator' && (
+                <div className="lg:col-span-3 relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">apartment</span>
+                  <select value={branchFilter} onChange={e => setBranchFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
+                    <option value="">All branches</option>
+                    {branches.map(b => <option key={b.branch_id} value={String(b.branch_id)}>{b.name}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
                 </div>
+              )}
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+                <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-space-sm rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center gap-space-xs transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">restart_alt</span>Clear filters
+                </button>
               </div>
             </div>
 
-            {/* Action Bar (Search & Filters) */}
-            <div className="p-space-lg pt-0">
-              <div className="mb-space-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md bg-surface-subtle p-space-sm rounded-xl">
-                <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-space-sm">
-                  {/* Search */}
-                  <div className="relative flex-1">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">
-                      search
-                    </span>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="Search staff by name, NIC, username or email…"
-                      className="w-full h-[42px] pl-10 pr-4 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Role filter */}
-                  <div className="relative min-w-[180px]">
-                    <select
-                      aria-label="Role Filter"
-                      value={roleFilter}
-                      onChange={e => setRoleFilter(e.target.value)}
-                      className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
-                    >
-                      <option value="">All Roles</option>
-                      {roles.map(r => (
-                        <option key={r.role_id} value={r.role_name}>
-                          {r.role_name}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[20px] text-outline pointer-events-none">
-                      expand_more
-                    </span>
-                  </div>
-
-                  {/* Branch filter */}
-                  {user?.role === 'Administrator' ? (
-                    <div className="relative min-w-[220px]">
-                      <select
-                        aria-label="Branch Filter"
-                        value={branchFilter}
-                        onChange={e => setBranchFilter(e.target.value)}
-                        className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
-                      >
-                        <option value="">All Branches</option>
-                        {branches.map(b => (
-                          <option key={b.branch_id} value={String(b.branch_id)}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[20px] text-outline pointer-events-none">
-                        expand_more
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Reset filters */}
-                {(searchQuery || roleFilter || branchFilter || activeTab !== 'all') && (
-                  <button
-                    type="button"
-                    onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }}
-                    className="h-[42px] px-3 rounded-lg bg-surface-card hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center gap-1.5 transition-colors border border-border-subtle shadow-sm shrink-0"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-                    <span>Reset</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-surface-subtle">
-                    <tr>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Staff Member
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Role
-                      </th>
-                      {user?.role === 'Administrator' && (
-                        <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                          Branch Location
-                        </th>
-                      )}
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        NIC Number
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Contact Info
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Account Status
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold text-right">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-surface-subtle">
-                    {filteredStaff.map(s => (
-                      <tr
-                        key={s.user_id}
-                        className="hover:bg-surface-subtle transition-colors group border-t border-border-subtle first:border-t-0 cursor-pointer"
-                        onClick={() => window.location.hash = `staff/${s.user_id}`}
-                      >
-                        <td className="px-space-md py-3">
-                          <div className="flex items-center gap-space-sm">
-                            <div className="relative w-11 h-11 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-label-md shrink-0 ring-2 ring-surface-card shadow-xs">
-                              {initials(s.first_name, s.last_name)}
-                              <span
-                                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-surface-card ${
-                                  s.is_active ? 'bg-status-completed-text' : 'bg-outline'
-                                }`}
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <span className="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-primary transition-colors block truncate">
-                                {s.first_name} {s.last_name}
-                              </span>
-                              <div className="font-mono text-body-sm text-outline truncate">
-                                @{s.username}
-                              </div>
-                            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-subtle h-11 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+                    <th className="px-space-md font-semibold">Staff member</th>
+                    <th className="px-space-md font-semibold">Role</th>
+                    {user?.role === 'Administrator' && <th className="px-space-md font-semibold">Branch</th>}
+                    <th className="px-space-md font-semibold">NIC</th>
+                    <th className="px-space-md font-semibold">Contact</th>
+                    <th className="px-space-md font-semibold">Status</th>
+                    <th className="px-space-md font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-surface-subtle">
+                  {filteredStaff.map(s => (
+                    <tr key={s.user_id} className="hover:bg-surface-subtle/70 cursor-pointer" onClick={() => window.location.hash = `staff/${s.user_id}`}>
+                      <td className="px-space-md py-space-sm">
+                        <div className="flex items-center gap-space-sm">
+                          <div className={`w-10 h-10 rounded-xl ${s.is_active ? 'bg-secondary-container text-on-secondary-fixed' : 'bg-surface-subtle text-outline'} font-label-md text-label-md flex items-center justify-center shrink-0`}>{initials(s.first_name, s.last_name)}</div>
+                          <div className="min-w-0">
+                            <span className="font-label-lg text-label-lg hover:text-border-focus font-medium">{s.first_name} {s.last_name}</span>
+                            <div className="text-body-sm text-outline font-mono-data">@{s.username}</div>
                           </div>
-                        </td>
-                        <td className="px-space-md py-3 whitespace-nowrap">
-                          <span className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
-                            s.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'
-                          }`}>
-                            {s.role_name}
+                        </div>
+                      </td>
+                      <td className="px-space-md py-space-sm whitespace-nowrap"><span className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${s.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'}`}>{s.role_name}</span></td>
+                      {user?.role === 'Administrator' && <td className="px-space-md py-space-sm whitespace-nowrap font-body-sm text-body-sm text-outline">{s.branch_name || `Branch #${s.branch_id}`}</td>}
+                      <td className="px-space-md py-space-sm font-mono-data text-mono-data whitespace-nowrap">{s.id_number}</td>
+                      <td className="px-space-md py-space-sm">
+                        <div className="font-mono-data text-mono-data">{s.phone_number || 'N/A'}</div>
+                        <div className="font-body-sm text-body-sm text-outline">{s.email || 'No email'}</div>
+                      </td>
+                      <td className="px-space-md py-space-sm whitespace-nowrap">
+                        <div className="flex items-center gap-space-xs">
+                          <span className={`inline-flex items-center gap-space-xs px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>{s.is_active ? 'Active' : 'Inactive'}
                           </span>
-                        </td>
-                        {user?.role === 'Administrator' && (
-                          <td className="px-space-md py-3 whitespace-nowrap text-body-md text-on-surface-variant">
-                            {s.branch_name || `Branch #${s.branch_id}`}
-                          </td>
-                        )}
-                        <td className="px-space-md py-3 text-mono-data whitespace-nowrap">
-                          {s.id_number}
-                        </td>
-                        <td className="px-space-md py-3">
-                          <div className="text-mono-data text-on-surface">{s.phone_number || 'N/A'}</div>
-                          <div className="text-body-sm text-outline truncate max-w-[200px]">{s.email || 'No email'}</div>
-                        </td>
-                        <td className="px-space-md py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
-                              s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>
-                              {s.is_active ? 'Active' : 'Inactive'}
+                          {s.locked_until && new Date(s.locked_until) > new Date() && (
+                            <span className="inline-flex items-center gap-space-2xs px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                              <span className="material-symbols-outlined text-[14px]">lock</span>Locked
                             </span>
-                            {s.locked_until && new Date(s.locked_until) > new Date() && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-amber-50 text-amber-800 border border-amber-200 font-medium">
-                                <span className="material-symbols-outlined text-[14px]">lock</span>Locked
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      <td className="px-space-md py-3 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-space-md py-space-sm text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-space-2xs">
                           {s.locked_until && new Date(s.locked_until) > new Date() && (
                             <button onClick={(e) => { e.stopPropagation(); handleUnlock(s); }} title="Unlock account" className="p-1.5 rounded-lg text-amber-700 hover:text-amber-900 hover:bg-amber-100/70 transition-colors">
                               <span className="material-symbols-outlined text-[18px]">lock_open</span>
@@ -803,22 +604,21 @@ export const ManageStaff: React.FC = () => {
                     <tr>
                       <td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center">
                         <div className="w-14 h-14 rounded-full bg-surface-subtle flex items-center justify-center text-outline mx-auto mb-space-sm"><span className="material-symbols-outlined text-[28px]">search_off</span></div>
-                        <h3 className="text-headline-sm">No staff match these filters</h3>
-                        <p className="text-body-sm text-on-surface-variant mt-1 mb-space-md">Try a different search term or clear the filters.</p>
-                        <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-sm transition-all">Clear filters</button>
+                        <h3 className="font-headline-sm text-headline-sm">No staff match these filters</h3>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs mb-space-md">Try a different search term or clear the filters.</p>
+                        <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary font-label-md text-label-md">Clear filters</button>
                       </td>
                     </tr>
                   )}
                   {loading && (
-                    <tr><td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span></td></tr>
+                    <tr><td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px]  text-primary">hourglass_empty</span></td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </>
-    )}
+      )}
 
       {/* DRAWER FOR ADD/EDIT STAFF */}
       {isDrawerOpen && (
@@ -827,55 +627,55 @@ export const ManageStaff: React.FC = () => {
           <div className="fixed right-0 top-0 h-full w-full max-w-[560px] bg-surface-card shadow-2xl z-[70] flex flex-col overflow-y-auto animate-slide-in-right">
             <div className="p-space-lg bg-surface-subtle flex items-center justify-between shrink-0 border-b border-surface-subtle">
               <div className="space-y-0.5">
-                <span className="text-label-sm text-primary uppercase tracking-wider">New account</span>
-                <h2 className="text-headline-md font-bold">Add staff member</h2>
+                <span className="font-label-sm text-label-sm text-primary uppercase tracking-wider">New account</span>
+                <h2 className="font-headline-md text-headline-md font-bold">Add staff member</h2>
               </div>
               <button onClick={() => setIsDrawerOpen(false)} className="p-2 rounded-xl text-outline hover:text-brand-navy-deep hover:bg-surface-card transition-colors"><span className="material-symbols-outlined text-[20px]">close</span></button>
             </div>
             
             <form onSubmit={handleSave} className="flex-1 flex flex-col min-h-0">
               <div className="p-space-lg space-y-space-md flex-1 overflow-y-auto">
-                <h3 className="text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold">Personal information</h3>
+                <h3 className="font-label-sm text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold">Personal information</h3>
                 <div className="grid grid-cols-3 gap-space-sm">
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">First name <span className="text-error">*</span></label><input required value={fFirst} onChange={e=>setFFirst(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Middle name</label><input value={fMid} onChange={e=>setFMid(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Last name <span className="text-error">*</span></label><input required value={fLast} onChange={e=>setFLast(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">First name <span className="text-error">*</span></label><input required value={fFirst} onChange={e=>setFFirst(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Middle name</label><input value={fMid} onChange={e=>setFMid(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Last name <span className="text-error">*</span></label><input required value={fLast} onChange={e=>setFLast(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
                 </div>
                 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">NIC {!editMode && <span className="text-error">*</span>}</label>
-                  <input required value={fNic} onChange={e=>setFNic(e.target.value.toUpperCase())} placeholder="199071400234 or 925430188V" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
-                  <p className="text-body-sm text-outline">9 digits + V/X, or 12 digits</p>
+                  <label className="font-label-md text-label-md font-semibold">NIC {!editMode && <span className="text-error">*</span>}</label>
+                  <input required value={fNic} onChange={e=>setFNic(e.target.value.toUpperCase())} placeholder="199071400234 or 925430188V" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
+                  <p className="font-body-sm text-body-sm text-outline">9 digits + V/X, or 12 digits</p>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Date of birth <span className="text-error">*</span></label><input type="date" required disabled={editMode} value={fDob} onChange={e=>setFDob(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Gender <span className="text-error">*</span></label><select required disabled={editMode} value={fGender} onChange={e=>setFGender(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
-                  <div className="space-y-1.5"><label className="text-label-md font-semibold">Marital status</label><select value={fMarital} onChange={e=>setFMarital(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Not provided</option><option value="Single">Single</option><option value="Married">Married</option><option value="Divorced">Divorced</option><option value="Widowed">Widowed</option></select></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Date of birth <span className="text-error">*</span></label><input type="date" required disabled={editMode} value={fDob} onChange={e=>setFDob(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Gender <span className="text-error">*</span></label><select required disabled={editMode} value={fGender} onChange={e=>setFGender(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+                  <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Marital status</label><select value={fMarital} onChange={e=>setFMarital(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus"><option value="">Not provided</option><option value="Single">Single</option><option value="Married">Married</option><option value="Divorced">Divorced</option><option value="Widowed">Widowed</option></select></div>
                 </div>
 
-                <h3 className="text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">Contact</h3>
-                <div className="space-y-1.5"><label className="text-label-md font-semibold">Address <span className="text-error">*</span></label><textarea required value={fAddr} onChange={e=>setFAddr(e.target.value)} rows={2} className="w-full p-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus resize-none" placeholder="Street, city" /></div>
+                <h3 className="font-label-sm text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">Contact</h3>
+                <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Address <span className="text-error">*</span></label><textarea required value={fAddr} onChange={e=>setFAddr(e.target.value)} rows={2} className="w-full p-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus resize-none" placeholder="Street, city" /></div>
                 
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between"><span className="text-label-md font-semibold">Phone numbers <span className="text-error">*</span></span><button type="button" onClick={handleAddPhone} className="text-label-md text-primary flex items-center gap-1 hover:underline"><span className="material-symbols-outlined text-[16px]">add</span>Add number</button></div>
-                  <div className="space-y-2">
+                  <div className="flex items-center justify-between"><span className="font-label-md text-label-md font-semibold">Phone numbers <span className="text-error">*</span></span><button type="button" onClick={handleAddPhone} className="font-label-md text-label-md text-primary flex items-center gap-space-2xs hover:underline"><span className="material-symbols-outlined text-[16px]">add</span>Add number</button></div>
+                  <div className="space-y-space-xs">
                     {fPhones.map((p, idx) => (
-                      <div key={idx} className="flex gap-2">
-                        <input required value={p} onChange={e=>{const t=[...fPhones];t[idx]=e.target.value.replace(/\D/g,'');setFPhones(t)}} maxLength={10} placeholder="0771234567" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+                      <div key={idx} className="flex gap-space-xs">
+                        <input required value={p} onChange={e=>{const t=[...fPhones];t[idx]=e.target.value.replace(/\D/g,'');setFPhones(t)}} maxLength={10} placeholder="0771234567" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
                         {fPhones.length > 1 && <button type="button" onClick={()=>handleRemovePhone(idx)} className="w-10 h-10 rounded-xl bg-surface-subtle hover:bg-error-container text-error flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">close</span></button>}
                       </div>
                     ))}
                   </div>
-                  <p className="text-body-sm text-outline">10 digits each, starting with 0.</p>
+                  <p className="font-body-sm text-body-sm text-outline">10 digits each, starting with 0.</p>
                 </div>
                 
-                <div className="space-y-1.5"><label className="text-label-md font-semibold">Email</label><input type="email" value={fEmail} onChange={e=>setFEmail(e.target.value)} placeholder="name@medsync.lk" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /><p className="text-body-sm text-outline">Optional</p></div>
+                <div className="space-y-1.5"><label className="font-label-md text-label-md font-semibold">Email</label><input type="email" value={fEmail} onChange={e=>setFEmail(e.target.value)} placeholder="name@medsync.lk" className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" /><p className="font-body-sm text-body-sm text-outline">Optional</p></div>
 
-                <h3 className="text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">Account</h3>
+                <h3 className="font-label-sm text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">Account</h3>
                 <div className="grid grid-cols-1 gap-space-md">
                   <div className="space-y-1.5">
-                    <label className="text-label-md font-semibold">Role <span className="text-error">*</span></label>
+                    <label className="font-label-md text-label-md font-semibold">Role <span className="text-error">*</span></label>
                     <select required disabled={editMode} value={fRole} onChange={e=>setFRole(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                       <option value="">Select a role</option>
                       {roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
@@ -884,16 +684,16 @@ export const ManageStaff: React.FC = () => {
                 </div>
 
                 {roles.find(r => r.role_id === Number(fRole))?.role_name === 'Doctor' && (
-                  <div className="p-4 bg-status-scheduled-bg border border-brand-teal-light/30 rounded-xl space-y-4">
-                    <div className="flex items-center gap-2 text-primary font-bold text-label-md">
+                  <div className="p-space-md bg-status-scheduled-bg border border-brand-teal-light/30 rounded-xl space-y-space-md">
+                    <div className="flex items-center gap-space-xs text-primary font-bold font-label-md text-label-md">
                       <span className="material-symbols-outlined">local_hospital</span> Doctor Specific Details
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-label-md font-semibold">Medical License Number <span className="text-error">*</span></label>
-                      <input required disabled={editMode} value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+                      <label className="font-label-md text-label-md font-semibold">Medical License Number <span className="text-error">*</span></label>
+                      <input required disabled={editMode} value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-label-md font-semibold">Primary Specialty <span className="text-error">*</span></label>
+                      <label className="font-label-md text-label-md font-semibold">Primary Specialty <span className="text-error">*</span></label>
                       <select required disabled={editMode} value={fSpecialty} onChange={e=>setFSpecialty(e.target.value)} className="w-full h-10 px-3.5 rounded-xl bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                         <option value="">Select a specialty</option>
                         {specialties.map(s => <option key={s.specialty_id} value={s.name}>{s.name}</option>)}
@@ -902,14 +702,14 @@ export const ManageStaff: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-xl mt-4 border border-border-subtle">
+                <div className="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-xl mt-space-md border border-border-subtle">
                   <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
                   <span>Branch: <strong>{user?.branchName || 'Assigned Branch'}</strong> · A temporary password and auto-generated username will be provided upon creation.</span>
                 </div>
               </div>
-              <div className="p-space-md border-t border-surface-subtle flex justify-end gap-3 shrink-0 bg-white">
-                <button type="button" onClick={() => setIsDrawerOpen(false)} className="h-10 px-space-md rounded-xl text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold transition-colors">Cancel</button>
-                <button type="submit" disabled={saving} className="h-10 px-space-md rounded-xl text-label-md bg-primary hover:bg-primary-container text-on-primary shadow-sm flex items-center gap-2 font-bold transition-all disabled:opacity-70">
+              <div className="p-space-md border-t border-surface-subtle flex justify-end gap-space-sm shrink-0 bg-white">
+                <button type="button" onClick={() => setIsDrawerOpen(false)} className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-border-focus hover:bg-status-scheduled-text text-on-primary shadow-sm flex items-center gap-space-xs font-bold transition-colors disabled:opacity-70">
                   <span className="material-symbols-outlined text-[18px]">save</span>{saving ? 'Saving...' : (editMode ? 'Save changes' : 'Create account')}
                 </button>
               </div>
@@ -921,18 +721,18 @@ export const ManageStaff: React.FC = () => {
       {/* CREDENTIALS MODAL */}
       <Modal isOpen={!!credsModal} onClose={() => setCredsModal(null)} title="Account Created Successfully" footer={
         <>
-          <button onClick={copyPw} className="h-10 px-space-md rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">content_copy</span>Copy Password</button>
-          <button onClick={() => setCredsModal(null)} className="h-10 px-space-md rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold shadow-sm transition-all">Done</button>
+          <button onClick={copyPw} className="h-10 px-space-md rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold flex items-center gap-space-xs"><span className="material-symbols-outlined text-[18px]">content_copy</span>Copy Password</button>
+          <button onClick={() => setCredsModal(null)} className="h-10 px-space-md rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary font-bold">Done</button>
         </>
       }>
-        <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-start gap-space-md mb-space-md">
           <div className="w-12 h-12 rounded-xl bg-status-completed-bg text-status-completed-text flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[28px]">vpn_key</span></div>
-          <div className="space-y-1">
-            <h3 className="text-headline-md font-bold">Temporary Credentials</h3>
-            <p className="text-body-md text-on-surface-variant">Give these to <strong>{credsModal?.name}</strong> in person or over a secure channel. The password must be changed at first sign-in.</p>
+          <div className="space-y-space-2xs">
+            <h3 className="font-headline-md text-headline-md font-bold">Temporary Credentials</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant">Give these to <strong>{credsModal?.name}</strong> in person or over a secure channel. The password must be changed at first sign-in.</p>
           </div>
         </div>
-        <div className="p-space-md rounded-xl bg-surface-subtle space-y-2 text-mono-data border border-border-subtle">
+        <div className="p-space-md rounded-xl bg-surface-subtle space-y-space-xs font-mono-data text-mono-data border border-border-subtle">
           <div className="flex justify-between items-center"><span className="text-outline font-sans font-bold">Username</span><span className="bg-white px-2 py-1 rounded shadow-sm border border-border-subtle">{credsModal?.username}</span></div>
           <div className="flex justify-between items-center"><span className="text-outline font-sans font-bold">Temporary password</span><span className="font-bold tracking-wider text-lg text-primary bg-white px-2 py-1 rounded shadow-sm border border-border-subtle">{credsModal?.tempPw}</span></div>
         </div>
@@ -946,22 +746,22 @@ export const ManageStaff: React.FC = () => {
         footer={
           <>
             <button type="button" onClick={() => { setResettingStaff(null); setCustomPassword(''); }} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all">Cancel</button>
-            <button type="button" onClick={handleResetPassword} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 bg-primary hover:bg-primary-container text-on-primary">Reset Password</button>
+            <button type="button" onClick={handleResetPassword} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary">Reset Password</button>
           </>
         }
       >
-        <div className="space-y-4 pt-2">
+        <div className="space-y-space-md pt-2">
           <p className="font-body-md text-body-md text-on-surface-variant">
             Set a new custom password for <strong>{resettingStaff?.first_name} {resettingStaff?.last_name}</strong>. Their current sessions may not be affected until next login.
           </p>
           <div className="space-y-1.5">
-            <label className="text-label-md font-semibold">New Password</label>
+            <label className="font-label-md text-label-md font-semibold">New Password</label>
             <input 
               type="text" 
               value={customPassword} 
               onChange={e => setCustomPassword(e.target.value)} 
               placeholder="Enter custom password..." 
-              className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono"
+              className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data"
             />
           </div>
         </div>

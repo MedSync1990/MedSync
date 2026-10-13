@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { createStaff, updateStaff, listBranches, type BranchResponse } from '../../api';
+import { createStaff, updateStaff, listBranches } from '../../api';
 import { get } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import { Modal } from '../../components/Modal';
@@ -17,10 +17,8 @@ export const AddStaff: React.FC = () => {
   // Data options
   const [roles, setRoles] = useState<{role_id: number, role_name: string}[]>([]);
   const [specialties, setSpecialties] = useState<{specialty_id: number, name: string}[]>([]);
-  const [branches, setBranches] = useState<BranchResponse[]>([]);
 
   // Form State
-  const [fBranch, setFBranch] = useState<number | ''>(user?.branchId || 1);
   const [fFirst, setFFirst] = useState('');
   const [fMid, setFMid] = useState('');
   const [fLast, setFLast] = useState('');
@@ -30,6 +28,10 @@ export const AddStaff: React.FC = () => {
   const [fAddr, setFAddr] = useState('');
   const [fEmail, setFEmail] = useState('');
   const [fRole, setFRole] = useState('');
+  const [fBranch, setFBranch] = useState('');
+  const [branches, setBranches] = useState<Awaited<ReturnType<typeof listBranches>>>([]);
+  const [branchesLoading, setBranchesLoading] = useState(false);
+  const [branchesError, setBranchesError] = useState('');
   const [fPhones, setFPhones] = useState<string[]>(['']);
   
   // Doctor specific fields
@@ -45,15 +47,18 @@ export const AddStaff: React.FC = () => {
   useEffect(() => {
     get<{role_id: number, role_name: string}[]>('/auth/roles').then(setRoles).catch(() => {});
     get<{specialty_id: number, name: string}[]>('/specialties').then(setSpecialties).catch(() => {});
-    listBranches().then(data => {
-      setBranches(data);
-      if (user?.branchId) {
-        setFBranch(user.branchId);
-      } else if (data.length > 0) {
-        setFBranch(data[0].branch_id);
-      }
-    }).catch(() => {});
-  }, [user?.branchId]);
+  }, []);
+
+  useEffect(() => {
+    if (user?.role !== 'Administrator') return;
+    let mounted = true;
+    setBranchesLoading(true);
+    listBranches()
+      .then(items => { if (mounted) setBranches(items); })
+      .catch(() => { if (mounted) setBranchesError('Unable to load branches. Please reload the page.'); })
+      .finally(() => { if (mounted) setBranchesLoading(false); });
+    return () => { mounted = false; };
+  }, [user?.role]);
 
   const handleAddPhone = () => {
     if (fPhones.length < 3) setFPhones([...fPhones, '']);
@@ -74,13 +79,14 @@ export const AddStaff: React.FC = () => {
     const selectedRole = roles.find(r => r.role_id === Number(fRole));
     if (!selectedRole && !isEditMode) { showToast('Please select a valid role.', 'error'); return; }
 
-    if (!isEditMode && user?.role === 'Administrator' && !fBranch) {
-      showToast('Please select a branch.', 'error');
+    if (!isEditMode && selectedRole?.role_name === 'Doctor' && (!fLicense.trim() || !fSpecialty)) {
+      showToast('Doctors must have a specialty and a medical license number.', 'error');
       return;
     }
 
-    if (!isEditMode && selectedRole?.role_name === 'Doctor' && (!fLicense.trim() || !fSpecialty)) {
-      showToast('Doctors must have a specialty and a medical license number.', 'error');
+    const branchId = user?.role === 'Administrator' ? Number(fBranch) : (user?.branchId ?? 0);
+    if (!isEditMode && (!branchId || (user?.role === 'Administrator' && !branches.some(branch => branch.branch_id === branchId)))) {
+      showToast(user?.role === 'Administrator' ? 'Please select a valid branch.' : 'Your assigned branch is unavailable. Please sign in again.', 'error');
       return;
     }
 
@@ -104,7 +110,7 @@ export const AddStaff: React.FC = () => {
 
         const payload = {
           role_id: Number(fRole),
-          branch_id: user?.role === 'Administrator' ? Number(fBranch) : (user?.branchId || 1),
+          branch_id: branchId,
           first_name: fFirst.trim(),
           middle_name: fMid.trim() || undefined,
           last_name: fLast.trim(),
@@ -131,10 +137,9 @@ export const AddStaff: React.FC = () => {
 
   const resetForm = () => {
     setFFirst(''); setFMid(''); setFLast(''); setFNic(''); setFDob('');
-    setFGender(''); setFAddr(''); setFEmail(''); setFRole('');
+    setFGender(''); setFAddr(''); setFEmail(''); setFRole(''); setFBranch('');
     setFPhones(['']); setFLicense(''); setFSpecialty('');
     setFBankAccounts([{ bank_name: '', account_number: '', bank_branch: '' }]);
-    setFBranch(user?.branchId || (branches[0]?.branch_id ?? 1));
   };
 
   const copyPw = () => {
@@ -144,16 +149,16 @@ export const AddStaff: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+    <div className="py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">
-            <Link to="/admin/staff" className="inline-flex items-center gap-1 text-primary hover:underline font-bold">
+        <div className="space-y-space-2xs">
+          <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider mb-space-xs">
+            <Link to="/admin/staff" className="inline-flex items-center gap-space-2xs text-primary hover:underline font-bold">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               Back to Manage Staff
             </Link>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-space-sm">
             <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
               {isEditMode ? 'Update Staff Member' : 'Add Staff Member'}
             </h1>
@@ -168,7 +173,7 @@ export const AddStaff: React.FC = () => {
 
       <form onSubmit={handleSave} className="space-y-space-xl">
         <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2 border-b border-surface-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-xs border-b border-surface-subtle">
             <div className="flex items-start sm:items-center gap-space-md">
               <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">1</div>
               <div>
@@ -178,27 +183,27 @@ export const AddStaff: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg pt-2">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">First Name <span className="text-error font-bold">*</span></label>
               <input required value={fFirst} onChange={e=>setFFirst(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" placeholder="e.g., John" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Middle Name</label>
               <input value={fMid} onChange={e=>setFMid(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" placeholder="Optional" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Last Name <span className="text-error font-bold">*</span></label>
               <input required value={fLast} onChange={e=>setFLast(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" placeholder="e.g., Doe" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">NIC {!isEditMode && <span className="text-error font-bold">*</span>}</label>
-              <input required={!isEditMode} value={fNic} onChange={e=>setFNic(e.target.value.toUpperCase())} placeholder="199071400234 or 925430188V" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+              <input required={!isEditMode} value={fNic} onChange={e=>setFNic(e.target.value.toUpperCase())} placeholder="199071400234 or 925430188V" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Date of Birth <span className="text-error font-bold">*</span></label>
               <input type="date" required disabled={isEditMode} value={fDob} onChange={e=>setFDob(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Gender <span className="text-error font-bold">*</span></label>
               <select required disabled={isEditMode} value={fGender} onChange={e=>setFGender(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                 <option value="">Select</option>
@@ -211,7 +216,7 @@ export const AddStaff: React.FC = () => {
         </div>
 
         <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2 border-b border-surface-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-xs border-b border-surface-subtle">
             <div className="flex items-start sm:items-center gap-space-md">
               <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">2</div>
               <div>
@@ -221,27 +226,27 @@ export const AddStaff: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-2">
-            <div className="flex flex-col gap-1.5 md:col-span-2">
+            <div className="flex flex-col gap-space-xs md:col-span-2">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Address <span className="text-error font-bold">*</span></label>
               <textarea required value={fAddr} onChange={e=>setFAddr(e.target.value)} rows={2} className="w-full p-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus resize-none" placeholder="Street, city" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <div className="flex items-center justify-between">
                 <label className="font-label-lg text-label-lg text-brand-navy-deep">Phone Numbers <span className="text-error font-bold">*</span></label>
-                <button type="button" onClick={handleAddPhone} className="text-label-md text-primary flex items-center gap-1 hover:underline">
+                <button type="button" onClick={handleAddPhone} className="font-label-md text-label-md text-primary flex items-center gap-space-2xs hover:underline">
                   <span className="material-symbols-outlined text-[16px]">add</span>Add number
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-space-xs">
                 {fPhones.map((p, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input required value={p} onChange={e=>{const t=[...fPhones];t[idx]=e.target.value.replace(/\D/g,'');setFPhones(t)}} maxLength={10} placeholder="0771234567" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+                  <div key={idx} className="flex gap-space-xs">
+                    <input required value={p} onChange={e=>{const t=[...fPhones];t[idx]=e.target.value.replace(/\D/g,'');setFPhones(t)}} maxLength={10} placeholder="0771234567" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
                     {fPhones.length > 1 && <button type="button" onClick={()=>handleRemovePhone(idx)} className="w-[42px] h-[42px] rounded-lg bg-surface-subtle hover:bg-error-container text-error flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[18px]">close</span></button>}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Email Address</label>
               <input type="email" value={fEmail} onChange={e=>setFEmail(e.target.value)} placeholder="name@medsync.lk" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" />
             </div>
@@ -249,7 +254,7 @@ export const AddStaff: React.FC = () => {
         </div>
 
         <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2 border-b border-surface-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-xs border-b border-surface-subtle">
             <div className="flex items-start sm:items-center gap-space-md">
               <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">3</div>
               <div>
@@ -259,42 +264,35 @@ export const AddStaff: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-2">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-space-xs">
               <label className="font-label-lg text-label-lg text-brand-navy-deep">Role <span className="text-error font-bold">*</span></label>
               <select required disabled={isEditMode} value={fRole} onChange={e=>setFRole(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                 <option value="">Select a role</option>
-                {roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
+                {roles.filter(r => r.role_name !== 'Patient' && (user?.role === 'Administrator' || ['Doctor', 'Receptionist'].includes(r.role_name))).map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
               </select>
             </div>
-            {user?.role === 'Administrator' ? (
-              <div className="flex flex-col gap-1.5">
-                <label className="font-label-lg text-label-lg text-brand-navy-deep">Branch <span className="text-error font-bold">*</span></label>
-                <select
-                  required
-                  disabled={isEditMode}
-                  value={fBranch}
-                  onChange={e => setFBranch(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus cursor-pointer"
-                >
-                  <option value="">Select a branch</option>
-                  {branches.map(b => (
-                    <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
-                  ))}
+            {user?.role === 'Administrator' && !isEditMode ? (
+              <div className="flex flex-col gap-space-xs">
+                <label htmlFor="staff-branch" className="font-label-lg text-label-lg text-brand-navy-deep">Branch <span className="text-error font-bold">*</span></label>
+                <select id="staff-branch" required disabled={branchesLoading} value={fBranch} onChange={e => setFBranch(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
+                  <option value="">{branchesLoading ? 'Loading branches…' : 'Select a branch'}</option>
+                  {branches.map(branch => <option key={branch.branch_id} value={branch.branch_id}>{branch.name}</option>)}
                 </select>
+                {branchesError && <p className="font-body-sm text-body-sm text-error" role="alert">{branchesError}</p>}
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-lg border border-border-subtle md:col-span-1 h-[42px] mt-[28px]">
+              <div className="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-lg border border-border-subtle md:col-span-1 h-[42px] mt-[28px]">
                 <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
                 <span>Branch: <strong>{user?.branchName || 'Assigned Branch'}</strong></span>
               </div>
             )}
             {roles.find(r => r.role_id === Number(fRole))?.role_name === 'Doctor' && (
               <>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-space-xs">
                   <label className="font-label-lg text-label-lg text-brand-navy-deep">Medical License Number <span className="text-error font-bold">*</span></label>
-                  <input required disabled={isEditMode} value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" />
+                  <input required disabled={isEditMode} value={fLicense} onChange={e=>setFLicense(e.target.value)} placeholder="e.g. SLMC-12345" className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" />
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-space-xs">
                   <label className="font-label-lg text-label-lg text-brand-navy-deep">Primary Specialty <span className="text-error font-bold">*</span></label>
                   <select required disabled={isEditMode} value={fSpecialty} onChange={e=>setFSpecialty(e.target.value)} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus">
                     <option value="">Select a specialty</option>
@@ -308,7 +306,7 @@ export const AddStaff: React.FC = () => {
 
         {/* Bank Account Details */}
         <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2 border-b border-surface-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-xs border-b border-surface-subtle">
             <div className="flex items-start sm:items-center gap-space-md">
               <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">4</div>
               <div>
@@ -319,29 +317,29 @@ export const AddStaff: React.FC = () => {
             <button
               type="button"
               onClick={handleAddBankAccount}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md transition-all shadow-sm self-start sm:self-auto cursor-pointer"
+              className="inline-flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md transition-all shadow-sm self-start sm:self-auto cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">add_card</span>
               <span>Add Another Account</span>
             </button>
           </div>
-          <div className="space-y-4 pt-2">
+          <div className="space-y-space-md pt-2">
             {fBankAccounts.map((acc, idx) => (
               <div key={idx} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-space-lg items-end">
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-space-xs">
                   <label className="font-label-lg text-label-lg text-brand-navy-deep">Bank Name</label>
                   <input value={acc.bank_name} onChange={e=>{const t=[...fBankAccounts];t[idx].bank_name=e.target.value;setFBankAccounts(t)}} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" placeholder="e.g., Commercial Bank" />
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-space-xs">
                   <label className="font-label-lg text-label-lg text-brand-navy-deep">Account Number</label>
-                  <input value={acc.account_number} onChange={e=>{const t=[...fBankAccounts];t[idx].account_number=e.target.value;setFBankAccounts(t)}} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono" placeholder="e.g., 812345678" />
+                  <input value={acc.account_number} onChange={e=>{const t=[...fBankAccounts];t[idx].account_number=e.target.value;setFBankAccounts(t)}} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data" placeholder="e.g., 812345678" />
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-space-xs">
                   <label className="font-label-lg text-label-lg text-brand-navy-deep">Bank Branch</label>
                   <input value={acc.bank_branch} onChange={e=>{const t=[...fBankAccounts];t[idx].bank_branch=e.target.value;setFBankAccounts(t)}} className="w-full h-[42px] px-3.5 rounded-lg bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus" placeholder="e.g., Colombo 03" />
                 </div>
                 {fBankAccounts.length > 1 && (
-                  <button type="button" onClick={()=>handleRemoveBankAccount(idx)} className="h-[42px] px-3 rounded-lg bg-surface-subtle hover:bg-error-container text-error flex items-center justify-center shrink-0 mb-[2px]">
+                  <button type="button" onClick={()=>handleRemoveBankAccount(idx)} className="h-[42px] px-space-sm rounded-lg bg-surface-subtle hover:bg-error-container text-error flex items-center justify-center shrink-0 mb-[2px]">
                     <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
                 )}
@@ -351,15 +349,15 @@ export const AddStaff: React.FC = () => {
         </div>
 
         <div className="bg-surface-card rounded-xl shadow-sm p-space-md sm:p-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-md">
-          <div className="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+          <div className="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
             <span className="material-symbols-outlined text-outline text-[18px]">info</span>
             <span><strong className="text-error">*</strong> Required fields for creating a staff account.</span>
           </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-space-sm w-full sm:w-auto justify-end">
             <button type="button" onClick={() => navigate('/admin/staff')} className="h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg transition-all cursor-pointer flex items-center justify-center">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60">
+            <button type="submit" disabled={saving} className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-space-xs cursor-pointer group disabled:opacity-60">
               <span className="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">
                 {isEditMode ? 'save' : 'person_add'}
               </span>
@@ -379,17 +377,17 @@ export const AddStaff: React.FC = () => {
 
       <Modal isOpen={!!credsModal} onClose={() => setCredsModal(null)} title="Account Created Successfully" footer={
         <>
-          <button onClick={copyPw} className="h-10 px-space-md rounded-xl text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold flex items-center gap-2 transition-colors">
+          <button onClick={copyPw} className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold flex items-center gap-space-xs transition-colors">
             <span className="material-symbols-outlined text-[18px]">content_copy</span>Copy Details
           </button>
-          <button onClick={() => setCredsModal(null)} className="h-10 px-space-md rounded-xl text-label-md bg-primary hover:bg-brand-navy-deep text-on-primary shadow-sm font-bold transition-colors">
+          <button onClick={() => setCredsModal(null)} className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-primary hover:bg-brand-navy-deep text-on-primary shadow-sm font-bold transition-colors">
             Done
           </button>
         </>
       }>
         <div className="space-y-space-md">
-          <p className="text-body-md text-on-surface-variant">The staff account for <strong>{credsModal?.name}</strong> has been created. Please share these credentials securely.</p>
-          <div className="p-space-md bg-surface-subtle rounded-xl space-y-3 font-mono text-body-md border border-border-subtle">
+          <p className="font-body-md text-body-md text-on-surface-variant">The staff account for <strong>{credsModal?.name}</strong> has been created. Please share these credentials securely.</p>
+          <div className="p-space-md bg-surface-subtle rounded-xl space-y-space-sm font-mono-data text-body-md border border-border-subtle">
             <div className="flex items-center justify-between">
               <span className="text-on-surface-variant font-sans">Username:</span>
               <span className="font-bold">{credsModal?.username}</span>
@@ -399,7 +397,7 @@ export const AddStaff: React.FC = () => {
               <span className="font-bold">{credsModal?.tempPw}</span>
             </div>
           </div>
-          <div className="flex items-start gap-2 p-3 bg-status-pending-bg text-status-pending-text rounded-xl text-body-sm">
+          <div className="flex items-start gap-space-xs p-3 bg-status-pending-bg text-status-pending-text rounded-xl font-body-sm text-body-sm">
             <span className="material-symbols-outlined text-[18px] shrink-0">info</span>
             <p>The user will be required to change this password upon their first sign-in.</p>
           </div>

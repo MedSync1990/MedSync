@@ -66,9 +66,23 @@ export const DoctorEarnings: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Outstanding already deducts paid payouts; reserve only unpaid requests here.
+  const reservedAmount = payoutRequests
+    .filter(request => request.status === 'Pending' || request.status === 'Approved')
+    .reduce((total, request) => total + request.request_amount, 0);
+  const availableToRequest = Math.max(
+    0,
+    Math.round(((overviewData?.outstanding ?? 0) - reservedAmount) * 100) / 100,
+  );
+
   const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestAmount || !bankAccountId) return;
+    const amount = Number(requestAmount);
+    if (!Number.isFinite(amount) || amount <= 0 || amount > availableToRequest) {
+      setRequestError(`Enter an amount greater than zero and no more than Rs. ${availableToRequest.toLocaleString(undefined, { minimumFractionDigits: 2 })}.`);
+      return;
+    }
     setRequestError(null);
     setShowConfirmModal(true);
   };
@@ -84,7 +98,7 @@ export const DoctorEarnings: React.FC = () => {
       setShowConfirmModal(false);
       setShowSuccessAlert(true);
       setRequestAmount('');
-      loadOverviewData(true); // Reload data silently
+      await loadOverviewData(true); // Refresh the remaining request limit before allowing another request
       setTimeout(() => setShowSuccessAlert(false), 5000);
     } catch (err: any) {
       setRequestError(err.message || 'Failed to submit request');
@@ -202,7 +216,7 @@ export const DoctorEarnings: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span className="font-label-sm text-label-sm text-secondary tracking-wider uppercase">OUTSTANDING</span>
                     <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-scheduled-bg text-status-scheduled-text border border-status-scheduled-bg">
-                      Available
+                      Unpaid
                     </span>
                   </div>
                   <div className="w-9 h-9 rounded-lg bg-status-scheduled-bg flex items-center justify-center text-status-scheduled-text">
@@ -233,7 +247,7 @@ export const DoctorEarnings: React.FC = () => {
               <div className="self-start sm:self-auto">
                 <div className="inline-flex items-center gap-2 px-space-sm py-1.5 rounded-lg border border-border-subtle bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md shadow-xs">
                   <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                  <span>Available to Request: <strong className="font-bold text-brand-navy-deep font-mono-data">Rs. {overviewData?.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</strong></span>
+                  <span>Available to Request: <strong className="font-bold text-brand-navy-deep font-mono-data">Rs. {availableToRequest.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></span>
                 </div>
               </div>
             </div>
@@ -248,6 +262,11 @@ export const DoctorEarnings: React.FC = () => {
                     className="w-full h-11 px-3.5 rounded-lg bg-surface-subtle border border-border-subtle font-mono-data text-mono-data font-semibold text-brand-navy-deep placeholder-secondary focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     id="requestAmount"
                     type="number"
+                    min="0.01"
+                    max={availableToRequest}
+                    step="0.01"
+                    required
+                    disabled={isSubmitting || !overviewData || availableToRequest <= 0}
                     value={requestAmount}
                     onChange={(e) => setRequestAmount(e.target.value)}
                   />
@@ -282,6 +301,7 @@ export const DoctorEarnings: React.FC = () => {
                   <button
                     className="w-full h-11 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-xs transition-colors active:scale-[0.99]"
                     type="submit"
+                    disabled={isSubmitting || !overviewData || availableToRequest <= 0}
                   >
                     <span className="material-symbols-outlined text-[18px]">send</span>
                     <span>Request Payment</span>
@@ -291,7 +311,7 @@ export const DoctorEarnings: React.FC = () => {
             </form>
             <div className="flex items-center gap-1.5 font-body-sm text-body-sm text-secondary mt-space-sm pt-1">
               <span className="material-symbols-outlined text-[15px]">info</span>
-              <span>Max eligible request: Rs. {overviewData?.outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}. Payouts are reviewed and credited within 2 business days.</span>
+              <span>Max eligible request: Rs. {availableToRequest.toLocaleString(undefined, { minimumFractionDigits: 2 })}. Pending and approved requests are already deducted. Payouts are reviewed and credited within 2 business days.</span>
             </div>
             {requestError && (
               <div className="mt-4 p-3 rounded-lg bg-error-container text-error text-sm">

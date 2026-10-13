@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         @page {
             size: A4;
@@ -31,10 +30,10 @@
             justify-content: space-between; 
             align-items: flex-start;
         }
-        .header-left { color: #ffffff; }
+        .header-left { color: #ffffff; flex: 1; min-width: 0; padding-right: 20px; }
         .header-super { font-size: 9px; font-weight: bold; color: #89a3c2; text-transform: uppercase; letter-spacing: 1px; }
         .header-context { font-size: 11px; color: #e2e8f0; margin-top: 4px; line-height: 1.4; }
-        .header-title { font-size: 32px; font-weight: bold; margin: 25px 0 8px 0; color: #ffffff; letter-spacing: -0.5px; }
+        .header-title { font-size: 28px; font-weight: bold; margin: 25px 0 8px 0; color: #ffffff; letter-spacing: -0.5px; }
         .header-subtitle { font-size: 11px; color: #cbd5e1; }
         
         .logo-box {
@@ -42,6 +41,7 @@
             padding: 10px;
             border-radius: 8px;
             display: inline-block;
+            flex-shrink: 0;
         }
         .logo { max-height: 80px; }
 
@@ -50,11 +50,12 @@
         .metadata-row {
             display: table;
             width: 100%;
+            table-layout: fixed;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
-        .meta-col { display: table-cell; width: 20%; vertical-align: top; }
+        .meta-col { display: table-cell; width: 20%; box-sizing: border-box; vertical-align: top; padding-right: 8px; overflow-wrap: break-word; }
         .meta-label { font-size: 10px; color: #0b1c30; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
         .meta-value { font-size: 11px; color: #3f4850; line-height: 1.4; }
         .meta-status { color: #047857; }

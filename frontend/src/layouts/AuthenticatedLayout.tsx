@@ -25,7 +25,9 @@ const AuthenticatedLayoutContent: React.FC = () => {
 };
 
 export const AuthenticatedLayout: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return <div role="status">Checking session…</div>;
 
   if (!user) {
     return <Navigate to="/login" replace />;

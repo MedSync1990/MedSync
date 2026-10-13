@@ -27,7 +27,6 @@ export default function BranchAppointmentSummary() {
   const fetchSummary = () => {
     const typeMap: Record<string, string> = {
       'doctor': 'Scheduled Visit',
-      'followup': 'Follow-up',
       'walkin': 'Walk-in'
     };
     const params: any = categoryFilter === 'all' ? {} : { appointment_type: typeMap[categoryFilter] };
@@ -161,7 +160,6 @@ export default function BranchAppointmentSummary() {
               <select id="category-filter" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
                 <option value="all">All Categories</option>
                 <option value="doctor">Doctor Consultation</option>
-                <option value="followup">Follow-up</option>
                 <option value="walkin">Walk-in</option>
               </select>
               <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>

@@ -154,9 +154,9 @@ export const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center w-full py-16">
+      <div className="py-space-xl max-w-content-max-width mx-auto w-full text-center">
         <span className="material-symbols-outlined text-[40px] text-primary animate-spin">progress_activity</span>
-        <p className="font-body-md text-secondary mt-3">Loading profile details...</p>
+        <p className="font-body-md text-secondary mt-space-sm">Loading profile details...</p>
       </div>
     );
   }
@@ -178,24 +178,24 @@ export const Profile: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
+    <div className="py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
       {/* Breadcrumbs */}
       <div>
         <Breadcrumbs items={breadcrumbs} />
       </div>
 
       {/* Header Banner */}
-      <div className="bg-surface-card border border-border-subtle rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
+      <div className="bg-surface-card border border-border-subtle rounded-2xl p-space-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+        <div className="flex items-center gap-space-md">
           <div>
             <h1 className="font-display-lg text-display-lg font-bold text-brand-navy-deep">{fullName}</h1>
-            <div className="flex flex-wrap items-center gap-2 mt-1 font-body-sm text-secondary">
-              <span className="inline-flex items-center gap-1 bg-surface-subtle border border-border-subtle px-2.5 py-0.5 rounded-full text-xs font-semibold text-primary">
+            <div className="flex flex-wrap items-center gap-space-xs mt-space-2xs font-body-sm text-secondary">
+              <span className="inline-flex items-center gap-space-2xs bg-surface-subtle border border-border-subtle px-2.5 py-0.5 rounded-full font-body-sm text-body-sm font-semibold text-primary">
                 <span className="material-symbols-outlined text-[14px]">badge</span>
                 {profile?.role}
               </span>
               <span>·</span>
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-space-2xs">
                 <span className="material-symbols-outlined text-[16px] text-secondary">domain</span>
                 {profile?.role === 'Administrator' ? 'All Branches Scope' : profile?.branch_name || 'Assigned Branch'}
               </span>
@@ -204,11 +204,11 @@ export const Profile: React.FC = () => {
         </div>
 
         {/* Tab Navigation Controls */}
-        <div className="flex items-center gap-2 bg-surface-subtle p-1.5 rounded-xl border border-border-subtle w-full md:w-auto">
+        <div className="flex items-center gap-space-xs bg-surface-subtle p-1.5 rounded-xl border border-border-subtle w-full md:w-auto">
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-label-md font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'profile' ? 'bg-white text-primary shadow-xs' : 'text-secondary hover:text-slate-900'
+            className={`flex-1 md:flex-none px-space-md py-2 rounded-lg font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-space-xs ${activeTab === 'profile' ? 'bg-white text-primary shadow-xs' : 'text-secondary hover:text-slate-900'
               }`}
           >
             <span className="material-symbols-outlined text-[18px]">person</span>
@@ -217,7 +217,7 @@ export const Profile: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-label-md font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'security' ? 'bg-white text-primary shadow-xs' : 'text-secondary hover:text-slate-900'
+            className={`flex-1 md:flex-none px-space-md py-2 rounded-lg font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-space-xs ${activeTab === 'security' ? 'bg-white text-primary shadow-xs' : 'text-secondary hover:text-slate-900'
               }`}
           >
             <span className="material-symbols-outlined text-[18px]">lock</span>
@@ -228,8 +228,8 @@ export const Profile: React.FC = () => {
 
       {/* Global Toast / Alerts */}
       {successMsg && (
-        <div role="status" className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div role="status" className="p-space-md rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center justify-between">
+          <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-emerald-600">check_circle</span>
             <span className="font-body-md font-medium">{successMsg}</span>
           </div>
@@ -240,8 +240,8 @@ export const Profile: React.FC = () => {
       )}
 
       {error && (
-        <div role="alert" className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div role="alert" className="p-space-md rounded-xl border border-rose-200 bg-rose-50 text-rose-800 flex items-center justify-between">
+          <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-rose-600">error</span>
             <span className="font-body-md font-medium">{error}</span>
           </div>
@@ -253,36 +253,36 @@ export const Profile: React.FC = () => {
 
       {/* TAB 1: PROFILE DETAILS */}
       {activeTab === 'profile' && (
-        <div className="space-y-6">
-          <form onSubmit={handleSaveProfile} className="bg-surface-card border border-border-subtle rounded-2xl p-6 shadow-sm space-y-6">
+        <div className="space-y-space-lg">
+          <form onSubmit={handleSaveProfile} className="bg-surface-card border border-border-subtle rounded-2xl p-space-lg shadow-sm space-y-space-lg">
             <div className="flex items-center justify-between border-b border-border-subtle pb-4">
               <div>
                 <h2 className="font-headline-md text-headline-md text-slate-900 font-bold">Personal & Contact Information</h2>
-                <p className="text-body-sm text-secondary">Manage your personal identification, communication, and demographics.</p>
+                <p className="font-body-sm text-body-sm text-secondary">Manage your personal identification, communication, and demographics.</p>
               </div>
               {!isEditing ? (
                 <button
                   type="button"
                   onClick={handleStartEdit}
-                  className="px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-xl text-label-md font-semibold flex items-center gap-2 transition-colors shadow-xs"
+                  className="px-space-md py-2 bg-primary text-white hover:bg-primary-dark rounded-xl font-label-md text-label-md font-semibold flex items-center gap-space-xs transition-colors shadow-xs"
                 >
                   <span className="material-symbols-outlined text-[18px]">edit</span>
                   Edit Profile
                 </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-space-xs">
                   <button
                     type="button"
                     onClick={handleCancelEdit}
                     disabled={saving}
-                    className="px-4 py-2 border border-border-subtle bg-white text-secondary hover:bg-surface-subtle rounded-xl text-label-md font-semibold transition-colors"
+                    className="px-space-md py-2 border border-border-subtle bg-white text-secondary hover:bg-surface-subtle rounded-xl font-label-md text-label-md font-semibold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded-xl text-label-md font-semibold flex items-center gap-2 transition-colors shadow-xs disabled:opacity-50"
+                    className="px-space-md py-2 bg-primary text-white hover:bg-primary-dark rounded-xl font-label-md text-label-md font-semibold flex items-center gap-space-xs transition-colors shadow-xs disabled:opacity-50"
                   >
                     {saving ? (
                       <>
@@ -301,30 +301,30 @@ export const Profile: React.FC = () => {
             </div>
 
             {/* Read-Only Identity Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl bg-surface-subtle border border-border-subtle">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md p-space-md rounded-xl bg-surface-subtle border border-border-subtle">
               <div>
-                <span className="text-xs font-semibold text-secondary uppercase tracking-wider block">Username</span>
-                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-1 block">{profile?.username}</span>
+                <span className="font-label-sm text-label-sm font-semibold text-secondary uppercase tracking-wider block">Username</span>
+                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-space-2xs block">{profile?.username}</span>
               </div>
               <div>
-                <span className="text-xs font-semibold text-secondary uppercase tracking-wider block">System Role</span>
-                <span className="font-headline-sm text-headline-sm text-primary font-bold mt-1 block">{profile?.role}</span>
+                <span className="font-label-sm text-label-sm font-semibold text-secondary uppercase tracking-wider block">System Role</span>
+                <span className="font-headline-sm text-headline-sm text-primary font-bold mt-space-2xs block">{profile?.role}</span>
               </div>
               <div>
-                <span className="text-xs font-semibold text-secondary uppercase tracking-wider block">NIC / Identity No.</span>
-                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-1 block">{profile?.id_number || 'N/A'}</span>
+                <span className="font-label-sm text-label-sm font-semibold text-secondary uppercase tracking-wider block">NIC / Identity No.</span>
+                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-space-2xs block">{profile?.id_number || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-xs font-semibold text-secondary uppercase tracking-wider block">Assigned Branch</span>
-                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-1 block">{profile?.branch_name || 'All Branches'}</span>
+                <span className="font-label-sm text-label-sm font-semibold text-secondary uppercase tracking-wider block">Assigned Branch</span>
+                <span className="font-headline-sm text-headline-sm text-slate-900 font-bold mt-space-2xs block">{profile?.branch_name || 'All Branches'}</span>
               </div>
             </div>
 
             {/* Editable Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
               {/* First Name */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">First Name *</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">First Name *</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -340,7 +340,7 @@ export const Profile: React.FC = () => {
 
               {/* Middle Name */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Middle Name</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Middle Name</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -355,7 +355,7 @@ export const Profile: React.FC = () => {
 
               {/* Last Name */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Last Name *</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Last Name *</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -371,7 +371,7 @@ export const Profile: React.FC = () => {
 
               {/* Email Address */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Email Address</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Email Address</label>
                 {isEditing ? (
                   <input
                     type="email"
@@ -386,7 +386,7 @@ export const Profile: React.FC = () => {
 
               {/* Phone Number */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Phone Number</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Phone Number</label>
                 {isEditing ? (
                   <input
                     type="tel"
@@ -402,7 +402,7 @@ export const Profile: React.FC = () => {
 
               {/* Date of Birth */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Date of Birth</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Date of Birth</label>
                 {isEditing ? (
                   <input
                     type="date"
@@ -418,7 +418,7 @@ export const Profile: React.FC = () => {
 
               {/* Gender */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Gender</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Gender</label>
                 {isEditing ? (
                   <select
                     value={formData.gender || ''}
@@ -436,7 +436,7 @@ export const Profile: React.FC = () => {
 
               {/* Marital Status */}
               <div>
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Marital Status</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Marital Status</label>
                 {isEditing ? (
                   <select
                     value={formData.marital_status || ''}
@@ -456,7 +456,7 @@ export const Profile: React.FC = () => {
 
               {/* Address */}
               <div className="md:col-span-3">
-                <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Residential Address</label>
+                <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Residential Address</label>
                 {isEditing ? (
                   <textarea
                     rows={2}
@@ -475,19 +475,19 @@ export const Profile: React.FC = () => {
 
       {/* TAB 2: SECURITY & PASSWORD */}
       {activeTab === 'security' && (
-        <div className="space-y-6 max-w-2xl">
-          <form onSubmit={handleChangePassword} className="bg-surface-card border border-border-subtle rounded-2xl p-6 shadow-sm space-y-5">
+        <div className="space-y-space-lg max-w-2xl">
+          <form onSubmit={handleChangePassword} className="bg-surface-card border border-border-subtle rounded-2xl p-space-lg shadow-sm space-y-5">
             <div className="border-b border-border-subtle pb-4">
-              <h2 className="font-headline-md text-headline-md text-slate-900 font-bold flex items-center gap-2">
+              <h2 className="font-headline-md text-headline-md text-slate-900 font-bold flex items-center gap-space-xs">
                 <span className="material-symbols-outlined text-primary">security</span>
                 Change Password
               </h2>
-              <p className="text-body-sm text-secondary mt-1">Ensure your account is using a strong password to protect system access.</p>
+              <p className="font-body-sm text-body-sm text-secondary mt-space-2xs">Ensure your account is using a strong password to protect system access.</p>
             </div>
 
             {pwSuccess && (
-              <div role="status" className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div role="status" className="p-space-md rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center justify-between">
+                <div className="flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-emerald-600">check_circle</span>
                   <span className="font-body-md font-medium">{pwSuccess}</span>
                 </div>
@@ -495,8 +495,8 @@ export const Profile: React.FC = () => {
             )}
 
             {pwError && (
-              <div role="alert" className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div role="alert" className="p-space-md rounded-xl border border-rose-200 bg-rose-50 text-rose-800 flex items-center justify-between">
+                <div className="flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-rose-600">error</span>
                   <span className="font-body-md font-medium">{pwError}</span>
                 </div>
@@ -505,7 +505,7 @@ export const Profile: React.FC = () => {
 
             {/* Current Password */}
             <div>
-              <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Current Password *</label>
+              <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Current Password *</label>
               <div className="relative">
                 <input
                   type={showCurrentPw ? 'text' : 'password'}
@@ -527,7 +527,7 @@ export const Profile: React.FC = () => {
 
             {/* New Password */}
             <div>
-              <label className="block text-label-md font-semibold text-slate-800 mb-1.5">New Password *</label>
+              <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">New Password *</label>
               <div className="relative">
                 <input
                   type={showNewPw ? 'text' : 'password'}
@@ -550,7 +550,7 @@ export const Profile: React.FC = () => {
 
             {/* Confirm New Password */}
             <div>
-              <label className="block text-label-md font-semibold text-slate-800 mb-1.5">Confirm New Password *</label>
+              <label className="block font-label-md text-label-md font-semibold text-slate-800 mb-1.5">Confirm New Password *</label>
               <input
                 type={showNewPw ? 'text' : 'password'}
                 required
@@ -567,7 +567,7 @@ export const Profile: React.FC = () => {
               <button
                 type="submit"
                 disabled={changingPw}
-                className="w-full py-3 bg-primary text-white hover:bg-primary-dark rounded-xl text-label-md font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs disabled:opacity-50"
+                className="w-full py-space-sm bg-primary text-white hover:bg-primary-dark rounded-xl font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs transition-colors shadow-xs disabled:opacity-50"
               >
                 {changingPw ? (
                   <>

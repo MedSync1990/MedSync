@@ -109,7 +109,6 @@ export const PatientDirectory: React.FC = () => {
       render: (r) => (
         r.phone_number && r.phone_number !== '0000000000' ? (
           <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
-            <span className="material-symbols-outlined text-[16px] text-outline">call</span>
             <span>{r.phone_number}</span>
           </div>
         ) : (

@@ -7,6 +7,7 @@ import { listBranches } from '../../api';
 export function OutstandingBalances() {
   const [data, setData] = useState<OutstandingBalancesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const { user } = useAuth();
   const [branches, setBranches] = useState<BranchResponse[]>([]);
@@ -30,13 +31,18 @@ export function OutstandingBalances() {
   // Export
   const [isExporting, setIsExporting] = useState(false);
 
-  const fetchReport = () => {
+  const fetchReport = async () => {
     setLoading(true);
-    getOutstandingBalances({ branch: selectedBranch || undefined }).then(res => {
+    setLoadError('');
+    try {
+      const res = await getOutstandingBalances({ branch: selectedBranch || undefined });
       setAppliedParams({ branch_id: selectedBranch || undefined });
       setData(res);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load outstanding balances. Please try again.');
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   useEffect(() => {
@@ -52,11 +58,13 @@ export function OutstandingBalances() {
   };
 
   const filteredData = (data?.data || []).filter(inv => {
-    const q = searchQuery.toLowerCase().trim();
-    const searchMatch = !q ||
-      (inv.patient_name || '').toLowerCase().includes(q) ||
-      String(inv.patient_id || '').toLowerCase().includes(q) ||
-      (inv.invoice_id || '').toLowerCase().includes(q);
+    const terms = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const patientId = String(inv.patient_id ?? '');
+    const patientCode = patientId ? `PT-${patientId.padStart(6, '0')}` : '';
+    const searchable = [inv.patient_name, patientId, patientCode, inv.invoice_id]
+      .map(value => String(value ?? '').toLowerCase())
+      .join(' ');
+    const searchMatch = terms.every(term => searchable.includes(term));
 
     const agingMatch = agingFilter === 'all' || getAgingCategory(inv.aging_days) === agingFilter;
 
@@ -149,7 +157,7 @@ export function OutstandingBalances() {
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-secondary" htmlFor="patient-search">Search Patient</label>
             <div className="relative flex items-center">
               <span className="material-symbols-outlined text-secondary text-[18px] absolute left-3 pointer-events-none">search</span>
-              <input id="patient-search" type="text" placeholder="Patient name, ID, or invoice #" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-9 pr-9 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
+              <input id="patient-search" type="text" placeholder="Patient name, ID, or invoice #" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !loading) { e.preventDefault(); void fetchReport(); } }} className="w-full h-10 pl-9 pr-9 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 transition-all" />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 text-outline hover:text-on-surface" type="button" aria-label="Clear search">
                   <span className="material-symbols-outlined text-[18px]">close</span>
@@ -185,6 +193,12 @@ export function OutstandingBalances() {
           </button>
         </div>
       </div>
+
+      {loadError && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-space-md text-error">
+          {loadError} <button type="button" onClick={() => void fetchReport()} disabled={loading} className="ml-2 underline">Retry</button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -301,7 +315,7 @@ export function OutstandingBalances() {
             </tbody>
           </table>
 
-          {!hasData && !loading && (
+          {!hasData && !loading && !loadError && (
             <div className="py-space-3xl px-space-md flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center text-secondary mb-space-sm"><span className="material-symbols-outlined text-[32px]">folder_off</span></div>
               <h4 className="font-headline-sm text-headline-sm text-on-surface">No data available for the selected criteria.</h4>

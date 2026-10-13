@@ -337,7 +337,8 @@ async def get_treatment_categories_pdf(
     import weasyprint
     from jinja2 import Environment, FileSystemLoader
     from datetime import datetime
-    import os
+    from pathlib import Path
+    from starlette.concurrency import run_in_threadpool
     
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     if actual_branch_id == 1:
@@ -430,8 +431,9 @@ async def get_treatment_categories_pdf(
         f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
     )
     
-    from pathlib import Path
-    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    # Keep report assets inside app/, which is copied into the production image.
+    template_dir = Path(__file__).resolve().parent.parent / "templates"
+    logo_path = template_dir / "report_logo.png"
     logo_uri = logo_path.as_uri()
 
     template_data = {
@@ -449,11 +451,13 @@ async def get_treatment_categories_pdf(
         "logo_url": logo_uri
     }
     
-    env = Environment(loader=FileSystemLoader("app/templates"))
+    env = Environment(loader=FileSystemLoader(str(template_dir)))
     template = env.get_template("treatment_report_template.html")
     html_string = template.render(**template_data)
     
-    pdf_bytes = weasyprint.HTML(string=html_string).write_pdf()
+    pdf_bytes = await run_in_threadpool(
+        lambda: weasyprint.HTML(string=html_string, base_url=str(template_dir)).write_pdf()
+    )
     
     return Response(
         content=pdf_bytes, 
@@ -1071,9 +1075,11 @@ async def outstanding_balances_pdf(
     if aging not in ("all", "0-30", "31-60", "60+"):
         raise HTTPException(status_code=422, detail="Invalid aging filter.")
     report = await get_outstanding_balances(branch_id, current_user, conn)
-    q = search.lower().strip()
+    terms = search.lower().split()
     items = [r for r in report.data if
-             (not q or any(q in str(v).lower() for v in (r.patient_name, r.patient_id, r.invoice_id))) and
+             all(term in " ".join(str(v).lower() for v in
+                 (r.patient_name, r.patient_id, f"PT-{r.patient_id:06d}", r.invoice_id))
+                 for term in terms) and
              (aging == "all" or aging == ("0-30" if r.aging_days <= 30 else "31-60" if r.aging_days <= 60 else "60+"))]
     sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status"), ("patient_id", "Patient ID"), ("last_payment_date", "Last payment")])]
     return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])
