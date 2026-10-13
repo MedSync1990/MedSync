@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import { getAppointment, listAppointments } from '../../api/appointments';
 import { get, put } from '../../api/client';
 import { listTreatments, type TreatmentApiItem } from '../../api/treatments';
-import type { PatientResponse, AllergyItem, PatientListItem } from '../../types';
+import type { PatientResponse, AllergyItem } from '../../types';
 import type { AppointmentResponse } from '../../api/types';
-import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 interface AppointmentTreatment {
   treatment_id: number;
@@ -43,15 +42,18 @@ export const DoctorConsultation: React.FC = () => {
   const activePatientId = routePatientId || searchParams.get('patientId');
   const activeAppointmentId = searchParams.get('appointmentId') || searchParams.get('appointment_id') || searchParams.get('id');
 
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const queryDate = searchParams.get('date');
+  const [currentDate, setCurrentDate] = useState<string>(queryDate || todayStr);
+
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
-
-  useDocumentTitle(patient ? `${patient.first_name} ${patient.last_name} · Consultation` : 'Consultation');
   const [allergies, setAllergies] = useState<AllergyItem[]>([]);
   const [masterAllergies, setMasterAllergies] = useState<AllergyItem[]>([]);
   const [availableTreatments, setAvailableTreatments] = useState<TreatmentApiItem[]>([]);
   const [treatmentSearch, setTreatmentSearch] = useState('');
-  const [availablePatients, setAvailablePatients] = useState<PatientListItem[]>([]);
+  const [allocatedAppointments, setAllocatedAppointments] = useState<AppointmentResponse[]>([]);
+  const [isLoadingAllocated, setIsLoadingAllocated] = useState<boolean>(false);
   const [isLoadingPatient, setIsLoadingPatient] = useState<boolean>(false);
   const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
   const [appointmentLoadError, setAppointmentLoadError] = useState<string | null>(null);
@@ -81,7 +83,48 @@ export const DoctorConsultation: React.FC = () => {
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [selectedTreatments, setSelectedTreatments] = useState<AppointmentTreatment[]>([]);
 
-  // Load master allergies catalogue
+  // Keep currentDate in sync with URL searchParams if provided
+  useEffect(() => {
+    if (queryDate && queryDate !== currentDate) {
+      setCurrentDate(queryDate);
+    }
+  }, [queryDate, currentDate]);
+
+  const handleDateChange = useCallback((newDate: string) => {
+    setCurrentDate(newDate);
+    setAppointment(null);
+    setPatient(null);
+    setDiagnosis('');
+    setNotes('');
+    setSelectedTreatments([]);
+    setIsFinalized(false);
+    setCompletionError(null);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('date', newDate);
+      next.delete('appointmentId');
+      next.delete('appointment_id');
+      next.delete('id');
+      next.delete('patientId');
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const shiftDay = useCallback((deltaDays: number) => {
+    const [y, m, d] = currentDate.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    dateObj.setDate(dateObj.getDate() + deltaDays);
+    const newDateStr = dateObj.toISOString().split('T')[0];
+    handleDateChange(newDateStr);
+  }, [currentDate, handleDateChange]);
+
+  const formattedDateLabel = useMemo(() => {
+    const [y, m, d] = currentDate.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }, [currentDate]);
+
+  // Load master allergies & treatment catalogue
   useEffect(() => {
     let isMounted = true;
     patientService.getAllergies()
@@ -102,20 +145,25 @@ export const DoctorConsultation: React.FC = () => {
         if (isMounted) setAppointmentLoadError('Unable to load available treatments.');
       });
 
-    // Also fetch available patients for quick switching
-    patientService.list({ limit: 30 })
-      .then((res) => {
-        if (isMounted && res?.data?.length) {
-          setAvailablePatients(res.data);
-        }
-      })
-      .catch(() => {
-        // Graceful fallback
-      });
-
     return () => {
       isMounted = false;
     };
+  }, []);
+
+  // Fetch allocated appointments strictly for a specific day
+  const loadAllocatedAppointments = useCallback(async (dateToLoad: string) => {
+    setIsLoadingAllocated(true);
+    try {
+      const res = await listAppointments({ date: dateToLoad, limit: 100 });
+      const items = res.data || [];
+      setAllocatedAppointments(items);
+      return items;
+    } catch {
+      setAllocatedAppointments([]);
+      return [];
+    } finally {
+      setIsLoadingAllocated(false);
+    }
   }, []);
 
   // Fetch patient details and allergies
@@ -129,7 +177,6 @@ export const DoctorConsultation: React.FC = () => {
         setAllergies(data.allergies);
         setSelectedAllergyIds(data.allergies.map((a) => a.allergy_id));
       } else {
-        // Try direct allergies endpoint
         try {
           const directAllergies = await patientService.getPatientAllergies(id);
           setAllergies(directAllergies);
@@ -149,39 +196,111 @@ export const DoctorConsultation: React.FC = () => {
     }
   }, []);
 
+  // Consultation and patient loader: strictly scoped to the specific day
   useEffect(() => {
-    if (activePatientId && !activeAppointmentId) fetchPatientData(activePatientId);
-  }, [activeAppointmentId, activePatientId, fetchPatientData]);
+    let isCancelled = false;
 
-  useEffect(() => {
-    if (!activeAppointmentId) {
+    // Case 1: activeAppointmentId is specified in URL
+    if (activeAppointmentId) {
+      setAppointmentLoadError(null);
+      getAppointment(Number(activeAppointmentId))
+        .then((data) => {
+          if (isCancelled) return;
+
+          // If queryDate is explicitly specified and differs from appointment_date, prevent showing cross-day consultation
+          if (queryDate && data.appointment_date !== queryDate) {
+            setAppointment(null);
+            setPatient(null);
+            setAppointmentLoadError(
+              `Appointment ${data.appointment_code} is scheduled for ${data.appointment_date}, not ${queryDate}. Previous and future consultations cannot be shown for this day.`
+            );
+            return;
+          }
+
+          // If no queryDate in URL, sync currentDate with the appointment's date
+          if (!queryDate && data.appointment_date !== currentDate) {
+            setCurrentDate(data.appointment_date);
+          }
+
+          setAppointment(data);
+          fetchPatientData(data.patient_id);
+          loadAllocatedAppointments(data.appointment_date);
+        })
+        .catch(() => {
+          if (isCancelled) return;
+          setAppointment(null);
+          setPatient(null);
+          setAppointmentLoadError('Unable to load the requested appointment.');
+        });
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    // Case 2: No activeAppointmentId in URL -> query appointments strictly for currentDate
+    setAppointmentLoadError(null);
+    loadAllocatedAppointments(currentDate).then((dayAppointments) => {
+      if (isCancelled) return;
+
       if (activePatientId) {
+        const patientApt = dayAppointments.find((a) => a.patient_id === Number(activePatientId));
+        if (patientApt) {
+          setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set('appointmentId', String(patientApt.appointment_id));
+            next.set('date', currentDate);
+            return next;
+          }, { replace: true });
+        } else {
+          setAppointment(null);
+          setPatient(null);
+          setAppointmentLoadError(
+            `Patient is not allocated for consultation on ${currentDate}. Previous and future consultations cannot be shown for this day.`
+          );
+        }
         return;
       }
 
-      listAppointments({ status: 'Scheduled', limit: 1 })
-        .then((response) => {
-          const nextAppointment = response.data?.[0];
-          if (nextAppointment) {
-            setSearchParams({ appointmentId: String(nextAppointment.appointment_id) }, { replace: true });
-          } else {
-            setAppointmentLoadError('No scheduled appointments are available for consultation.');
-          }
-        })
-        .catch(() => setAppointmentLoadError('Unable to load the next appointment.'));
-      return;
-    }
-    setAppointmentLoadError(null);
-    getAppointment(Number(activeAppointmentId))
-      .then((data) => {
-        setAppointment(data);
-        fetchPatientData(data.patient_id);
-      })
-      .catch(() => setAppointmentLoadError('Unable to load the appointment.'));
-  }, [activeAppointmentId, fetchPatientData]);
+      // Auto-select the next scheduled appointment for this specific day
+      const scheduledApt = dayAppointments.find((a) => a.status === 'Scheduled') || dayAppointments[0];
+      if (scheduledApt) {
+        setSearchParams((prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('appointmentId', String(scheduledApt.appointment_id));
+          next.set('date', currentDate);
+          return next;
+        }, { replace: true });
+      } else {
+        setAppointment(null);
+        setPatient(null);
+        setAppointmentLoadError(
+          `No consultations allocated for ${currentDate === todayStr ? 'today' : currentDate}. Previous and future consultations are not shown.`
+        );
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    activeAppointmentId,
+    activePatientId,
+    currentDate,
+    queryDate,
+    todayStr,
+    fetchPatientData,
+    loadAllocatedAppointments,
+    setSearchParams,
+  ]);
 
   useEffect(() => {
-    if (!activeAppointmentId) return;
+    if (!activeAppointmentId) {
+      setDiagnosis('');
+      setNotes('');
+      setSelectedTreatments([]);
+      setIsFinalized(false);
+      return;
+    }
     if (window.localStorage.getItem(`medsync-consultation-draft-${activeAppointmentId}`)) return;
     get<ConsultationRecord>(`/appointments/${activeAppointmentId}/consultation`)
       .then((record) => {
@@ -195,6 +314,10 @@ export const DoctorConsultation: React.FC = () => {
       })
       .catch(() => {
         // A scheduled appointment does not have a consultation record yet.
+        setDiagnosis('');
+        setNotes('');
+        setSelectedTreatments([]);
+        setIsFinalized(false);
       });
   }, [activeAppointmentId]);
 
@@ -359,6 +482,7 @@ export const DoctorConsultation: React.FC = () => {
       if (activeAppointmentId) {
         window.localStorage.removeItem(`medsync-consultation-draft-${activeAppointmentId}`);
       }
+      loadAllocatedAppointments(currentDate);
       window.setTimeout(() => navigate('/doctor/dashboard', { replace: true }), 1200);
     } catch (error) {
       setIsLoading(false);
@@ -379,7 +503,7 @@ export const DoctorConsultation: React.FC = () => {
   const patientDemographics = patient ? `${calculateAge(patient.date_of_birth)} · ${patient.gender || 'Unknown'}` : 'Select a scheduled appointment';
 
   return (
-    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-lg">
+    <div className="w-full max-w-content-max-width mx-auto flex flex-col gap-space-lg py-space-md">
       {/* Breadcrumb & Patient Context Header */}
       <div className="flex flex-col gap-space-sm">
         <nav className="flex items-center gap-space-2xs font-label-md text-label-md text-secondary">
@@ -392,17 +516,89 @@ export const DoctorConsultation: React.FC = () => {
           <span className="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
           <span className="text-brand-navy-deep font-semibold">Consultation</span>
         </nav>
+<<<<<<< Updated upstream
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Consultation</h1>
+            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Consultation</h1>
             <span className="px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
               {appointment?.status || 'Room 04'}
             </span>
+=======
+        {/* Top Header: Title, Status, and Date Controller */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Consultation</h1>
+              <span className={`px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
+                appointment?.status === 'Completed'
+                  ? 'bg-status-completed-bg text-status-completed-text'
+                  : appointment?.status === 'Scheduled'
+                    ? 'bg-status-scheduled-bg text-status-scheduled-text'
+                    : 'bg-surface-subtle text-secondary'
+              }`}>
+                {appointment?.status || 'No Session Active'}
+              </span>
+            </div>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Record clinical notes, place orders and prescribe for patients allocated for this day.
+            </p>
           </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Record clinical notes, place orders and prescribe for the patient in consultation.
-          </p>
+
+          {/* Consultation Day Selector / Indicator */}
+          <div className="flex items-center gap-2 self-start md:self-auto bg-surface-card border border-border-subtle rounded-xl p-1.5 shadow-xs">
+            <button
+              type="button"
+              onClick={() => shiftDay(-1)}
+              className="w-8 h-8 rounded-lg hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep flex items-center justify-center transition-colors"
+              title="Previous day"
+              aria-label="Previous day"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+
+            <div className="flex items-center gap-2 px-2">
+              <span className="material-symbols-outlined text-[18px] text-primary">calendar_today</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
+                  Session Date
+                </span>
+                <input
+                  type="date"
+                  value={currentDate}
+                  onChange={(e) => e.target.value && handleDateChange(e.target.value)}
+                  className="text-xs font-bold text-brand-navy-deep bg-transparent focus:outline-none cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {currentDate === todayStr ? (
+              <span className="px-2 py-0.5 rounded-md bg-primary text-on-primary text-[10px] font-bold uppercase tracking-wider">
+                Today
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleDateChange(todayStr)}
+                className="px-2 py-0.5 rounded-md bg-surface-subtle hover:bg-surface-container-high text-primary text-[10px] font-bold transition-colors"
+                title="Jump to today"
+              >
+                Today
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => shiftDay(1)}
+              className="w-8 h-8 rounded-lg hover:bg-surface-subtle text-secondary hover:text-brand-navy-deep flex items-center justify-center transition-colors"
+              title="Next day"
+              aria-label="Next day"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+>>>>>>> Stashed changes
+          </div>
         </div>
+
         {(appointmentLoadError || patientLoadError) && (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {appointmentLoadError || patientLoadError}
@@ -427,17 +623,30 @@ export const DoctorConsultation: React.FC = () => {
                 <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold tracking-tight">
                   {patientFullName}
                 </h2>
+<<<<<<< Updated upstream
                 {/* Queue Status Pill */}
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-border-focus animate-pulse"></span>
                   {appointment?.status || 'Loading appointment'}
                 </span>
+=======
+                {appointment ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-md text-label-md font-semibold border border-status-scheduled-bg">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    {appointment.status}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-subtle text-secondary font-label-md text-label-md font-semibold border border-border-subtle">
+                    No Appointment Selected
+                  </span>
+                )}
+>>>>>>> Stashed changes
               </div>
 
-              {/* Sub-Header Demographics & Allergy Flags (page-content.md §2.3) */}
+              {/* Sub-Header Demographics & Allergy Flags */}
               <div className="flex flex-wrap items-center gap-2 text-sm text-secondary">
                 <span className="font-mono-data font-semibold text-primary">
-                  {patientView.patient_code || '—'}
+                  {patientView.patient_code || (appointment ? appointment.appointment_code : '—')}
                 </span>
                 <span>·</span>
                 <span>{patientDemographics}</span>
@@ -456,7 +665,7 @@ export const DoctorConsultation: React.FC = () => {
                       ))}
                     </div>
                   </>
-                ) : (
+                ) : appointment ? (
                   <>
                     <span>·</span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-xs font-semibold">
@@ -464,7 +673,7 @@ export const DoctorConsultation: React.FC = () => {
                       No Known Allergies
                     </span>
                   </>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -473,48 +682,69 @@ export const DoctorConsultation: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPatientSwitchOpen(!patientSwitchOpen)}
-                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-subtle hover:bg-surface-variant border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs transition-all"
+                className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-subtle hover:bg-surface-variant border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs transition-all"
+                title="Switch patient allocated for this day"
               >
                 <span className="material-symbols-outlined text-[18px] text-primary">switch_account</span>
                 <span>Switch Patient</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-bold">
+                  {allocatedAppointments.length}
+                </span>
                 <span className="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
               </button>
 
-              {/* Patient Switcher Dropdown */}
+              {/* Patient Switcher Dropdown - Scoped Strictly to This Specific Day */}
               {patientSwitchOpen && (
-                <div className="absolute right-0 top-12 w-80 max-h-72 overflow-y-auto bg-surface-card border border-border-subtle rounded-xl shadow-xl z-30 p-2 space-y-1">
-                  <div className="px-2 py-1.5 text-xs font-bold text-secondary uppercase tracking-wider border-b border-border-subtle">
-                    Registered Clinic Patients
+                <div className="absolute right-0 top-12 w-88 max-h-80 overflow-y-auto bg-surface-card border border-border-subtle rounded-xl shadow-xl z-30 p-2 space-y-1">
+                  <div className="px-2.5 py-2 text-xs font-bold text-brand-navy-deep uppercase tracking-wider border-b border-border-subtle flex items-center justify-between">
+                    <span>Patients Allocated ({currentDate === todayStr ? 'Today' : formattedDateLabel})</span>
+                    <span className="font-mono-data text-[10px] text-primary font-bold">{allocatedAppointments.length} Total</span>
                   </div>
-                  {availablePatients.length > 0 ? (
-                    availablePatients.map((p) => (
-                      <button
-                        key={p.patient_id}
-                        type="button"
-                        onClick={() => {
-                          setSearchParams({ patientId: String(p.patient_id) });
-                          setPatientSwitchOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between hover:bg-surface-subtle transition-colors ${
-                          p.patient_id === patientView.patient_id ? 'bg-surface-container-high font-bold' : ''
-                        }`}
-                      >
-                        <div>
-                          <div className="font-semibold text-brand-navy-deep">
-                            {p.first_name} {p.last_name}
+                  {isLoadingAllocated ? (
+                    <div className="p-4 text-center text-xs text-secondary">
+                      Loading allocated patients...
+                    </div>
+                  ) : allocatedAppointments.length > 0 ? (
+                    allocatedAppointments.map((apt) => {
+                      const isCurrent = apt.appointment_id === appointment?.appointment_id;
+                      return (
+                        <button
+                          key={apt.appointment_id}
+                          type="button"
+                          onClick={() => {
+                            setSearchParams({ appointmentId: String(apt.appointment_id), date: currentDate });
+                            setPatientSwitchOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between hover:bg-surface-subtle transition-colors ${
+                            isCurrent ? 'bg-surface-container-high font-bold border border-primary/20' : ''
+                          }`}
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="font-semibold text-brand-navy-deep truncate flex items-center gap-1.5">
+                              <span>{apt.patient_name}</span>
+                              {isCurrent && (
+                                <span className="text-[10px] text-primary font-bold shrink-0">(Active)</span>
+                              )}
+                            </div>
+                            <div className="text-secondary font-mono-data text-[11px] truncate">
+                              {apt.appointment_code} · {apt.start_time ? apt.start_time.slice(0, 5) : '—'} · {apt.patient_nic || 'NIC —'}
+                            </div>
                           </div>
-                          <div className="text-secondary font-mono-data">
-                            {p.patient_code} · {p.id_number}
-                          </div>
-                        </div>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-subtle border border-border-subtle text-secondary font-mono-data">
-                          {p.gender?.charAt(0) || 'M'}
-                        </span>
-                      </button>
-                    ))
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+                            apt.status === 'Completed'
+                              ? 'bg-status-completed-bg text-status-completed-text'
+                              : apt.status === 'Cancelled'
+                                ? 'bg-status-cancelled-bg text-status-cancelled-text'
+                                : 'bg-status-scheduled-bg text-status-scheduled-text'
+                          }`}>
+                            {apt.status}
+                          </span>
+                        </button>
+                      );
+                    })
                   ) : (
-                    <div className="p-3 text-center text-xs text-secondary italic">
-                      No other patients available.
+                    <div className="p-4 text-center text-xs text-secondary italic">
+                      No patients allocated for this day.
                     </div>
                   )}
                 </div>
@@ -522,7 +752,8 @@ export const DoctorConsultation: React.FC = () => {
 
               <button
                 onClick={loadPatientHistory}
-                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
+                disabled={!patient}
+                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle disabled:opacity-50 transition-all"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px] text-secondary">history</span>
@@ -530,7 +761,8 @@ export const DoctorConsultation: React.FC = () => {
               </button>
               <button
                 onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
+                disabled={!appointment}
+                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle disabled:opacity-50 transition-all"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[18px] text-secondary">print</span>
@@ -539,51 +771,54 @@ export const DoctorConsultation: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Grid: Clear, High-Visibility Patient Detail Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-sm">
-            {/* Tile 1: Age & Gender */}
-            <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                Demographics
-              </span>
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                {patientDemographics}
-              </span>
-            </div>
+          {/* Patient Details & Allergy Alerts or Day Summary */}
+          {appointment ? (
+            <>
+              {/* Bottom Grid: Patient Detail Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-sm">
+                {/* Tile 1: Age & Gender */}
+                <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
+                    Demographics
+                  </span>
+                  <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                    {patientDemographics}
+                  </span>
+                </div>
 
-            {/* Tile 2: Blood Group */}
-            <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                Blood Group
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[18px] text-rose-500">bloodtype</span>
-                <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                  {patientView.blood_group || 'Unknown'}
-                </span>
+                {/* Tile 2: Blood Group */}
+                <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
+                    Blood Group
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[18px] text-rose-500">bloodtype</span>
+                    <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                      {patientView.blood_group || 'Unknown'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tile 3: NIC */}
+                <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
+                    National ID (NIC)
+                  </span>
+                  <span className="font-mono-data text-mono-data font-bold text-brand-navy-deep text-base">
+                    {patientView.id_number || appointment.patient_nic || '—'}
+                  </span>
+                </div>
+
+                {/* Tile 4: Visit Type */}
+                <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
+                    Encounter Type
+                  </span>
+                  <span className="font-label-md text-label-md font-semibold text-primary">
+                    {appointment.appointment_type || 'Appointment'}
+                  </span>
+                </div>
               </div>
-            </div>
-
-            {/* Tile 3: NIC */}
-            <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                National ID (NIC)
-              </span>
-              <span className="font-mono-data text-mono-data font-bold text-brand-navy-deep text-base">
-                {patientView.id_number || '—'}
-              </span>
-            </div>
-
-            {/* Tile 4: Visit Type */}
-            <div className="p-space-sm rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col justify-between">
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                Encounter Type
-              </span>
-              <span className="font-label-md text-label-md font-semibold text-primary">
-                {appointment?.appointment_type || 'Appointment'}
-              </span>
-            </div>
-          </div>
 
           {/* Dynamic Critical Allergy Alert Bar */}
           {allergies.length > 0 ? (
@@ -649,8 +884,39 @@ export const DoctorConsultation: React.FC = () => {
               </button>
             </div>
           )}
+        </>
+      ) : (
+        <div className="p-space-md rounded-xl bg-surface-subtle border border-border-subtle/70 flex flex-col sm:flex-row items-center justify-between gap-space-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[22px]">calendar_today</span>
+            </div>
+            <div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                {allocatedAppointments.length > 0
+                  ? `${allocatedAppointments.length} Patient(s) Allocated for ${currentDate === todayStr ? 'Today' : formattedDateLabel}`
+                  : `No Patients Allocated for ${currentDate === todayStr ? 'Today' : formattedDateLabel}`}
+              </div>
+              <div className="text-xs text-secondary mt-0.5">
+                {allocatedAppointments.length > 0
+                  ? 'Select an allocated patient from the Switch Patient dropdown to start consultation.'
+                  : 'Previous and future consultations are not shown for this day. Use the date selector to view other days.'}
+              </div>
+            </div>
+          </div>
+          {allocatedAppointments.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setPatientSwitchOpen(true)}
+              className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-all shadow-xs shrink-0"
+            >
+              Choose Patient
+            </button>
+          )}
         </div>
-      </div>
+      )}
+    </div>
+  </div>
 
       {/* Allergy Management Modal for Doctor */}
       {isAllergyModalOpen && (
@@ -858,11 +1124,12 @@ export const DoctorConsultation: React.FC = () => {
               <span className="material-symbols-outlined text-[18px]">search</span>
             </div>
             <input
-              className="w-full h-11 pl-10 pr-24 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+              className="w-full h-11 pl-10 pr-24 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               id="diagnosis-input"
               value={diagnosis}
+              disabled={!appointment}
               onChange={(e) => setDiagnosis(e.target.value)}
-              placeholder="Search ICD-10 code or enter diagnosis..."
+              placeholder={appointment ? "Search ICD-10 code or enter diagnosis..." : "Select an allocated patient to enter diagnosis..."}
               type="text"
             />
           </div>
@@ -873,12 +1140,13 @@ export const DoctorConsultation: React.FC = () => {
           <label className="font-label-sm text-label-sm text-brand-navy-deep" htmlFor="consultation-notes">Clinical notes <span className="text-status-cancelled-text">*</span></label>
           <div className="rounded-lg border border-border-subtle overflow-hidden bg-surface-subtle focus-within:ring-2 focus-within:ring-border-focus focus-within:bg-surface-card transition-all">
             <textarea
-              className="w-full p-3.5 bg-transparent font-body-md text-body-md text-brand-navy-deep focus:outline-none resize-y leading-relaxed"
+              className="w-full p-3.5 bg-transparent font-body-md text-body-md text-brand-navy-deep focus:outline-none resize-y leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
               id="consultation-notes"
               rows={4}
+              disabled={!appointment}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Enter clinical observations, vitals assessment, progression, and directives..."
+              placeholder={appointment ? "Enter clinical observations, vitals assessment, progression, and directives..." : "Select an allocated patient to enter clinical notes..."}
             />
           </div>
           <div className="flex justify-end font-body-sm text-body-sm text-secondary pt-1">
@@ -909,9 +1177,10 @@ export const DoctorConsultation: React.FC = () => {
               <span className="material-symbols-outlined text-[18px]">add_circle_outline</span>
             </div>
             <input
-              className="w-full h-11 pl-10 pr-4 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
-              placeholder="Search clinical order by name, code, or department..."
+              className="w-full h-11 pl-10 pr-4 rounded-lg bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:bg-surface-card focus:outline-none focus:ring-2 focus:ring-border-focus disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+              placeholder={appointment ? "Search clinical order by name, code, or department..." : "Select an allocated patient to add treatments..."}
               value={treatmentSearch}
+              disabled={!appointment}
               onChange={(event) => setTreatmentSearch(event.target.value)}
               type="text"
             />
@@ -977,7 +1246,8 @@ export const DoctorConsultation: React.FC = () => {
           <div className="flex flex-wrap items-center gap-space-sm self-end lg:self-auto">
             <button
               onClick={saveDraft}
-              className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"
+              disabled={!activeAppointmentId}
+              className="h-10 px-4 rounded-lg border border-border-subtle bg-surface-card hover:bg-surface-subtle disabled:opacity-50 text-brand-navy-deep font-label-md text-label-md font-bold inline-flex items-center gap-1.5 transition-all shadow-xs"
               type="button"
             >
               <span className="material-symbols-outlined text-[18px] text-secondary">save</span>
@@ -985,8 +1255,8 @@ export const DoctorConsultation: React.FC = () => {
             </button>
             <button
               onClick={handleComplete}
-              disabled={isLoading || isFinalized}
-              className={`h-10 px-6 rounded-lg font-label-lg text-label-lg font-bold inline-flex items-center gap-2 shadow-xs transition-all transform active:scale-[0.99] ${isFinalized
+              disabled={isLoading || isFinalized || !activeAppointmentId}
+              className={`h-10 px-6 rounded-lg font-label-lg text-label-lg font-bold inline-flex items-center gap-2 shadow-xs transition-all transform active:scale-[0.99] disabled:opacity-50 ${isFinalized
                 ? 'bg-status-completed-bg text-status-completed-text border border-status-completed-text/30'
                 : 'bg-primary hover:bg-primary-container text-on-primary'
                 }`}
