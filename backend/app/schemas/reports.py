@@ -51,6 +51,7 @@ class OutstandingBalanceItem(BaseModel):
     patient_id: int
     patient_name: str
     contact_number: str
+    branch_name: Optional[str] = None
     total_amount: float
     paid_amount: float
     due_amount: float

@@ -134,7 +134,7 @@ export function Dashboard() {
   const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg p-space-lg md:p-space-xl max-w-content-max-width mx-auto">
+    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pt-space-lg pb-space-xl">
       {/* Top Level Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
         <div className="flex flex-col">

@@ -331,6 +331,7 @@ export interface OutstandingBalanceItem {
   patient_id: number;
   patient_name: string;
   contact_number: string;
+  branch_name?: string | null;
   total_amount: number;
   paid_amount: number;
   due_amount: number;
