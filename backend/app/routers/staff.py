@@ -83,6 +83,9 @@ async def create_staff(
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
+    if current_user.role not in ("Administrator", "Branch Manager"):
+        raise HTTPException(status_code=403, detail="Only Administrators and Branch Managers can create staff.")
+
     if current_user.role == "Branch Manager" and current_user.branch_id != payload.branch_id:
         raise HTTPException(status_code=403, detail="You can only add staff to your own branch.")
 
