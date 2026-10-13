@@ -111,3 +111,17 @@ def test_authenticated_download_needs_no_origin_or_csrf_token(client):
     assert response.status_code == 200
     assert response.content == b"download fixture"
     assert "attachment" in response.headers["content-disposition"]
+
+
+@pytest.mark.parametrize('secure', [False, True])
+def test_logout_cookie_deletion_matches_login_attributes(client, monkeypatch, secure):
+    monkeypatch.setattr(config, 'COOKIE_SECURE', secure)
+    response = client.post('/auth/logout', headers={'Origin': TRUSTED_ORIGIN})
+    cookies = response.headers.get_list('set-cookie')
+    assert len(cookies) == 2
+    for cookie in cookies:
+        assert 'Max-Age=0' in cookie
+        assert 'Path=/' in cookie
+        assert ('Secure' in cookie) == secure
+        assert f'SameSite={"none" if secure else "lax"}' in cookie
+    assert 'HttpOnly' in cookies[0]

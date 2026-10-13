@@ -98,8 +98,11 @@ async def logout(response: Response):
     # Stateless JWT: nothing to invalidate server-side. Frontend just discards
     # the token. Add a token-blocklist table here later if you ever need
     # server-side revocation before expiry.
-    response.delete_cookie("access_token")
-    response.delete_cookie("csrf_token")
+    samesite_policy: Literal["none", "lax"] = "none" if config.COOKIE_SECURE else "lax"
+    response.delete_cookie("access_token", path="/", httponly=True,
+                           secure=config.COOKIE_SECURE, samesite=samesite_policy)
+    response.delete_cookie("csrf_token", path="/", httponly=False,
+                           secure=config.COOKIE_SECURE, samesite=samesite_policy)
     return {"message": "Logged out"}
 
 
