@@ -416,14 +416,14 @@ export const ManageAppointments: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="page-content">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER, BREADCRUMBS & LIVE METRICS                       */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -435,7 +435,7 @@ export const ManageAppointments: React.FC = () => {
 
           {/* Title & Live Status Pills */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
               Manage Appointments
             </h1>
 
@@ -448,7 +448,7 @@ export const ManageAppointments: React.FC = () => {
               {cancelledCount} Cancelled
             </span>
             {scheduledCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-subtle text-brand-navy-deep font-label-sm text-label-sm font-semibold border border-border-subtle">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-subtle text-on-surface font-label-sm text-label-sm font-semibold border border-border-subtle">
                 <span className="material-symbols-outlined text-[14px] text-primary">schedule</span>
                 {scheduledCount} Scheduled
               </span>
@@ -463,7 +463,7 @@ export const ManageAppointments: React.FC = () => {
         <div className="flex flex-wrap items-center gap-space-sm self-start lg:self-center">
           <Link
             to="/receptionist/book-appointment"
-            className="h-11 px-space-lg rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-2 shadow-sm transition-all font-bold"
+            className="h-11 px-space-lg rounded-xl bg-primary hover:bg-tertiary text-on-primary font-label-md text-label-md flex items-center gap-2 shadow-sm transition-all font-bold"
           >
             <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
             <span>Book Appointment</span>
@@ -474,7 +474,7 @@ export const ManageAppointments: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 2: COMPREHENSIVE MULTI-CRITERIA FILTER CONSOLE              */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-card rounded-xl shadow-sm border border-border-subtle p-space-md space-y-space-md">
+      <div className="ui-card p-space-md space-y-space-md">
         {/* Row 1: Search, Branch, Doctor, Reset */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
           {/* Patient / NIC / ID Search */}
@@ -487,13 +487,13 @@ export const ManageAppointments: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search patient, NIC, or Appointment ID..."
-              className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card text-brand-navy-deep placeholder-outline font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary border border-transparent focus:border-primary transition-all shadow-inner"
+              className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card text-on-surface placeholder-outline font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary border border-transparent focus:border-primary transition-all shadow-inner"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-brand-navy-deep"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
@@ -512,7 +512,7 @@ export const ManageAppointments: React.FC = () => {
                   setSelectedBranch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full h-11 pl-9 pr-8 rounded-xl bg-surface-subtle border border-transparent focus:border-primary font-body-md text-body-md text-brand-navy-deep appearance-none focus:outline-none cursor-pointer"
+                className="w-full h-11 pl-9 pr-8 rounded-xl bg-surface-subtle border border-transparent focus:border-primary font-body-md text-body-md text-on-surface appearance-none focus:outline-none cursor-pointer"
               >
                 <option value="all">All Branches</option>
                 {allBranches.map((b) => (
@@ -541,10 +541,10 @@ export const ManageAppointments: React.FC = () => {
               {!isDoctorOpen && selectedDoctorObj ? (
                 <div className="flex-1 flex items-center justify-between min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-label-md text-label-md text-brand-navy-deep font-semibold truncate">
+                    <span className="font-label-md text-label-md text-on-surface font-semibold truncate">
                       {selectedDoctorObj.full_name}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-label-sm text-[11px] font-semibold shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-label-sm text-label-sm font-semibold shrink-0">
                       {selectedDoctorObj.specialties?.[0] || 'OPD'}
                     </span>
                   </div>
@@ -556,7 +556,7 @@ export const ManageAppointments: React.FC = () => {
                       setDoctorSearchQuery('');
                       setPage(1);
                     }}
-                    className="text-outline hover:text-brand-navy-deep p-0.5 rounded-full hover:bg-surface-subtle"
+                    className="text-outline hover:text-on-surface p-0.5 rounded-full hover:bg-surface-subtle"
                     title="Clear doctor filter"
                   >
                     <span className="material-symbols-outlined text-[16px]">close</span>
@@ -576,7 +576,7 @@ export const ManageAppointments: React.FC = () => {
                       ? `Selected: ${selectedDoctorObj.full_name}`
                       : 'Search doctor by name, specialty...'
                   }
-                  className="w-full bg-transparent font-body-md text-body-md text-brand-navy-deep placeholder-outline focus:outline-none"
+                  className="w-full bg-transparent font-body-md text-body-md text-on-surface placeholder-outline focus:outline-none"
                 />
               )}
 
@@ -588,7 +588,7 @@ export const ManageAppointments: React.FC = () => {
                       e.stopPropagation();
                       setDoctorSearchQuery('');
                     }}
-                    className="text-outline hover:text-brand-navy-deep"
+                    className="text-outline hover:text-on-surface"
                   >
                     <span className="material-symbols-outlined text-[16px]">close</span>
                   </button>
@@ -621,7 +621,7 @@ export const ManageAppointments: React.FC = () => {
                     }}
                     className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-colors ${selectedDoctor === 'all'
                       ? 'bg-primary/10 text-primary font-bold'
-                      : 'hover:bg-surface-subtle text-brand-navy-deep font-medium'
+                      : 'hover:bg-surface-subtle text-on-surface font-medium'
                       }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -630,7 +630,7 @@ export const ManageAppointments: React.FC = () => {
                       </div>
                       <div>
                         <div className="font-label-md text-label-md">All Doctors</div>
-                        <div className="text-[11px] text-outline font-normal">
+                        <div className="text-body-sm text-outline font-normal">
                           Show appointments for all doctors
                         </div>
                       </div>
@@ -653,7 +653,7 @@ export const ManageAppointments: React.FC = () => {
                             setSelectedBranch('all');
                             setPage(1);
                           }}
-                          className="text-[12px] text-primary hover:underline font-semibold"
+                          className="text-body-sm text-primary hover:underline font-semibold"
                         >
                           Show across all branches
                         </button>
@@ -683,7 +683,7 @@ export const ManageAppointments: React.FC = () => {
                           }}
                           className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-colors ${isSelected
                             ? 'bg-primary/10 text-primary font-bold'
-                            : 'hover:bg-surface-subtle text-brand-navy-deep'
+                            : 'hover:bg-surface-subtle text-on-surface'
                             }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -696,10 +696,10 @@ export const ManageAppointments: React.FC = () => {
                               {initials || 'DR'}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-label-md text-label-md text-brand-navy-deep font-semibold truncate">
+                              <div className="font-label-md text-label-md text-on-surface font-semibold truncate">
                                 {doc.full_name}
                               </div>
-                              <div className="flex items-center gap-1.5 text-[11px] text-outline">
+                              <div className="flex items-center gap-1.5 text-body-sm text-outline">
                                 <span className="text-secondary font-medium">
                                   {doc.specialties?.[0] || 'General Medicine'}
                                 </span>
@@ -733,7 +733,7 @@ export const ManageAppointments: React.FC = () => {
               type="button"
               onClick={handleResetFilters}
               title="Clear all filters"
-              className="h-11 px-3 w-full rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center justify-center gap-1 transition-colors border border-border-subtle"
+              className="h-11 px-3 w-full rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-on-surface font-label-md text-label-md flex items-center justify-center gap-1 transition-colors border border-border-subtle"
             >
               <span className="material-symbols-outlined text-[18px]">restart_alt</span>
               <span className="lg:hidden">Reset</span>
@@ -762,7 +762,7 @@ export const ManageAppointments: React.FC = () => {
                   }}
                   className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm transition-all font-semibold ${isActive
                     ? 'bg-primary text-on-primary shadow-sm'
-                    : 'text-on-surface-variant hover:text-brand-navy-deep hover:bg-surface-card'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-card'
                     }`}
                 >
                   {tab.label}
@@ -773,7 +773,7 @@ export const ManageAppointments: React.FC = () => {
 
           {/* Date Range Quick Selector */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-subtle font-label-md text-label-md text-brand-navy-deep border border-border-subtle">
+            <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-subtle font-label-md text-label-md text-on-surface border border-border-subtle">
               <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
               <span>
                 {selectedDate
@@ -789,8 +789,8 @@ export const ManageAppointments: React.FC = () => {
                 type="button"
                 onClick={() => handleDatePreset('all')}
                 className={`px-2.5 py-1 rounded-lg font-label-sm text-label-sm transition-all font-semibold ${datePreset === 'all'
-                  ? 'bg-surface-card text-brand-navy-deep shadow-xs'
-                  : 'text-outline hover:text-brand-navy-deep'
+                  ? 'bg-surface-card text-on-surface shadow-xs'
+                  : 'text-outline hover:text-on-surface'
                   }`}
               >
                 All
@@ -799,8 +799,8 @@ export const ManageAppointments: React.FC = () => {
                 type="button"
                 onClick={() => handleDatePreset('today')}
                 className={`px-2.5 py-1 rounded-lg font-label-sm text-label-sm transition-all font-semibold ${datePreset === 'today'
-                  ? 'bg-surface-card text-brand-navy-deep shadow-xs'
-                  : 'text-outline hover:text-brand-navy-deep'
+                  ? 'bg-surface-card text-on-surface shadow-xs'
+                  : 'text-outline hover:text-on-surface'
                   }`}
               >
                 Today
@@ -809,8 +809,8 @@ export const ManageAppointments: React.FC = () => {
                 type="button"
                 onClick={() => handleDatePreset('tomorrow')}
                 className={`px-2.5 py-1 rounded-lg font-label-sm text-label-sm transition-all font-semibold ${datePreset === 'tomorrow'
-                  ? 'bg-surface-card text-brand-navy-deep shadow-xs'
-                  : 'text-outline hover:text-brand-navy-deep'
+                  ? 'bg-surface-card text-on-surface shadow-xs'
+                  : 'text-outline hover:text-on-surface'
                   }`}
               >
                 Tomorrow
@@ -826,7 +826,7 @@ export const ManageAppointments: React.FC = () => {
                 setDatePreset('custom');
                 setPage(1);
               }}
-              className="h-9 px-2.5 rounded-xl bg-surface-subtle border border-border-subtle font-body-sm text-body-sm text-brand-navy-deep focus:outline-none focus:border-primary"
+              className="h-9 px-2.5 rounded-xl bg-surface-subtle border border-border-subtle font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -835,11 +835,11 @@ export const ManageAppointments: React.FC = () => {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 3: MAIN CLINICAL APPOINTMENTS DATA TABLE CARD               */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-card rounded-xl shadow-sm border border-border-subtle overflow-hidden flex flex-col">
+      <div className="ui-card overflow-hidden flex flex-col">
         {/* Table Header & Utility Toolbar */}
         <div className="px-space-md py-space-sm bg-surface-subtle flex flex-wrap items-center justify-between gap-2 border-b border-border-subtle">
           <div className="flex items-center gap-2">
-            <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+            <span className="font-headline-sm text-headline-sm text-on-surface font-bold">
               Scheduled Queue
             </span>
             <span className="font-label-sm text-label-sm text-outline px-2.5 py-0.5 rounded-md bg-surface-card border border-border-subtle font-semibold">
@@ -892,7 +892,7 @@ export const ManageAppointments: React.FC = () => {
                       <span className="material-symbols-outlined text-[36px] text-outline/60">
                         calendar_today
                       </span>
-                      <span className="font-headline-sm text-brand-navy-deep font-semibold">
+                      <span className="font-headline-sm text-on-surface font-semibold">
                         No appointments found
                       </span>
                       <p className="font-body-sm text-body-sm max-w-sm">
@@ -929,20 +929,20 @@ export const ManageAppointments: React.FC = () => {
                         <div className="flex items-center justify-between gap-3 min-w-0">
                           <div className="flex flex-col min-w-0">
                             <span
-                              className={`font-label-lg text-label-lg font-semibold whitespace-nowrap ${isCancelled ? 'text-brand-navy-deep line-through' : 'text-brand-navy-deep'
+                              className={`font-label-lg text-label-lg font-semibold whitespace-nowrap ${isCancelled ? 'text-on-surface line-through' : 'text-on-surface'
                                 }`}
                               title={apt.patient_name}
                             >
                               {apt.patient_name}
                             </span>
-                            <div className="flex items-center gap-2 mt-0.5 font-mono-data text-[11px] text-outline font-medium whitespace-nowrap">
+                            <div className="flex items-center gap-2 mt-0.5 font-mono-data text-body-sm text-outline font-medium whitespace-nowrap">
                               <span className="text-primary font-semibold">{apt.appointment_code || `APT-${apt.appointment_id}`}</span>
                               <span>•</span>
                               <span>NIC: {apt.is_temp || apt.patient_nic?.startsWith('999') ? 'Pending' : (apt.patient_nic || 'N/A')}</span>
                             </div>
                           </div>
                           {apt.is_temp && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-label-sm font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
                               <span
                                 className="material-symbols-outlined text-amber-600 leading-none select-none"
                                 style={{ fontSize: '11px', width: '11px', height: '11px' }}
@@ -959,7 +959,7 @@ export const ManageAppointments: React.FC = () => {
                       <td className="px-space-md py-3.5">
                         <div className="flex items-center gap-2.5">
                           <div className="flex flex-col">
-                            <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">
+                            <span className="font-label-md text-label-md text-on-surface font-semibold">
                               {apt.doctor_name}
                             </span>
                           </div>
@@ -968,7 +968,7 @@ export const ManageAppointments: React.FC = () => {
 
                       {/* 3. Specialty */}
                       <td className="px-space-md py-3.5">
-                        <span className="px-2.5 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-[12px] font-bold border border-primary/10">
+                        <span className="px-2.5 py-0.5 rounded-md bg-surface-container-low text-primary font-label-sm text-label-sm font-bold border border-primary/10">
                           {specialty}
                         </span>
                       </td>
@@ -979,12 +979,12 @@ export const ManageAppointments: React.FC = () => {
                           <span
                             className={`font-label-md text-label-md font-semibold ${isCancelled
                               ? 'text-on-surface-variant line-through'
-                              : 'text-brand-navy-deep'
+                              : 'text-on-surface'
                               }`}
                           >
                             {formatTime(apt.start_time)}
                           </span>
-                          <span className="font-body-sm text-[12px] text-outline mt-0.5 font-medium">
+                          <span className="font-body-sm text-body-sm text-outline mt-0.5 font-medium">
                             {formatDate(apt.appointment_date)}
                           </span>
                         </div>
@@ -998,7 +998,7 @@ export const ManageAppointments: React.FC = () => {
                       {/* 6. Facility / Wing */}
                       <td className="px-space-md py-3.5 font-body-sm text-body-sm text-on-surface-variant">
                         <div className="flex flex-col">
-                          <span className="font-label-md text-label-md text-brand-navy-deep font-medium">
+                          <span className="font-label-md text-label-md text-on-surface font-medium">
                             {apt.branch_name || 'Unknown Branch'}
                           </span>
                         </div>
@@ -1044,7 +1044,7 @@ export const ManageAppointments: React.FC = () => {
                           )}
 
                           {isCompleted && (
-                            <span className="px-2 py-0.5 rounded bg-surface-subtle font-label-sm text-[11px] text-outline font-semibold cursor-not-allowed">
+                            <span className="px-2 py-0.5 rounded bg-surface-subtle font-label-sm text-label-sm text-outline font-semibold cursor-not-allowed">
                               Consulted
                             </span>
                           )}
@@ -1052,7 +1052,7 @@ export const ManageAppointments: React.FC = () => {
                           {isCancelled && (
                             <Link
                               to="/receptionist/book-appointment"
-                              className="h-7 px-2.5 rounded-lg bg-surface-subtle hover:bg-status-scheduled-bg text-primary font-label-sm text-[11px] font-bold flex items-center gap-1 transition-colors"
+                              className="h-7 px-2.5 rounded-lg bg-surface-subtle hover:bg-status-scheduled-bg text-primary font-label-sm text-label-sm font-bold flex items-center gap-1 transition-colors"
                             >
                               <span>Rebook</span>
                             </Link>
@@ -1063,7 +1063,7 @@ export const ManageAppointments: React.FC = () => {
                             type="button"
                             onClick={() => openDetailsDrawer(apt)}
                             title="View Patient Encounter Card"
-                            className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors"
+                            className="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-subtle transition-colors"
                           >
                             <span className="material-symbols-outlined text-[18px]">visibility</span>
                           </button>
@@ -1087,7 +1087,7 @@ export const ManageAppointments: React.FC = () => {
                 setLimit(Number(e.target.value));
                 setPage(1);
               }}
-              className="bg-surface-card rounded-lg px-2 py-1 text-brand-navy-deep font-medium border border-border-subtle focus:outline-none"
+              className="bg-surface-card rounded-lg px-2 py-1 text-on-surface font-medium border border-border-subtle focus:outline-none"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -1105,18 +1105,18 @@ export const ManageAppointments: React.FC = () => {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-brand-navy-deep border border-border-subtle shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-on-surface border border-border-subtle shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">chevron_left</span>
             </button>
-            <span className="px-3 py-1 text-label-sm font-bold text-brand-navy-deep bg-surface-card rounded-lg border border-border-subtle shadow-xs">
+            <span className="px-3 py-1 text-label-sm font-bold text-on-surface bg-surface-card rounded-lg border border-border-subtle shadow-xs">
               Page {page} of {Math.max(1, Math.ceil(totalCount / limit))}
             </span>
             <button
               type="button"
               disabled={page * limit >= totalCount}
               onClick={() => setPage((p) => p + 1)}
-              className="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-brand-navy-deep border border-border-subtle shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-outline hover:text-on-surface border border-border-subtle shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">chevron_right</span>
             </button>
@@ -1143,7 +1143,7 @@ export const ManageAppointments: React.FC = () => {
                     <span className="material-symbols-outlined text-[22px]">calendar_clock</span>
                   </div>
                   <div>
-                    <h3 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">
+                    <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
                       Reschedule Consultation
                     </h3>
                     <span className="font-body-sm text-body-sm text-outline">
@@ -1154,7 +1154,7 @@ export const ManageAppointments: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRescheduleApt(null)}
-                  className="p-1.5 rounded-lg text-outline hover:text-brand-navy-deep hover:bg-surface-subtle transition-colors"
+                  className="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-subtle transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
@@ -1166,7 +1166,7 @@ export const ManageAppointments: React.FC = () => {
                   <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block mb-1 font-semibold">
                     Assigned Consultant
                   </label>
-                  <div className="p-3 rounded-xl bg-surface-subtle font-label-md text-label-md text-brand-navy-deep flex items-center gap-2 border border-border-subtle font-semibold">
+                  <div className="p-3 rounded-xl bg-surface-subtle font-label-md text-label-md text-on-surface flex items-center gap-2 border border-border-subtle font-semibold">
                     <span className="material-symbols-outlined text-primary text-[18px]">
                       stethoscope
                     </span>
@@ -1186,7 +1186,7 @@ export const ManageAppointments: React.FC = () => {
                       setRescheduleDate(e.target.value);
                       setSelectedNewSlot(null);
                     }}
-                    className="w-full h-11 px-3 rounded-xl bg-surface-subtle border border-border-subtle text-brand-navy-deep font-body-md text-body-md focus:outline-none focus:border-primary font-medium"
+                    className="w-full h-11 px-3 rounded-xl bg-surface-subtle border border-border-subtle text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary font-medium"
                   />
                 </div>
 
@@ -1214,7 +1214,7 @@ export const ManageAppointments: React.FC = () => {
                             onClick={() => setSelectedNewSlot(slot)}
                             className={`py-2 px-3 rounded-xl text-center font-label-sm text-label-sm transition-all font-semibold border ${isSelected
                               ? 'bg-primary text-on-primary border-primary shadow-sm'
-                              : 'bg-surface-subtle hover:bg-surface-container text-brand-navy-deep border-border-subtle'
+                              : 'bg-surface-subtle hover:bg-surface-container text-on-surface border-border-subtle'
                               }`}
                           >
                             {formatTime(slot.start_time)}
@@ -1231,7 +1231,7 @@ export const ManageAppointments: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRescheduleApt(null)}
-                  className="h-10 px-4 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-label-md font-semibold transition-colors border border-border-subtle"
+                  className="h-10 px-4 rounded-xl bg-surface-subtle hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold transition-colors border border-border-subtle"
                 >
                   Cancel
                 </button>
@@ -1239,7 +1239,7 @@ export const ManageAppointments: React.FC = () => {
                   type="button"
                   disabled={!selectedNewSlot || submittingReschedule}
                   onClick={handleConfirmReschedule}
-                  className="h-10 px-5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-sm font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-10 px-5 rounded-xl bg-primary hover:bg-tertiary text-on-primary font-label-md text-label-md shadow-sm font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-[18px]">check</span>
                   <span>{submittingReschedule ? 'Rescheduling...' : 'Confirm Reschedule'}</span>
@@ -1267,13 +1267,13 @@ export const ManageAppointments: React.FC = () => {
                   <span className="material-symbols-outlined text-[28px]">warning</span>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">
+                  <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
                     Cancel this appointment?
                   </h3>
                   <p className="font-body-md text-body-md text-on-surface-variant">
                     You are about to cancel{' '}
-                    <strong className="text-brand-navy-deep">{cancelApt.appointment_code}</strong> for{' '}
-                    <strong className="text-brand-navy-deep">{cancelApt.patient_name}</strong>. This
+                    <strong className="text-on-surface">{cancelApt.appointment_code}</strong> for{' '}
+                    <strong className="text-on-surface">{cancelApt.patient_name}</strong>. This
                     action will release their time slot immediately.
                   </p>
                 </div>
@@ -1284,7 +1284,7 @@ export const ManageAppointments: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCancelApt(null)}
-                  className="h-10 px-4 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-label-md text-label-md font-semibold transition-colors border border-border-subtle"
+                  className="h-10 px-4 rounded-xl bg-surface-subtle hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold transition-colors border border-border-subtle"
                 >
                   Dismiss
                 </button>
@@ -1321,14 +1321,14 @@ export const ManageAppointments: React.FC = () => {
                   <span className="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">
                     Patient Card
                   </span>
-                  <h3 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">
+                  <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
                     {drawerApt.appointment_code}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDrawerApt(null)}
-                  className="p-2 rounded-xl text-outline hover:text-brand-navy-deep hover:bg-surface-card transition-colors"
+                  className="p-2 rounded-xl text-outline hover:text-on-surface hover:bg-surface-card transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
@@ -1343,7 +1343,7 @@ export const ManageAppointments: React.FC = () => {
                       {getInitials(drawerApt.patient_name)}
                     </div>
                     <div>
-                      <h4 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                      <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                         {drawerApt.patient_name}
                       </h4>
                       <span className="font-body-sm text-body-sm text-outline">
@@ -1361,7 +1361,7 @@ export const ManageAppointments: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2 text-body-sm pt-2 border-t border-border-subtle/50">
                     <div>
                       <span className="font-label-sm text-outline block font-semibold">Age / Gender</span>
-                      <span className="text-brand-navy-deep font-medium">
+                      <span className="text-on-surface font-medium">
                         {drawerPatient
                           ? `${drawerPatient.date_of_birth && drawerPatient.date_of_birth !== '1900-01-01' && drawerPatient.date_of_birth !== '1995-01-01' && getAge(drawerPatient.date_of_birth) > 0 && getAge(drawerPatient.date_of_birth) < 120 ? `${getAge(drawerPatient.date_of_birth)} Yrs` : 'Age Pending'} · ${drawerPatient.gender}`
                           : '—'}
@@ -1369,7 +1369,7 @@ export const ManageAppointments: React.FC = () => {
                     </div>
                     <div>
                       <span className="font-label-sm text-outline block font-semibold">Contact Phone</span>
-                      <span className="text-brand-navy-deep font-medium">
+                      <span className="text-on-surface font-medium">
                         {drawerPatient?.phone_number && drawerPatient.phone_number !== '0000000000' ? drawerPatient.phone_number : 'Not Provided'}
                       </span>
                     </div>
@@ -1405,19 +1405,19 @@ export const ManageAppointments: React.FC = () => {
                   <div className="space-y-2 text-body-sm">
                     <div className="flex justify-between py-2 border-b border-border-subtle">
                       <span className="text-outline">Attending Doctor</span>
-                      <span className="font-label-md text-brand-navy-deep font-semibold">
+                      <span className="font-label-md text-on-surface font-semibold">
                         {drawerApt.doctor_name}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border-subtle">
                       <span className="text-outline">Type</span>
-                      <span className="font-label-md text-brand-navy-deep font-semibold">
+                      <span className="font-label-md text-on-surface font-semibold">
                         {drawerApt.appointment_type || 'Scheduled Visit'}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border-subtle">
                       <span className="text-outline">Branch</span>
-                      <span className="font-label-md text-brand-navy-deep font-semibold">
+                      <span className="font-label-md text-on-surface font-semibold">
                         {drawerApt.branch_name || 'Unknown Branch'}
                       </span>
                     </div>
@@ -1429,7 +1429,7 @@ export const ManageAppointments: React.FC = () => {
                     </div>
                     <div className="flex justify-between py-2 border-b border-border-subtle">
                       <span className="text-outline">Consultation Date</span>
-                      <span className="font-label-md text-brand-navy-deep font-semibold">
+                      <span className="font-label-md text-on-surface font-semibold">
                         {formatDate(drawerApt.appointment_date)}
                       </span>
                     </div>
@@ -1446,7 +1446,7 @@ export const ManageAppointments: React.FC = () => {
                     <span className="material-symbols-outlined text-[16px]">priority_high</span>
                     <span>Medical Flags &amp; Allergies</span>
                   </div>
-                  <p className="font-body-sm text-body-sm text-brand-navy-deep font-medium">
+                  <p className="font-body-sm text-body-sm text-on-surface font-medium">
                     {drawerPatient?.allergies && drawerPatient.allergies.length > 0
                       ? `Recorded Allergies: ${drawerPatient.allergies.map((a) => a.name).join(', ')}`
                       : 'No critical drug allergies recorded in medical profile.'}
@@ -1458,7 +1458,7 @@ export const ManageAppointments: React.FC = () => {
               <div className="p-space-md border-t border-border-subtle flex gap-2 bg-surface-subtle">
                 <Link
                   to="/receptionist/invoices"
-                  className="flex-1 h-10 rounded-xl bg-surface-card hover:bg-surface-container text-brand-navy-deep font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors border border-border-subtle font-semibold"
+                  className="flex-1 h-10 rounded-xl bg-surface-card hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors border border-border-subtle font-semibold"
                 >
                   <span className="material-symbols-outlined text-[18px] text-primary">
                     receipt_long
@@ -1468,7 +1468,7 @@ export const ManageAppointments: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDrawerApt(null)}
-                  className="flex-1 h-10 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-colors font-bold shadow-sm"
+                  className="flex-1 h-10 rounded-xl bg-primary hover:bg-tertiary text-on-primary font-label-md text-label-md transition-colors font-bold shadow-sm"
                 >
                   Done
                 </button>

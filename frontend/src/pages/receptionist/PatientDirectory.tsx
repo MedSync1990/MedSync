@@ -65,7 +65,7 @@ export const PatientDirectory: React.FC = () => {
         return (
           <div className="flex items-center justify-between gap-3 min-w-[200px]">
             <div className="flex flex-col">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold group-hover:text-primary transition-colors">
+              <span className="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">
                 {displayName}
               </span>
               <span className="font-body-sm text-body-sm text-outline mt-0.5">
@@ -75,7 +75,7 @@ export const PatientDirectory: React.FC = () => {
               </span>
             </div>
             {walkin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-[10px] font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-pending-bg text-status-pending-text font-label-sm text-label-sm font-bold border border-amber-200/80 shrink-0 leading-none shadow-2xs">
                 <span
                   className="material-symbols-outlined text-amber-600 leading-none select-none"
                   style={{ fontSize: '11px', width: '11px', height: '11px' }}
@@ -186,14 +186,14 @@ export const PatientDirectory: React.FC = () => {
   ];
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="page-content">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -203,7 +203,7 @@ export const PatientDirectory: React.FC = () => {
 
           {/* Title */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
               Patient Directory
             </h1>
           </div>
@@ -213,18 +213,18 @@ export const PatientDirectory: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-space-md flex-wrap">
-          <div className="flex items-center gap-space-sm bg-surface-card px-space-md py-2 rounded-xl shadow-sm">
+          <div className="ui-card flex items-center gap-space-sm px-space-md py-2">
             <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
               <span className="material-symbols-outlined text-[20px]">groups</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-headline-sm text-headline-sm text-brand-navy-deep leading-tight font-semibold">{totalPatients.toLocaleString()}</span>
+              <span className="font-headline-sm text-headline-sm text-on-surface leading-tight font-semibold">{totalPatients.toLocaleString()}</span>
               <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Registered Patients</span>
             </div>
           </div>
           <button 
             onClick={() => navigate('/receptionist/register-patient')}
-            className="inline-flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-space-lg h-[42px] rounded-xl hover:bg-primary-container shadow-sm transition-all transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-space-lg h-10 rounded-xl hover:bg-tertiary shadow-sm transition-all transform hover:-translate-y-0.5"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             <span>Register Patient</span>
@@ -233,7 +233,7 @@ export const PatientDirectory: React.FC = () => {
       </div>
 
       {/* Search, Filter & Quick Controls Bar */}
-      <div className="bg-surface-card p-space-lg rounded-xl shadow-sm border border-border-subtle flex flex-col gap-space-md relative overflow-hidden">
+      <div className="ui-card p-space-lg flex flex-col gap-space-md relative overflow-hidden">
         <div className="relative w-full">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[24px] text-primary">search</span>
           <input
@@ -241,14 +241,14 @@ export const PatientDirectory: React.FC = () => {
             placeholder="Search by NIC, name, or contact number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-12 pl-12 pr-28 bg-canvas-bg rounded-xl font-body-md text-body-md text-brand-navy-deep placeholder:text-outline focus:outline-none focus:bg-surface-card ring-1 ring-border-subtle focus:ring-2 focus:ring-border-focus transition-all shadow-inner"
+            className="w-full h-12 pl-12 pr-28 bg-canvas-bg rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-card ring-1 ring-border-subtle focus:ring-2 focus:ring-border-focus transition-all shadow-inner"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            <button onClick={() => setSearch('')} className="w-7 h-7 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors">
+            <button onClick={() => setSearch('')} className="w-7 h-7 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-outline hover:text-on-surface transition-colors">
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
             <div className="h-5 w-px bg-border-subtle"></div>
-            <span className="px-2 py-0.5 rounded bg-surface-card border border-border-subtle font-mono-data text-[11px] text-outline shadow-sm">ESC</span>
+            <span className="px-2 py-0.5 rounded bg-surface-card border border-border-subtle font-mono-data text-body-sm text-outline shadow-sm">ESC</span>
           </div>
         </div>
 
@@ -258,8 +258,8 @@ export const PatientDirectory: React.FC = () => {
 
           <div className="flex items-center gap-space-xs flex-wrap">
              <div className="flex items-center bg-canvas-bg p-1 rounded-xl border border-border-subtle">
-               <button onClick={() => setBranchFilter('all')} className={`px-3 py-1 rounded-lg font-label-md text-label-md transition-all ${branchFilter === 'all' ? 'bg-surface-card text-primary shadow-sm' : 'text-on-surface-variant hover:text-brand-navy-deep'}`}>All Branches</button>
-               <button onClick={() => setBranchFilter('colombo')} className={`px-3 py-1 rounded-lg font-label-md text-label-md transition-all ${branchFilter === 'colombo' ? 'bg-surface-card text-primary shadow-sm' : 'text-on-surface-variant hover:text-brand-navy-deep'}`}>Colombo Central</button>
+               <button onClick={() => setBranchFilter('all')} className={`px-3 py-1 rounded-lg font-label-md text-label-md transition-all ${branchFilter === 'all' ? 'bg-surface-card text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}>All Branches</button>
+               <button onClick={() => setBranchFilter('colombo')} className={`px-3 py-1 rounded-lg font-label-md text-label-md transition-all ${branchFilter === 'colombo' ? 'bg-surface-card text-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}>Colombo Central</button>
              </div>
              
              <div className="relative">
@@ -275,14 +275,14 @@ export const PatientDirectory: React.FC = () => {
                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
              </div>
 
-             <button onClick={() => { setBranchFilter('all'); setInsuranceFilter('all'); }} className="w-9 h-9 rounded-xl bg-canvas-bg hover:bg-surface-subtle border border-border-subtle flex items-center justify-center text-outline hover:text-brand-navy-deep transition-colors shadow-sm" title="Clear Filters">
+             <button onClick={() => { setBranchFilter('all'); setInsuranceFilter('all'); }} className="w-9 h-9 rounded-xl bg-canvas-bg hover:bg-surface-subtle border border-border-subtle flex items-center justify-center text-outline hover:text-on-surface transition-colors shadow-sm" title="Clear Filters">
                <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
              </button>
           </div>
         </div>
       </div>
 
-      <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col border border-border-subtle">
+      <div className="ui-card overflow-hidden flex flex-col">
         <DataTable
           columns={columns}
           data={patients}

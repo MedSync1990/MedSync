@@ -142,7 +142,7 @@ export const PatientProfile: React.FC = () => {
   }
 
   return (
-    <div className="py-6 px-space-md md:px-space-lg max-w-[1600px] mx-auto w-full space-y-space-lg">
+    <div className="page-content">
       <button
         onClick={() => navigate('/receptionist/patients')}
         className="inline-flex items-center text-primary hover:text-primary-container font-label-md text-label-md transition-colors mb-2"
@@ -162,7 +162,7 @@ export const PatientProfile: React.FC = () => {
         actions={
           <button
             onClick={() => setShowEditModal(true)}
-            className="flex items-center gap-2 bg-surface-subtle text-brand-navy-deep font-label-lg text-label-lg px-space-md h-10 rounded-xl border border-border-subtle hover:bg-surface-container transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-surface-subtle text-on-surface font-label-lg text-label-lg px-space-md h-10 rounded-xl border border-border-subtle hover:bg-surface-container transition-colors shadow-sm"
           >
             <span className="material-symbols-outlined text-[18px]">edit</span>
             <span>Edit Patient</span>
@@ -173,12 +173,12 @@ export const PatientProfile: React.FC = () => {
       {/* Profile Status Bar */}
       <div className="flex items-center gap-space-sm">
         {patient.is_active ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-[12px] tracking-wide uppercase border border-status-completed-text/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-completed-bg text-status-completed-text font-label-sm text-label-sm tracking-wide uppercase border border-status-completed-text/20">
             <span className="material-symbols-outlined text-[14px]">check_circle</span>
             Active Patient
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-[12px] tracking-wide uppercase border border-border-subtle">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm tracking-wide uppercase border border-border-subtle">
             <span className="material-symbols-outlined text-[14px]">cancel</span>
             Inactive Patient
           </span>
@@ -188,56 +188,56 @@ export const PatientProfile: React.FC = () => {
       <div className="flex flex-col space-y-space-xl">
 
         {/* SECTION 1: Personal Details */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">person</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Personal Details</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Personal Details</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Basic identification and demographic information.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pt-2">
             <div className="flex flex-col gap-1.5 lg:col-span-2">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Full Name</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Full Name</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 {patient.first_name} {patient.last_name}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Patient ID</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-primary font-bold">
+              <span className="font-label-md text-label-md text-on-surface">Patient ID</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-primary font-bold">
                 {patient.patient_code}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">NIC Number</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">NIC Number</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-mono-data text-mono-data text-on-surface">
                 {patient.id_number}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Date of Birth</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Date of Birth</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 {patient.date_of_birth}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Gender</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Gender</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 {patient.gender}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5 lg:col-span-2">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Blood Group</span>
-              <div className="h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-error font-bold gap-1.5">
+              <span className="font-label-md text-label-md text-on-surface">Blood Group</span>
+              <div className="h-10 flex items-center bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-error font-bold gap-1.5">
                 <span className="material-symbols-outlined text-[18px]">water_drop</span>
                 {patient.blood_group || 'Not Specified'}
               </div>
@@ -246,51 +246,51 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 2: Contact Information */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">contact_phone</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Contact & Emergency</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Contact & Emergency</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Primary communication channels and emergency contacts.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-2">
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Primary Phone</span>
-              <div className="h-[42px] flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Primary Phone</span>
+              <div className="h-10 flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 <span className="material-symbols-outlined text-[18px] text-outline">call</span>
                 {patient.phone_number}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Email Address</span>
-              <div className="h-[42px] flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Email Address</span>
+              <div className="h-10 flex items-center gap-2 bg-canvas-bg rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 <span className="material-symbols-outlined text-[18px] text-outline">mail</span>
                 {patient.email || 'Not Provided'}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5 md:col-span-2">
-              <span className="font-label-lg text-label-lg text-brand-navy-deep">Physical Address</span>
-              <div className="min-h-[42px] flex items-center bg-canvas-bg rounded-lg px-4 py-2 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <span className="font-label-md text-label-md text-on-surface">Physical Address</span>
+              <div className="min-h-10 flex items-center bg-canvas-bg rounded-lg px-4 py-2 border border-border-subtle font-body-md text-body-md text-on-surface">
                 {patient.address || 'Not Provided'}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5 bg-error-container/20 p-space-md rounded-xl border border-error-container/50">
               <span className="font-label-lg text-label-lg text-error">Emergency Contact Name</span>
-              <div className="h-[42px] flex items-center bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <div className="h-10 flex items-center bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 {patient.contact_name || 'Not Provided'}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5 bg-error-container/20 p-space-md rounded-xl border border-error-container/50">
               <span className="font-label-lg text-label-lg text-error">Emergency Contact Phone</span>
-              <div className="h-[42px] flex items-center gap-2 bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <div className="h-10 flex items-center gap-2 bg-surface-card rounded-lg px-4 border border-border-subtle font-body-md text-body-md text-on-surface">
                 <span className="material-symbols-outlined text-[18px] text-error/70">call</span>
                 {patient.emergency_contact || 'Not Provided'}
               </div>
@@ -299,19 +299,19 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 2.1: Allergies */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-status-cancelled-bg text-status-cancelled-text flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">warning</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Allergies & Alerts</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Allergies & Alerts</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Known clinical allergies.</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 pt-2">
             {allergies.length > 0 ? allergies.map((alg: any) => (
-              <span key={alg.allergy_id || alg.name} className="px-3 py-1 bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border rounded-full font-label-sm text-[12px] flex items-center gap-1">
+              <span key={alg.allergy_id || alg.name} className="px-3 py-1 bg-status-cancelled-bg text-status-cancelled-text border border-status-cancelled-border rounded-full font-label-sm text-label-sm flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">dangerous</span>
                 {alg.name}
               </span>
@@ -320,14 +320,14 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 2.5: Recent Appointments */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">calendar_month</span>
             </div>
             <div className="flex-1 flex items-center justify-between">
               <div>
-                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Appointments</h2>
+                <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Recent Appointments</h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Past and upcoming visits for this patient.</p>
               </div>
               <button className="text-primary hover:text-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors">
@@ -350,11 +350,11 @@ export const PatientProfile: React.FC = () => {
                 {appointments.slice(0, 5).map((a: any) => (
                   <tr key={a.appointment_id} className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
                     <td className="py-3 px-4">
-                      <p className="font-body-md text-brand-navy-deep font-medium">{new Date(a.appointment_date).toLocaleDateString()}</p>
+                      <p className="font-body-md text-on-surface font-medium">{new Date(a.appointment_date).toLocaleDateString()}</p>
                       <p className="font-body-sm text-outline">{a.start_time} - {a.end_time}</p>
                     </td>
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{a.doctor_name}</td>
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{a.appointment_type}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface">{a.doctor_name}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface">{a.appointment_type}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-0.5 rounded-md font-label-sm text-[10px] uppercase tracking-wider border ${
                         a.status === 'Completed' ? 'bg-status-completed-bg text-status-completed-text border-status-completed-text/20' :
@@ -375,14 +375,14 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 2.6: Recent Invoices */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">receipt_long</span>
             </div>
             <div className="flex-1 flex items-center justify-between">
               <div>
-                <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Invoices</h2>
+                <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Recent Invoices</h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Billing history and payment status.</p>
               </div>
               <button onClick={() => navigate(`/receptionist/invoices?search=${patient.id_number}`)} className="text-primary hover:text-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors">
@@ -405,8 +405,8 @@ export const PatientProfile: React.FC = () => {
                 {invoices.slice(0, 5).map((inv: any) => (
                   <tr key={inv.invoice_id || inv.invoice_code} className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
                     <td className="py-3 px-4 font-mono-data text-primary font-bold">{inv.invoice_code}</td>
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{new Date(inv.created_at).toLocaleDateString()}</td>
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep text-right">LKR {inv.total_amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface">{new Date(inv.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface text-right">LKR {inv.total_amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-0.5 rounded-md font-label-sm text-[10px] uppercase tracking-wider border ${
                         inv.status === 'Paid' ? 'bg-status-completed-bg text-status-completed-text border-status-completed-text/20' :
@@ -427,13 +427,13 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 2.7: Payment History */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">payments</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Recent Payment History</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Recent Payment History</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Payments made across all invoices.</p>
             </div>
           </div>
@@ -450,8 +450,8 @@ export const PatientProfile: React.FC = () => {
               <tbody>
                 {payments.map((p, i) => (
                   <tr key={i} className="border-b border-border-subtle hover:bg-surface-subtle/50 transition-colors">
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{p.payment_date ? new Date(p.payment_date).toLocaleDateString() : 'N/A'}</td>
-                    <td className="py-3 px-4 font-body-md text-brand-navy-deep">{p.payment_type}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface">{p.payment_date ? new Date(p.payment_date).toLocaleDateString() : 'N/A'}</td>
+                    <td className="py-3 px-4 font-body-md text-on-surface">{p.payment_type}</td>
                     <td className="py-3 px-4 font-body-md text-status-completed-text font-bold text-right">
                       LKR {p.amount_paid?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
@@ -466,13 +466,13 @@ export const PatientProfile: React.FC = () => {
         </div>
 
         {/* SECTION 3: Account Balance & Health Insurance */}
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative border border-border-subtle">
+        <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
           <div className="flex items-center gap-space-md pb-space-md border-b border-border-subtle">
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]">verified_user</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">Billing & Insurance</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">Billing & Insurance</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Account standing and active health insurance policies.</p>
             </div>
           </div>
@@ -494,7 +494,7 @@ export const PatientProfile: React.FC = () => {
                     btn.innerText = 'Pending Integration';
                     setTimeout(() => { btn.innerText = originalText; }, 2000);
                   }}
-                  className="mt-space-lg w-full bg-surface-card border border-border-subtle font-label-md text-label-md px-4 py-2 rounded-lg text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors"
+                  className="mt-space-lg w-full bg-surface-card border border-border-subtle font-label-md text-label-md px-4 py-2 rounded-lg text-primary hover:bg-tertiary hover:text-on-primary-container transition-colors"
                 >
                   Pay Outstanding Balance
                 </button>
@@ -503,9 +503,9 @@ export const PatientProfile: React.FC = () => {
 
             {/* Insurance details */}
             <div className="lg:col-span-2 space-y-space-md">
-              <h4 className="font-label-lg text-label-lg text-brand-navy-deep flex items-center justify-between">
+              <h4 className="font-label-md text-label-md text-on-surface flex items-center justify-between">
                 Linked Policies
-                <span className="font-label-sm text-[11px] bg-canvas-bg px-2 py-0.5 rounded text-outline border border-border-subtle">{insurancePolicies.length} Active</span>
+                <span className="font-label-sm text-label-sm bg-canvas-bg px-2 py-0.5 rounded text-outline border border-border-subtle">{insurancePolicies.length} Active</span>
               </h4>
 
               {insurancePolicies.length === 0 ? (
@@ -521,8 +521,8 @@ export const PatientProfile: React.FC = () => {
                           <span className="material-symbols-outlined text-primary text-[20px]">shield</span>
                         </div>
                         <div>
-                          <p className="font-label-lg text-label-lg text-brand-navy-deep">{pol.provider_name} - <span className="font-body-md font-normal">{pol.policy_name}</span></p>
-                          <p className="font-mono-data text-[13px] text-outline mt-0.5">Card ID: {pol.insurance_card_number} • Valid: {pol.start_date} to {pol.end_date}</p>
+                          <p className="font-label-md text-label-md text-on-surface">{pol.provider_name} - <span className="font-body-md font-normal">{pol.policy_name}</span></p>
+                          <p className="font-mono-data text-body-sm text-outline mt-0.5">Card ID: {pol.insurance_card_number} • Valid: {pol.start_date} to {pol.end_date}</p>
                         </div>
                       </div>
                       <div className="shrink-0 self-start sm:self-auto">
@@ -543,7 +543,7 @@ export const PatientProfile: React.FC = () => {
 
               {/* Verify New Policy */}
               <div className="bg-canvas-bg p-space-md rounded-xl border border-border-subtle">
-                <h4 className="font-label-lg text-label-lg text-brand-navy-deep mb-4 flex items-center gap-2">
+                <h4 className="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px] text-primary">add_circle</span>
                   Register New Insurance Policy
                 </h4>
@@ -557,12 +557,12 @@ export const PatientProfile: React.FC = () => {
 
                 <form onSubmit={handleVerifyInsurance} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Select Policy</label>
+                    <label className="block font-label-sm text-label-sm text-on-surface mb-1 uppercase tracking-wider">Select Policy</label>
                     <select
                       required
                       value={policyId}
                       onChange={(e) => setPolicyId(e.target.value)}
-                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all appearance-none cursor-pointer"
                     >
                       <option value="">Select a policy...</option>
                       {cataloguePolicies.map(p => (
@@ -571,34 +571,34 @@ export const PatientProfile: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Insurance Card No.</label>
+                    <label className="block font-label-sm text-label-sm text-on-surface mb-1 uppercase tracking-wider">Insurance Card No.</label>
                     <input
                       type="text"
                       required
                       value={cardNumber}
                       onChange={(e) => setCardNumber(e.target.value)}
                       placeholder="e.g. SLIC-12345"
-                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all uppercase tracking-wider"
                     />
                   </div>
                   <div>
-                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Valid From</label>
+                    <label className="block font-label-sm text-label-sm text-on-surface mb-1 uppercase tracking-wider">Valid From</label>
                     <input
                       type="date"
                       required
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block font-label-sm text-[11px] text-brand-navy-deep mb-1 uppercase tracking-wider">Valid Until</label>
+                    <label className="block font-label-sm text-label-sm text-on-surface mb-1 uppercase tracking-wider">Valid Until</label>
                     <input
                       type="date"
                       required
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full bg-surface-card border border-border-subtle rounded-lg px-3 py-2 h-10 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
 
@@ -606,7 +606,7 @@ export const PatientProfile: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isVerifying}
-                      className="bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg h-10 px-6 rounded-xl shadow-sm transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg h-10 px-6 rounded-xl shadow-sm transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       <span className="material-symbols-outlined text-[18px]">verified</span>
                       {isVerifying ? 'Verifying...' : 'Verify & Link Policy'}
@@ -624,8 +624,8 @@ export const PatientProfile: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-brand-navy-deep/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-surface-card rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-border-subtle flex items-center justify-between">
-              <h2 className="text-xl font-bold text-brand-navy-deep">Edit Patient Details</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-outline hover:text-brand-navy-deep">
+              <h2 className="text-xl font-bold text-on-surface">Edit Patient Details</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-outline hover:text-on-surface">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -656,7 +656,7 @@ export const PatientProfile: React.FC = () => {
                   </div>
 
                   <div className="sm:col-span-2 pt-2 pb-1">
-                    <h3 className="text-sm font-bold text-brand-navy-deep border-b border-border-subtle pb-1">Emergency Contact Info</h3>
+                    <h3 className="text-sm font-bold text-on-surface border-b border-border-subtle pb-1">Emergency Contact Info</h3>
                   </div>
 
                   <div>
@@ -680,7 +680,7 @@ export const PatientProfile: React.FC = () => {
             </div>
             <div className="p-6 border-t border-border-subtle flex justify-end gap-3 bg-surface-container-low">
               <button onClick={() => setShowEditModal(false)} className="px-5 py-2 rounded-xl text-sm font-semibold text-secondary hover:bg-surface-subtle">Cancel</button>
-              <button form="edit-form" type="submit" disabled={isSaving} className="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50">
+              <button form="edit-form" type="submit" disabled={isSaving} className="px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-on-primary hover:bg-tertiary disabled:opacity-50">
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>

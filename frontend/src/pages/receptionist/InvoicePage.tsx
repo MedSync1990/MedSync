@@ -95,11 +95,11 @@ export default function InvoicePage() {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+    <div className="page-content">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -111,7 +111,7 @@ export default function InvoicePage() {
 
           {/* Title */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
               Invoices
             </h1>
           </div>
@@ -135,14 +135,14 @@ export default function InvoicePage() {
         {!invoiceId ? (
           <div className="w-full">
             {recentInvoices.length > 0 ? (
-              <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+              <div className="ui-card overflow-hidden">
                 {/* Section header — matches RegisterPatient card headers */}
-                <div className="flex items-center gap-space-md p-space-lg sm:p-space-xl pb-0">
+                <div className="flex items-center gap-space-md p-space-md md:p-space-lg pb-0">
                   <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                   </div>
                   <div>
-                    <h2 className="font-headline-md text-headline-md text-brand-navy-deep leading-tight">
+                    <h2 className="font-headline-md text-headline-md text-on-surface leading-tight">
                       Recent Unpaid Invoices
                     </h2>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
@@ -170,13 +170,13 @@ export default function InvoicePage() {
                           <td className="px-6 py-4 whitespace-nowrap font-body-sm text-body-sm text-on-surface-variant">
                             {new Date(inv.created_at).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap font-mono-data text-mono-data font-semibold text-brand-navy-deep">
+                          <td className="px-6 py-4 whitespace-nowrap font-mono-data text-mono-data font-semibold text-on-surface">
                             {inv.invoice_code}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-brand-navy-deep">
+                          <td className="px-6 py-4 whitespace-nowrap font-body-md text-body-md text-on-surface">
                             {inv.patient_name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right font-mono-data text-mono-data text-brand-navy-deep">
+                          <td className="px-6 py-4 whitespace-nowrap text-right font-mono-data text-mono-data text-on-surface">
                             Rs. {inv.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right font-mono-data text-mono-data font-semibold text-status-cancelled-text">
@@ -212,12 +212,12 @@ export default function InvoicePage() {
               </div>
             ) : (
               /* Empty state — matches RegisterPatient / UI guidelines §5 */
-              <div className="bg-surface-card rounded-xl border border-dashed border-border-subtle p-space-xl text-center flex flex-col items-center justify-center space-y-space-md shadow-sm">
+              <div className="ui-card border-dashed p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
                 <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[36px]">receipt_long</span>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-headline-md text-headline-md text-brand-navy-deep">
+                  <h3 className="font-headline-md text-headline-md text-on-surface">
                     Enter an Invoice Code or Patient NIC to Search
                   </h3>
                   <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
@@ -229,9 +229,9 @@ export default function InvoicePage() {
           </div>
         ) : loading ? (
           /* Loading state — matches UI guidelines §5 */
-          <div className="bg-surface-card rounded-xl shadow-sm p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
+          <div className="ui-card p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
             <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
-            <p className="font-label-lg text-label-lg text-brand-navy-deep">
+            <p className="font-label-md text-label-md text-on-surface">
               Loading invoice details…
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function InvoicePage() {
             <button
               type="button"
               onClick={() => navigate('/receptionist/invoices')}
-              className="inline-flex items-center gap-1.5 h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-10 px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Back to Invoices</span>

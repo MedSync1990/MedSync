@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .page-content {
+    @apply flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl;
+  }
+
+  .ui-card {
+    @apply bg-surface-card rounded-xl border border-border-subtle shadow-sm;
+  }
+}
+
 :root {
   --primary-color: #0f766e;
   --primary-dark: #115e59;
@@ -13,7 +23,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Roboto', sans-serif;
   background-color: var(--bg-color);
   color: #1e293b;
 }
