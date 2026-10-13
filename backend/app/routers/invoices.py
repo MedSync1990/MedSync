@@ -1,10 +1,12 @@
+import base64
+from pathlib import Path as FilePath
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
 from asyncpg import Connection
 from typing import Optional
 from app.db import get_conn
 from jinja2 import Environment, FileSystemLoader
-from app.dependencies import CurrentUser, require_roles, get_current_user
-from app.errors import NotFoundError, ConflictError, AppValidationError
+from app.dependencies import CurrentUser, require_roles
+from app.errors import NotFoundError, AppValidationError
 from app.schemas.invoices import (
     InvoiceDetailResponse,
     InvoiceLineItem,
@@ -17,7 +19,8 @@ from app.schemas.invoices import (
 )
 
 router = APIRouter()
-env = Environment(loader=FileSystemLoader('app/templates'))
+TEMPLATE_DIR = FilePath(__file__).resolve().parent.parent / 'templates'
+env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
 
 
 async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_type: str = "invoice"):
@@ -54,7 +57,6 @@ async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_
         JOIN app_user du ON s.user_id = du.user_id
         JOIN branch b ON s.branch_id = b.branch_id
         LEFT JOIN patient_insurance pi ON p.user_id = pi.patient_id
-        LEFT JOIN insurance_policy_details ipd ON pi.policy_id = ipd.policy_id
         WHERE (
             ($4::text = 'invoice' AND (
                 ($1::boolean AND i.invoice_id = $2::int)
@@ -353,9 +355,12 @@ async def download_invoice_pdf(
         })
 
     # 5. Load the template and fill in the REAL data
-    from pathlib import Path
-    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
-    logo_uri = logo_path.as_uri()
+    logo_path = FilePath(__file__).resolve().parent.parent / "templates" / "report_logo.png"
+    try:
+        logo_bytes = logo_path.read_bytes()
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail="Invoice logo is unavailable.") from exc
+    logo_uri = "data:image/png;base64," + base64.b64encode(logo_bytes).decode("ascii")
 
     template = env.get_template("invoice_template.html")
     rendered_html = template.render(
