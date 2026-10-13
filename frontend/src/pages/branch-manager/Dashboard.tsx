@@ -85,13 +85,12 @@ export default function BranchManagerDashboard() {
     </DashboardWelcome>
 
     {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-space-md font-body-md text-body-md text-rose-800">{stats ? 'Showing the last available overview. ' : ''}{error} The dashboard will retry automatically.</div>}
-    {loading && !stats ? <div role="status" className="grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className={`${card} h-40 animate-pulse bg-slate-100`} />)}<span className="sr-only">Loading dashboard</span></div> : stats && <>
-      <section aria-label="Branch overview statistics" className="grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    {loading && !stats ? <div role="status" className="grid grid-cols-1 gap-space-md md:grid-cols-3">{Array.from({ length: 3 }, (_, index) => <div key={index} className={`${card} h-40 animate-pulse bg-slate-100`} />)}<span className="sr-only">Loading dashboard</span></div> : stats && <>
+      <section aria-label="Branch overview statistics" className="grid grid-cols-1 gap-space-md md:grid-cols-3">
         {[
           { label: 'Active Patients', context: 'Assigned branch', value: stats.total_patients, icon: 'groups', detail: 'Active patients registered at this branch' },
           { label: 'Active Doctors', context: 'Medical roster', value: stats.total_doctors, icon: 'stethoscope', detail: Array.from(specialtyGroups.keys()).join(', ') || 'Active physicians assigned to this branch' },
           { label: 'Branch Staff', context: 'Workforce headcount', value: stats.total_staff, icon: 'badge', detail: 'Active staff profiles, including physicians' },
-          { label: 'Clinical Rooms', context: 'Facility capacity', value: null, icon: 'meeting_room', detail: 'Room capacity is not tracked by the system' },
         ].map(item => <article key={item.label} className={`${card} flex min-h-[180px] flex-col justify-between p-space-md hover:shadow-md transition-shadow`}><div className="flex items-start justify-between gap-space-xs"><div><p className="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-secondary">{item.context}</p><h2 className="mt-space-2xs font-headline-sm text-headline-sm text-on-surface">{item.label}</h2></div><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-primary"><Icon name={item.icon} className="text-2xl" /></div></div><p className="mt-space-md font-display-lg text-display-lg text-on-surface tabular-nums">{item.value === null ? 'Not tracked' : item.value.toLocaleString()}</p><p className="font-body-sm text-body-sm leading-relaxed text-secondary">{item.detail}</p></article>)}
       </section>
       <section className={`${card} p-space-md`} aria-label="Today's appointment progress">
@@ -113,14 +112,6 @@ export default function BranchManagerDashboard() {
       </section>
       <aside className="flex flex-col gap-space-lg lg:col-span-4">
         <section className={`${card} p-space-md`}><div className="mb-5 flex items-center justify-between gap-space-xs"><h2 className="font-headline-sm text-headline-sm text-on-surface">Physician Allocation</h2><span className="font-body-sm text-body-sm font-semibold text-primary">{doctorError ? 'Unavailable' : `${doctors.length} active`}</span></div>{doctorError ? <p role="alert" className="font-body-md text-body-md text-rose-800">{doctorError}</p> : loading ? <p className="font-body-md text-body-md text-secondary">Loading roster…</p> : !doctors.length ? <p className="font-body-md text-body-md text-secondary">No active physicians assigned.</p> : <div className="flex flex-col gap-space-sm">{Array.from(specialtyGroups.entries()).map(([specialty, members]) => <div key={specialty} className="flex items-center justify-between gap-space-sm rounded-lg bg-surface p-2.5"><div className="flex min-w-0 items-center gap-space-xs"><Icon name="medical_services" className="rounded-lg bg-sky-100 p-space-xs text-xl text-primary" /><div className="min-w-0"><h3 className="font-body-md text-body-md font-semibold text-brand-navy-deep">{specialty}</h3><p className="mt-space-2xs font-body-sm text-body-sm text-secondary">{members[0].full_name}{members.length > 1 ? ` + ${members.length - 1}` : ''}</p></div></div><span className="shrink-0 font-body-sm text-body-sm font-medium text-secondary">{members.length} {members.length === 1 ? 'doctor' : 'doctors'}</span></div>)}</div>}<Link to="/branch-manager/doctors" className={`${action} mt-5 w-full bg-surface-container-low text-primary hover:bg-surface-container`}>Doctor Rosters & Specialties</Link></section>
-        <section className={`${card} p-space-md`}>
-          <div className="mb-space-md flex items-center gap-space-xs"><Icon name="shield" className="text-xl text-primary" /><h2 className="font-headline-sm text-headline-sm text-on-surface">Facility Readiness</h2></div>
-          <dl className="flex flex-col gap-space-sm font-body-sm text-body-sm">
-            {['Pharmacy Stock Audit', 'Lab Specimen Dispatch', 'Billing Counter Terminals', 'Emergency Response Room'].map(label => <div key={label} className="flex items-start justify-between gap-space-sm"><dt className="text-secondary">{label}</dt><dd className="shrink-0 font-medium text-secondary">Not tracked</dd></div>)}
-          </dl>
-          <p className="mt-space-md font-body-sm text-body-sm leading-relaxed text-secondary">Facility checks are not recorded in the current backend.</p>
-          <div className="mt-space-md flex items-center justify-between border-t border-surface-container-high pt-space-sm"><span className="font-label-sm text-label-sm uppercase tracking-wide text-secondary">Branch ID</span><span className="font-mono-data text-mono-data font-semibold text-on-surface">{user?.branchId ?? 'Unavailable'}</span></div>
-        </section>
       </aside>
     </div>
   </div>;
