@@ -1,4 +1,6 @@
 # MedSync CATMS — UI Guidelines
+> Updated 2026-10-13: design guidance checked against the current shared shell. Layout rules remain design guidance where individual pages differ.
+
 Based on SRS §3.1 and the reference screenshot (Book Appointment page). This is the contract
 every page must follow so the app feels like one product, not five students' separate pages.
 
@@ -7,9 +9,8 @@ every page must follow so the app feels like one product, not five students' sep
 - **Left sidebar**, collapsible, grouped by section headers (not a flat list):
   `PATIENTS`, `APPOINTMENTS`, `BILLING & PAYMENTS`, etc. — matches the reference screenshot.
   Logo + product name pinned at top; `Settings`, `Help Center`, `Logout` pinned at bottom.
-- **Top bar**: notifications bell, theme toggle, branch/location indicator, "Good
-  morning/afternoon, {first name}" + role/branch subtitle, avatar.
-- **Breadcrumbs** under the top bar on any page nested more than one level deep.
+- **Top bar**: sidebar toggle, time-based greeting, branch indicator for non-Administrators, and profile link with name/role/avatar. Notification bell and theme toggle are not implemented.
+- **Breadcrumbs**: a design convention for nested pages; the current shared top bar does not provide a global breadcrumb control.
 - **Content area**: white cards on a light-grey page background, each card with a clear section
   header. Multi-step forms (like Book Appointment) use numbered circular badges (1, 2, 3…) per
   section — reuse this pattern for any multi-step flow (registration, invoice generation).

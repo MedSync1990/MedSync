@@ -1,5 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Cleared Vite default styles to allow Tailwind configuration in index.html to control fonts and layout */

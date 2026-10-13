@@ -1075,9 +1075,11 @@ async def outstanding_balances_pdf(
     if aging not in ("all", "0-30", "31-60", "60+"):
         raise HTTPException(status_code=422, detail="Invalid aging filter.")
     report = await get_outstanding_balances(branch_id, current_user, conn)
-    q = search.lower().strip()
+    terms = search.lower().split()
     items = [r for r in report.data if
-             (not q or any(q in str(v).lower() for v in (r.patient_name, r.patient_id, r.invoice_id))) and
+             all(term in " ".join(str(v).lower() for v in
+                 (r.patient_name, r.patient_id, f"PT-{r.patient_id:06d}", r.invoice_id))
+                 for term in terms) and
              (aging == "all" or aging == ("0-30" if r.aging_days <= 30 else "31-60" if r.aging_days <= 60 else "60+"))]
     sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status"), ("patient_id", "Patient ID"), ("last_payment_date", "Last payment")])]
     return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])

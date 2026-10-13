@@ -2,13 +2,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { DoctorRosterModal } from '../../components/DoctorRosterModal';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export const DoctorSchedule: React.FC = () => {
+  useDocumentTitle('Doctor Schedule');
   const [activeTab, setActiveTab] = useState<'all' | 'remaining' | 'waiting' | 'upcoming' | 'completed'>('remaining');
   const [currentDateIndex, setCurrentDateIndex] = useState(1); // 1 = Today (Thursday)
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showRosterModal, setShowRosterModal] = useState(false);
+  const { user } = useAuth();
 
   const dates = useMemo(() => {
     const today = new Date();
@@ -66,7 +72,15 @@ export const DoctorSchedule: React.FC = () => {
           <span className="text-brand-navy-deep font-semibold">My Schedule</span>
         </nav>
         <div className="flex items-center gap-space-xs">
-          <span className="text-secondary font-mono-data text-mono-data hidden lg:inline-block">Sync: 10:14 AM IST</span>
+          <button
+            type="button"
+            onClick={() => setShowRosterModal(true)}
+            className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-brand-navy-deep transition-all shadow-sm flex items-center gap-1.5"
+            title="Edit Recurring Working Hours"
+          >
+            <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+            <span>Edit My Weekly Roster</span>
+          </button>
         </div>
       </div>
 
@@ -477,6 +491,14 @@ export const DoctorSchedule: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Doctor Weekly Working Roster Modal */}
+      <DoctorRosterModal
+        isOpen={showRosterModal}
+        doctorId={user?.id ?? null}
+        doctorName={user?.firstName ? `Dr. ${user.firstName} ${user.lastName || ''}` : 'My Schedule'}
+        onClose={() => setShowRosterModal(false)}
+      />
     </div>
   );
 };

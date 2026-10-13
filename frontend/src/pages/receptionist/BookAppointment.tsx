@@ -4,6 +4,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Modal } from '../../components/Modal';
 import { LoadingState } from '../../components/LoadingState';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { appointmentService } from '../../services/appointmentService';
 import { patientService } from '../../services/patientService';
 import { get } from '../../services/api';
@@ -72,6 +73,10 @@ function checkTimeOverlap(start1: string, end1: string, start2: string, end2: st
 export const BookAppointment: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const isReceptionist = user?.role === 'Receptionist';
+  const userBranchId = user?.branchId;
+  const userBranchName = user?.branchName;
 
   // ─── Step 1: Category State ────────────────────────────────────────────────
   const [category, setCategory] = useState<AppointmentType>('Scheduled Visit');
@@ -106,9 +111,11 @@ export const BookAppointment: React.FC = () => {
 
     setCreatingQuickPatient(true);
     try {
-      const branchIdNum = selectedBranch && selectedBranch !== 'All' && !isNaN(parseInt(selectedBranch, 10))
-        ? parseInt(selectedBranch, 10)
-        : selectedDoctor?.branch_id;
+      const branchIdNum = (isReceptionist && userBranchId)
+        ? userBranchId
+        : (selectedBranch && selectedBranch !== 'All' && !isNaN(parseInt(selectedBranch, 10))
+          ? parseInt(selectedBranch, 10)
+          : selectedDoctor?.branch_id);
 
       const res = await patientService.quickCreate({
         first_name: quickForm.first_name.trim(),
@@ -149,6 +156,16 @@ export const BookAppointment: React.FC = () => {
   const [allDoctors, setAllDoctors] = useState<DoctorResponse[]>([]);
   const [allBranches, setAllBranches] = useState<BranchResponse[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>('All');
+
+  // Resolved branch name for the current logged in receptionist
+  const effectiveUserBranchName = useMemo(() => {
+    if (userBranchName) return userBranchName;
+    if (userBranchId && allBranches.length > 0) {
+      const found = allBranches.find((b) => b.branch_id === userBranchId);
+      if (found) return found.name;
+    }
+    return '';
+  }, [userBranchName, userBranchId, allBranches]);
   const [allSpecialties, setAllSpecialties] = useState<SpecialtyResponse[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('All');
   const [doctorSearch, setDoctorSearch] = useState('');
@@ -201,15 +218,15 @@ export const BookAppointment: React.FC = () => {
       setLoadingDoctors(true);
       try {
         const [docsRes, specsRes, branchesRes] = await Promise.all([
-          get<DoctorResponse[]>('/doctors').catch(() => []),
+          get<DoctorResponse[]>('/doctors?is_active=true').catch(() => []),
           get<SpecialtyResponse[]>('/specialties').catch(() => []),
-          get<BranchResponse[]>('/branches').catch(() => []),
+          get<BranchResponse[]>('/branches?is_active=true').catch(() => []),
         ]);
-        setAllDoctors(docsRes || []);
+        setAllDoctors((docsRes || []).filter((d) => d.is_active !== false));
         setAllSpecialties(specsRes || []);
 
         if (branchesRes && branchesRes.length > 0) {
-          setAllBranches(branchesRes);
+          setAllBranches(branchesRes.filter((b) => b.is_active !== false));
         } else if (docsRes && docsRes.length > 0) {
           // Derive fallback branches from doctors list
           const unique = Array.from(new Set(docsRes.map((d) => d.branch_name).filter(Boolean)));
@@ -285,6 +302,32 @@ export const BookAppointment: React.FC = () => {
     }
   }, [searchParams, location.state, showToast]);
 
+  // ─── Category Selection with Receptionist Walk-in Branch Lock ──────────────
+  const handleSelectCategory = (newCat: AppointmentType) => {
+    setCategory(newCat);
+    if (newCat === 'Walk-in' && isReceptionist && (effectiveUserBranchName || userBranchId)) {
+      const targetBranch = effectiveUserBranchName || String(userBranchId);
+      setSelectedBranch(targetBranch);
+      if (selectedDoctor) {
+        const docInBranch =
+          (userBranchId && selectedDoctor.branch_id === userBranchId) ||
+          (effectiveUserBranchName && selectedDoctor.branch_name?.toLowerCase() === effectiveUserBranchName.toLowerCase());
+        if (!docInBranch) {
+          setSelectedDoctor(null);
+          setSelectedSlot(null);
+        }
+      }
+    }
+  };
+
+  // Pre-select Walk-in category if URL specifies type=walk-in
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam?.toLowerCase() === 'walk-in' || typeParam?.toLowerCase() === 'walkin') {
+      handleSelectCategory('Walk-in');
+    }
+  }, [searchParams, isReceptionist, effectiveUserBranchName, userBranchId]);
+
   // ─── Patient Search Functions ──────────────────────────────────────────────
   const searchPatients = async (query?: string) => {
     setSearchingPatients(true);
@@ -336,7 +379,17 @@ export const BookAppointment: React.FC = () => {
   // ─── Filtered Doctors ──────────────────────────────────────────────────────
   const filteredDoctors = useMemo(() => {
     return allDoctors.filter((doc) => {
+      if (doc.is_active === false) return false;
       const docName = doc.full_name;
+
+      // Receptionists can only see/book doctors for their own branch in Quick Walk-ins
+      if (category === 'Walk-in' && isReceptionist && (userBranchId || effectiveUserBranchName)) {
+        const docInBranch =
+          (userBranchId && doc.branch_id === userBranchId) ||
+          (effectiveUserBranchName && doc.branch_name?.toLowerCase() === effectiveUserBranchName.toLowerCase());
+        if (!docInBranch) return false;
+      }
+
       const matchesBranch =
         selectedBranch === 'All' ||
         doc.branch_name?.toLowerCase() === selectedBranch.toLowerCase() ||
@@ -353,7 +406,7 @@ export const BookAppointment: React.FC = () => {
 
       return matchesBranch && matchesSpecialty && matchesSearch;
     });
-  }, [allDoctors, selectedBranch, selectedSpecialty, doctorSearch]);
+  }, [allDoctors, selectedBranch, selectedSpecialty, doctorSearch, category, isReceptionist, userBranchId, effectiveUserBranchName]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleSelectPatient = (patient: PatientListItem) => {
@@ -376,6 +429,10 @@ export const BookAppointment: React.FC = () => {
   };
 
   const handleExecuteBooking = async () => {
+    if (selectedDate < todayStr) {
+      showToast('Appointments cannot be booked for past dates.', 'error');
+      return;
+    }
     if (!selectedPatient) {
       showToast('Please search and select a patient first.', 'error');
       return;
@@ -386,6 +443,15 @@ export const BookAppointment: React.FC = () => {
     }
 
     if (category === 'Walk-in') {
+      if (isReceptionist && (userBranchId || effectiveUserBranchName)) {
+        const docInBranch =
+          (userBranchId && selectedDoctor.branch_id === userBranchId) ||
+          (effectiveUserBranchName && selectedDoctor.branch_name?.toLowerCase() === effectiveUserBranchName.toLowerCase());
+        if (!docInBranch) {
+          showToast('Quick walk-in appointments can only be booked for doctors at your own branch.', 'error');
+          return;
+        }
+      }
       if (!walkInStartTime || !walkInEndTime) {
         showToast('Please enter both start time and end time for the walk-in appointment.', 'error');
         return;
@@ -480,7 +546,8 @@ export const BookAppointment: React.FC = () => {
   };
 
   const isReadyToConfirm =
-    category === 'Walk-in'
+    selectedDate >= todayStr &&
+    (category === 'Walk-in'
       ? Boolean(
         selectedPatient &&
         selectedDoctor &&
@@ -489,7 +556,7 @@ export const BookAppointment: React.FC = () => {
         walkInEndTime > walkInStartTime &&
         !conflictingSlot
       )
-      : Boolean(selectedPatient && selectedDoctor && selectedSlot);
+      : Boolean(selectedPatient && selectedDoctor && selectedSlot));
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -547,7 +614,7 @@ export const BookAppointment: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             {/* 1. Scheduled Visit */}
             <label
-              onClick={() => setCategory('Scheduled Visit')}
+              onClick={() => handleSelectCategory('Scheduled Visit')}
               className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Scheduled Visit'
                 ? 'border-primary bg-status-scheduled-bg/30'
                 : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
@@ -578,7 +645,7 @@ export const BookAppointment: React.FC = () => {
 
             {/* 2. Walk-in */}
             <label
-              onClick={() => setCategory('Walk-in')}
+              onClick={() => handleSelectCategory('Walk-in')}
               className={`relative flex flex-col p-space-md rounded-xl border-2 cursor-pointer shadow-sm transition-all ${category === 'Walk-in'
                 ? 'border-primary bg-status-scheduled-bg/30'
                 : 'border-border-subtle bg-surface-card hover:bg-surface-subtle/50'
@@ -891,8 +958,17 @@ export const BookAppointment: React.FC = () => {
               </button>
               <input
                 type="date"
+                min={todayStr}
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val && val < todayStr) {
+                    showToast('Appointments cannot be booked for past dates.', 'error');
+                    setSelectedDate(todayStr);
+                    return;
+                  }
+                  setSelectedDate(val);
+                }}
                 className="h-[32px] px-2 text-label-sm font-semibold bg-surface-subtle border border-border-subtle rounded-md text-brand-navy-deep focus:outline-none focus:border-primary"
               />
             </div>
@@ -916,42 +992,68 @@ export const BookAppointment: React.FC = () => {
 
           {/* Clinic Branches Filter Pills */}
           <div className="space-y-1.5">
-            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block font-semibold">
-              Clinic Branch
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedBranch('All')}
-                className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch === 'All'
-                  ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
-                  : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
-                  }`}
-              >
-                <span className="material-symbols-outlined text-[15px]">apartment</span>
-                <span>All Branches</span>
-                {selectedBranch === 'All' && (
-                  <span className="material-symbols-outlined text-[14px]">check</span>
-                )}
-              </button>
-              {allBranches.map((b) => (
+            <div className="flex items-center justify-between">
+              <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider block font-semibold">
+                Clinic Branch
+              </label>
+              {category === 'Walk-in' && isReceptionist && (effectiveUserBranchName || userBranchId) && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-[11px] font-bold border border-brand-teal-light/40 shadow-2xs">
+                  <span className="material-symbols-outlined text-[13px]">lock</span>
+                  Locked to your branch for Quick Walk-ins
+                </span>
+              )}
+            </div>
+
+            {category === 'Walk-in' && isReceptionist && (effectiveUserBranchName || userBranchId) ? (
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  key={b.branch_id}
                   type="button"
-                  onClick={() => setSelectedBranch(b.name)}
-                  className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch.toLowerCase() === b.name.toLowerCase()
+                  disabled
+                  className="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm font-semibold bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text flex items-center gap-1.5 shadow-2xs cursor-default"
+                >
+                  <span className="material-symbols-outlined text-[15px]">location_on</span>
+                  <span>{effectiveUserBranchName || `Branch #${userBranchId}`} (Your Branch)</span>
+                  <span className="material-symbols-outlined text-[14px]">check</span>
+                </button>
+                <span className="text-[12px] text-outline font-body-sm italic">
+                  Quick walk-ins are restricted to doctors in your physical branch.
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedBranch('All')}
+                  className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch === 'All'
                     ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
                     : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
                     }`}
                 >
-                  <span className="material-symbols-outlined text-[15px]">location_on</span>
-                  <span>{b.name} Branch</span>
-                  {selectedBranch.toLowerCase() === b.name.toLowerCase() && (
+                  <span className="material-symbols-outlined text-[15px]">apartment</span>
+                  <span>All Branches</span>
+                  {selectedBranch === 'All' && (
                     <span className="material-symbols-outlined text-[14px]">check</span>
                   )}
                 </button>
-              ))}
-            </div>
+                {allBranches.filter((b) => b.is_active !== false).map((b) => (
+                  <button
+                    key={b.branch_id}
+                    type="button"
+                    onClick={() => setSelectedBranch(b.name)}
+                    className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all flex items-center gap-1 ${selectedBranch.toLowerCase() === b.name.toLowerCase()
+                      ? 'bg-status-scheduled-bg border border-brand-teal-light/40 text-status-scheduled-text'
+                      : 'bg-surface border border-border-subtle text-secondary hover:text-brand-navy-deep'
+                      }`}
+                  >
+                    <span className="material-symbols-outlined text-[15px]">location_on</span>
+                    <span>{b.name} Branch</span>
+                    {selectedBranch.toLowerCase() === b.name.toLowerCase() && (
+                      <span className="material-symbols-outlined text-[14px]">check</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Clinical Departments / Specialties Filter Pills */}

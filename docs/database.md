@@ -1,37 +1,10 @@
 # MedSync CATMS — Database Design & Implementation (PostgreSQL 16)
 
-Source of truth for columns/relationships: the group ER diagram, reproduced in `architecture.md`
-§6. Source of truth for security requirements: the security-rules prompt supplied alongside this
-request. Where I diverged from a literal reading of either source, it's called out inline with a
-short reason — never silently.
+> Updated 2026-10-13: this document contains detailed design SQL and reasoning. Current `db/modules/**/*.sql` definitions are the repository implementation reference; deployed database objects and grants were not inspected. Do not treat design snippets as proof of live enforcement.
 
----
+## 0. Current consultation flow
 
-## 0. Reconciliation note — read this before the rest
-
-`api-routes.md` §6.1 (as revised) allows `POST /appointments/{id}/treatments` to be called while
-an appointment is still `Scheduled`, to match the single-screen Consultation UI in
-`page-content.md` §2.3. **This database design does not implement that.** The original
-`database.md` draft's own rule — *"treatments/consultation notes only on `Completed`
-appointments," enforced by a trigger* — is what I've built here, for two reasons:
-
-1. `fn_complete_appointment()` below (§7) already takes diagnosis, notes, **and** the full
-   treatment list as one call and does the status flip + consultation insert + treatment inserts
-   + invoice generation together, atomically. That already matches the "one Complete Appointment
-   button" UX — the button's click is one function call, not three sequential writes.
-2. A hard DB-level trigger enforcing "no treatment rows against a non-`Completed` appointment" is
-   real defense-in-depth (FR-DMI-06): even a backend bug or a compromised app role can't create
-   billing-relevant clinical data against an appointment nobody actually completed.
-
-**Net effect: `api-routes.md`'s `POST /appointments/{id}/treatments` and `POST
-/appointments/{id}/consultation` as separate pre-completion writes won't work against this
-schema** — the trigger will reject them. If you want the incremental-picker behavior kept, tell
-me and I'll either (a) relax the trigger to allow writes while `Scheduled` and only forbid writes
-once `Completed`+invoiced (mirroring what I did in `api-routes.md` §6.1), or (b) fold those two
-routes into one `PUT /appointments/{id}/complete` that takes notes+diagnosis+treatments in a
-single request body, matching this schema exactly. I'd lean toward (b) — it's a closer match to
-the actual UI (one button, one moment of commit) and it's the only version that gets the full
-ACID guarantee in one shot.
+The earlier design conflict is resolved in code: the frontend keeps notes, diagnosis, and selected treatments in local state and submits one `PUT /appointments/{id}/complete` request. The backend calls `fn_complete_appointment` to change status and create consultation/treatment/invoice records together. Separate pre-completion consultation/treatment POST routes are not implemented. Review the actual SQL modules for the current function and guard-trigger definitions.
 
 ---
 
@@ -1374,7 +1347,7 @@ Working through the checklist from the security-rules prompt:
 ## 14. Not determined from the current documents
 
 - Exact login-lockout threshold and lockout duration (placeholders used in §7.11).
-- JWT expiry/refresh mechanics (affects nothing in this file directly, but session-context in §4
+- JWT expiry defaults to 60 minutes; no refresh endpoint is implemented (session-context in §4
   is only as trustworthy as the JWT verification that precedes it).
 - Whether a genuinely unreferenced branch/staff/treatment row may ever be hard-deleted by a DBA
   outside the app (the trigger in §7.10 blocks it unconditionally; relax it manually if wanted).
