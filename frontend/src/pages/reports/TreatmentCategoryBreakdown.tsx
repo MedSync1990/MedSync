@@ -67,6 +67,7 @@ export default function TreatmentCategoryBreakdownReport() {
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
       alert('Failed to generate PDF');
@@ -316,10 +317,6 @@ export default function TreatmentCategoryBreakdownReport() {
               <span className="material-symbols-outlined text-primary text-[20px]">info</span>
               <span className="font-body-sm text-body-sm text-on-surface">Diagnostic turnover matches the Q3 target (94.2% within standard turnaround).</span>
             </div>
-            <button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="font-label-sm text-label-sm text-primary hover:underline shrink-0 flex items-center gap-1" type="button">
-              {isDownloadingPdf ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : null}
-              {isDownloadingPdf ? 'Generating...' : 'Download Audit PDF'}
-            </button>
           </div>
         </div>
       </div>
@@ -336,10 +333,16 @@ export default function TreatmentCategoryBreakdownReport() {
               <p className="font-body-sm text-body-sm text-on-surface-variant">Procedure frequency, demand share and revenue</p>
             </div>
           </div>
-          <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-            {isExporting ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
-            {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export CSV'}
-          </button>
+          <div className="flex flex-wrap items-center gap-space-sm">
+            <button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 disabled:opacity-50" type="button">
+              <span className={`material-symbols-outlined text-[16px] ${isDownloadingPdf ? 'animate-spin' : ''}`}>{isDownloadingPdf ? 'sync' : 'picture_as_pdf'}</span>
+              {isDownloadingPdf ? 'Generating...' : 'Export PDF'}
+            </button>
+            <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
+              {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export CSV'}
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className={`w-full text-left border-collapse ${hasData ? '' : 'hidden'}`}>
