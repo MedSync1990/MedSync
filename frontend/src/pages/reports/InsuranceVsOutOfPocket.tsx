@@ -463,9 +463,6 @@ export function InsuranceVsOutOfPocket() {
           </div>
           <div className="flex items-center justify-between mt-auto">
             <span className="font-body-sm text-body-sm text-secondary">Chief Cashier: R. Perera</span>
-            <button className="text-primary font-label-md text-label-md hover:underline flex items-center gap-1" type="button">
-              View Cashier Logs<span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </button>
           </div>
         </div>
       </div>
