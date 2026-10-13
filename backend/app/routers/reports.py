@@ -228,6 +228,7 @@ async def get_outstanding_balances(
             a.patient_id,
             u.first_name || ' ' || u.last_name as patient_name,
             c.phone_number as contact_number,
+            b.name as branch_name,
             i.total_amount,
             (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
             (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
@@ -238,16 +239,19 @@ async def get_outstanding_balances(
         JOIN appointments a ON i.appointment_id = a.appointment_id
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
+        JOIN branch b ON s.branch_id = b.branch_id
         JOIN app_user u ON a.patient_id = u.user_id
-        LEFT JOIN (
-            SELECT user_id, phone_number,
-                   ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY contact_id ASC) as rn
+        LEFT JOIN LATERAL (
+            SELECT phone_number
             FROM contact
-        ) c ON u.user_id = c.user_id AND c.rn = 1
+            WHERE user_id = u.user_id
+            ORDER BY contact_id ASC
+            LIMIT 1
+        ) c ON TRUE
         LEFT JOIN payments p ON i.invoice_id = p.invoice_id
         WHERE i.status != 'Paid'
           AND ($1::int IS NULL OR s.branch_id = $1)
-        GROUP BY i.invoice_code, a.patient_id, u.first_name, u.last_name, c.phone_number, i.total_amount, i.insurance_amount, i.created_at, i.status
+        GROUP BY i.invoice_code, a.patient_id, u.first_name, u.last_name, c.phone_number, b.name, i.total_amount, i.insurance_amount, i.created_at, i.status
         HAVING (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) > 0
         ORDER BY aging_days DESC
     """
@@ -259,6 +263,7 @@ async def get_outstanding_balances(
             patient_id=r["patient_id"],
             patient_name=r["patient_name"],
             contact_number=r["contact_number"] or "N/A",
+            branch_name=r["branch_name"],
             total_amount=float(r["total_amount"]),
             paid_amount=float(r["paid_amount"]),
             due_amount=float(r["due_amount"]),
@@ -335,7 +340,8 @@ async def get_treatment_categories_pdf(
     import weasyprint
     from jinja2 import Environment, FileSystemLoader
     from datetime import datetime
-    import os
+    from pathlib import Path
+    from starlette.concurrency import run_in_threadpool
     
     actual_branch_id = get_effective_branch_id(current_user, branch_id)
     if actual_branch_id == 1:
@@ -428,8 +434,9 @@ async def get_treatment_categories_pdf(
         f"Financially, the highest earning procedure was <strong>{top_revenue_name}</strong>, contributing LKR {top_revenue_amount:,.2f} to the bottom line."
     )
     
-    from pathlib import Path
-    logo_path = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    # Keep report assets inside app/, which is copied into the production image.
+    template_dir = Path(__file__).resolve().parent.parent / "templates"
+    logo_path = template_dir / "report_logo.png"
     logo_uri = logo_path.as_uri()
 
     template_data = {
@@ -447,11 +454,13 @@ async def get_treatment_categories_pdf(
         "logo_url": logo_uri
     }
     
-    env = Environment(loader=FileSystemLoader("app/templates"))
+    env = Environment(loader=FileSystemLoader(str(template_dir)))
     template = env.get_template("treatment_report_template.html")
     html_string = template.render(**template_data)
     
-    pdf_bytes = weasyprint.HTML(string=html_string).write_pdf()
+    pdf_bytes = await run_in_threadpool(
+        lambda: weasyprint.HTML(string=html_string, base_url=str(template_dir)).write_pdf()
+    )
     
     return Response(
         content=pdf_bytes, 
@@ -702,6 +711,111 @@ async def get_doctor_payouts(
 
     data = [PayoutHistoryItem(**dict(r)) for r in records]
     return PayoutHistoryResponse(data=data)
+
+@router.get("/doctor-earnings/{target_doctor_id}/payouts/{payout_id}/pdf")
+@router.get("/doctor-payouts/{payout_id}/pdf")
+async def download_doctor_payout_slip(
+    payout_id: int,
+    target_doctor_id: Optional[int] = None,
+    current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+    conn: Connection = Depends(get_conn)
+):
+    from pathlib import Path
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from starlette.concurrency import run_in_threadpool
+    from datetime import timedelta
+    import weasyprint
+
+    query = """
+    SELECT 
+        p.payout_id,
+        p.user_id,
+        p.request_id,
+        p.account_id,
+        p.amount_paid,
+        p.payment_reference,
+        p.payment_method,
+        p.payment_date,
+        u.first_name,
+        u.middle_name,
+        u.last_name,
+        u.address AS doctor_address,
+        u.email AS doctor_email,
+        d.license_number,
+        b.bank_name,
+        b.account_number,
+        b.branch_name AS bank_branch_name,
+        r.remarks,
+        r.request_date,
+        br.name AS branch_name,
+        br.address AS branch_address,
+        br.phone_number AS branch_phone
+    FROM staff_payouts p
+    JOIN staff s ON p.user_id = s.user_id
+    JOIN app_user u ON s.user_id = u.user_id
+    LEFT JOIN doctor d ON s.user_id = d.user_id
+    LEFT JOIN staff_bank_accounts b ON p.account_id = b.account_id
+    LEFT JOIN staff_payout_requests r ON p.request_id = r.request_id
+    LEFT JOIN branch br ON s.branch_id = br.branch_id
+    WHERE p.payout_id = $1
+    """
+    row = await conn.fetchrow(query, payout_id)
+    if not row:
+        raise NotFoundError(f"Payout #{payout_id} not found.")
+
+    doctor_user_id = row["user_id"]
+    if target_doctor_id is not None and target_doctor_id != doctor_user_id:
+        raise NotFoundError("Payout does not match target doctor.")
+
+    if current_user.role == "Doctor" and current_user.user_id != doctor_user_id:
+        raise ForbiddenError("Doctors can only download their own payout slips.")
+
+    payment_date = row["payment_date"]
+    issued_date = payment_date.strftime("%d %B %Y")
+
+    slip_no = f"MS-PS-{payment_date.year}-{row['payout_id']:04d}"
+    doctor_name = f"Dr. {row['first_name']} {row['last_name']}".strip()
+    license_no = row['license_number'] or "000000"
+    reg_no = license_no if license_no.startswith("SLMC") else f"SLMC-{license_no}"
+
+    bank_name_str = row['bank_name'] or "Commercial Bank, Anuradhapura"
+    if row['bank_branch_name']:
+        bank_name_str += f", {row['bank_branch_name']}"
+
+    template_dir = Path(__file__).resolve().parents[1] / "templates"
+    env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=select_autoescape(["html"]))
+
+    logo_file = Path(__file__).resolve().parent.parent.parent / "medsync.webp"
+    if not logo_file.exists():
+        logo_file = template_dir / "report_logo.png"
+    logo_uri = logo_file.as_uri()
+
+    amount_val = float(row["amount_paid"])
+    html = env.get_template("doctor_payment_slip_template.html").render(
+        slip_no=slip_no,
+        issued_date=issued_date,
+        doctor_name=doctor_name,
+        registration_no=reg_no,
+        doctor_address=row["doctor_address"] or "123 Anywhere St., Any City",
+        bank_name=bank_name_str,
+        account_number=row["account_number"] or "1234567899956415",
+        net_payment=f"Rs. {amount_val:,.2f}",
+        branch_address=row["branch_address"] or "123 Anywhere St., Any City",
+        branch_phone=row["branch_phone"] or "+123-456-7890",
+        website="www.medsync.com",
+        contact_email="accounts@medsync.com",
+        logo_url=logo_uri
+    )
+
+    pdf_bytes = await run_in_threadpool(lambda: weasyprint.HTML(string=html).write_pdf())
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="Doctor_Payment_Slip_{slip_no}.pdf"',
+            "Cache-Control": "no-store"
+        }
+    )
 
 @router.post("/doctor-earnings/{target_doctor_id}/payout-requests")
 async def create_doctor_payout_request(
@@ -964,9 +1078,11 @@ async def outstanding_balances_pdf(
     if aging not in ("all", "0-30", "31-60", "60+"):
         raise HTTPException(status_code=422, detail="Invalid aging filter.")
     report = await get_outstanding_balances(branch_id, current_user, conn)
-    q = search.lower().strip()
+    terms = search.lower().split()
     items = [r for r in report.data if
-             (not q or any(q in str(v).lower() for v in (r.patient_name, r.patient_id, r.invoice_id))) and
+             all(term in " ".join(str(v).lower() for v in
+                 (r.patient_name, r.patient_id, f"PT-{r.patient_id:06d}", r.invoice_id))
+                 for term in terms) and
              (aging == "all" or aging == ("0-30" if r.aging_days <= 30 else "31-60" if r.aging_days <= 60 else "60+"))]
     sections = [_report_section("Outstanding invoices (LKR)", items, [("invoice_id", "Invoice"), ("patient_name", "Patient"), ("total_amount", "Invoiced"), ("paid_amount", "Paid"), ("due_amount", "Due"), ("aging_days", "Days"), ("status", "Status"), ("patient_id", "Patient ID"), ("last_payment_date", "Last payment")])]
     return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])

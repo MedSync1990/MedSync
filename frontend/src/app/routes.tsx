@@ -80,13 +80,26 @@ const RoleTreatmentCatalogueRedirect: React.FC = () => {
   }
 };
 
+const LoginRoute: React.FC = () => {
+  const { user } = useAuth();
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Login />;
+};
+
+const RootRedirect: React.FC = () => {
+  const { user } = useAuth();
+  return <Navigate to={user ? "/dashboard" : "/login"} replace />;
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center"><LoadingState message="Loading..." /></div>}>
       <Routes>
         {/* Public Auth Routes */}
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<LoginRoute />} />
           <Route path="/logout" element={<Logout />} />
         </Route>
 
@@ -162,9 +175,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/treatment-catalogue" element={<RoleTreatmentCatalogueRedirect />} />
         </Route>
 
-        {/* Redirect root to login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Redirect root to dashboard if logged in, or login if not */}
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="*" element={<RootRedirect />} />
       </Routes>
     </Suspense>
   );

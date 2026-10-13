@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Path, Query ,Response
-from asyncpg import Connection, PostgresError, RaiseError
-from typing import List, Optional
-from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
+from asyncpg import Connection
+from typing import Optional
 from app.db import get_conn
 from jinja2 import Environment, FileSystemLoader
 from app.dependencies import CurrentUser, require_roles, get_current_user
@@ -93,10 +92,19 @@ async def fetch_invoice_by_id_or_code(conn: Connection, identifier: str, search_
 
 @router.get("/recent", response_model=RecentInvoicesResponse)
 async def get_recent_invoices(
+    status: str = Query("unpaid", description="Status filter: 'all', 'unpaid', 'paid'"),
+    limit: int = Query(25, ge=1, le=100),
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Receptionist")),
     conn: Connection = Depends(get_conn)
 ):
-    query = """
+    status_lower = (status or "unpaid").lower().strip()
+    where_clause = ""
+    if status_lower == "unpaid":
+        where_clause = "WHERE i.status != 'Paid'"
+    elif status_lower == "paid":
+        where_clause = "WHERE i.status = 'Paid'"
+
+    query = f"""
         SELECT 
             i.invoice_code,
             pu.first_name || ' ' || pu.last_name AS patient_name,
@@ -110,12 +118,12 @@ async def get_recent_invoices(
         JOIN patient pat ON a.patient_id = pat.user_id
         JOIN app_user pu ON pat.user_id = pu.user_id
         LEFT JOIN payments p ON i.invoice_id = p.invoice_id
-        WHERE i.status != 'Paid'
+        {where_clause}
         GROUP BY i.invoice_id, i.invoice_code, patient_name, i.created_at, i.total_amount, i.insurance_amount, i.status
         ORDER BY i.created_at DESC
-        LIMIT 10
+        LIMIT $1
     """
-    rows = await conn.fetch(query)
+    rows = await conn.fetch(query, limit)
     items = []
     for r in rows:
         tot = float(r["total_amount"])
@@ -367,12 +375,18 @@ async def download_invoice_pdf(
     
     # 6. Generate the PDF
     try:
-        import weasyprint
-        pdf_bytes = weasyprint.HTML(string=rendered_html).write_pdf()
-    except Exception as e:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail=f"PDF generation error: {e}")
-    
+        from weasyprint import HTML
+    except (ImportError, OSError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="PDF generation engine (WeasyPrint) is not installed or available on this host environment.",
+        ) from exc
+
+    try:
+        pdf_bytes = HTML(string=rendered_html).write_pdf()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"PDF generation error: {exc}") from exc
+
     # 7. Return the PDF file directly to the browser
     return Response(
         content=pdf_bytes, 

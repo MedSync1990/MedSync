@@ -21,3 +21,4 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 \ir kalana/fn_reschedule_appointment.sql
 \ir kalana/fn_cancel_appointment.sql
 \ir kalana/trg_block_delete_doctor.sql
+\ir kalana/doctor_weekly_schedule.sql

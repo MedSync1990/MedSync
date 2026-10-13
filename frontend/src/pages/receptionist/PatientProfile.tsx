@@ -5,6 +5,7 @@ import { patientService } from '../../services/patientService';
 import { get } from '../../services/api';
 import { getPatientInsurance, verifyInsurance } from '../../api/billing';
 import { useAuth } from '../../context/AuthContext';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import type { PatientResponse, PatientInsuranceItem } from '../../types';
 
 export const PatientProfile: React.FC = () => {
@@ -12,6 +13,8 @@ export const PatientProfile: React.FC = () => {
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
+
+  useDocumentTitle(patient ? `${patient.first_name} ${patient.last_name} · Patient Profile` : 'Patient Profile');
   const [balance, setBalance] = useState<number | null>(null);
   const [insurancePolicies, setInsurancePolicies] = useState<PatientInsuranceItem[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -139,7 +142,7 @@ export const PatientProfile: React.FC = () => {
   }
 
   return (
-    <div className="py-6 px-space-md md:px-space-lg max-w-[1600px] mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <button
         onClick={() => navigate('/receptionist/patients')}
         className="inline-flex items-center text-primary hover:text-primary-container font-label-md text-label-md transition-colors mb-2"
@@ -658,15 +661,11 @@ export const PatientProfile: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Name</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_name || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_name: e.target.value })} />
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.contact_name || ''} onChange={(e) => setEditData({ ...editData, contact_name: e.target.value })} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Phone</label>
-                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_phone || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_phone: e.target.value })} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Emergency Relationship</label>
-                    <input type="text" placeholder="e.g. Spouse, Parent, Sibling" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact_relationship || ''} onChange={(e) => setEditData({ ...editData, emergency_contact_relationship: e.target.value })} />
+                    <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none" value={editData.emergency_contact || ''} onChange={(e) => setEditData({ ...editData, emergency_contact: e.target.value })} />
                   </div>
                 </div>
 

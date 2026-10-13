@@ -121,7 +121,7 @@ export default function CollectPayment() {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
@@ -507,17 +507,10 @@ export default function CollectPayment() {
                         </>
                       )}
                     </button>
-                    <div className="flex items-center gap-2">
-                      <button type="button" onClick={() => window.print()}
-                        className="flex-1 h-[42px] rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
-                        <span className="material-symbols-outlined text-[18px]">print</span>
-                        <span>Print Invoice / Estimate</span>
-                      </button>
-                      <button type="button" onClick={() => navigate(`/receptionist/invoices/${invoice.invoice_code}?type=invoice`)}
-                        className="h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer">
-                        Cancel
-                      </button>
-                    </div>
+                    <button type="button" onClick={() => navigate(`/receptionist/invoices/${invoice.invoice_code}?type=invoice`)}
+                      className="w-full h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer">
+                      Cancel
+                    </button>
                   </div>
                 </form>
               ) : (

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Modal } from '../../components/Modal';
+import { LoadingState } from '../../components/LoadingState';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { createTreatment, deactivateTreatment, listTreatments, updateTreatment } from '../../api/treatments';
 
@@ -79,71 +80,8 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
   const importInputRef = useRef<HTMLInputElement>(null);
   const [loadError, setLoadError] = useState('');
 
-  const [treatments, setTreatments] = useState<TreatmentItem[]>([
-    {
-      code: 'SRV-CRD-01',
-      name: 'Cardiology Specialist Consultation',
-      description: 'Initial or follow-up physical examination with hemodynamics review',
-      category: 'Consultation',
-      price: '3,500.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-    {
-      code: 'SRV-DIA-04',
-      name: '12-Lead Electrocardiogram (ECG)',
-      description: 'Standard digital resting rhythm trace with computer interpretation',
-      category: 'Diagnostics',
-      price: '1,800.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-    {
-      code: 'SRV-CRD-08',
-      name: '2D Transthoracic Echocardiogram',
-      description: 'Complete spectral and color Doppler structural valve imaging',
-      category: 'Cardiology',
-      price: '8,500.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-    {
-      code: 'SRV-LAB-12',
-      name: 'Blood Glucose Random (RBS)',
-      description: 'Immediate capillary blood glucose evaluation stat testing',
-      category: 'Laboratory',
-      price: '450.00',
-      insuranceEligible: false,
-      isActive: true,
-    },
-    {
-      code: 'SRV-LAB-22',
-      name: 'Lipid Profile Full Panel',
-      description: 'Total cholesterol, HDL, LDL, VLDL, and serum triglycerides',
-      category: 'Laboratory',
-      price: '2,200.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-    {
-      code: 'SRV-RAD-03',
-      name: 'Chest X-Ray (PA View)',
-      description: 'Standard digital thoracic radiographic exposure',
-      category: 'Radiology',
-      price: '2,400.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-    {
-      code: 'SRV-PRC-09',
-      name: 'Emergency Defibrillation & Cardioversion',
-      description: 'Direct current synchronous restoration of sinus rhythm',
-      category: 'Procedures',
-      price: '12,000.00',
-      insuranceEligible: true,
-      isActive: true,
-    },
-  ]);
+  const [treatments, setTreatments] = useState<TreatmentItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Derived Stats
   const totalCatalogued = treatments.length;
@@ -173,6 +111,9 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       })
       .catch(() => {
         if (mounted) setLoadError('Unable to load the treatment catalogue. Please try again.');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
     return () => {
       mounted = false;
@@ -362,8 +303,16 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     { label: canEdit ? 'Manage Treatment Catalogue' : 'Treatment Catalogue' },
   ];
 
+  if (loading) {
+    return (
+      <div className="w-full max-w-content-max-width mx-auto py-space-lg" role="status" aria-live="polite">
+        <LoadingState message="Loading treatment catalogue…" />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-content-max-width mx-auto py-space-lg space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
         <div className="space-y-1">
@@ -474,7 +423,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
               id="catalogue-search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by treatment name, code (e.g. SRV-CRD-01)..."
+              placeholder="Search by treatment name, code..."
               type="text"
             />
             {searchQuery && (
@@ -488,21 +437,11 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
             )}
           </div>
 
-          {/* Meta Controls (Print & View Count) */}
+          {/* View Count */}
           <div className="flex items-center gap-space-sm justify-between lg:justify-end">
             <div className="text-secondary font-label-md text-label-md">
               Showing <span className="font-bold text-brand-navy-deep">{filteredTreatments.length}</span> items
             </div>
-            <div className="h-5 w-[1px] bg-surface-variant hidden sm:block"></div>
-            <button
-              className="inline-flex items-center gap-1.5 px-space-sm h-[38px] rounded-lg bg-surface-subtle hover:bg-surface-variant text-brand-navy-deep font-label-md text-label-md transition-colors border border-border-subtle"
-              onClick={() => window.print()}
-              title="Print treatment reference"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[18px] text-secondary">print</span>
-              <span>Print Sheet</span>
-            </button>
           </div>
           {loadError && (
             <p className="mt-space-sm rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{loadError}</p>
@@ -545,7 +484,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
               {filteredTreatments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-space-md py-space-xl text-center text-secondary">
-                    No treatments match the current search or category filter.
+                    {loadError ? 'Treatment catalogue could not be loaded.' : 'No treatments match the current search or category filter.'}
                   </td>
                 </tr>
               ) : filteredTreatments.map((item) => (

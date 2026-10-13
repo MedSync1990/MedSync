@@ -213,15 +213,15 @@ export const ManageBranches: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
-      <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      <div className="py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
         {/* Header Bar */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
+          <div className="space-y-space-2xs">
+            <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">
               <span className="text-primary font-bold">Manage Branches</span>
             </div>
-            <h1 className="text-display-lg tracking-tight">Manage Branches</h1>
-            <p className="text-body-md text-on-surface-variant">
+            <h1 className="font-display-lg text-display-lg tracking-tight">Manage Branches</h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
               Clinic branch locations across the healthcare network. Add locations, assign managers, and manage branch statuses.
             </p>
           </div>
@@ -229,7 +229,7 @@ export const ManageBranches: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenAddDrawer}
-              className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors font-medium"
+              className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors font-medium"
             >
               <span className="material-symbols-outlined text-[20px]">add_business</span>
               Add branch
@@ -239,51 +239,51 @@ export const ManageBranches: React.FC = () => {
 
         {/* KPI Metrics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+          <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
             <div className="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">domain</span>
             </div>
             <div>
-              <p className="text-label-sm uppercase text-outline tracking-wider">Total branches</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-headline-md">{branches.length}</span>
-                <span className="text-body-sm text-on-surface-variant">{activeCount} active</span>
+              <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Total branches</p>
+              <div className="flex items-baseline gap-space-xs">
+                <span className="font-headline-md text-headline-md">{branches.length}</span>
+                <span className="font-body-sm text-body-sm text-on-surface-variant">{activeCount} active</span>
               </div>
             </div>
           </div>
 
-          <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+          <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
             <div className="w-10 h-10 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">apartment</span>
             </div>
             <div>
-              <p className="text-label-sm uppercase text-outline tracking-wider">Active hubs</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-headline-md">{activeCount}</span>
+              <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Active hubs</p>
+              <div className="flex items-baseline gap-space-xs">
+                <span className="font-headline-md text-headline-md">{activeCount}</span>
               </div>
             </div>
           </div>
 
-          <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+          <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
             <div className="w-10 h-10 rounded-xl bg-status-pending-bg text-status-pending-text flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">groups</span>
             </div>
             <div>
-              <p className="text-label-sm uppercase text-outline tracking-wider">Staff assigned</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-headline-md">{totalStaffCount}</span>
+              <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Staff assigned</p>
+              <div className="flex items-baseline gap-space-xs">
+                <span className="font-headline-md text-headline-md">{totalStaffCount}</span>
               </div>
             </div>
           </div>
 
-          <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+          <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
             <div className="w-10 h-10 rounded-xl bg-surface-subtle text-outline flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">domain_disabled</span>
             </div>
             <div>
-              <p className="text-label-sm uppercase text-outline tracking-wider">Inactive</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-headline-md">{branches.length - activeCount}</span>
+              <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Inactive</p>
+              <div className="flex items-baseline gap-space-xs">
+                <span className="font-headline-md text-headline-md">{branches.length - activeCount}</span>
               </div>
             </div>
           </div>
@@ -291,9 +291,9 @@ export const ManageBranches: React.FC = () => {
 
         {/* Main Card */}
         <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
-          <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2 border-b border-border-subtle">
-            <span className="text-headline-sm">Clinic branches</span>
-            <span className="text-label-sm text-outline px-2 py-0.5 rounded bg-surface-card">
+          <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-space-xs border-b border-border-subtle">
+            <span className="font-headline-sm text-headline-sm">Clinic branches</span>
+            <span className="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-surface-card">
               Showing {filteredBranches.length} of {branches.length}
             </span>
           </div>
@@ -309,19 +309,19 @@ export const ManageBranches: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id as any)}
-                className={`h-11 -mb-px border-b-2 text-label-md whitespace-nowrap transition-colors ${
+                className={`h-11 -mb-px border-b-2 font-label-md text-label-md whitespace-nowrap transition-colors ${
                   statusFilter === tab.id
                     ? 'border-border-focus text-brand-navy-deep font-semibold'
                     : 'border-transparent text-outline hover:text-brand-navy-deep'
                 }`}
               >
-                {tab.label} <span className="ml-1 text-label-sm text-outline">{tab.count}</span>
+                {tab.label} <span className="ml-1 font-label-sm text-label-sm text-outline">{tab.count}</span>
               </button>
             ))}
           </div>
 
           {/* Filter Bar */}
-          <div className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-3 items-center border-b border-surface-subtle">
+          <div className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-space-sm items-center border-b border-surface-subtle">
             <div className="lg:col-span-8 relative">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">
                 search
@@ -329,7 +329,7 @@ export const ManageBranches: React.FC = () => {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card placeholder-outline focus:outline-none shadow-inner text-body-md"
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card placeholder-outline focus:outline-none shadow-inner font-body-md text-body-md"
                 placeholder="Search branch name, address, manager, phone..."
               />
             </div>
@@ -340,7 +340,7 @@ export const ManageBranches: React.FC = () => {
                   setSearchQuery('');
                   setStatusFilter('all');
                 }}
-                className="h-10 px-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep text-label-md flex items-center gap-1.5 transition-colors"
+                className="h-10 px-space-sm rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center gap-space-xs transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">restart_alt</span>Clear filters
               </button>
@@ -351,7 +351,7 @@ export const ManageBranches: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-subtle h-11 text-label-sm text-outline uppercase tracking-wider">
+                <tr className="bg-surface-subtle h-11 font-label-sm text-label-sm text-outline uppercase tracking-wider">
                   <th className="px-space-md font-semibold">Branch</th>
                   <th className="px-space-md font-semibold">Address</th>
                   <th className="px-space-md font-semibold">Manager</th>
@@ -367,51 +367,51 @@ export const ManageBranches: React.FC = () => {
                     className="hover:bg-surface-subtle/70 transition-colors"
                   >
                     {/* Branch (NO profile picture or initials circle) */}
-                    <td className="px-space-md py-3">
+                    <td className="px-space-md py-space-sm">
                       <div className="min-w-0">
-                        <span className="text-label-lg font-medium text-brand-navy-deep hover:text-border-focus block">
+                        <span className="font-label-lg text-label-lg font-medium text-brand-navy-deep hover:text-border-focus block">
                           {branch.name}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="font-mono text-label-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold text-primary">
+                        <div className="flex items-center gap-space-xs mt-0.5">
+                          <span className="font-mono-data text-label-sm px-1.5 py-0.5 rounded bg-surface-container font-semibold text-primary">
                             BR-{branch.branch_id}
                           </span>
-                          <span className="text-body-sm text-outline font-mono">
+                          <span className="text-body-sm text-outline font-mono-data">
                             · {branch.phone_number}
                           </span>
                         </div>
                       </div>
                     </td>
 
-                    <td className="px-space-md py-3">
-                      <span className="text-body-md text-brand-navy-deep">{branch.address}</span>
+                    <td className="px-space-md py-space-sm">
+                      <span className="font-body-md text-body-md text-brand-navy-deep">{branch.address}</span>
                     </td>
 
-                    <td className="px-space-md py-3 whitespace-nowrap">
+                    <td className="px-space-md py-space-sm whitespace-nowrap">
                       {branch.branch_manager_name ? (
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-space-xs">
                           <span className="material-symbols-outlined text-[18px] text-outline">
                             account_circle
                           </span>
-                          <span className="text-label-md font-medium text-brand-navy-deep">
+                          <span className="font-label-md text-label-md font-medium text-brand-navy-deep">
                             {branch.branch_manager_name}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-body-sm text-outline italic">Unassigned</span>
+                        <span className="font-body-sm text-body-sm text-outline italic">Unassigned</span>
                       )}
                     </td>
 
-                    <td className="px-space-md py-3 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 text-label-md font-medium text-brand-navy-deep">
+                    <td className="px-space-md py-space-sm whitespace-nowrap">
+                      <span className="inline-flex items-center gap-space-2xs font-label-md text-label-md font-medium text-brand-navy-deep">
                         <span className="material-symbols-outlined text-[18px] text-outline">groups</span>
                         {branch.staff_count || 0}
                       </span>
                     </td>
 
-                    <td className="px-space-md py-3 whitespace-nowrap">
+                    <td className="px-space-md py-space-sm whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm ${
+                        className={`inline-flex items-center gap-space-xs px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${
                           branch.is_active
                             ? 'bg-status-completed-bg text-status-completed-text'
                             : 'bg-surface-subtle text-outline'
@@ -426,8 +426,8 @@ export const ManageBranches: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="px-space-md py-3 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1">
+                    <td className="px-space-md py-space-sm text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-space-2xs">
                         <button
                           type="button"
                           onClick={() => handleOpenEditDrawer(branch)}
@@ -466,8 +466,8 @@ export const ManageBranches: React.FC = () => {
                       <div className="w-14 h-14 rounded-full bg-surface-subtle flex items-center justify-center text-outline mx-auto mb-space-sm">
                         <span className="material-symbols-outlined text-[28px]">search_off</span>
                       </div>
-                      <h3 className="text-headline-sm">No branches match these filters</h3>
-                      <p className="text-body-sm text-on-surface-variant mt-1 mb-space-md">
+                      <h3 className="font-headline-sm text-headline-sm">No branches match these filters</h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs mb-space-md">
                         Try a different search term or clear the filters.
                       </p>
                       <button
@@ -476,7 +476,7 @@ export const ManageBranches: React.FC = () => {
                           setSearchQuery('');
                           setStatusFilter('all');
                         }}
-                        className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary text-label-md"
+                        className="h-10 px-space-md rounded-xl bg-border-focus text-on-primary font-label-md text-label-md"
                       >
                         Clear filters
                       </button>
@@ -509,10 +509,10 @@ export const ManageBranches: React.FC = () => {
           <div className="fixed right-0 top-0 h-full w-full max-w-[560px] bg-surface-card shadow-2xl z-[70] flex flex-col overflow-y-auto animate-slide-in-right">
             <div className="p-space-lg bg-surface-subtle flex items-center justify-between shrink-0 border-b border-surface-subtle">
               <div className="space-y-0.5">
-                <span className="text-label-sm text-primary uppercase tracking-wider">
+                <span className="font-label-sm text-label-sm text-primary uppercase tracking-wider">
                   {editingBranch ? 'Update location' : 'New branch'}
                 </span>
-                <h2 className="text-headline-md font-bold">
+                <h2 className="font-headline-md text-headline-md font-bold">
                   {editingBranch ? `Edit: ${editingBranch.name}` : 'Add clinic branch'}
                 </h2>
               </div>
@@ -528,17 +528,17 @@ export const ManageBranches: React.FC = () => {
             <form onSubmit={handleSubmitForm} className="flex-1 flex flex-col min-h-0">
               <div className="p-space-lg space-y-space-md flex-1 overflow-y-auto">
                 {formError && (
-                  <div className="p-3.5 rounded-xl bg-error-container/60 border border-error/20 text-error text-body-sm font-medium">
+                  <div className="p-3.5 rounded-xl bg-error-container/60 border border-error/20 text-error font-body-sm text-body-sm font-medium">
                     {formError}
                   </div>
                 )}
 
-                <h3 className="text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold">
+                <h3 className="font-label-sm text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold">
                   Branch Information
                 </h3>
 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">
+                  <label className="font-label-md text-label-md font-semibold">
                     Branch name <span className="text-error">*</span>
                   </label>
                   <input
@@ -551,7 +551,7 @@ export const ManageBranches: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">
+                  <label className="font-label-md text-label-md font-semibold">
                     Contact phone <span className="text-error">*</span>
                   </label>
                   <input
@@ -560,13 +560,13 @@ export const ManageBranches: React.FC = () => {
                     onChange={(e) => setFormPhone(e.target.value.replace(/\D/g, ''))}
                     maxLength={10}
                     placeholder="0112589901"
-                    className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono"
+                    className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data"
                   />
-                  <p className="text-body-sm text-outline">10 digits starting with 0</p>
+                  <p className="font-body-sm text-body-sm text-outline">10 digits starting with 0</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">
+                  <label className="font-label-md text-label-md font-semibold">
                     Address <span className="text-error">*</span>
                   </label>
                   <textarea
@@ -579,12 +579,12 @@ export const ManageBranches: React.FC = () => {
                   />
                 </div>
 
-                <h3 className="text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">
+                <h3 className="font-label-sm text-label-sm text-primary uppercase tracking-wider pb-1 border-b border-surface-subtle font-bold mt-space-lg">
                   Operations & Management
                 </h3>
 
                 <div className="space-y-1.5">
-                  <label className="text-label-md font-semibold">Branch manager</label>
+                  <label className="font-label-md text-label-md font-semibold">Branch manager</label>
                   <select
                     value={formManagerId}
                     onChange={(e) => setFormManagerId(e.target.value)}
@@ -597,12 +597,12 @@ export const ManageBranches: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <p className="text-body-sm text-outline">
+                  <p className="font-body-sm text-body-sm text-outline">
                     Selecting a manager will switch their assigned branch to this branch.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-xl mt-4 border border-border-subtle">
+                <div className="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant p-3 bg-surface-subtle rounded-xl mt-space-md border border-border-subtle">
                   <span className="material-symbols-outlined text-[18px] text-primary">apartment</span>
                   <span>
                     Saving branch configuration binds appointment availability slots and doctor schedules automatically.
@@ -610,18 +610,18 @@ export const ManageBranches: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-space-md border-t border-surface-subtle flex justify-end gap-3 shrink-0 bg-white">
+              <div className="p-space-md border-t border-surface-subtle flex justify-end gap-space-sm shrink-0 bg-white">
                 <button
                   type="button"
                   onClick={handleCloseDrawer}
-                  className="h-10 px-space-md rounded-xl text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold transition-colors"
+                  className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-surface-subtle hover:bg-surface-container text-brand-navy-deep font-bold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-10 px-space-md rounded-xl text-label-md bg-border-focus hover:bg-status-scheduled-text text-on-primary shadow-sm flex items-center gap-2 font-bold transition-colors disabled:opacity-70"
+                  className="h-10 px-space-md rounded-xl font-label-md text-label-md bg-border-focus hover:bg-status-scheduled-text text-on-primary shadow-sm flex items-center gap-space-xs font-bold transition-colors disabled:opacity-70"
                 >
                   <span className="material-symbols-outlined text-[18px]">save</span>
                   {isSubmitting ? 'Saving...' : editingBranch ? 'Save changes' : 'Create branch'}

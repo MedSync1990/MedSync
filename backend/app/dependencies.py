@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.errors import UnauthorizedError, ForbiddenError
-from app.security import decode_access_token
+from app.security import decode_access_token, require_trusted_origin
 from app.db import get_conn, get_admin_conn  # adjust path if db.py lives elsewhere
 
 security = HTTPBearer(auto_error=False)
@@ -20,6 +20,7 @@ async def get_current_user(
     creds: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> CurrentUser:
     token = request.cookies.get("access_token")
+    cookie_authenticated = bool(token)
     if not token and creds:
         token = creds.credentials
     if not token:
@@ -32,36 +33,34 @@ async def get_current_user(
 
     payload = decode_access_token(token)
 
-    if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
-        from app.config import config
-        origin = request.headers.get("origin")
-        referer = request.headers.get("referer", "")
-        is_docs = "/docs" in referer or "/redoc" in referer
-        
-        # If the request comes from our trusted frontend domain or Swagger docs, we rely on CORS 
-        # and the browser's Origin header for CSRF protection.
-        if not is_docs and (not origin or origin not in config.CORS_ALLOWED_ORIGINS):
-            cookie_csrf = request.cookies.get("csrf_token")
-            header_csrf = request.headers.get("X-CSRF-Token")
+    if cookie_authenticated and request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+        require_trusted_origin(request)
 
-            if not cookie_csrf or not header_csrf or cookie_csrf != header_csrf:
-                raise ForbiddenError("CSRF token missing or invalid.")
-
-    # Check if the user is deactivated
+    # Only accept accounts whose active status can be confirmed.
     user_id = payload.get("user_id")
     pool = getattr(request.app.state, "pool", None)
-    if pool and user_id:
-        try:
-            async with pool.acquire() as conn:
-                is_active = await conn.fetchval(
-                    "SELECT is_active FROM staff WHERE user_id = $1;", user_id
-                )
-                if is_active is False:
-                    raise UnauthorizedError("This account has been deactivated. Access denied.")
-        except UnauthorizedError:
-            raise
-        except Exception:
-            pass
+    if not user_id:
+        raise UnauthorizedError("Invalid authentication token.")
+
+    if pool is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication service temporarily unavailable.",
+        )
+
+    try:
+        async with pool.acquire() as conn:
+            is_active = await conn.fetchval(
+                "SELECT is_active FROM staff WHERE user_id = $1", user_id
+            )
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication service temporarily unavailable.",
+        )
+
+    if is_active is not True:
+        raise UnauthorizedError("Account unavailable or deactivated.")
 
     user = CurrentUser(
         user_id=payload["user_id"],

@@ -28,18 +28,30 @@ async def list_staff(
                a.first_name, a.last_name, a.id_number, a.email,
                a.address, a.birthdate, a.gender, a.created_at,
                r.role_name,
-               (SELECT phone_number FROM contact c WHERE c.user_id = s.user_id LIMIT 1) as phone_number,
+               ph.phone_number,
                d.license_number,
-               sp.name as specialty,
+               doc_sp.specialty,
                b.name as branch_name,
-               s.last_login_at, s.failed_login_attempts, s.locked_until
+               s.last_login_at, s.failed_login_attempts, s.locked_until,
+               COALESCE(s.must_change_password, FALSE) as must_change_password
         FROM staff s
         JOIN app_user a ON s.user_id = a.user_id
         JOIN role r ON a.role_id = r.role_id
         JOIN branch b ON s.branch_id = b.branch_id
         LEFT JOIN doctor d ON s.user_id = d.user_id
-        LEFT JOIN doctor_specialty ds ON s.user_id = ds.user_id
-        LEFT JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+        LEFT JOIN LATERAL (
+            SELECT string_agg(sp.name, ', ' ORDER BY sp.name) AS specialty
+            FROM doctor_specialty ds
+            JOIN specialty sp ON ds.specialty_id = sp.specialty_id
+            WHERE ds.user_id = s.user_id
+        ) doc_sp ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT c.phone_number
+            FROM contact c
+            WHERE c.user_id = s.user_id
+            ORDER BY c.contact_id ASC
+            LIMIT 1
+        ) ph ON TRUE
         WHERE 1=1
     """
     args = []
@@ -71,6 +83,9 @@ async def create_staff(
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
+    if current_user.role not in ("Administrator", "Branch Manager"):
+        raise HTTPException(status_code=403, detail="Only Administrators and Branch Managers can create staff.")
+
     if current_user.role == "Branch Manager" and current_user.branch_id != payload.branch_id:
         raise HTTPException(status_code=403, detail="You can only add staff to your own branch.")
 
@@ -78,6 +93,13 @@ async def create_staff(
     if not role:
         raise HTTPException(status_code=400, detail="Invalid role_id")
     role_name = role['role_name']
+    
+    # Role restriction checks
+    if role_name == "Patient":
+        raise HTTPException(status_code=400, detail="Patients cannot be registered via the staff management endpoint.")
+
+    if current_user.role == "Branch Manager" and role_name not in ["Doctor", "Receptionist"]:
+        raise HTTPException(status_code=403, detail="Branch Managers are only permitted to create Doctors and Receptionists.")
     
     if role_name == "Doctor":
         if not payload.specialty or not payload.license_number:
@@ -111,11 +133,15 @@ async def create_staff(
         # Format the role name to be a clean prefix (e.g. "Receptionist" -> "receptionist")
         role_prefix = role_name.lower().replace(" ", "")
         
-        # Count how many users have this role to append the number
-        role_count = await db.fetchval("SELECT COUNT(*) FROM app_user WHERE role_id = $1", payload.role_id)
-        
-        # Create the username (e.g. receptionist1, receptionist2)
-        username = f"{role_prefix}{role_count}"
+        # Generate unique username by counting current role holders and ensuring no collisions
+        count = await db.fetchval(
+            "SELECT COUNT(*) FROM staff s JOIN app_user u ON s.user_id = u.user_id WHERE u.role_id = $1",
+            payload.role_id,
+        ) + 1
+        username = f"{role_prefix}{count}"
+        while await db.fetchval("SELECT 1 FROM staff WHERE username = $1", username):
+            count += 1
+            username = f"{role_prefix}{count}"
         
         # Set the default temporary password to "medsync"
         temp_password = "medsync"
@@ -125,8 +151,8 @@ async def create_staff(
 
         await db.execute(
             """
-            INSERT INTO staff (user_id, branch_id, username, password_hash)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO staff (user_id, branch_id, username, password_hash, must_change_password)
+            VALUES ($1, $2, $3, $4, TRUE)
             """,
             new_user_id, payload.branch_id, username, hashed_pw
         )
@@ -147,15 +173,19 @@ async def create_staff(
             await db.execute("INSERT INTO doctor_specialty (user_id, specialty_id) VALUES ($1, $2)", new_user_id, specialty_id)
             
         if payload.bank_accounts:
-            for acc in payload.bank_accounts:
-                if acc.bank_name and acc.account_number:
-                    await db.execute(
-                        """
-                        INSERT INTO staff_bank_accounts (user_id, bank_name, account_number, branch_name)
-                        VALUES ($1, $2, $3, $4)
-                        """,
-                        new_user_id, acc.bank_name, acc.account_number, acc.bank_branch
-                    )
+            bank_records = [
+                (new_user_id, acc.bank_name, acc.account_number, acc.bank_branch)
+                for acc in payload.bank_accounts
+                if acc.bank_name and acc.account_number
+            ]
+            if bank_records:
+                await db.executemany(
+                    """
+                    INSERT INTO staff_bank_accounts (user_id, bank_name, account_number, branch_name)
+                    VALUES ($1, $2, $3, $4)
+                    """,
+                    bank_records,
+                )
             
     return {
         "message": "Staff registered successfully",
@@ -170,22 +200,61 @@ async def deactivate_staff(
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
-    if current_user.user_id == id:
+    # 1. Prevent self-deactivation
+    if id == current_user.user_id:
         raise HTTPException(status_code=400, detail="You cannot deactivate your own account.")
 
-    staff_exists = await db.fetchrow("SELECT s.branch_id, s.is_active FROM staff s WHERE s.user_id = $1", id)
-    if not staff_exists:
+    target_staff = await db.fetchrow(
+        """
+        SELECT s.branch_id, r.role_name 
+        FROM staff s 
+        JOIN app_user a ON s.user_id = a.user_id 
+        JOIN role r ON a.role_id = r.role_id 
+        WHERE s.user_id = $1
+        """, 
+        id
+    )
+    if not target_staff:
         raise HTTPException(status_code=404, detail="Staff member not found.")
 
     if current_user.role == "Branch Manager":
-        if staff_exists["branch_id"] != current_user.branch_id:
+        if target_staff["branch_id"] != current_user.branch_id:
             raise HTTPException(status_code=403, detail="You can only deactivate staff in your own branch.")
-        target_role = await db.fetchval(
-            "SELECT r.role_name FROM staff s JOIN app_user u ON s.user_id = u.user_id JOIN role r ON u.role_id = r.role_id WHERE s.user_id = $1",
+        if target_staff["role_name"] in ["Administrator", "Branch Manager"]:
+            raise HTTPException(status_code=403, detail="Branch Managers cannot deactivate Administrators or Branch Managers.")
+
+    # 2. Last remaining active administrator guard
+    if target_staff["role_name"] == "Administrator":
+        active_admin_count = await db.fetchval(
+            """
+            SELECT COUNT(*) FROM staff s 
+            JOIN app_user a ON s.user_id = a.user_id 
+            JOIN role r ON a.role_id = r.role_id 
+            WHERE r.role_name = 'Administrator' AND s.is_active = TRUE
+            """
+        )
+        if active_admin_count is not None and active_admin_count <= 1:
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot deactivate the last remaining active Administrator in the system."
+            )
+
+    # 3. Doctor upcoming appointments guard
+    if target_staff["role_name"] == "Doctor":
+        pending_appts = await db.fetchval(
+            """
+            SELECT COUNT(*) 
+            FROM appointments a
+            JOIN doctor_availability_slots s ON a.slot_id = s.slot_id
+            WHERE s.doctor_id = $1 AND s.date >= CURRENT_DATE AND a.status = 'Scheduled'
+            """,
             id
         )
-        if target_role == "Administrator":
-            raise HTTPException(status_code=403, detail="Branch Managers cannot deactivate Administrators.")
+        if pending_appts and pending_appts > 0:
+            raise HTTPException(
+                status_code=409, 
+                detail=f"Cannot deactivate doctor with {pending_appts} upcoming scheduled appointment(s). Please reassign or cancel them first."
+            )
 
     await db.execute("SELECT fn_deactivate_staff($1)", id)
     return {"message": "Staff deactivated successfully", "user_id": id}
@@ -207,6 +276,23 @@ async def activate_staff(
     await db.execute("UPDATE staff SET is_active = TRUE WHERE user_id = $1", id)
     return {"message": "Staff activated successfully", "user_id": id}
 
+@router.put("/{id}/unlock")
+async def unlock_staff(
+    id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: asyncpg.Connection = Depends(get_conn)
+):
+    if current_user.role == "Branch Manager":
+        staff_branch = await db.fetchval("SELECT branch_id FROM staff WHERE user_id = $1", id)
+        if staff_branch != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="You can only unlock staff in your own branch.")
+
+    await db.execute(
+        "UPDATE staff SET failed_login_attempts = 0, locked_until = NULL WHERE user_id = $1", 
+        id
+    )
+    return {"message": "Staff account unlocked successfully", "user_id": id}
+
 @router.put("/{id}/reset-password")
 async def reset_staff_password(
     id: int,
@@ -220,7 +306,10 @@ async def reset_staff_password(
             raise HTTPException(status_code=403, detail="You can only reset passwords for staff in your own branch.")
     
     hashed_pw = hash_password(payload.password)
-    await db.execute("UPDATE staff SET password_hash = $1 WHERE user_id = $2", hashed_pw, id)
+    await db.execute(
+        "UPDATE staff SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2", 
+        hashed_pw, id
+    )
     
     return {"message": "Password reset successfully", "temporary_password": payload.password}
 

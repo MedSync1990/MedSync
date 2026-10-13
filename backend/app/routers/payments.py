@@ -39,76 +39,86 @@ async def record_payment(
       6. Re-fetch updated status and return result.
     """
 
-    # ── 1. Load invoice ────────────────────────────────────────────────────────
-    inv = await fetch_invoice_by_id_or_code(conn, invoice_code)
-    if not inv:
-        raise NotFoundError(f"Invoice '{invoice_code}' not found.")
-
-    invoice_id   = inv["invoice_id"]
-    total_amount = float(inv["total_amount"])
-    ins_amount   = float(inv["insurance_amount"])
-
-    # ── 2. Calculate outstanding balance (server-side) ─────────────────────────
-    paid_row = await conn.fetchrow(
-        "SELECT COALESCE(SUM(amount_paid), 0) AS total_paid FROM payments WHERE invoice_id = $1",
-        invoice_id
-    )
-    total_paid  = float(paid_row["total_paid"]) if paid_row else 0.0
-    outstanding = max(0.0, round(total_amount - ins_amount - total_paid, 2))
-
-    # ── 3. Validate ────────────────────────────────────────────────────────────
-    if outstanding == 0:
-        raise ConflictError("This invoice is already fully paid.")
-
+    # ── 1. Validate payment type early ────────────────────────────────────────
     if body.payment_type not in ALLOWED_PAYMENT_TYPES:
         raise AppValidationError([{
             "field": "payment_type",
             "message": f"Invalid payment type. Must be one of: {', '.join(sorted(ALLOWED_PAYMENT_TYPES))}."
         }])
 
-    if body.amount > outstanding:
-        raise ConflictError(
-            f"Amount ({body.amount:.2f}) exceeds outstanding balance ({outstanding:.2f})."
-        )
+    if body.amount <= 0:
+        raise AppValidationError([{
+            "field": "amount",
+            "message": "Payment amount must be greater than zero."
+        }])
 
-    # ── 4. Map label → DB enum ─────────────────────────────────────────────────
     db_payment_type = PAYMENT_TYPE_MAP[body.payment_type]
+    is_numeric = invoice_code.isdigit() and int(invoice_code) <= 2147483647
+    num_val = int(invoice_code) if is_numeric else 0
 
-    # ── 5. Persist via DB function ─────────────────────────────────────────────
-    try:
-        await conn.execute(
-            "SELECT fn_record_payment($1::int, $2::numeric, $3::payment_type_enum)",
-            invoice_id,
-            body.amount,
-            db_payment_type
+    async with conn.transaction():
+        # ── 2. Load target invoice and lock row against concurrent payments ──
+        inv = await conn.fetchrow(
+            """
+            SELECT invoice_id, invoice_code, total_amount, insurance_amount, status
+            FROM invoices
+            WHERE ($1::boolean AND invoice_id = $2::int)
+               OR UPPER(invoice_code) = UPPER($3::text)
+            FOR UPDATE
+            """,
+            is_numeric, num_val, invoice_code
         )
-    except RaiseError as exc:
-        raise ConflictError(str(exc))
-    except PostgresError as exc:
-        raise ConflictError(str(exc))
+        if not inv:
+            # Fallback to helper if code lookup has subtle aliases
+            inv = await fetch_invoice_by_id_or_code(conn, invoice_code)
+            if not inv:
+                raise NotFoundError(f"Invoice '{invoice_code}' not found.")
 
-    # ── 6. Re-fetch updated state and return ───────────────────────────────────
-    updated = await conn.fetchrow(
-        "SELECT status FROM invoices WHERE invoice_id = $1", invoice_id
-    )
-    new_paid_row = await conn.fetchrow(
-        "SELECT COALESCE(SUM(amount_paid), 0) AS total_paid FROM payments WHERE invoice_id = $1",
-        invoice_id
-    )
-    total_paid = float(new_paid_row["total_paid"]) if new_paid_row else 0.0
-    new_outstanding = max(0.0, round(total_amount - ins_amount - total_paid, 2))
-    new_status = updated["status"] if updated else "Paid"
+        invoice_id   = inv["invoice_id"]
+        total_amount = float(inv["total_amount"])
+        ins_amount   = float(inv["insurance_amount"])
 
-    msg = (
-        "Invoice fully paid."
-        if new_outstanding == 0
-        else f"Payment recorded. Remaining balance: {new_outstanding:.2f}."
-    )
+        # ── 3. Calculate outstanding balance once ─────────────────────────────
+        paid_row = await conn.fetchrow(
+            "SELECT COALESCE(SUM(amount_paid), 0) AS total_paid FROM payments WHERE invoice_id = $1",
+            invoice_id
+        )
+        total_paid  = float(paid_row["total_paid"]) if paid_row else 0.0
+        outstanding = max(0.0, round(total_amount - ins_amount - total_paid, 2))
 
-    return RecordPaymentResponse(
-        message=msg,
-        invoice_code=inv["invoice_code"],
-        amount_paid=body.amount,
-        outstanding_balance=new_outstanding,
-        status=new_status
-    )
+        if outstanding == 0:
+            raise ConflictError("This invoice is already fully paid.")
+
+        if body.amount > outstanding:
+            raise ConflictError(
+                f"Amount ({body.amount:.2f}) exceeds outstanding balance ({outstanding:.2f})."
+            )
+
+        # ── 4. Persist payment atomically via DB function ─────────────────────
+        try:
+            await conn.execute(
+                "SELECT fn_record_payment($1::int, $2::numeric, $3::payment_type_enum)",
+                invoice_id,
+                body.amount,
+                db_payment_type
+            )
+        except (RaiseError, PostgresError) as exc:
+            raise ConflictError(str(exc))
+
+        # ── 5. Derive updated status without redundant DB round-trips ──────────
+        new_outstanding = max(0.0, round(outstanding - body.amount, 2))
+        new_status = "Paid" if new_outstanding == 0 else "Partially Paid"
+
+        msg = (
+            "Invoice fully paid."
+            if new_outstanding == 0
+            else f"Payment recorded. Remaining balance: {new_outstanding:.2f}."
+        )
+
+        return RecordPaymentResponse(
+            message=msg,
+            invoice_code=inv["invoice_code"],
+            amount_paid=body.amount,
+            outstanding_balance=new_outstanding,
+            status=new_status
+        )

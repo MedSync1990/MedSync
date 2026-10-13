@@ -7,9 +7,20 @@ export const Logout = () => {
   const { logout } = useAuth();
   const [isLoggedOut, setIsLoggedOut] = useState(false);
 
-  const handleConfirmLogout = () => {
-    logout();
-    setIsLoggedOut(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    setError('');
+    try {
+      await logout();
+      setIsLoggedOut(true);
+    } catch {
+      setError('Logout could not be completed. Please retry to end your session.');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -28,6 +39,7 @@ export const Logout = () => {
         </div>
 
         <div className="px-8 py-10 text-center">
+          {error && <p role="alert" className="mb-4 text-rose-600">{error}</p>}
           {isLoggedOut ? (
             <>
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#E0F2FE]">
@@ -56,10 +68,11 @@ export const Logout = () => {
 
               <div className="flex flex-col gap-3">
                 <button
+                  disabled={isLoggingOut}
                   onClick={handleConfirmLogout}
                   className="h-[50px] w-full rounded-full bg-rose-500 text-base font-bold text-white shadow-[0_10px_22px_rgba(244,63,94,0.30)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(244,63,94,0.36)]"
                 >
-                  Yes, Log Out
+                  {isLoggingOut ? 'Logging out…' : 'Yes, Log Out'}
                 </button>
                 <button
                   onClick={() => navigate(-1)}

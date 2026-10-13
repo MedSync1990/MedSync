@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import { getMe, logout as logoutSession } from '../api/auth';
+import React, { createContext, useContext, useState, useRef } from 'react';
 
 export type UserRole =
   | 'Administrator'
@@ -18,6 +19,7 @@ export interface UserProfile {
   branchId?: number;
   branchName?: string;
   avatarUrl?: string;
+  mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -25,7 +27,8 @@ interface AuthContextType {
   token: string | null;
   setUser: (user: UserProfile | null) => void;
   setToken: (token: string | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -33,27 +36,18 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   setUser: () => { },
   setToken: () => { },
-  logout: () => { },
+  logout: async () => { },
+  isLoading: true,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUserState] = useState<UserProfile | null>(() => {
-    try {
-      const stored = localStorage.getItem('current_user');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.role) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error('Failed to parse current_user from localStorage', e);
-    }
-    return null;
-  });
+  const [user, setUserState] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const sessionVersion = useRef(0);
   const [token, setToken] = useState<string | null>(null);
 
   const setUser = (newUser: UserProfile | null) => {
+    sessionVersion.current += 1;
     setUserState(newUser);
     if (newUser) {
       localStorage.setItem('current_user', JSON.stringify(newUser));
@@ -62,16 +56,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setToken(null);
-    const rawBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
-    const cleanedBase = rawBase.replace(/\/+$/, '');
-    const apiBase = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
-    fetch(`${apiBase}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    }).catch(() => { });
+    // Only report success once the browser has received the cookie deletion.
+    await logoutSession();
   };
 
   React.useEffect(() => {
@@ -81,21 +70,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(null);
     };
 
-    const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
-    const cleanedBase = rawBase.replace(/\/+$/, '');
-    const apiBase = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
-
-    fetch(`${apiBase}/auth/me`, { credentials: 'include' })
-      .then((res) => {
-        if (res.ok) return res.json();
-        if (res.status === 401 || res.status === 403) {
-          setUser(null);
-          setToken(null);
-        }
-        return null;
-      })
+    const version = sessionVersion.current;
+    let active = true;
+    localStorage.removeItem('current_user');
+    getMe()
       .then((data) => {
-        if (data) {
+        if (active && version === sessionVersion.current && data) {
           setUserState((prev) => {
             const updated: UserProfile = {
               id: data.user_id,
@@ -104,22 +84,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               lastName: data.last_name || '',
               role: data.role as UserRole,
               roleTitle: `${data.role} Portal`,
-              branchId: data.branch_id,
+              branchId: data.branch_id ?? undefined,
               branchName: data.branch_name || prev?.branchName || (data.branch_id ? `Branch #${data.branch_id}` : 'Central Branch'),
+              mustChangePassword: Boolean(data.must_change_password),
             };
             localStorage.setItem('current_user', JSON.stringify(updated));
             return updated;
           });
         }
       })
-      .catch(() => { });
+      .catch(() => {
+        if (active && version === sessionVersion.current) setUserState(null);
+      })
+      .finally(() => { if (active) setIsLoading(false); });
 
     window.addEventListener('auth:unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    return () => {
+      active = false;
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, setUser, setToken, logout }}>
+    <AuthContext.Provider value={{ user, token, setUser, setToken, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

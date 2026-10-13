@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 
 from app.db import get_conn
 from app.config import config
-from app.security import verify_password, create_access_token, decode_access_token, generate_csrf_token
+from app.security import verify_password, create_access_token, decode_access_token, generate_csrf_token, require_trusted_origin
 from app.dependencies import require_roles, get_current_user, CurrentUser
 from app.schemas.auth import LoginRequest, LoginResponse, MeResponse
 from app.errors import UnauthorizedError
@@ -13,11 +13,12 @@ router = APIRouter()
 
 LOCKOUT_THRESHOLD = 5 # placeholder per database.md §14 -- confirm before shipping
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, dependencies=[Depends(require_trusted_origin)])
 async def login(payload: LoginRequest, response: Response, db: asyncpg.Connection = Depends(get_conn)):
     row = await db.fetchrow(
         """
-        SELECT s.user_id, s.password_hash, s.branch_id, r.role_name, s.is_active
+        SELECT s.user_id, s.password_hash, s.branch_id, r.role_name, s.is_active,
+               COALESCE(s.must_change_password, FALSE) as must_change_password
         FROM staff s
         JOIN app_user u ON u.user_id = s.user_id
         JOIN role r ON r.role_id = u.role_id
@@ -86,16 +87,22 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
         max_age=max_age,
     )
 
-    return LoginResponse(message="Login successful")
+    return LoginResponse(
+        message="Login successful",
+        must_change_password=bool(row["must_change_password"]),
+    )
 
 
-@router.post("/logout")
+@router.post("/logout", dependencies=[Depends(require_trusted_origin)])
 async def logout(response: Response):
     # Stateless JWT: nothing to invalidate server-side. Frontend just discards
     # the token. Add a token-blocklist table here later if you ever need
     # server-side revocation before expiry.
-    response.delete_cookie("access_token")
-    response.delete_cookie("csrf_token")
+    samesite_policy: Literal["none", "lax"] = "none" if config.COOKIE_SECURE else "lax"
+    response.delete_cookie("access_token", path="/", httponly=True,
+                           secure=config.COOKIE_SECURE, samesite=samesite_policy)
+    response.delete_cookie("csrf_token", path="/", httponly=False,
+                           secure=config.COOKIE_SECURE, samesite=samesite_policy)
     return {"message": "Logged out"}
 
 
@@ -125,6 +132,11 @@ async def get_me(
     first_name = user_row["first_name"] if user_row else None
     last_name = user_row["last_name"] if user_row else None
 
+    must_change = await db.fetchval(
+        "SELECT COALESCE(must_change_password, FALSE) FROM staff WHERE user_id = $1;", 
+        current_user.user_id
+    )
+
     return MeResponse(
         user_id=current_user.user_id,
         username=current_user.username,
@@ -133,6 +145,7 @@ async def get_me(
         role=current_user.role,
         branch_id=current_user.branch_id,
         branch_name=branch_name,
+        must_change_password=bool(must_change),
     )
 
 @router.get("/admin-only-dashboard", dependencies=[Depends(require_roles("Administrator", "Branch Manager"))])

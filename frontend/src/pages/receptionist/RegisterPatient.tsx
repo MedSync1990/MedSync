@@ -6,8 +6,102 @@ type Gender = 'Male' | 'Female';
 
 interface SecondaryPhone {
   number: string;
-  type: string;
+  countryCode: string;
 }
+
+export const COUNTRY_CODES = [
+  { code: '+94', label: '🇱🇰 +94 (LK)' },
+  { code: '+1', label: '🇺🇸 +1 (US)' },
+  { code: '+44', label: '🇬🇧 +44 (UK)' },
+  { code: '+61', label: '🇦🇺 +61 (AU)' },
+  { code: '+91', label: '🇮🇳 +91 (IN)' },
+  { code: '+971', label: '🇦🇪 +971 (AE)' },
+  { code: '+966', label: '🇸🇦 +966 (SA)' },
+  { code: '+65', label: '🇸🇬 +65 (SG)' },
+  { code: '+60', label: '🇲🇾 +60 (MY)' },
+];
+
+export const cleanPhoneInput = (val: string, countryCode: string = '+94'): string => {
+  if (countryCode === '+94') {
+    let v = val;
+    if (v.startsWith('+94')) {
+      v = v.slice(3).trim();
+    }
+    // Remove leading 0 if present (e.g. typing 077 -> 77)
+    if (v.startsWith('0')) {
+      v = v.replace(/^0+/, '');
+    }
+    return v;
+  }
+  return val;
+};
+
+export const validatePhoneNumber = (
+  rawPhone: string,
+  countryCode: string = '+94'
+): { isValid: boolean; message?: string } => {
+  const trimmed = rawPhone.trim();
+  if (!trimmed) {
+    return { isValid: false, message: 'Phone number is required.' };
+  }
+
+  const cleaned = trimmed.replace(/[\s\-()]/g, '');
+
+  if (countryCode === '+94') {
+    // Strip any +94 or leading 0 if present
+    let digits = cleaned;
+    if (digits.startsWith('+94')) {
+      digits = digits.slice(3);
+    } else if (digits.startsWith('94') && digits.length >= 11) {
+      digits = digits.slice(2);
+    }
+    digits = digits.replace(/^0+/, '').replace(/\D/g, '');
+
+    if (digits.length === 9 && /^[1-9]\d{8}$/.test(digits)) {
+      return { isValid: true };
+    }
+    if (digits.length < 9) {
+      return { isValid: false, message: 'Too short. Must be 9 digits (e.g. 7X XXX XXXX).' };
+    }
+    if (digits.length > 9) {
+      return { isValid: false, message: 'Too many digits. Must be 9 digits (e.g. 7X XXX XXXX).' };
+    }
+    return {
+      isValid: false,
+      message: 'Must be 9 digits after country code (e.g. 712345678).',
+    };
+  } else {
+    const digitsOnly = cleaned.replace(/\D/g, '');
+    if (digitsOnly.length >= 7 && digitsOnly.length <= 15) {
+      return { isValid: true };
+    }
+    return { isValid: false, message: 'International number must be between 7 and 15 digits.' };
+  }
+};
+
+export const normalizePhoneForBackend = (
+  rawPhone: string,
+  countryCode: string = '+94'
+): string => {
+  const clean = rawPhone.trim();
+  const digits = clean.replace(/\D/g, '');
+  if (countryCode === '+94') {
+    if (digits.length === 12 && digits.startsWith('940')) {
+      return digits.slice(2);
+    }
+    if (digits.length === 11 && digits.startsWith('94')) {
+      return '0' + digits.slice(2);
+    }
+    if (digits.length === 9) {
+      return '0' + digits;
+    }
+    if (digits.length === 10 && digits.startsWith('0')) {
+      return digits;
+    }
+  }
+  return digits || clean;
+};
+
 
 export const RegisterPatient: React.FC = () => {
   const navigate = useNavigate();
@@ -29,17 +123,22 @@ export const RegisterPatient: React.FC = () => {
 
   // Phone numbers
   const [primaryPhone, setPrimaryPhone] = useState('');
-  const [primaryPhoneType, setPrimaryPhoneType] = useState('mobile');
+  const [primaryCountryCode, setPrimaryCountryCode] = useState('+94');
+  const [primaryPhoneTouched, setPrimaryPhoneTouched] = useState(false);
   const [secondaryPhones, setSecondaryPhones] = useState<SecondaryPhone[]>([]);
 
   // Emergency contact
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyRelation, setEmergencyRelation] = useState('');
   const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyCountryCode, setEmergencyCountryCode] = useState('+94');
+  const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false);
   const [showAlternateContact, setShowAlternateContact] = useState(false);
   const [altContactName, setAltContactName] = useState('');
   const [altRelation, setAltRelation] = useState('');
   const [altPhone, setAltPhone] = useState('');
+  const [altCountryCode, setAltCountryCode] = useState('+94');
+  const [altPhoneTouched, setAltPhoneTouched] = useState(false);
 
   // Insurance
   const [insuranceEnabled, setInsuranceEnabled] = useState(false);
@@ -71,9 +170,31 @@ export const RegisterPatient: React.FC = () => {
           setEmailAddress(p.email || '');
           setStreetAddress(p.address === 'Address Pending' ? '' : (p.address || ''));
           setCityDistrict('');
-          setPrimaryPhone(p.phone_number || '');
+          setPrimaryCountryCode('+94');
+          if (p.phone_number) {
+            let ph = p.phone_number.trim();
+            if (ph.startsWith('+94')) {
+              ph = ph.slice(3).replace(/^0+/, '');
+            } else if (ph.startsWith('0')) {
+              ph = ph.slice(1);
+            }
+            setPrimaryPhone(ph);
+          } else {
+            setPrimaryPhone('');
+          }
           setEmergencyName(p.contact_name || '');
-          setEmergencyPhone(p.emergency_contact || '');
+          setEmergencyCountryCode('+94');
+          if (p.emergency_contact) {
+            let em = p.emergency_contact.trim();
+            if (em.startsWith('+94')) {
+              em = em.slice(3).replace(/^0+/, '');
+            } else if (em.startsWith('0')) {
+              em = em.slice(1);
+            }
+            setEmergencyPhone(em);
+          } else {
+            setEmergencyPhone('');
+          }
         }
       })
       .catch(() => {
@@ -104,8 +225,21 @@ export const RegisterPatient: React.FC = () => {
     return /^([0-9]{9}[VvXx]|[0-9]{12})$/.test(nicNumber.trim());
   }, [nicNumber]);
 
+  // Validation states
+  const primaryValidation = useMemo(() => {
+    return validatePhoneNumber(primaryPhone, primaryCountryCode);
+  }, [primaryPhone, primaryCountryCode]);
+
+  const emergencyValidation = useMemo(() => {
+    return validatePhoneNumber(emergencyPhone, emergencyCountryCode);
+  }, [emergencyPhone, emergencyCountryCode]);
+
+  const altValidation = useMemo(() => {
+    return altPhone.trim() ? validatePhoneNumber(altPhone, altCountryCode) : { isValid: true };
+  }, [altPhone, altCountryCode]);
+
   const addSecondaryPhone = () => {
-    setSecondaryPhones((prev) => [...prev, { number: '', type: 'alternate' }]);
+    setSecondaryPhones((prev) => [...prev, { number: '', countryCode: '+94' }]);
   };
 
   const removeSecondaryPhone = (index: number) => {
@@ -123,15 +257,66 @@ export const RegisterPatient: React.FC = () => {
     setSubmitting(true);
     setError(null);
 
+    // Validate primary phone
+    if (!primaryValidation.isValid) {
+      setPrimaryPhoneTouched(true);
+      setError(
+        primaryValidation.message ||
+          'Please enter a valid 9-digit mobile number after country code.'
+      );
+      document.getElementById('primaryPhone')?.focus();
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate any filled secondary phones
+    for (let i = 0; i < secondaryPhones.length; i++) {
+      const sec = secondaryPhones[i];
+      if (sec.number.trim()) {
+        const secVal = validatePhoneNumber(sec.number, sec.countryCode);
+        if (!secVal.isValid) {
+          setError(`Secondary phone line #${i + 1} is invalid: ${secVal.message}`);
+          setSubmitting(false);
+          return;
+        }
+      }
+    }
+
+    // Validate emergency contact phone
+    if (!emergencyValidation.isValid) {
+      setEmergencyPhoneTouched(true);
+      setError(
+        emergencyValidation.message ||
+          'Please enter a valid 9-digit emergency contact phone number.'
+      );
+      document.getElementById('emergencyPhone')?.focus();
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate alternate contact phone if open & filled
+    if (showAlternateContact && altPhone.trim()) {
+      const altVal = validatePhoneNumber(altPhone, altCountryCode);
+      if (!altVal.isValid) {
+        setAltPhoneTouched(true);
+        setError(`Alternate emergency phone is invalid: ${altVal.message}`);
+        setSubmitting(false);
+        return;
+      }
+    }
+
     // Split Full Name into first_name and last_name for backend compatibility
     const trimmedName = fullName.trim();
     const nameParts = trimmedName.split(' ');
     const firstName = nameParts[0] || 'Unknown';
     const lastName = nameParts.slice(1).join(' ') || nameParts[0] || 'Patient';
 
-    const allPhones = [primaryPhone, ...secondaryPhones.map((p) => p.number)]
-      .map((p) => p.replace(/\D/g, ''))
-      .filter(Boolean);
+    const normalizedPrimary = normalizePhoneForBackend(primaryPhone, primaryCountryCode);
+    const normalizedSecondary = secondaryPhones
+      .filter((p) => p.number.trim())
+      .map((p) => normalizePhoneForBackend(p.number, p.countryCode));
+    const allPhones = [normalizedPrimary, ...normalizedSecondary].filter(Boolean);
+    const normalizedEmergency = normalizePhoneForBackend(emergencyPhone, emergencyCountryCode);
 
     try {
       if (isEditMode && editId) {
@@ -143,9 +328,10 @@ export const RegisterPatient: React.FC = () => {
           birthdate: dateOfBirth || null,
           gender: gender,
           email: emailAddress || null,
-          phone_number: primaryPhone.replace(/\D/g, ''),
+          phone_number: normalizedPrimary,
+          phone_numbers: allPhones,
           blood_group: bloodGroup || null,
-          emergency_contact: emergencyPhone.replace(/\D/g, ''),
+          emergency_contact: normalizedEmergency,
           contact_name: emergencyName,
         });
 
@@ -165,9 +351,10 @@ export const RegisterPatient: React.FC = () => {
           birthdate: dateOfBirth || null,
           gender: gender,
           email: emailAddress || null,
+          phone_number: normalizedPrimary,
           phone_numbers: allPhones,
           blood_group: bloodGroup || null,
-          emergency_contact: emergencyPhone.replace(/\D/g, ''),
+          emergency_contact: normalizedEmergency,
           contact_name: emergencyName,
           registered_branch: 1,
           insurance:
@@ -205,7 +392,7 @@ export const RegisterPatient: React.FC = () => {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -498,103 +685,208 @@ export const RegisterPatient: React.FC = () => {
 
             <div className="space-y-3" id="phoneNumbersContainer">
               {/* Primary Mobile */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-surface-card p-3 rounded-lg shadow-sm">
-                <div className="sm:col-span-3 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm uppercase font-bold tracking-wider">
-                    <span className="material-symbols-outlined text-[14px]">star</span> Primary
-                  </span>
-                  <span className="font-label-md text-label-md text-brand-navy-deep">
-                    Primary Mobile <span className="text-error font-bold">*</span>
-                  </span>
+              <div className="bg-surface-card p-3 sm:p-4 rounded-xl shadow-sm border border-outline-variant/30 space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+                  <div className="lg:col-span-3 flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm uppercase font-bold tracking-wider">
+                      <span className="material-symbols-outlined text-[14px]">star</span> Primary
+                    </span>
+                    <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">
+                      Primary Mobile <span className="text-error font-bold">*</span>
+                    </span>
+                  </div>
+
+                  <div className="lg:col-span-7">
+                    <div className="flex items-center w-full">
+                      {/* Country Code Part */}
+                      <div className="relative shrink-0">
+                        <select
+                          aria-label="Country Code"
+                          value={primaryCountryCode}
+                          onChange={(e) => setPrimaryCountryCode(e.target.value)}
+                          className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                        >
+                          {COUNTRY_CODES.map((c) => (
+                            <option key={c.code} value={c.code}>
+                              {c.label}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">
+                          expand_more
+                        </span>
+                      </div>
+
+                      {/* Phone Number Input */}
+                      <div className="relative flex-1 flex items-center">
+                        <input
+                          id="primaryPhone"
+                          name="primaryPhone"
+                          type="tel"
+                          required
+                          placeholder={primaryCountryCode === '+94' ? '7X XXX XXXX' : 'Mobile number'}
+                          value={primaryPhone}
+                          onChange={(e) => {
+                            setPrimaryPhone(cleanPhoneInput(e.target.value, primaryCountryCode));
+                            if (!primaryPhoneTouched) setPrimaryPhoneTouched(true);
+                          }}
+                          onBlur={() => setPrimaryPhoneTouched(true)}
+                          className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
+                            primaryPhoneTouched && !primaryValidation.isValid
+                              ? 'border border-error focus:ring-error'
+                              : primaryValidation.isValid
+                              ? 'border border-status-completed-text/40 focus:ring-border-focus'
+                              : 'border border-outline/30 focus:ring-border-focus'
+                          }`}
+                        />
+                        {primaryPhone.trim() && (
+                          <span
+                            className={`material-symbols-outlined absolute right-3 text-[20px] pointer-events-none ${
+                              primaryValidation.isValid
+                                ? 'text-status-completed-text'
+                                : 'text-error'
+                            }`}
+                          >
+                            {primaryValidation.isValid ? 'check_circle' : 'error'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-2 flex items-center justify-start lg:justify-end">
+                    <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">notifications_active</span> Alerts Active
+                    </span>
+                  </div>
                 </div>
-                <div className="sm:col-span-4 relative flex items-center">
-                  <span className="absolute left-3 font-mono-data text-mono-data font-semibold text-outline select-none">
-                    +94
-                  </span>
-                  <input
-                    name="primaryPhone"
-                    type="tel"
-                    required
-                    placeholder="07X XXX XXXX"
-                    value={primaryPhone}
-                    onChange={(e) => setPrimaryPhone(e.target.value)}
-                    className="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md pl-12 pr-3 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus"
-                  />
-                </div>
-                <div className="sm:col-span-3">
-                  <select
-                    name="primaryPhoneType"
-                    value={primaryPhoneType}
-                    onChange={(e) => setPrimaryPhoneType(e.target.value)}
-                    className="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md px-3 font-body-sm text-body-sm text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus cursor-pointer"
-                  >
-                    <option value="mobile">Personal Mobile</option>
-                    <option value="whatsapp">WhatsApp Enabled</option>
-                    <option value="work">Work Phone</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2 flex items-center justify-end pr-1">
-                  <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">notifications_active</span> Alerts Active
-                  </span>
+
+                {/* Validation message */}
+                <div className="lg:pl-[calc(25%+0.75rem)]">
+                  {primaryPhoneTouched && !primaryValidation.isValid && primaryPhone.trim() && (
+                    <span className="font-body-sm text-body-sm text-error flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">cancel</span>
+                      {primaryValidation.message}
+                    </span>
+                  )}
+                  {primaryValidation.isValid && (
+                    <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">verified</span>
+                      Valid 9-digit mobile number verified
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Secondary Phones */}
-              {secondaryPhones.map((phone, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-surface-card p-3 rounded-lg shadow-sm"
-                >
-                  <div className="sm:col-span-3 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-subtle text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
-                      Secondary
-                    </span>
-                    <span className="font-label-md text-label-md text-on-surface-variant">
-                      Alternate Line
-                    </span>
+              {secondaryPhones.map((phone, idx) => {
+                const secVal = validatePhoneNumber(phone.number, phone.countryCode);
+                const hasValue = phone.number.trim().length > 0;
+                return (
+                  <div
+                    key={idx}
+                    className="bg-surface-card p-3 sm:p-4 rounded-xl shadow-sm border border-outline-variant/30 space-y-2"
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+                      <div className="lg:col-span-3 flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-subtle text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
+                          Secondary
+                        </span>
+                        <span className="font-label-md text-label-md text-on-surface-variant font-medium">
+                          Alternate Line {secondaryPhones.length > 1 ? `#${idx + 1}` : ''}
+                        </span>
+                      </div>
+
+                      <div className="lg:col-span-7">
+                        <div className="flex items-center w-full">
+                          {/* Country Code Part */}
+                          <div className="relative shrink-0">
+                            <select
+                              aria-label="Secondary Country Code"
+                              value={phone.countryCode}
+                              onChange={(e) => updateSecondaryPhone(idx, 'countryCode', e.target.value)}
+                              className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                            >
+                              {COUNTRY_CODES.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                  {c.label}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">
+                              expand_more
+                            </span>
+                          </div>
+
+                          <div className="relative flex-1 flex items-center">
+                            <input
+                              type="tel"
+                              placeholder={phone.countryCode === '+94' ? '7X XXX XXXX' : 'Mobile number'}
+                              value={phone.number}
+                              onChange={(e) =>
+                                updateSecondaryPhone(
+                                  idx,
+                                  'number',
+                                  cleanPhoneInput(e.target.value, phone.countryCode)
+                                )
+                              }
+                              className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 transition-all ${
+                                hasValue && !secVal.isValid
+                                  ? 'border border-error focus:ring-error'
+                                  : hasValue && secVal.isValid
+                                  ? 'border border-status-completed-text/40 focus:ring-border-focus'
+                                  : 'border border-outline/30 focus:ring-border-focus'
+                              }`}
+                            />
+                            {hasValue && (
+                              <span
+                                className={`material-symbols-outlined absolute right-3 text-[20px] pointer-events-none ${
+                                  secVal.isValid ? 'text-status-completed-text' : 'text-error'
+                                }`}
+                              >
+                                {secVal.isValid ? 'check_circle' : 'error'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:col-span-2 flex items-center justify-start lg:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => removeSecondaryPhone(idx)}
+                          className="h-9 px-2.5 rounded-md text-status-cancelled-text hover:bg-status-cancelled-bg flex items-center gap-1 font-label-sm text-label-sm transition-colors cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete_outline</span>
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Secondary validation message */}
+                    {hasValue && (
+                      <div className="lg:pl-[calc(25%+0.75rem)]">
+                        {!secVal.isValid ? (
+                          <span className="font-body-sm text-body-sm text-error flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">cancel</span>
+                            {secVal.message}
+                          </span>
+                        ) : (
+                          <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">verified</span>
+                            Valid 9-digit mobile number verified
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="sm:col-span-4 relative flex items-center">
-                    <span className="absolute left-3 font-mono-data text-mono-data font-semibold text-outline select-none">
-                      +94
-                    </span>
-                    <input
-                      type="tel"
-                      placeholder="07X XXX XXXX"
-                      value={phone.number}
-                      onChange={(e) => updateSecondaryPhone(idx, 'number', e.target.value)}
-                      className="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md pl-12 pr-3 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus"
-                    />
-                  </div>
-                  <div className="sm:col-span-3">
-                    <select
-                      value={phone.type}
-                      onChange={(e) => updateSecondaryPhone(idx, 'type', e.target.value)}
-                      className="w-full h-[40px] bg-surface-subtle focus:bg-surface-card rounded-md px-3 font-body-sm text-body-sm text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus cursor-pointer"
-                    >
-                      <option value="alternate">Alternate Mobile</option>
-                      <option value="whatsapp">WhatsApp Enabled</option>
-                      <option value="home">Home / Landline</option>
-                      <option value="work">Office Phone</option>
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2 flex items-center justify-end">
-                    <button
-                      type="button"
-                      onClick={() => removeSecondaryPhone(idx)}
-                      className="h-9 px-2.5 rounded-md text-status-cancelled-text hover:bg-status-cancelled-bg flex items-center gap-1 font-label-sm text-label-sm transition-colors cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">delete_outline</span>
-                      <span>Remove</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <p className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 pt-1">
               <span className="material-symbols-outlined text-outline text-[16px]">info</span>
-              <span>Enter 10-digit mobile number(s).</span>
+              <span>Enter 9-digit mobile number after country code (e.g. 7XXXXXXXX).</span>
             </p>
           </div>
 
@@ -764,22 +1056,69 @@ export const RegisterPatient: React.FC = () => {
               >
                 Emergency Phone Number <span className="text-error font-bold">*</span>
               </label>
-              <div className="relative flex items-center">
-                <span className="absolute left-3 font-mono-data text-mono-data font-semibold text-outline select-none">
-                  +94
-                </span>
-                <input
-                  id="emergencyPhone"
-                  name="emergencyPhone"
-                  type="tel"
-                  required
-                  placeholder="07X XXX XXXX"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
-                  className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-12 pr-4 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
-                />
+              <div className="flex items-center w-full">
+                <div className="relative shrink-0">
+                  <select
+                    aria-label="Emergency Country Code"
+                    value={emergencyCountryCode}
+                    onChange={(e) => setEmergencyCountryCode(e.target.value)}
+                    className="h-[42px] pl-3 pr-7 bg-surface-subtle hover:bg-surface-card border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                  >
+                    {COUNTRY_CODES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+                <div className="relative flex-1 flex items-center">
+                  <input
+                    id="emergencyPhone"
+                    name="emergencyPhone"
+                    type="tel"
+                    required
+                    placeholder={emergencyCountryCode === '+94' ? '7X XXX XXXX' : 'Phone number'}
+                    value={emergencyPhone}
+                    onChange={(e) => {
+                      setEmergencyPhone(cleanPhoneInput(e.target.value, emergencyCountryCode));
+                      if (!emergencyPhoneTouched) setEmergencyPhoneTouched(true);
+                    }}
+                    onBlur={() => setEmergencyPhoneTouched(true)}
+                    className={`w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 transition-all ${
+                      emergencyPhoneTouched && !emergencyValidation.isValid
+                        ? 'border border-error focus:ring-error'
+                        : emergencyValidation.isValid
+                        ? 'border border-status-completed-text/40 focus:ring-border-focus'
+                        : 'border border-outline/30 focus:ring-border-focus'
+                    }`}
+                  />
+                  {emergencyPhone.trim() && (
+                    <span
+                      className={`material-symbols-outlined absolute right-3 text-[20px] pointer-events-none ${
+                        emergencyValidation.isValid ? 'text-status-completed-text' : 'text-error'
+                      }`}
+                    >
+                      {emergencyValidation.isValid ? 'check_circle' : 'error'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <span className="font-body-sm text-body-sm text-outline">Direct 24/7 reachable contact</span>
+              {emergencyPhoneTouched && !emergencyValidation.isValid && emergencyPhone.trim() ? (
+                <span className="font-body-sm text-body-sm text-error flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">cancel</span>
+                  {emergencyValidation.message}
+                </span>
+              ) : emergencyValidation.isValid ? (
+                <span className="font-body-sm text-body-sm text-status-completed-text flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">verified</span>
+                  Valid 9-digit emergency contact verified
+                </span>
+              ) : (
+                <span className="font-body-sm text-body-sm text-outline">Direct 24/7 reachable contact</span>
+              )}
             </div>
           </div>
 
@@ -840,18 +1179,59 @@ export const RegisterPatient: React.FC = () => {
                       Discard
                     </button>
                   </div>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-3 font-mono-data text-mono-data text-outline font-semibold select-none">
-                      +94
-                    </span>
-                    <input
-                      type="tel"
-                      placeholder="07X XXX XXXX"
-                      value={altPhone}
-                      onChange={(e) => setAltPhone(e.target.value)}
-                      className="w-full h-[42px] bg-surface-card rounded-lg pl-12 pr-3 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus"
-                    />
+                  <div className="flex items-center w-full">
+                    <div className="relative shrink-0">
+                      <select
+                        aria-label="Alternate Contact Country Code"
+                        value={altCountryCode}
+                        onChange={(e) => setAltCountryCode(e.target.value)}
+                        className="h-[42px] pl-3 pr-7 bg-surface-card hover:bg-surface-subtle border border-r-0 border-outline/30 rounded-l-lg font-mono-data text-mono-data font-semibold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus focus:z-10 transition-all appearance-none cursor-pointer"
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">
+                        expand_more
+                      </span>
+                    </div>
+                    <div className="relative flex-1 flex items-center">
+                      <input
+                        type="tel"
+                        placeholder={altCountryCode === '+94' ? '7X XXX XXXX' : 'Phone number'}
+                        value={altPhone}
+                        onChange={(e) => {
+                          setAltPhone(cleanPhoneInput(e.target.value, altCountryCode));
+                          if (!altPhoneTouched) setAltPhoneTouched(true);
+                        }}
+                        onBlur={() => setAltPhoneTouched(true)}
+                        className={`w-full h-[42px] bg-surface-card rounded-r-lg pl-3 pr-10 font-mono-data text-mono-data text-brand-navy-deep focus:outline-none focus:ring-2 transition-all ${
+                          altPhoneTouched && !altValidation.isValid
+                            ? 'border border-error focus:ring-error'
+                            : altValidation.isValid && altPhone.trim()
+                            ? 'border border-status-completed-text/40 focus:ring-border-focus'
+                            : 'border border-outline/30 focus:ring-border-focus'
+                        }`}
+                      />
+                      {altPhone.trim() && (
+                        <span
+                          className={`material-symbols-outlined absolute right-3 text-[20px] pointer-events-none ${
+                            altValidation.isValid ? 'text-status-completed-text' : 'text-error'
+                          }`}
+                        >
+                          {altValidation.isValid ? 'check_circle' : 'error'}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {altPhoneTouched && !altValidation.isValid && altPhone.trim() && (
+                    <span className="font-body-sm text-body-sm text-error flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">cancel</span>
+                      {altValidation.message}
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -891,7 +1271,7 @@ export const RegisterPatient: React.FC = () => {
                   onChange={(e) => setInsuranceEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-border-focus"></div>
+                <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
           </div>

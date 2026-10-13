@@ -27,7 +27,6 @@ export default function BranchAppointmentSummary() {
   const fetchSummary = () => {
     const typeMap: Record<string, string> = {
       'doctor': 'Scheduled Visit',
-      'followup': 'Follow-up',
       'walkin': 'Walk-in'
     };
     const params: any = categoryFilter === 'all' ? {} : { appointment_type: typeMap[categoryFilter] };
@@ -99,7 +98,7 @@ export default function BranchAppointmentSummary() {
   const yAxisLabels = [0, dynamicMax * 0.2, dynamicMax * 0.4, dynamicMax * 0.6, dynamicMax * 0.8, dynamicMax].map(Math.round);
 
   return (
-    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-xl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col gap-space-2xs">
           <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
@@ -108,7 +107,7 @@ export default function BranchAppointmentSummary() {
             <span className="text-outline">/</span>
             <span className="text-secondary font-medium">Q3 Reporting Period</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Branch Appointment Summary</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Branch Appointment Summary</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">Scheduled, completed, and cancelled appointments by branch and day.</p>
         </div>
         {user?.role === 'Administrator' ? (
@@ -161,7 +160,6 @@ export default function BranchAppointmentSummary() {
               <select id="category-filter" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-lg bg-surface-subtle font-body-md text-body-md text-on-surface outline-none focus:bg-surface-card focus:ring-2 focus:ring-primary/20 appearance-none transition-all cursor-pointer">
                 <option value="all">All Categories</option>
                 <option value="doctor">Doctor Consultation</option>
-                <option value="followup">Follow-up</option>
                 <option value="walkin">Walk-in</option>
               </select>
               <span className="material-symbols-outlined text-secondary text-[18px] absolute right-3 pointer-events-none">expand_more</span>
@@ -185,32 +183,32 @@ export default function BranchAppointmentSummary() {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Scheduled</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">calendar_today</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalScheduled}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">event</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalScheduled}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Completed</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">check_circle</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalCompleted}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">task_alt</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalCompleted}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>task_alt</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Cancelled</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">cancel</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalCancelled}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">event_busy</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalCancelled}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>event_busy</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Walk-in Inflow</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">transfer_within_a_station</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalWalkins}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">directions_walk</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalWalkins}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>directions_walk</span></div>
         </div>
       </div>
 

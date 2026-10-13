@@ -15,14 +15,28 @@ export const PatientDirectory: React.FC = () => {
   const [completingPatient, setCompletingPatient] = useState<PatientListItem | null>(null);
   const navigate = useNavigate();
 
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(totalPatients / pageSize));
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, branchFilter, insuranceFilter]);
+
   useEffect(() => {
     fetchPatients();
-  }, [search, branchFilter, insuranceFilter]);
+  }, [search, branchFilter, insuranceFilter, page]);
 
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const res = await patientService.list({ search, branch: branchFilter, insurance: insuranceFilter });
+      const res = await patientService.list({ 
+        search, 
+        branch: branchFilter, 
+        insurance: insuranceFilter,
+        page,
+        limit: pageSize 
+      });
       setPatients(res.data || []);
       setTotalPatients(res.total || 0);
       setLoading(false);
@@ -109,7 +123,6 @@ export const PatientDirectory: React.FC = () => {
       render: (r) => (
         r.phone_number && r.phone_number !== '0000000000' ? (
           <div className="flex items-center gap-1.5 font-body-md text-body-md text-on-surface">
-            <span className="material-symbols-outlined text-[16px] text-outline">call</span>
             <span>{r.phone_number}</span>
           </div>
         ) : (
@@ -187,7 +200,7 @@ export const PatientDirectory: React.FC = () => {
   ];
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -290,6 +303,69 @@ export const PatientDirectory: React.FC = () => {
           keyExtractor={(r) => r.patient_id.toString()}
           emptyMessage={loading ? 'Loading patients...' : 'No matching patient records found.'}
         />
+
+        {/* Pagination Footer */}
+        {!loading && totalPatients > 0 && (
+          <div className="p-space-md bg-surface-card flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t border-border-subtle">
+            <span className="font-label-md text-label-md text-on-surface-variant">
+              Showing {Math.min((page - 1) * pageSize + 1, totalPatients)}–
+              {Math.min(page * pageSize, totalPatients)} of {totalPatients} patient
+              {totalPatients !== 1 ? 's' : ''}
+            </span>
+            <div className="flex items-center gap-space-xs">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="h-8 px-3 rounded-lg bg-surface-subtle text-outline font-label-md text-label-md flex items-center gap-1 hover:bg-surface-container hover:text-brand-navy-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+                <span>Prev</span>
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                    if (idx > 0 && typeof arr[idx - 1] === 'number' && (p as number) - (arr[idx - 1] as number) > 1) {
+                      acc.push(`dots-${p}`);
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item) => {
+                    if (typeof item === 'string') {
+                      return <span key={item} className="px-1 text-outline text-label-sm select-none">...</span>;
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setPage(item)}
+                        className={`h-8 w-8 rounded-lg font-label-md text-label-md font-bold flex items-center justify-center transition-colors ${
+                          item === page
+                            ? 'bg-primary text-on-primary shadow-xs'
+                            : 'bg-surface-subtle text-on-surface hover:bg-surface-container'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="h-8 px-3 rounded-lg bg-surface-subtle text-on-surface font-label-md text-label-md hover:bg-surface-container flex items-center gap-1 font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span>Next</span>
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Complete Registration Modal */}

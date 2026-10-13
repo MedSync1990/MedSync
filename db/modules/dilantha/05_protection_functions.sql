@@ -48,7 +48,28 @@ LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public, pg_temp
 AS $$
+DECLARE
+    v_role_id INT;
+    v_active_admins INT;
 BEGIN
+    -- Check if user is an Administrator
+    SELECT u.role_id INTO v_role_id
+    FROM staff s
+    JOIN app_user u ON s.user_id = u.user_id
+    WHERE s.user_id = p_user_id;
+
+    IF v_role_id = 1 THEN
+        SELECT COUNT(*) INTO v_active_admins
+        FROM staff s
+        JOIN app_user u ON s.user_id = u.user_id
+        WHERE u.role_id = 1 AND s.is_active = TRUE;
+
+        IF v_active_admins <= 1 THEN
+            RAISE EXCEPTION 'Cannot deactivate the last remaining active Administrator'
+                USING ERRCODE = '23514';
+        END IF;
+    END IF;
+
     UPDATE staff SET is_active = FALSE WHERE user_id = p_user_id;
 END;
 $$;

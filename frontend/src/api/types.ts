@@ -31,6 +31,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   message: string;
   user: MeResponse;
+  must_change_password?: boolean;
 }
 
 export interface MeResponse {
@@ -41,6 +42,7 @@ export interface MeResponse {
   role: string;
   branch_id: number | null;
   branch_name: string | null;
+  must_change_password?: boolean;
 }
 
 // ─── Appointments (schemas/appointments.py) ─────────────────────────────────
@@ -169,6 +171,20 @@ export interface DoctorResponse {
 
 export interface DoctorCreateResponse extends DoctorResponse {
   temp_password: string;
+}
+
+export interface DoctorScheduleItem {
+  schedule_id?: number;
+  doctor_id?: number;
+  day_of_week: number; // 0=Sunday, 1=Monday ... 6=Saturday
+  start_time: string;
+  end_time: string;
+  slot_duration: number;
+  is_active: boolean;
+}
+
+export interface DoctorScheduleUpdate {
+  schedules: DoctorScheduleItem[];
 }
 
 // ─── Billing / Invoices ─────────────────────────────────────────────────────
@@ -315,6 +331,7 @@ export interface OutstandingBalanceItem {
   patient_id: number;
   patient_name: string;
   contact_number: string;
+  branch_name?: string | null;
   total_amount: number;
   paid_amount: number;
   due_amount: number;

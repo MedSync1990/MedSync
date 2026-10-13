@@ -126,19 +126,19 @@ export const BranchDetails: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
-      <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+      <div className="py-space-xl max-w-content-max-width mx-auto w-full space-y-space-xl">
         {/* ── Breadcrumb & Top Header ── */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
+            <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-outline uppercase tracking-wider">
               <span>Branch Management</span>
               <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               <span className="text-primary font-bold">Branch Details</span>
             </div>
-            <h1 className="text-display-lg tracking-tight font-bold text-brand-navy-deep">
+            <h1 className="font-display-lg text-display-lg tracking-tight font-bold text-brand-navy-deep">
               {branch ? `${branch.name} Branch` : 'Branch Details'}
             </h1>
-            <p className="text-body-md text-on-surface-variant">
+            <p className="font-body-md text-body-md text-on-surface-variant">
               Comprehensive profile, location, and operational parameters for your branch. All details are read-only.
             </p>
           </div>
@@ -146,12 +146,12 @@ export const BranchDetails: React.FC = () => {
           <div className="flex flex-wrap items-center gap-space-sm">
             {/* Admin Branch Switcher */}
             {user?.role === 'Administrator' && branches.length > 1 && (
-              <div className="flex items-center gap-2 bg-surface-card rounded-xl px-3 py-2 shadow-sm border border-border-subtle">
-                <span className="text-label-sm text-outline uppercase tracking-wider">Branch:</span>
+              <div className="flex items-center gap-space-xs bg-surface-card rounded-xl px-space-sm py-2 shadow-sm border border-border-subtle">
+                <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Branch:</span>
                 <select
                   value={selectedBranchId ?? ''}
                   onChange={(e) => handleBranchSwitch(Number(e.target.value))}
-                  className="bg-transparent text-label-md font-medium text-brand-navy-deep border-none focus:outline-none cursor-pointer"
+                  className="bg-transparent font-label-md text-label-md font-medium text-brand-navy-deep border-none focus:outline-none cursor-pointer"
                 >
                   {branches.map((b) => (
                     <option key={b.branch_id} value={b.branch_id}>
@@ -163,7 +163,7 @@ export const BranchDetails: React.FC = () => {
             )}
 
             {/* Read-Only Badge */}
-            <div className="h-10 px-space-md rounded-xl bg-surface-card border border-border-subtle shadow-sm flex items-center gap-1.5 text-label-md text-outline">
+            <div className="h-10 px-space-md rounded-xl bg-surface-card border border-border-subtle shadow-sm flex items-center gap-space-xs font-label-md text-label-md text-outline">
               <span className="material-symbols-outlined text-[18px] text-primary">lock</span>
               <span>Read-only</span>
             </div>
@@ -173,7 +173,7 @@ export const BranchDetails: React.FC = () => {
               type="button"
               onClick={() => void fetchData(true)}
               disabled={refreshing || loading}
-              className="h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary text-label-md flex items-center justify-center gap-1.5 transition-colors shadow-sm disabled:opacity-50"
+              className="h-10 px-space-md rounded-xl bg-surface-card hover:bg-surface-subtle text-primary font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors shadow-sm disabled:opacity-50"
             >
               <span className={`material-symbols-outlined text-[18px] ${refreshing ? 'animate-spin' : ''}`}>
                 refresh
@@ -185,8 +185,8 @@ export const BranchDetails: React.FC = () => {
 
         {/* ── Error Notification ── */}
         {error && (
-          <div role="alert" className="p-space-md rounded-xl bg-error-container text-error text-label-md flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-2">
+          <div role="alert" className="p-space-md rounded-xl bg-error-container text-error font-label-md text-label-md flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-space-xs">
               <span className="material-symbols-outlined text-[20px]">error</span>
               <span>{error}</span>
             </div>
@@ -216,8 +216,8 @@ export const BranchDetails: React.FC = () => {
         ) : !branch ? (
           <div className="bg-surface-card rounded-xl p-space-2xl text-center shadow-sm space-y-3">
             <span className="material-symbols-outlined text-[48px] text-outline">domain_disabled</span>
-            <h2 className="text-headline-md font-bold text-brand-navy-deep">No Branch Assigned</h2>
-            <p className="text-body-md text-on-surface-variant max-w-md mx-auto">
+            <h2 className="font-headline-md text-headline-md font-bold text-brand-navy-deep">No Branch Assigned</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
               Your account does not have an active clinic branch assignment. Please contact the administrator.
             </p>
           </div>
@@ -226,57 +226,57 @@ export const BranchDetails: React.FC = () => {
             {/* ── Stat Summary Cards (Theme matching ManageStaff) ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
               {/* Total Staff */}
-              <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
                 <div className="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[22px]">badge</span>
                 </div>
                 <div>
-                  <p className="text-label-sm uppercase text-outline tracking-wider">Assigned Staff</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-headline-md font-bold">{branch.staff_count ?? stats?.total_staff ?? 0}</span>
-                    <span className="text-body-sm text-on-surface-variant">active personnel</span>
+                  <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Assigned Staff</p>
+                  <div className="flex items-baseline gap-space-xs">
+                    <span className="font-headline-md text-headline-md font-bold">{branch.staff_count ?? stats?.total_staff ?? 0}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">active personnel</span>
                   </div>
                 </div>
               </div>
 
               {/* Rostered Doctors */}
-              <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
                 <div className="w-10 h-10 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[22px]">stethoscope</span>
                 </div>
                 <div>
-                  <p className="text-label-sm uppercase text-outline tracking-wider">Rostered Doctors</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-headline-md font-bold">{stats?.total_doctors ?? '—'}</span>
-                    <span className="text-body-sm text-on-surface-variant">physicians</span>
+                  <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Rostered Doctors</p>
+                  <div className="flex items-baseline gap-space-xs">
+                    <span className="font-headline-md text-headline-md font-bold">{stats?.total_doctors ?? '—'}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">physicians</span>
                   </div>
                 </div>
               </div>
 
               {/* Registered Patients */}
-              <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
                 <div className="w-10 h-10 rounded-xl bg-secondary-container text-primary flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[22px]">groups</span>
                 </div>
                 <div>
-                  <p className="text-label-sm uppercase text-outline tracking-wider">Branch Patients</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-headline-md font-bold">{stats?.total_patients ?? '—'}</span>
-                    <span className="text-body-sm text-on-surface-variant">registered</span>
+                  <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Branch Patients</p>
+                  <div className="flex items-baseline gap-space-xs">
+                    <span className="font-headline-md text-headline-md font-bold">{stats?.total_patients ?? '—'}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">registered</span>
                   </div>
                 </div>
               </div>
 
               {/* Today's Schedule */}
-              <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="p-space-md rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
                 <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[22px]">calendar_month</span>
                 </div>
                 <div>
-                  <p className="text-label-sm uppercase text-outline tracking-wider">Today's Visits</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-headline-md font-bold">{todayTotal}</span>
-                    <span className="text-body-sm text-on-surface-variant">
+                  <p className="font-label-sm text-label-sm uppercase text-outline tracking-wider">Today's Visits</p>
+                  <div className="flex items-baseline gap-space-xs">
+                    <span className="font-headline-md text-headline-md font-bold">{todayTotal}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">
                       {stats?.today_appointments?.scheduled ?? 0} scheduled
                     </span>
                   </div>
@@ -291,7 +291,7 @@ export const BranchDetails: React.FC = () => {
                 {/* Header with Initial & Name */}
                 <div className="p-space-lg flex items-center gap-space-md">
                   <div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center text-headline-md font-bold shrink-0 ${branch.is_active
+                    className={`w-14 h-14 rounded-xl flex items-center justify-center font-headline-md text-headline-md font-bold shrink-0 ${branch.is_active
                       ? 'bg-secondary-container text-on-secondary-fixed'
                       : 'bg-surface-subtle text-outline'
                       }`}
@@ -299,11 +299,11 @@ export const BranchDetails: React.FC = () => {
                     {branchInitials}
                   </div>
                   <div className="min-w-0 space-y-1">
-                    <h2 className="text-headline-md font-bold leading-tight truncate">
+                    <h2 className="font-headline-md text-headline-md font-bold leading-tight truncate">
                       {branch.name} Branch
                     </h2>
                     <span
-                      className={`inline-flex px-2.5 py-0.5 rounded-full text-label-sm ${branch.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'
+                      className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm ${branch.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'
                         }`}
                     >
                       #BR-{branch.branch_id.toString().padStart(4, '0')}
@@ -312,12 +312,12 @@ export const BranchDetails: React.FC = () => {
                 </div>
 
                 {/* Key Quick Attributes */}
-                <div className="px-space-lg divide-y divide-surface-subtle border-t border-surface-subtle text-body-sm">
+                <div className="px-space-lg divide-y divide-surface-subtle border-t border-surface-subtle font-body-sm text-body-sm">
                   {/* Status */}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-center justify-between gap-space-sm py-2.5">
                     <span className="text-on-surface-variant">Status</span>
                     <span
-                      className={`text-right font-medium flex items-center gap-1.5 ${branch.is_active ? 'text-primary' : 'text-outline'
+                      className={`text-right font-medium flex items-center gap-space-xs ${branch.is_active ? 'text-primary' : 'text-outline'
                         }`}
                     >
                       <div
@@ -328,7 +328,7 @@ export const BranchDetails: React.FC = () => {
                   </div>
 
                   {/* Branch Manager */}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-center justify-between gap-space-sm py-2.5">
                     <span className="text-on-surface-variant">Manager</span>
                     <span className="text-right font-medium text-brand-navy-deep truncate max-w-[190px]">
                       {branch.branch_manager_name || 'Unassigned'}
@@ -336,15 +336,15 @@ export const BranchDetails: React.FC = () => {
                   </div>
 
                   {/* Phone */}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-center justify-between gap-space-sm py-2.5">
                     <span className="text-on-surface-variant">Telephone</span>
-                    <span className="text-right font-medium font-mono">
+                    <span className="text-right font-medium font-mono-data">
                       {formatPhoneNumber(branch.phone_number)}
                     </span>
                   </div>
 
                   {/* Staff Headcount */}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-center justify-between gap-space-sm py-2.5">
                     <span className="text-on-surface-variant">Staff members</span>
                     <span className="text-right font-medium">
                       {branch.staff_count ?? stats?.total_staff ?? 0} active
@@ -352,7 +352,7 @@ export const BranchDetails: React.FC = () => {
                   </div>
 
                   {/* Classification */}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-center justify-between gap-space-sm py-2.5">
                     <span className="text-on-surface-variant">Facility tier</span>
                     <span className="text-right font-medium">Regional Center</span>
                   </div>
@@ -360,11 +360,11 @@ export const BranchDetails: React.FC = () => {
 
                 {/* Read-Only Notice Box at Bottom of Aside */}
                 <div className="p-space-lg space-y-2 border-t border-surface-subtle bg-surface-subtle/50">
-                  <div className="flex items-start gap-2.5 text-body-sm text-on-surface-variant">
+                  <div className="flex items-start gap-2.5 font-body-sm text-body-sm text-on-surface-variant">
                     <span className="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">
                       info
                     </span>
-                    <p className="text-xs leading-relaxed">
+                    <p className="font-body-sm text-body-sm leading-relaxed">
                       All branch specifications and managerial assignments are read-only for Branch Managers.
                     </p>
                   </div>
@@ -375,40 +375,40 @@ export const BranchDetails: React.FC = () => {
               <div className="space-y-space-md min-w-0">
                 {/* ── Section 1: Branch Information ── */}
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-space-xs">
+                    <div className="flex items-center gap-space-xs">
                       <span className="material-symbols-outlined text-[20px] text-primary">domain</span>
-                      <h2 className="text-headline-sm font-bold">Branch information</h2>
+                      <h2 className="font-headline-sm text-headline-sm font-bold">Branch information</h2>
                     </div>
-                    <span className="text-label-sm text-outline uppercase tracking-wider font-semibold">
+                    <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">
                       Read-only
                     </span>
                   </div>
                   <dl className="divide-y divide-surface-subtle">
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Branch name</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep">{branch.name}</dd>
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Branch name</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep">{branch.name}</dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Branch code</dt>
-                      <dd className="text-label-md font-medium font-mono text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Branch code</dt>
+                      <dd className="text-label-md font-medium font-mono-data text-brand-navy-deep">
                         BR-{branch.branch_id.toString().padStart(4, '0')}
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Facility ID</dt>
-                      <dd className="text-label-md font-medium font-mono text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Facility ID</dt>
+                      <dd className="text-label-md font-medium font-mono-data text-brand-navy-deep">
                         #{branch.branch_id}
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3 items-center">
-                      <dt className="text-on-surface-variant text-label-md">Status</dt>
-                      <dd className="text-label-md font-medium">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm items-center">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Status</dt>
+                      <dd className="font-label-md text-label-md font-medium">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-bold ${branch.is_active
+                          className={`inline-flex items-center gap-space-xs px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-bold ${branch.is_active
                             ? 'bg-secondary-container text-primary'
                             : 'bg-surface-subtle text-outline'
                             }`}
@@ -427,31 +427,31 @@ export const BranchDetails: React.FC = () => {
 
                 {/* ── Section 2: Branch Management & Administration ── */}
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-space-xs">
+                    <div className="flex items-center gap-space-xs">
                       <span className="material-symbols-outlined text-[20px] text-primary">manage_accounts</span>
-                      <h2 className="text-headline-sm font-bold">Management & leadership</h2>
+                      <h2 className="font-headline-sm text-headline-sm font-bold">Management & leadership</h2>
                     </div>
-                    <span className="text-label-sm text-outline uppercase tracking-wider font-semibold">
+                    <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">
                       Read-only
                     </span>
                   </div>
                   <dl className="divide-y divide-surface-subtle">
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Branch manager</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep flex items-center gap-2">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Branch manager</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep flex items-center gap-space-xs">
                         <span>{branch.branch_manager_name || 'Unassigned'}</span>
                         {isCurrentUserBranchManager && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-sky-100 text-sky-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded font-label-sm text-label-sm font-bold bg-sky-100 text-sky-800">
                             Your Profile
                           </span>
                         )}
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Manager User ID</dt>
-                      <dd className="text-label-md font-medium font-mono text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Manager User ID</dt>
+                      <dd className="text-label-md font-medium font-mono-data text-brand-navy-deep">
                         {branch.branch_manager_id ? `#${branch.branch_manager_id}` : 'N/A'}
                       </dd>
                     </div>
@@ -461,24 +461,24 @@ export const BranchDetails: React.FC = () => {
 
                 {/* ── Section 3: Location & Contact Details ── */}
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-space-xs">
+                    <div className="flex items-center gap-space-xs">
                       <span className="material-symbols-outlined text-[20px] text-primary">contacts</span>
-                      <h2 className="text-headline-sm font-bold">Location and contact</h2>
+                      <h2 className="font-headline-sm text-headline-sm font-bold">Location and contact</h2>
                     </div>
-                    <span className="text-label-sm text-outline uppercase tracking-wider font-semibold">
+                    <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">
                       Read-only
                     </span>
                   </div>
                   <dl className="divide-y divide-surface-subtle">
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3 items-center">
-                      <dt className="text-on-surface-variant text-label-md">Phone number</dt>
-                      <dd className="text-label-md font-medium font-mono text-brand-navy-deep flex items-center justify-between">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm items-center">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Phone number</dt>
+                      <dd className="text-label-md font-medium font-mono-data text-brand-navy-deep flex items-center justify-between">
                         <span>{formatPhoneNumber(branch.phone_number)}</span>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(branch.phone_number, 'Phone number')}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                          className="inline-flex items-center gap-space-2xs font-body-sm text-body-sm font-semibold text-primary hover:underline"
                         >
                           <span className="material-symbols-outlined text-[16px]">content_copy</span>
                           <span>Copy</span>
@@ -486,14 +486,14 @@ export const BranchDetails: React.FC = () => {
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3 items-start">
-                      <dt className="text-on-surface-variant text-label-md pt-0.5">Physical address</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep flex items-start justify-between gap-3">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm items-start">
+                      <dt className="text-on-surface-variant font-label-md text-label-md pt-0.5">Physical address</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep flex items-start justify-between gap-space-sm">
                         <span className="leading-relaxed">{branch.address}</span>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(branch.address, 'Address')}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0 pt-0.5"
+                          className="inline-flex items-center gap-space-2xs font-body-sm text-body-sm font-semibold text-primary hover:underline shrink-0 pt-0.5"
                         >
                           <span className="material-symbols-outlined text-[16px]">content_copy</span>
                           <span>Copy</span>
@@ -506,33 +506,33 @@ export const BranchDetails: React.FC = () => {
 
                 {/* ── Section 4: Workforce and Operational Summary ── */}
                 <section className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="px-space-md py-space-sm bg-surface-subtle flex items-center justify-between gap-space-xs">
+                    <div className="flex items-center gap-space-xs">
                       <span className="material-symbols-outlined text-[20px] text-primary">badge</span>
-                      <h2 className="text-headline-sm font-bold">Operational workforce summary</h2>
+                      <h2 className="font-headline-sm text-headline-sm font-bold">Operational workforce summary</h2>
                     </div>
-                    <span className="text-label-sm text-outline uppercase tracking-wider font-semibold">
+                    <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">
                       Read-only
                     </span>
                   </div>
                   <dl className="divide-y divide-surface-subtle">
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Active staff headcount</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Active staff headcount</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep">
                         {branch.staff_count ?? stats?.total_staff ?? 0} active members assigned
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Medical physicians</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Medical physicians</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep">
                         {stats?.total_doctors ?? '—'} doctors rostered for consultation
                       </dd>
                     </div>
 
-                    <div className="grid grid-cols-[180px_1fr] gap-4 px-space-md py-3">
-                      <dt className="text-on-surface-variant text-label-md">Registered patients</dt>
-                      <dd className="text-label-md font-medium text-brand-navy-deep">
+                    <div className="grid grid-cols-[180px_1fr] gap-space-md px-space-md py-space-sm">
+                      <dt className="text-on-surface-variant font-label-md text-label-md">Registered patients</dt>
+                      <dd className="font-label-md text-label-md font-medium text-brand-navy-deep">
                         {stats?.total_patients ?? '—'} active patient records
                       </dd>
                     </div>

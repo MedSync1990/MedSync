@@ -414,14 +414,9 @@ export const ManageAppointments: React.FC = () => {
     showToast('Appointment records exported to CSV successfully.', 'success');
   };
 
-  // ─── Print Sheet ───────────────────────────────────────────────────────────
-  const handlePrintSheet = () => {
-    window.print();
-  };
-
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER, BREADCRUMBS & LIVE METRICS                       */}
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -861,14 +856,6 @@ export const ManageAppointments: React.FC = () => {
               <span className="material-symbols-outlined text-[16px] text-primary">file_download</span>
               <span>Export CSV</span>
             </button>
-            <button
-              type="button"
-              onClick={handlePrintSheet}
-              className="flex items-center gap-1.5 text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-3 py-1.5 rounded-lg bg-surface-card border border-border-subtle hover:border-primary transition-colors font-semibold"
-            >
-              <span className="material-symbols-outlined text-[16px] text-primary">print</span>
-              <span>Print Sheet</span>
-            </button>
           </div>
         </div>
 
@@ -990,14 +977,11 @@ export const ManageAppointments: React.FC = () => {
                       <td className="px-space-md py-3.5">
                         <div className="flex flex-col">
                           <span
-                            className={`font-label-md text-label-md flex items-center gap-1.5 font-semibold ${isCancelled
+                            className={`font-label-md text-label-md font-semibold ${isCancelled
                               ? 'text-on-surface-variant line-through'
                               : 'text-brand-navy-deep'
                               }`}
                           >
-                            <span className="material-symbols-outlined text-[16px] text-primary">
-                              schedule
-                            </span>
                             {formatTime(apt.start_time)}
                           </span>
                           <span className="font-body-sm text-[12px] text-outline mt-0.5 font-medium">

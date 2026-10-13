@@ -12,6 +12,7 @@ import { Modal } from '../../components/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
+import { DoctorRosterModal } from '../../components/DoctorRosterModal';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function initials(name?: string) {
@@ -34,6 +35,7 @@ interface StatCardProps {
   iconBg: string;
   iconColor: string;
   valueColor?: string;
+  watermarkIcon?: string;
 }
 const StatCard: React.FC<StatCardProps> = ({
   icon,
@@ -42,23 +44,31 @@ const StatCard: React.FC<StatCardProps> = ({
   iconBg,
   iconColor,
   valueColor,
+  watermarkIcon,
 }) => (
-  <div className="bg-surface-card rounded-xl p-space-sm flex items-center gap-space-sm shadow-sm">
-    <div
-      className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg} ${iconColor}`}
-    >
-      <span className="material-symbols-outlined text-[20px]">{icon}</span>
-    </div>
-    <div>
-      <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">
+  <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+    <div className="flex items-center justify-between mb-space-sm">
+      <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block truncate">
         {label}
       </span>
+      <div
+        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+      >
+        <span className="material-symbols-outlined text-[20px]">{icon}</span>
+      </div>
+    </div>
+    <div className="flex items-baseline gap-2 z-10">
       <span
-        className={`font-headline-md text-headline-md font-bold ${valueColor ?? 'text-on-surface'}`}
+        className={`font-headline-lg text-headline-lg font-bold tracking-tight ${valueColor ?? 'text-on-surface'}`}
       >
         {value}
       </span>
     </div>
+    {watermarkIcon && (
+      <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center">
+        <span className="material-symbols-outlined !text-[90px] leading-none select-none" style={{ fontSize: '90px' }}>{watermarkIcon}</span>
+      </div>
+    )}
   </div>
 );
 
@@ -464,6 +474,7 @@ export const ManageDoctors: React.FC = () => {
 
   // Modal state
   const [modalDoctor, setModalDoctor] = useState<DoctorResponse | null>(null);
+  const [rosterDoctor, setRosterDoctor] = useState<DoctorResponse | null>(null);
 
   // Edit / Delete Specialty State
   const [editingSpecialty, setEditingSpecialty] = useState<SpecialtyResponse | null>(null);
@@ -609,14 +620,42 @@ export const ManageDoctors: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full pt-space-lg pb-space-xl">
-      {/* ── Stat ribbon ── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-space-sm mb-space-md">
+      {/* Header Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <span className="text-primary font-bold">Medical Staff</span>
+          </div>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
+            Manage Doctors &amp; Specialties
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Assign specialties and manage doctor availability across clinic locations.
+          </p>
+        </div>
+        {isAdmin && (
+          <div className="flex items-center gap-space-xs self-start lg:self-auto">
+            <button
+              type="button"
+              onClick={switchToSpecialtiesTab}
+              className="h-[42px] px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold flex items-center gap-space-xs shadow-sm transition-all"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Add Specialty</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Stat ribbon (KPI cards with watermarks) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-space-sm mb-space-lg">
         <StatCard
           icon="stethoscope"
           label="Total Doctors"
           value={doctors.length}
           iconBg="bg-status-scheduled-bg"
           iconColor="text-status-scheduled-text"
+          watermarkIcon="stethoscope"
         />
         <StatCard
           icon="category"
@@ -624,6 +663,7 @@ export const ManageDoctors: React.FC = () => {
           value={specialties.length}
           iconBg="bg-surface-container-high"
           iconColor="text-primary"
+          watermarkIcon="category"
         />
         <StatCard
           icon="check_circle"
@@ -632,6 +672,7 @@ export const ManageDoctors: React.FC = () => {
           iconBg="bg-status-completed-bg"
           iconColor="text-status-completed-text"
           valueColor="text-status-completed-text"
+          watermarkIcon="check_circle"
         />
         <StatCard
           icon="do_not_disturb_on"
@@ -640,27 +681,26 @@ export const ManageDoctors: React.FC = () => {
           iconBg="bg-status-cancelled-bg"
           iconColor="text-status-cancelled-text"
           valueColor="text-status-cancelled-text"
+          watermarkIcon="do_not_disturb_on"
         />
       </div>
 
       {/* ── Main card ── */}
       <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-        {/* Header */}
-        <div className="p-space-lg bg-surface-card">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+        {/* Subheader with Tab switcher */}
+        <div className="p-space-lg bg-surface-card border-b border-border-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
             <div>
-              <div className="flex items-center gap-space-xs">
-              </div>
-              <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
-                Manage Doctors &amp; Specialties
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Assign specialties and manage doctor availability.
+              <h2 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
+                Doctor &amp; Specialty Directory
+              </h2>
+              <p className="font-body-sm text-body-sm text-outline mt-0.5">
+                Showing {activeTab === 'doctors' ? doctors.length : specialties.length} records
               </p>
             </div>
 
             {/* Tab switcher */}
-            <div className="flex items-center gap-space-xs p-1 bg-surface-subtle rounded-xl self-start lg:self-center">
+            <div className="flex items-center gap-space-xs p-1 bg-surface-subtle rounded-xl self-start sm:self-auto">
               <button
                 id="tabBtnDoctors"
                 type="button"
@@ -871,6 +911,17 @@ export const ManageDoctors: React.FC = () => {
                             <div className="flex items-center justify-end gap-space-xs">
                               <button
                                 type="button"
+                                onClick={() => setRosterDoctor(doctor)}
+                                className="px-space-sm h-8 rounded-lg bg-surface-container text-secondary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
+                                title="Manage Weekly Working Roster"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">
+                                  calendar_month
+                                </span>
+                                <span>Roster</span>
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => setModalDoctor(doctor)}
                                 className="px-space-sm h-8 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary font-label-md text-label-md font-bold transition-all shadow-sm flex items-center gap-1"
                               >
@@ -1076,6 +1127,14 @@ export const ManageDoctors: React.FC = () => {
           onSave={handleModalSave}
         />
       )}
+
+      {/* Doctor Weekly Schedule Roster Modal */}
+      <DoctorRosterModal
+        isOpen={Boolean(rosterDoctor)}
+        doctorId={rosterDoctor?.doctor_id ?? null}
+        doctorName={rosterDoctor?.full_name}
+        onClose={() => setRosterDoctor(null)}
+      />
 
       {/* Edit Specialty Modal */}
       <Modal

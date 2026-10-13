@@ -2,13 +2,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
+import { useAuth } from '../../context/AuthContext';
+import { DoctorRosterModal } from '../../components/DoctorRosterModal';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export const DoctorSchedule: React.FC = () => {
+  useDocumentTitle('Doctor Schedule');
   const [activeTab, setActiveTab] = useState<'all' | 'remaining' | 'waiting' | 'upcoming' | 'completed'>('remaining');
   const [currentDateIndex, setCurrentDateIndex] = useState(1); // 1 = Today (Thursday)
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showRosterModal, setShowRosterModal] = useState(false);
+  const { user } = useAuth();
 
   const dates = useMemo(() => {
     const today = new Date();
@@ -52,7 +58,7 @@ export const DoctorSchedule: React.FC = () => {
   const waitingCount = appointments.filter((appointment) => appointment.status === 'Scheduled').length;
 
   return (
-    <div className="flex flex-col w-full py-space-md space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* Breadcrumb & Schedule Mode Indicator */}
       <div className="flex flex-wrap items-center justify-between gap-y-space-xs">
         <nav aria-label="Breadcrumb" className="flex items-center gap-space-2xs text-secondary font-label-md text-label-md">
@@ -66,7 +72,15 @@ export const DoctorSchedule: React.FC = () => {
           <span className="text-brand-navy-deep font-semibold">My Schedule</span>
         </nav>
         <div className="flex items-center gap-space-xs">
-          <span className="text-secondary font-mono-data text-mono-data hidden lg:inline-block">Sync: 10:14 AM IST</span>
+          <button
+            type="button"
+            onClick={() => setShowRosterModal(true)}
+            className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-brand-navy-deep transition-all shadow-sm flex items-center gap-1.5"
+            title="Edit Recurring Working Hours"
+          >
+            <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+            <span>Edit My Weekly Roster</span>
+          </button>
         </div>
       </div>
 
@@ -93,7 +107,7 @@ export const DoctorSchedule: React.FC = () => {
                   {currentDate.label}
                 </span>
                 {currentDate.isToday ? (
-                  <span className="px-2 py-0.5 rounded-md bg-border-focus text-on-primary font-label-sm text-label-sm font-bold tracking-wider uppercase">
+                  <span className="px-2 py-0.5 rounded-md bg-primary text-on-primary font-label-sm text-label-sm font-bold tracking-wider uppercase">
                     Today
                   </span>
                 ) : (
@@ -274,7 +288,7 @@ export const DoctorSchedule: React.FC = () => {
                       {appointment.status === 'Scheduled' ? (
                         <Link
                           to={`/doctor/consultation?appointmentId=${appointment.appointment_id}`}
-                          className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+                          className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
                         >
                           <span className="material-symbols-outlined text-[18px]">stethoscope</span>
                           <span>Start Consultation</span>
@@ -326,7 +340,7 @@ export const DoctorSchedule: React.FC = () => {
                   <td className="px-space-lg py-space-sm text-right">
                     <Link
                       to="/consultation"
-                      className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-border-focus hover:bg-status-scheduled-text text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+                      className="inline-flex items-center gap-1.5 h-9 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
                     >
                       <span className="material-symbols-outlined text-[18px]">stethoscope</span>
                       <span>Start Consultation</span>
@@ -469,7 +483,7 @@ export const DoctorSchedule: React.FC = () => {
             </div>
             <button
               onClick={() => setCurrentDateIndex(1)}
-              className="h-10 px-space-lg rounded-xl bg-border-focus text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
+              className="h-10 px-space-lg rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
               type="button"
             >
               Return to Today ({dates[1].label})
@@ -477,6 +491,14 @@ export const DoctorSchedule: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Doctor Weekly Working Roster Modal */}
+      <DoctorRosterModal
+        isOpen={showRosterModal}
+        doctorId={user?.id ?? null}
+        doctorName={user?.firstName ? `Dr. ${user.firstName} ${user.lastName || ''}` : 'My Schedule'}
+        onClose={() => setShowRosterModal(false)}
+      />
     </div>
   );
 };
