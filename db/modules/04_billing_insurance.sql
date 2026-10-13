@@ -1,6 +1,4 @@
--- db/modules/04_billing_insurance.sql
 -- Module: Billing & Insurance
--- Author: Shavinda
 -- Entry point script concatenating all sub-module files in FK-safe execution order
 
 \i db/modules/shavinda/insurance_policy_details.sql
