@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getOutstandingBalances, exportToCSV, downloadManagementPdf } from '../../api/reports';
-import { recordPayment } from '../../api/billing';
 import type { OutstandingBalancesResponse, BranchResponse } from '../../api/types';
 import { useAuth } from '../../context/AuthContext';
 import { listBranches } from '../../api';
@@ -31,7 +30,6 @@ export function OutstandingBalances() {
 
   // Export
   const [isExporting, setIsExporting] = useState(false);
-  const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   const fetchReport = async () => {
     setLoading(true);
@@ -102,24 +100,6 @@ export function OutstandingBalances() {
     }
   };
 
-  const handleRecordPayment = async () => {
-    if (!selectedInv) return;
-    setIsRecordingPayment(true);
-    try {
-      await recordPayment(selectedInv.invoice_id, {
-        amount: selectedInv.due_amount,
-        payment_type: 'Cash'
-      });
-      const res = await getOutstandingBalances();
-      setData(res);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Failed to record payment', err);
-    } finally {
-      setIsRecordingPayment(false);
-    }
-  };
-
   const handleView = (inv: any) => {
     setSelectedInv(inv);
     setIsModalOpen(true);
@@ -131,7 +111,7 @@ export function OutstandingBalances() {
   };
 
   return (
-    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-xl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col gap-space-2xs">
           <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
@@ -140,7 +120,7 @@ export function OutstandingBalances() {
             <span className="text-outline">/</span>
             <span className="text-secondary font-medium">Collections</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Outstanding Balances</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Outstanding Balances</h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">Patients with unpaid or partially paid invoices. Monitor collection risks and invoice recovery status.</p>
         </div>
         {user?.role === 'Administrator' ? (
@@ -226,32 +206,32 @@ export function OutstandingBalances() {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Outstanding</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">account_balance_wallet</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fmt(totalOutstanding)}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">payments</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalOutstanding)}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>payments</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Overdue Invoices</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">receipt_long</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{overdueInvoices} <span className="font-body-md text-body-md text-secondary font-normal">invoices</span></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">receipt</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{overdueInvoices} <span className="font-body-md text-body-md text-secondary font-normal">invoices</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Partially Paid</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">pie_chart</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{partiallyPaid}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">donut_small</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{partiallyPaid}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>donut_small</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Fully Unpaid</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">block</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fullyUnpaid}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">money_off</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fullyUnpaid}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>money_off</span></div>
         </div>
       </div>
 
@@ -350,7 +330,10 @@ export function OutstandingBalances() {
           )}
         </div>
         <div className="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
-          <div className="flex items-center gap-2 text-body-sm font-body-sm text-secondary"><span className="material-symbols-outlined text-[16px] text-primary">verified</span>Reconciliation sync active · latest Colombo Central ledgers</div>
+          <div className="flex items-center gap-2 text-body-sm font-body-sm text-secondary">
+            <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
+            Reconciliation sync active · {selectedBranch ? `${branches.find(b => b.branch_id === selectedBranch)?.name || 'Branch'} ledgers` : (user?.branchName ? `${user.branchName} ledgers` : 'All Branches ledgers')}
+          </div>
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-lg text-outline cursor-not-allowed" disabled type="button" aria-label="Previous page"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
             <span className="px-3 py-1 rounded-md bg-surface-card text-on-surface font-mono-data text-mono-data font-semibold">Page 1 of 1</span>
@@ -365,7 +348,10 @@ export function OutstandingBalances() {
             <div className="p-space-lg bg-surface-container-low flex items-start justify-between">
               <div className="flex items-center gap-space-sm">
                 <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center"><span className="material-symbols-outlined text-[26px]">receipt</span></div>
-                <div><div className="font-headline-sm text-headline-sm text-on-surface">{selectedInv.invoice_id}</div><div className="font-body-sm text-body-sm text-primary font-medium">Colombo Central Branch Registry</div></div>
+                <div>
+                  <div className="font-headline-sm text-headline-sm text-on-surface">{selectedInv.invoice_id}</div>
+                  <div className="font-body-sm text-body-sm text-primary font-medium">{selectedInv.branch_name ? `${selectedInv.branch_name} Branch Registry` : 'Branch Registry'}</div>
+                </div>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-lg bg-surface-card text-secondary hover:text-on-surface flex items-center justify-center transition-colors" aria-label="Close"><span className="material-symbols-outlined text-[20px]">close</span></button>
             </div>
@@ -388,10 +374,6 @@ export function OutstandingBalances() {
             </div>
             <div className="p-space-md bg-surface-container-low flex justify-end gap-space-sm">
               <button onClick={() => setIsModalOpen(false)} className="h-10 px-4 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">Close</button>
-              <button onClick={handleRecordPayment} disabled={isRecordingPayment} className="h-10 px-5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-tertiary transition-colors flex items-center gap-1.5 disabled:opacity-50">
-                {isRecordingPayment ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : <span className="material-symbols-outlined text-[16px]">payments</span>}
-                {isRecordingPayment ? 'Recording...' : 'Record Payment'}
-              </button>
             </div>
           </div>
         </div>

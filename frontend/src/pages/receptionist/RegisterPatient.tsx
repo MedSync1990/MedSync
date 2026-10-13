@@ -392,7 +392,7 @@ export const RegisterPatient: React.FC = () => {
   };
 
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* SECTION 1: HEADER & BREADCRUMBS                                     */}
       {/* ─────────────────────────────────────────────────────────────────── */}
@@ -1271,7 +1271,7 @@ export const RegisterPatient: React.FC = () => {
                   onChange={(e) => setInsuranceEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-border-focus"></div>
+                <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
           </div>

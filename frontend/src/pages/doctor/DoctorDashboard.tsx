@@ -20,16 +20,20 @@ export const DoctorDashboard: React.FC = () => {
   const todayLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
       {/* Top Level Welcome & Date Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
         <div className="flex flex-col">
           <div className="flex items-center gap-space-xs mb-1">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm">
+            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+              Doctor Portal
+            </span>
+            <span className="text-secondary opacity-40">•</span>
+            <span className="font-label-sm text-label-sm text-status-scheduled-text font-medium">
               Live Session
             </span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight">Overview</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Overview</h1>
         </div>
 
         {/* Quick Date & Roster Controls */}

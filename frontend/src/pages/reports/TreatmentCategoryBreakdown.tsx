@@ -67,6 +67,7 @@ export default function TreatmentCategoryBreakdownReport() {
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
       alert('Failed to generate PDF');
@@ -137,7 +138,7 @@ export default function TreatmentCategoryBreakdownReport() {
   };
 
   return (
-    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-xl">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col gap-space-2xs">
           <div className="flex items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
@@ -146,7 +147,7 @@ export default function TreatmentCategoryBreakdownReport() {
             <span className="text-outline">/</span>
             <span className="text-secondary font-medium">Utilization</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Treatment Category Breakdown</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Treatment Category Breakdown</h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">Number of treatments performed per category over a period, with demand distribution and procedure revenue.</p>
         </div>
         {user?.role === 'Administrator' ? (
@@ -221,32 +222,32 @@ export default function TreatmentCategoryBreakdownReport() {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Treatments</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">medical_services</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{totalTreatments}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">vaccines</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{totalTreatments}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>vaccines</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Top Category</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">biotech</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{topCategory}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">science</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{topCategory}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>science</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Total Treatment Value</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">payments</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{fmt(totalRevenue)}</div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">paid</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalRevenue)}</div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>paid</span></div>
         </div>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Catalog Active Items</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">fact_check</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{catalogActiveItems} <span className="font-body-md text-body-md text-outline font-normal">/ {catalogTotalItems} items</span></div>
-          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 pointer-events-none"><span className="material-symbols-outlined text-[90px]">checklist</span></div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{catalogActiveItems} <span className="font-body-md text-body-md text-outline font-normal">/ {catalogTotalItems} items</span></div>
+          <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>checklist</span></div>
         </div>
       </div>
 
@@ -316,10 +317,6 @@ export default function TreatmentCategoryBreakdownReport() {
               <span className="material-symbols-outlined text-primary text-[20px]">info</span>
               <span className="font-body-sm text-body-sm text-on-surface">Diagnostic turnover matches the Q3 target (94.2% within standard turnaround).</span>
             </div>
-            <button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="font-label-sm text-label-sm text-primary hover:underline shrink-0 flex items-center gap-1" type="button">
-              {isDownloadingPdf ? <span className="material-symbols-outlined text-[16px] animate-spin">sync</span> : null}
-              {isDownloadingPdf ? 'Generating...' : 'Download Audit PDF'}
-            </button>
           </div>
         </div>
       </div>
@@ -336,10 +333,16 @@ export default function TreatmentCategoryBreakdownReport() {
               <p className="font-body-sm text-body-sm text-on-surface-variant">Procedure frequency, demand share and revenue</p>
             </div>
           </div>
-          <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
-            {isExporting ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
-            {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export CSV'}
-          </button>
+          <div className="flex flex-wrap items-center gap-space-sm">
+            <button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="h-9 px-3 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-tertiary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 disabled:opacity-50" type="button">
+              <span className={`material-symbols-outlined text-[16px] ${isDownloadingPdf ? 'animate-spin' : ''}`}>{isDownloadingPdf ? 'sync' : 'picture_as_pdf'}</span>
+              {isDownloadingPdf ? 'Generating...' : 'Export PDF'}
+            </button>
+            <button onClick={handleExport} className="h-9 px-3 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center gap-1">
+              {isExporting ? <span className="material-symbols-outlined text-[16px] ">hourglass_empty</span> : exportComplete ? <span className="material-symbols-outlined text-[16px]">check</span> : <span className="material-symbols-outlined text-[16px]">download</span>}
+              {isExporting ? 'Exporting...' : exportComplete ? 'Downloaded' : 'Export CSV'}
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className={`w-full text-left border-collapse ${hasData ? '' : 'hidden'}`}>

@@ -36,10 +36,10 @@ const REPORT_CARDS = [
 
 export const ReportsIndex: React.FC = () => {
   return (
-    <div className="flex flex-col w-full px-space-md md:px-space-xl py-space-lg max-w-content-max-width mx-auto space-y-space-lg text-[18px]">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <div>
-        <h1 className="font-display-lg text-[34px] font-extrabold text-on-surface tracking-tight">Reports & Analytics</h1>
-        <p className="font-body-md text-[18px] text-secondary mt-0.5">
+        <h1 className="font-display-lg text-display-lg font-bold text-brand-navy-deep tracking-tight">Reports &amp; Analytics</h1>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
           Select a report below to view clinic performance, financial data, and operational metrics.
         </p>
       </div>
