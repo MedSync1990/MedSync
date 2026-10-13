@@ -330,7 +330,10 @@ export function OutstandingBalances() {
           )}
         </div>
         <div className="p-space-md bg-surface-subtle flex flex-col sm:flex-row items-center justify-between gap-space-sm">
-          <div className="flex items-center gap-2 text-body-sm font-body-sm text-secondary"><span className="material-symbols-outlined text-[16px] text-primary">verified</span>Reconciliation sync active · latest Colombo Central ledgers</div>
+          <div className="flex items-center gap-2 text-body-sm font-body-sm text-secondary">
+            <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
+            Reconciliation sync active · {selectedBranch ? `${branches.find(b => b.branch_id === selectedBranch)?.name || 'Branch'} ledgers` : (user?.branchName ? `${user.branchName} ledgers` : 'All Branches ledgers')}
+          </div>
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-lg text-outline cursor-not-allowed" disabled type="button" aria-label="Previous page"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
             <span className="px-3 py-1 rounded-md bg-surface-card text-on-surface font-mono-data text-mono-data font-semibold">Page 1 of 1</span>
@@ -345,7 +348,10 @@ export function OutstandingBalances() {
             <div className="p-space-lg bg-surface-container-low flex items-start justify-between">
               <div className="flex items-center gap-space-sm">
                 <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center"><span className="material-symbols-outlined text-[26px]">receipt</span></div>
-                <div><div className="font-headline-sm text-headline-sm text-on-surface">{selectedInv.invoice_id}</div><div className="font-body-sm text-body-sm text-primary font-medium">Colombo Central Branch Registry</div></div>
+                <div>
+                  <div className="font-headline-sm text-headline-sm text-on-surface">{selectedInv.invoice_id}</div>
+                  <div className="font-body-sm text-body-sm text-primary font-medium">{selectedInv.branch_name ? `${selectedInv.branch_name} Branch Registry` : 'Branch Registry'}</div>
+                </div>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-lg bg-surface-card text-secondary hover:text-on-surface flex items-center justify-center transition-colors" aria-label="Close"><span className="material-symbols-outlined text-[20px]">close</span></button>
             </div>
