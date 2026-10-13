@@ -30,6 +30,10 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const isModuleLoadError = /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk .* failed|error loading dynamically imported module/i.test(
+        this.state.error?.message || '',
+      );
+
       return (
         <div className="min-h-screen bg-canvas-bg flex items-center justify-center p-6">
           <div className="bg-surface-card border border-border-subtle rounded-2xl p-8 max-w-lg w-full shadow-lg text-center space-y-4">
@@ -40,7 +44,9 @@ export class ErrorBoundary extends Component<Props, State> {
               Unable to load page
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              An unexpected error occurred while rendering this section:
+              {isModuleLoadError
+                ? 'This page’s code could not be downloaded. The app may have been updated, or the connection was interrupted. Reload to fetch the current version.'
+                : 'An unexpected error occurred while rendering this section:'}
             </p>
             {this.state.error?.message && (
               <div className="p-3 bg-surface rounded-xl text-rose-700 font-mono-data text-xs text-left overflow-x-auto border border-border-subtle">

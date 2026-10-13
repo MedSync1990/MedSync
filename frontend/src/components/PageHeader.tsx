@@ -15,14 +15,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions,
 }) => {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md p-space-lg bg-surface-card rounded-xl shadow-sm border border-border-subtle mb-space-md">
+    <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
       <div>
         {breadcrumbs && <div className="mb-2"><Breadcrumbs items={breadcrumbs} /></div>}
-        <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
+        <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1 max-w-2xl">
             {subtitle}
           </p>
         )}

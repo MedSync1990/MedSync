@@ -130,7 +130,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">
+            <span className="font-display-lg text-display-lg text-on-surface font-headline-lg font-bold">
               {counts?.scheduled ?? 0}
             </span>
             <span className="font-body-md text-body-md text-secondary">Patients</span>
@@ -154,7 +154,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">
+            <span className="font-display-lg text-display-lg text-on-surface font-headline-lg font-bold">
               {counts?.completed ?? 0}
             </span>
             <span className="font-body-md text-body-md text-secondary">Consultations</span>
@@ -176,7 +176,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">
+            <span className="font-display-lg text-display-lg text-on-surface font-headline-lg font-bold">
               {counts?.total ?? 0}
             </span>
             <span className="font-body-md text-body-md text-secondary">Appointments</span>
@@ -198,7 +198,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="my-space-md flex items-baseline gap-3">
-            <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">
+            <span className="font-display-lg text-display-lg text-on-surface font-headline-lg font-bold">
               {counts?.cancelled ?? 0}
             </span>
             <span className="font-body-md text-body-md text-secondary">Cancelled</span>
@@ -224,7 +224,7 @@ export function Dashboard() {
                 <div className="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[22px]">person_pin</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">Next Patient Waiting</h2>
+                <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Next Patient Waiting</h2>
               </div>
               {nextAppointment && (
                 <span className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-status-pending-text bg-status-pending-bg px-3 py-1.5 rounded-full font-semibold border border-status-pending-bg animate-pulse">
@@ -238,7 +238,7 @@ export function Dashboard() {
             <div className="p-space-lg rounded-2xl bg-surface-subtle border border-border-subtle/80 mb-space-md flex-1 flex flex-col justify-between gap-space-md">
               <div>
                 <div className="flex flex-wrap items-center gap-space-xs mb-1">
-                  <h3 className="font-headline-lg text-headline-lg text-brand-navy-deep font-bold">
+                  <h3 className="font-headline-lg text-headline-lg text-on-surface font-bold">
                     {loading && !counts ? 'Loading next patient...' : nextAppointment?.patient_name || 'No patient waiting'}
                   </h3>
                   {nextAppointment && (
@@ -252,7 +252,7 @@ export function Dashboard() {
                   {nextAppointment && (
                     <>
                       <span className="text-outline-variant">·</span>
-                      <span className="font-semibold text-brand-navy-deep">{formatTime(nextAppointment.start_time)}</span>
+                      <span className="font-semibold text-on-surface">{formatTime(nextAppointment.start_time)}</span>
                     </>
                   )}
                 </div>
@@ -267,7 +267,7 @@ export function Dashboard() {
                     </div>
                     <div>
                       <span className="font-label-sm text-label-sm text-secondary block">Attending Doctor</span>
-                      <span className="font-body-md text-body-md font-semibold text-brand-navy-deep">
+                      <span className="font-body-md text-body-md font-semibold text-on-surface">
                         {nextAppointment.doctor_name || 'Dr. Assigned'}
                       </span>
                     </div>
@@ -284,7 +284,7 @@ export function Dashboard() {
                   <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                     Appointment Type
                   </span>
-                  <p className="font-body-md text-body-md text-brand-navy-deep font-medium">
+                  <p className="font-body-md text-body-md text-on-surface font-medium">
                     {nextAppointment?.appointment_type || 'None'}
                   </p>
                 </div>
@@ -292,7 +292,7 @@ export function Dashboard() {
                   <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
                     Time Slot
                   </span>
-                  <p className="font-body-md text-body-md text-brand-navy-deep font-semibold">
+                  <p className="font-body-md text-body-md text-on-surface font-semibold">
                     {formatTime(nextAppointment?.start_time)}
                   </p>
                 </div>
@@ -302,14 +302,14 @@ export function Dashboard() {
 
           <div className="flex flex-col sm:flex-row items-center gap-space-sm pt-space-xs">
             <Link
-              className="flex-1 w-full inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold shadow-sm hover:shadow transition-all"
+              className="flex-1 w-full inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-xl bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg font-semibold shadow-sm hover:shadow transition-all"
               to="/receptionist/appointments"
             >
               <span className="material-symbols-outlined text-[20px]">calendar_month</span>
               <span>Manage Appointments</span>
             </Link>
             <Link
-              className="flex-1 w-full inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-brand-navy-deep border border-border-subtle font-label-lg text-label-lg font-semibold transition-all"
+              className="flex-1 w-full inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-on-surface border border-border-subtle font-label-lg text-label-lg font-semibold transition-all"
               to="/receptionist/collect-payment"
             >
               <span className="material-symbols-outlined text-[20px]">payments</span>
@@ -326,7 +326,7 @@ export function Dashboard() {
                 <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[20px]">bolt</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">Quick Actions</h2>
+                <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Quick Actions</h2>
               </div>
               <span className="font-label-sm text-label-sm text-secondary bg-surface-subtle px-space-sm py-1 rounded-lg uppercase font-semibold">
                 Desk Tools
@@ -347,7 +347,7 @@ export function Dashboard() {
                     <span className="material-symbols-outlined text-[20px]">{action.icon}</span>
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-headline-sm text-headline-sm font-semibold text-brand-navy-deep group-hover:text-primary transition-colors">
+                    <h3 className="font-headline-sm text-headline-sm font-semibold text-on-surface group-hover:text-primary transition-colors">
                       {action.title}
                     </h3>
                     <p className="text-body-sm text-secondary truncate">{action.description}</p>
@@ -386,7 +386,7 @@ export function Dashboard() {
               <span className="material-symbols-outlined text-[22px]">calendar_month</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">Today's Appointments Queue</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Today's Appointments Queue</h2>
               <p className="text-body-sm text-secondary mt-0.5">
                 Latest appointments first · {counts?.total ?? '—'} total appointments
               </p>
@@ -408,11 +408,11 @@ export function Dashboard() {
         ) : appointments.length === 0 ? (
           <div className="m-5 p-12 text-center border border-dashed border-border-subtle rounded-xl">
             <span aria-hidden="true" className="material-symbols-outlined text-[36px] text-primary">event_available</span>
-            <p className="mt-2 text-headline-sm font-semibold text-brand-navy-deep">No appointments scheduled for today.</p>
+            <p className="mt-2 text-headline-sm font-semibold text-on-surface">No appointments scheduled for today.</p>
             <p className="text-body-sm text-secondary mt-1">Ready to book walk-ins and consultations.</p>
             <Link
               to="/receptionist/book-appointment"
-              className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md font-semibold hover:bg-primary-container transition-colors"
+              className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md font-semibold hover:bg-tertiary transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>Book Appointment</span>
@@ -431,16 +431,16 @@ export function Dashboard() {
                   <th scope="col" className="px-space-lg py-3.5 text-right w-32">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle font-body-md text-body-md text-brand-navy-deep">
+              <tbody className="divide-y divide-border-subtle font-body-md text-body-md text-on-surface">
                 {appointments.map((appointment) => (
                   <tr key={appointment.appointment_id} className="hover:bg-surface-subtle/70 transition-colors h-16">
-                    <td className="px-space-lg py-space-sm font-mono-data text-mono-data font-semibold text-brand-navy-deep whitespace-nowrap">
+                    <td className="px-space-lg py-space-sm font-mono-data text-mono-data font-semibold text-on-surface whitespace-nowrap">
                       {formatTime(appointment.start_time)}
                     </td>
                     <td className="px-space-md py-space-sm">
                       <div className="flex flex-col gap-0.5">
                         <div className="flex flex-wrap items-center gap-space-xs">
-                          <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-semibold">
+                          <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                             {appointment.patient_name}
                           </span>
                           <span className="text-primary font-mono-data text-mono-data font-label-sm text-label-sm font-semibold">
@@ -455,7 +455,7 @@ export function Dashboard() {
                     <td className="px-space-md py-space-sm">
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-secondary">stethoscope</span>
-                        <span className="font-body-md text-body-md text-brand-navy-deep font-medium">
+                        <span className="font-body-md text-body-md text-on-surface font-medium">
                           {appointment.doctor_name}
                         </span>
                       </div>
@@ -496,8 +496,8 @@ export function Dashboard() {
               Previous
             </button>
             <span>
-              Page <strong className="text-brand-navy-deep">{page}</strong> of{' '}
-              <strong className="text-brand-navy-deep">{Math.max(1, Math.ceil((counts?.total ?? 0) / pageSize))}</strong>
+              Page <strong className="text-on-surface">{page}</strong> of{' '}
+              <strong className="text-on-surface">{Math.max(1, Math.ceil((counts?.total ?? 0) / pageSize))}</strong>
             </span>
             <button
               aria-label="Next appointment page"

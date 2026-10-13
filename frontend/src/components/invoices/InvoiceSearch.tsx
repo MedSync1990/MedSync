@@ -16,7 +16,7 @@ export default function InvoiceSearch({
   onQuickLookup,
 }: InvoiceSearchProps) {
   return (
-    <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-md">
+    <div className="ui-card p-space-md md:p-space-lg space-y-space-md">
       <form onSubmit={onSubmit} className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
         {/* Search input */}
         <div className="relative flex-1">
@@ -24,7 +24,7 @@ export default function InvoiceSearch({
             search
           </span>
           <input
-            className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+            className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
             id="invoiceSearchInput"
             placeholder="Search by invoice code, patient name, patient code, NIC, or phone..."
             type="text"
@@ -34,7 +34,7 @@ export default function InvoiceSearch({
           {searchQuery && (
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-brand-navy-deep transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors cursor-pointer"
               title="Clear search"
               onClick={() => onSearchQueryChange('')}
             >
@@ -46,7 +46,7 @@ export default function InvoiceSearch({
         {/* Search button */}
         <button
           type="submit"
-          className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="h-10 px-6 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[20px]">search</span>
           <span>Search</span>

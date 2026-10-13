@@ -125,7 +125,7 @@ export default function CollectPayment() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+          <div className="flex flex-wrap items-center gap-space-xs text-primary font-label-md text-label-md uppercase tracking-wider">
             <Link to="/receptionist/dashboard" className="hover:text-primary transition-colors">
               Home
             </Link>
@@ -137,7 +137,7 @@ export default function CollectPayment() {
 
           {/* Title */}
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">
+            <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight">
               Collect Payment
             </h1>
           </div>
@@ -148,9 +148,9 @@ export default function CollectPayment() {
       </div>
 
       {/* Search Bar Card */}
-      <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-md">
+      <div className="ui-card p-space-md md:p-space-lg space-y-space-md">
         <div className="flex items-center justify-between">
-          <label htmlFor="collectInvoiceSearch" className="font-label-lg text-label-lg text-brand-navy-deep flex items-center gap-2">
+          <label htmlFor="collectInvoiceSearch" className="font-label-md text-label-md text-on-surface flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[20px]">manage_search</span>
             <span>Search Invoice Code</span>
           </label>
@@ -163,13 +163,13 @@ export default function CollectPayment() {
               ref={searchRef}
               id="collectInvoiceSearch"
               type="text"
-              className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+              className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-11 pr-10 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
               placeholder="Search by Invoice # (e.g. INV-004281), Patient Name, or NIC..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-brand-navy-deep transition-colors cursor-pointer"
+              <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors cursor-pointer"
                 onClick={() => { setSearchQuery(''); setInvoice(null); setLoadError(null); searchRef.current?.focus(); }}>
                 <span className="material-symbols-outlined text-[20px]">cancel</span>
               </button>
@@ -177,7 +177,7 @@ export default function CollectPayment() {
           </div>
           <button
             type="submit"
-            className="h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="h-10 px-6 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">search</span>
             <span>Search</span>
@@ -202,9 +202,9 @@ export default function CollectPayment() {
 
       {/* Loading state */}
       {loadingInvoice && (
-        <div className="bg-surface-card rounded-xl shadow-sm p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
+        <div className="ui-card p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
           <span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>
-          <p className="font-label-lg text-label-lg text-brand-navy-deep">Loading invoice…</p>
+          <p className="font-label-md text-label-md text-on-surface">Loading invoice…</p>
         </div>
       )}
 
@@ -231,7 +231,7 @@ export default function CollectPayment() {
             <span className="material-symbols-outlined text-[36px] text-status-completed-text">check_circle</span>
           </div>
           <div className="space-y-1">
-            <h3 className="font-headline-md text-headline-md text-brand-navy-deep">Payment Recorded!</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface">Payment Recorded!</h3>
             <p className="font-body-md text-body-md text-on-surface-variant">{successMessage}</p>
           </div>
           <p className="font-body-sm text-body-sm text-status-completed-text">Redirecting to invoice…</p>
@@ -240,12 +240,12 @@ export default function CollectPayment() {
 
       {/* Empty state */}
       {!invoice && !loadingInvoice && !loadError && !successMessage && (
-        <div className="bg-surface-card rounded-xl border border-dashed border-border-subtle p-space-xl text-center flex flex-col items-center justify-center space-y-space-md shadow-sm">
+        <div className="ui-card border-dashed p-space-xl text-center flex flex-col items-center justify-center space-y-space-md">
           <div className="w-16 h-16 rounded-full bg-surface-subtle flex items-center justify-center text-primary">
             <span className="material-symbols-outlined text-[36px]">receipt_long</span>
           </div>
           <div className="space-y-1">
-            <h3 className="font-headline-md text-headline-md text-brand-navy-deep">Search an Invoice to Begin</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface">Search an Invoice to Begin</h3>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
               Use the search bar above to find an invoice by invoice number, patient name, or NIC.
             </p>
@@ -259,14 +259,14 @@ export default function CollectPayment() {
 
           {/* LEFT: Invoice Detail */}
           <div className="lg:col-span-7 space-y-space-md">
-            <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
+            <div className="ui-card overflow-hidden">
 
               {/* Header bar */}
               <div className="px-space-lg py-3.5 bg-surface-subtle flex items-center justify-between border-b border-border-subtle">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="font-mono-data text-mono-data font-bold text-brand-navy-deep">{invoice.invoice_code}</span>
+                    <span className="font-mono-data text-mono-data font-bold text-on-surface">{invoice.invoice_code}</span>
                   </div>
                   <span className="font-body-sm text-body-sm text-outline">
                     {new Date(invoice.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -289,9 +289,9 @@ export default function CollectPayment() {
                       {initials(invoice.patient_name)}
                     </div>
                     <div>
-                      <h3 className="font-label-lg text-label-lg font-bold text-brand-navy-deep leading-tight">{invoice.patient_name}</h3>
+                      <h3 className="font-label-lg text-label-lg font-bold text-on-surface leading-tight">{invoice.patient_name}</h3>
                       <div className="flex flex-wrap items-center gap-2 mt-0.5 font-body-sm text-body-sm text-outline">
-                        <span className="text-brand-navy-deep font-semibold">{invoice.patient_id}</span>
+                        <span className="text-on-surface font-semibold">{invoice.patient_id}</span>
                         <span>·</span>
                         <span>NIC: <strong className="text-on-surface font-medium">{invoice.patient_nic}</strong></span>
                       </div>
@@ -299,7 +299,7 @@ export default function CollectPayment() {
                   </div>
                   <div className="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-border-subtle">
                     <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Attending Doctor</span>
-                    <span className="font-label-md text-label-md text-brand-navy-deep font-semibold">{invoice.doctor_name}</span>
+                    <span className="font-label-md text-label-md text-on-surface font-semibold">{invoice.doctor_name}</span>
                     <span className="font-body-sm text-body-sm text-outline block">{invoice.unit_name}</span>
                   </div>
                 </div>
@@ -314,10 +314,10 @@ export default function CollectPayment() {
                     {invoice.items.map((item, idx) => (
                       <div key={idx} className="p-3.5 bg-surface-card flex items-center justify-between hover:bg-surface-subtle/50 transition-colors">
                         <div className="flex flex-col">
-                          <span className="font-label-md text-label-md font-semibold text-brand-navy-deep leading-snug">{item.treatment_name}</span>
+                          <span className="font-label-md text-label-md font-semibold text-on-surface leading-snug">{item.treatment_name}</span>
                           <span className="font-body-sm text-body-sm text-outline">Code: {item.service_code} · {item.quantity}x</span>
                         </div>
-                        <span className="font-mono-data text-mono-data font-semibold text-brand-navy-deep">LKR {fmt(item.total_price)}</span>
+                        <span className="font-mono-data text-mono-data font-semibold text-on-surface">LKR {fmt(item.total_price)}</span>
                       </div>
                     ))}
                   </div>
@@ -332,7 +332,7 @@ export default function CollectPayment() {
                         <span className="material-symbols-outlined text-[14px]">verified</span>
                         {invoice.insurance_percentage}% Covered
                         {invoice.insurance_policy_number && (
-                          <span className="ml-1 px-1.5 py-0.5 rounded bg-surface-card text-primary font-mono-data text-[10px] border border-border-subtle">{invoice.insurance_policy_number}</span>
+                          <span className="ml-1 px-1.5 py-0.5 rounded bg-surface-card text-primary font-mono-data text-body-sm border border-border-subtle">{invoice.insurance_policy_number}</span>
                         )}
                       </span>
                     )}
@@ -340,7 +340,7 @@ export default function CollectPayment() {
                   <div className="space-y-1.5 font-body-sm text-body-sm pt-1">
                     <div className="flex items-center justify-between">
                       <span className="text-on-surface-variant">Subtotal Bill</span>
-                      <span className="font-mono-data text-mono-data font-semibold text-brand-navy-deep">LKR {fmt(invoice.total_amount)}</span>
+                      <span className="font-mono-data text-mono-data font-semibold text-on-surface">LKR {fmt(invoice.total_amount)}</span>
                     </div>
                     {invoice.insurance_amount > 0 && (
                       <div className="flex items-center justify-between text-status-scheduled-text">
@@ -354,10 +354,10 @@ export default function CollectPayment() {
                     </div>
                     <div className="pt-2.5 mt-2 border-t border-border-subtle flex items-center justify-between">
                       <div>
-                        <span className="font-label-lg text-label-lg font-bold text-brand-navy-deep block leading-tight">Net Patient Payable</span>
+                        <span className="font-label-lg text-label-lg font-bold text-on-surface block leading-tight">Net Patient Payable</span>
                         <span className="font-body-sm text-body-sm text-outline">Balance due upon discharge</span>
                       </div>
-                      <span className="font-headline-md text-headline-md font-bold text-brand-navy-deep">LKR {fmt(invoice.outstanding_balance)}</span>
+                      <span className="font-headline-md text-headline-md font-bold text-on-surface">LKR {fmt(invoice.outstanding_balance)}</span>
                     </div>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function CollectPayment() {
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[18px] text-status-scheduled-text">check_circle</span>
                             <div>
-                              <span className="font-label-md text-label-md font-medium text-brand-navy-deep">{p.payment_type}</span>
+                              <span className="font-label-md text-label-md font-medium text-on-surface">{p.payment_type}</span>
                               <span className="font-body-sm text-body-sm text-outline ml-2">{new Date(p.payment_date).toLocaleDateString()}</span>
                             </div>
                           </div>
@@ -389,15 +389,15 @@ export default function CollectPayment() {
 
           {/* RIGHT: Payment Terminal */}
           <div className="lg:col-span-5 space-y-space-md">
-            <div className="bg-surface-card rounded-xl shadow-sm p-space-lg sm:p-space-xl space-y-space-lg relative">
+            <div className="ui-card p-space-md md:p-space-lg space-y-space-lg relative">
 
               {/* Outstanding balance highlight */}
               <div className="p-space-md rounded-xl bg-status-scheduled-bg border border-brand-teal-light/30 flex items-center justify-between">
                 <div>
                   <span className="font-label-sm text-label-sm font-bold uppercase tracking-wider text-status-scheduled-text block">Outstanding Balance</span>
-                  <span className="font-display-lg text-display-lg font-bold text-brand-navy-deep leading-none">LKR {fmt(invoice.outstanding_balance)}</span>
+                  <span className="font-display-lg text-display-lg font-bold text-on-surface leading-none">LKR {fmt(invoice.outstanding_balance)}</span>
                 </div>
-                <div className="w-11 h-11 rounded-xl bg-surface-card flex items-center justify-center text-primary shadow-sm">
+                <div className="ui-card w-11 h-11 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[24px]">payments</span>
                 </div>
               </div>
@@ -407,7 +407,7 @@ export default function CollectPayment() {
 
                   {/* Payment Method */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="font-label-lg text-label-lg text-brand-navy-deep">Select Payment Method</label>
+                    <label className="font-label-md text-label-md text-on-surface">Select Payment Method</label>
                     <div className="grid grid-cols-3 gap-2">
                       {PAYMENT_METHODS.map(({ label, icon }) => (
                         <label key={label} className="cursor-pointer">
@@ -424,7 +424,7 @@ export default function CollectPayment() {
                   {/* Amount */}
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <label htmlFor="amountInput" className="font-label-lg text-label-lg text-brand-navy-deep">
+                      <label htmlFor="amountInput" className="font-label-md text-label-md text-on-surface">
                         Amount Received (LKR) <span className="text-error font-bold">*</span>
                       </label>
                       <span className="font-body-sm text-body-sm text-outline">Exact balance default</span>
@@ -439,7 +439,7 @@ export default function CollectPayment() {
                         max={invoice.outstanding_balance}
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg pl-14 pr-4 font-mono-data text-mono-data font-bold text-brand-navy-deep focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                        className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg pl-14 pr-4 font-mono-data text-mono-data font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                         required
                       />
                     </div>
@@ -461,7 +461,7 @@ export default function CollectPayment() {
 
                   {/* Reference */}
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="txnRef" className="font-label-lg text-label-lg text-brand-navy-deep">
+                    <label htmlFor="txnRef" className="font-label-md text-label-md text-on-surface">
                       Reference / POS Slip No. / Remarks
                     </label>
                     <input
@@ -470,7 +470,7 @@ export default function CollectPayment() {
                       value={txnRef}
                       onChange={(e) => setTxnRef(e.target.value)}
                       placeholder="e.g. Visa 4219 – Slip #TXN-99120"
-                      className="w-full h-[42px] bg-surface-subtle focus:bg-surface-card rounded-lg px-3.5 font-body-md text-body-md text-brand-navy-deep placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
+                      className="w-full h-10 bg-surface-subtle focus:bg-surface-card rounded-lg px-3.5 font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-border-focus transition-all"
                     />
                   </div>
 
@@ -478,7 +478,7 @@ export default function CollectPayment() {
                   <div className="p-space-md bg-surface-subtle rounded-xl border border-border-subtle space-y-2.5">
                     <label className="flex items-center gap-2.5 cursor-pointer">
                       <input type="checkbox" checked={genReceipt} onChange={(e) => setGenReceipt(e.target.checked)} className="w-4 h-4 rounded text-primary focus:ring-primary" />
-                      <span className="font-label-md text-label-md text-brand-navy-deep">Generate official payment receipt upon confirmation</span>
+                      <span className="font-label-md text-label-md text-on-surface">Generate official payment receipt upon confirmation</span>
                     </label>
                     <label className="flex items-center gap-2.5 cursor-pointer">
                       <input type="checkbox" checked={sendSms} onChange={(e) => setSendSms(e.target.checked)} className="w-4 h-4 rounded text-primary focus:ring-primary" />
@@ -497,7 +497,7 @@ export default function CollectPayment() {
                   {/* Buttons */}
                   <div className="space-y-2 pt-1">
                     <button type="submit" disabled={submitting}
-                      className="w-full h-[42px] px-6 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed">
+                      className="w-full h-10 px-6 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed">
                       {submitting ? (
                         <><span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span>Processing…</>
                       ) : (
@@ -508,7 +508,7 @@ export default function CollectPayment() {
                       )}
                     </button>
                     <button type="button" onClick={() => navigate(`/receptionist/invoices/${invoice.invoice_code}?type=invoice`)}
-                      className="w-full h-[42px] px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-brand-navy-deep font-label-md text-label-md transition-colors cursor-pointer">
+                      className="w-full h-10 px-5 rounded-lg border border-outline-variant bg-transparent hover:bg-surface-subtle text-on-surface font-label-md text-label-md transition-colors cursor-pointer">
                       Cancel
                     </button>
                   </div>
@@ -519,11 +519,11 @@ export default function CollectPayment() {
                     <span className="material-symbols-outlined text-[36px]">check_circle</span>
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-headline-md text-headline-md text-brand-navy-deep">Invoice Fully Settled</h3>
+                    <h3 className="font-headline-md text-headline-md text-on-surface">Invoice Fully Settled</h3>
                     <p className="font-body-md text-body-md text-on-surface-variant">There is no outstanding balance on this invoice.</p>
                   </div>
                   <button onClick={() => navigate('/receptionist/invoices')}
-                    className="inline-flex items-center gap-2 h-[42px] px-5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm transition-all cursor-pointer">
+                    className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-primary hover:bg-tertiary text-on-primary font-label-lg text-label-lg shadow-sm transition-all cursor-pointer">
                     <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                     Back to Invoices
                   </button>
