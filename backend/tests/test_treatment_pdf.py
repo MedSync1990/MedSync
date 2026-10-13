@@ -122,6 +122,7 @@ def test_pdf_uses_packaged_logo_from_any_directory(
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["cache-control"] == "private, no-store"
     assert "attachment; filename=Treatment_Report.pdf" == response.headers["content-disposition"]
     assert response.content.startswith(b"%PDF-")
     # A valid PDF alone can hide a failed logo. Require an embedded raster image.
@@ -138,6 +139,47 @@ def test_pdf_requires_authorized_cookie():
         client.cookies.clear()
         assert client.get("/api/v1/reports/treatment-categories/pdf").status_code == 401
     assert connection.arguments is None
+
+
+def test_pdf_logo_survives_unavailable_file_at_render_time(tmp_path, monkeypatch, caplog):
+    """The renderer must use embedded bytes, not reopen a file:// image URL."""
+    import weasyprint
+
+    packaged_app = tmp_path / "app"
+    shutil.copytree(
+        Path(reports.__file__).resolve().parent.parent / "templates",
+        packaged_app / "templates",
+    )
+    monkeypatch.setattr(reports, "__file__", str(packaged_app / "routers" / "reports.py"))
+    logo = packaged_app / "templates" / "report_logo.png"
+    real_html = weasyprint.HTML
+
+    def render_without_logo_file(*args, **kwargs):
+        # The endpoint has read the asset. Simulate a renderer that cannot access
+        # its original path; data URLs must continue to render the image.
+        logo.unlink()
+        return real_html(*args, **kwargs)
+
+    monkeypatch.setattr(weasyprint, "HTML", render_without_logo_file)
+    caplog.set_level(logging.ERROR, logger="weasyprint")
+    client, _ = make_client([])
+    with client:
+        response = client.get("/api/v1/reports/treatment-categories/pdf")
+
+    assert response.status_code == 200
+    assert b"/Subtype /Image" in response.content
+    assert not logo.exists()
+    assert not [r for r in caplog.records if r.name.startswith("weasyprint") and r.levelno >= logging.ERROR]
+
+
+def test_pdf_fails_clearly_when_packaged_logo_is_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(reports, "__file__", str(tmp_path / "app" / "routers" / "reports.py"))
+    client, _ = make_client([])
+    with client:
+        response = client.get("/api/v1/reports/treatment-categories/pdf")
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Report logo is unavailable."}
 
 
 def test_pdf_rejects_inactive_account():

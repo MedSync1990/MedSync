@@ -434,7 +434,16 @@ async def get_treatment_categories_pdf(
     # Keep report assets inside app/, which is copied into the production image.
     template_dir = Path(__file__).resolve().parent.parent / "templates"
     logo_path = template_dir / "report_logo.png"
-    logo_uri = logo_path.as_uri()
+    # Embed branding so PDF rendering never depends on a second file:// fetch.
+    # Do not silently deliver an unbranded PDF if the deployment lacks the asset.
+    from base64 import b64encode
+    try:
+        logo_bytes = logo_path.read_bytes()
+    except OSError as exc:
+        import logging
+        logging.getLogger(__name__).exception("Unable to read treatment report logo")
+        raise HTTPException(status_code=500, detail="Report logo is unavailable.") from exc
+    logo_uri = "data:image/png;base64," + b64encode(logo_bytes).decode("ascii")
 
     template_data = {
         "branch_name": branch_name,
@@ -462,7 +471,10 @@ async def get_treatment_categories_pdf(
     return Response(
         content=pdf_bytes, 
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=Treatment_Report.pdf"}
+        headers={
+            "Content-Disposition": "attachment; filename=Treatment_Report.pdf",
+            "Cache-Control": "private, no-store",
+        }
     )
 
 

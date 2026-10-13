@@ -1,5 +1,35 @@
 # Treatment Breakdown PDF verification
 
+## Follow-up: embedded logo fix
+
+After the initial verification, a user-provided PDF screenshot still showed
+`MedSync Logo` fallback text. GitHub deployment run `38357806303` completed
+successfully and remote `main` contained the PNG file-path fix, but that alone
+does not identify the exact image or cached response that served the screenshot.
+The live failure's precise cause remains unconfirmed without a fresh authenticated
+download and server diagnostics.
+
+The treatment endpoint now reads the packaged PNG and embeds its bytes as a
+`data:image/png;base64,...` URL in the HTML. Rendering no longer needs to reopen
+the logo through a separate `file://` fetch. A missing/unreadable asset produces
+a logged error and an explicit HTTP 500 instead of a silently unbranded PDF.
+The response sends `Cache-Control: private, no-store`, and the frontend download
+request also uses `cache: 'no-store'`.
+
+Verification of this follow-up: a fresh production image without mounts passed
+**22 tests**. The new regression test removes the PNG after HTML preparation but
+before rendering and still requires an embedded PDF image and no image-loading
+errors. A second test checks the missing-asset error response. The frontend
+production build passed. Both pages of a generated PDF were visually inspected:
+the logo is visible in the upper-right corner, and extracted text contains no
+`MedSync Logo` fallback. The sample is saved as
+`../treatment-pdf-verification/treatment-embedded-logo.pdf`.
+
+These follow-up code changes require a new deployment. The remainder of this
+document records the earlier file-path investigation and its results.
+
+## Original verification
+
 Verified on 13 October 2026 against local `ashen-new`, based on merge commit
 `1c87964`, with the test-fixture updates described below.
 
