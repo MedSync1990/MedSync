@@ -105,7 +105,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
 
   useEffect(() => {
     let mounted = true;
-    listTreatments(true)
+    listTreatments(canEdit)
       .then((items) => {
         if (mounted) setTreatments(items.map(mapTreatment));
       })
@@ -118,7 +118,7 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [canEdit]);
 
   const filteredTreatments = treatments.filter((item) => {
     const matchesCat = selectedCategory === 'All' || item.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -185,6 +185,9 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     const duplicateCode = treatments.some(
       (item) => item.code.toUpperCase() === normalizedCode && item.code !== editingItem?.code,
     );
+    const duplicateName = treatments.some(
+      (item) => item.name.trim().toLowerCase() === normalizedName.toLowerCase() && item.code !== editingItem?.code && item.isActive !== false,
+    );
 
     if (!normalizedCode || !normalizedName || !Number.isFinite(price) || price <= 0) {
       setFormError('Enter a treatment code, name, and a valid price greater than zero.');
@@ -192,6 +195,10 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
     }
     if (duplicateCode) {
       setFormError('Treatment codes must be unique.');
+      return;
+    }
+    if (duplicateName) {
+      setFormError('A treatment with this name already exists in the catalogue.');
       return;
     }
 
@@ -218,8 +225,8 @@ export const DoctorTreatmentCatalogue: React.FC<DoctorTreatmentCatalogueProps> =
       } else {
         setTreatments((current) => [...current, persistedItem]);
       }
-    } catch {
-      setFormError('Unable to save this treatment. Please try again.');
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : 'Unable to save this treatment. Please try again.');
       return;
     }
     setFormError('');

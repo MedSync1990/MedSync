@@ -71,6 +71,13 @@ async def create_treatment(
 	conn: Connection = Depends(get_db),
 	_: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
 ):
+	duplicate = await conn.fetchval(
+		"SELECT 1 FROM treatment_catalogue WHERE LOWER(TRIM(treatment_name)) = LOWER(TRIM($1)) AND is_active",
+		payload.treatment_name,
+	)
+	if duplicate:
+		raise ConflictError(f"A treatment named '{payload.treatment_name}' already exists.")
+
 	row = await conn.fetchrow(
 		"""
 		INSERT INTO treatment_catalogue
@@ -94,6 +101,19 @@ async def update_treatment(
 	conn: Connection = Depends(get_db),
 	_: CurrentUser = Depends(require_roles("Administrator", "Branch Manager")),
 ):
+	duplicate = await conn.fetchval(
+		"""
+		SELECT 1 FROM treatment_catalogue
+		WHERE LOWER(TRIM(treatment_name)) = LOWER(TRIM($1))
+		  AND treatment_code != $2
+		  AND is_active
+		""",
+		payload.treatment_name,
+		code,
+	)
+	if duplicate:
+		raise ConflictError(f"A treatment named '{payload.treatment_name}' already exists.")
+
 	row = await conn.fetchrow(
 		"""
 		UPDATE treatment_catalogue
