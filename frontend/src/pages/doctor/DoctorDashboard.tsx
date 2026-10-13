@@ -23,30 +23,11 @@ export const DoctorDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full pt-space-lg pb-space-xl">
-      {/* Top Level Welcome & Date Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs mb-1">
-            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider">
-              Doctor Portal
-            </span>
-            <span className="text-secondary opacity-40">•</span>
-            <span className="font-label-sm text-label-sm text-status-scheduled-text font-medium">
-              Live Session
-            </span>
-          </div>
-          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Overview</h1>
-        </div>
-
-        {/* Quick Date & Roster Controls */}
-        <div className="flex items-center gap-space-sm self-start md:self-auto">
-          <div className="flex items-center bg-surface-card rounded-xl px-space-md py-2 shadow-sm border border-border-subtle">
-            <span className="material-symbols-outlined text-[18px] text-primary mr-2">event_available</span>
-            <span className="font-label-lg text-label-lg text-brand-navy-deep">{todayLabel}</span>
-            <span className="mx-2 text-secondary opacity-40">|</span>
-            <span className="font-mono-data text-mono-data text-secondary">09:58 AM IST</span>
-          </div>
-        </div>
+      <div className="mb-space-lg">
+        <DashboardWelcome subtitle={`${user?.branchName || 'Assigned Branch'} · Doctor`} status="Clinical Dashboard">
+          <Link to="/doctor/schedule" className={`${dashboardAction} bg-primary text-white hover:bg-tertiary`}><span aria-hidden="true" className="material-symbols-outlined text-xl">calendar_month</span>My Schedule</Link>
+          <Link to="/doctor/earnings" className={`${dashboardAction} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><span aria-hidden="true" className="material-symbols-outlined text-xl">trending_up</span>My Earnings</Link>
+        </DashboardWelcome>
       </div>
 
       {/* Widget 1: Key Metric Cards Grid (Stretched to 2 columns to fill width) */}
