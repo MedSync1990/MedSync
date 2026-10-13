@@ -5,8 +5,10 @@ Thilakarathna (D.D.D.) · Ashen Silva (W.A.A.T.)**
 
 
 
+> Updated 2026-10-13: this is the historical ownership/build plan, not a current completion checklist. Unticked tasks do not mean their features are absent. Core routers/pages, SQL modules, Dockerfiles, and the Azure workflow now exist; see `next_steps.md` for current verification work. No live deployment, migration, acceptance-test, or performance success is asserted by this plan.
+
 Work is split by module so each person owns their DB tables, API routes, and frontend pages
-end-to-end. Tasks below are synced against the **current** `docs/api-routes.md` and
+end-to-end. Historical tasks below were organized against the design versions of `docs/api-routes.md` and
 `docs/database.md`; anything that changed shape since the last version of this doc is tagged
 **(new)** or **(updated)** inline.
 
@@ -248,12 +250,12 @@ below is a route immediately followed by the page(s) that call it.
       the open question flagged in `database.md` §0 — don't silently build both.
 
 **Shavinda**
-- [ ] `GET /invoices/{id}`, `GET /patients/{id}/invoices` → **Invoices list + detail view**
+- [ ] `GET /invoices/{id}`, `GET /invoices/patient/{patient_id}` → **Invoices list + detail view**
       (itemised lines, insurance breakdown).
-- [ ] `POST /invoices/{id}/payments` → `fn_record_payment()` (server-side amount ≤ outstanding
+- [ ] `POST /payments/{invoice_code}` → `fn_record_payment()` (server-side amount ≤ outstanding
       check happens **inside that function**, `database.md` §7.8 — this route is a thin wrapper)
       → **Collect Payment page.**
-- [ ] `GET /patients/{id}/balance`, `/patients/{id}/insurance`, `POST /insurance/verify` →
+- [ ] `GET /invoices/patient/{patient_id}/balance`, `/insurance/patient/{patient_id}`, `POST /insurance/verify` →
       **Insurance registration section** on the patient profile.
 
 **Ashen Silva — remaining routes/pages, after the two blockers above land**
@@ -362,9 +364,8 @@ Goal: a reliable one-command demo and a clean walkthrough for the presentation.
 - [ ] Polish copy/microcopy on auth + branch/staff pages against `docs/page-content.md`.
 
 **Ashen Silva**
-- [ ] Write `backend/Dockerfile` and `frontend/Dockerfile` per `docs/docker.md`, uncomment the
-      corresponding blocks in `docker-compose.yml`.
-- [ ] Confirm `docker compose up -d --build` brings up the full stack (DB + API + UI) from a
+- [ ] Verify the existing backend/frontend Dockerfiles and Azure workflow. Docker Compose currently runs API + UI with an externally configured database; there is no `docs/docker.md` setup guide.
+- [ ] Confirm `docker compose up -d --build` brings up API + UI connected to the configured external database from a
       clean checkout on a different machine than the one it was built on.
 - [ ] Prepare the reports demo path (including the doctor payment report) and a backup
       screen-recording in case of live-demo issues.
@@ -374,5 +375,4 @@ Goal: a reliable one-command demo and a clean walkthrough for the presentation.
 
 ## Status legend
 
-Use `[ ]` → `[x]` on each task above as it's completed and merged. For a quick glance at what's
-outstanding, search the file for `[ ]`.
+Checkboxes preserve historical planning, not a verified current backlog. Use `next_steps.md` for current verification tasks; mark historical tasks complete only with evidence of implementation and acceptance.

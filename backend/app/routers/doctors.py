@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 import secrets
 import string
 from typing import List, Optional
@@ -12,12 +12,20 @@ from app.schemas.doctors import (
     DoctorSpecialtiesUpdate,
     DoctorResponse,
     DoctorCreateResponse,
+    DoctorScheduleItem,
+    DoctorScheduleUpdate,
 )
 from app.schemas.appointments import DoctorSlotResponse, SlotStatusEnum
 from app.errors import NotFoundError, ConflictError, ForbiddenError, AppValidationError
 from app.security import hash_password
 
 router = APIRouter()
+
+
+def parse_time(val: str) -> time:
+    """Parse HH:MM or HH:MM:SS string to datetime.time."""
+    parts = val.strip().split(":")
+    return time(hour=int(parts[0]), minute=int(parts[1]), second=int(parts[2]) if len(parts) > 2 else 0)
 
 
 def generate_temp_password(length: int = 12) -> str:
@@ -30,6 +38,7 @@ def generate_temp_password(length: int = 12) -> str:
 async def list_doctors(
     specialty_id: Optional[int] = Query(None, description="Filter by specialty ID"),
     branch_id: Optional[int] = Query(None, description="Filter by branch ID"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
     conn: Connection = Depends(get_db),
     user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
 ):
@@ -68,16 +77,17 @@ async def list_doctors(
         ) doc_sp ON TRUE
         WHERE ($1::int IS NULL OR s.branch_id = $1)
           AND (
-              $2::int IS NULL OR 
+              $2::int IS NULL OR
               EXISTS (
-                  SELECT 1 FROM doctor_specialty ds2 
+                  SELECT 1 FROM doctor_specialty ds2
                   WHERE ds2.user_id = d.user_id AND ds2.specialty_id = $2
               )
           )
+          AND ($3::boolean IS NULL OR s.is_active = $3)
         ORDER BY full_name ASC;
     """
 
-    rows = await conn.fetch(query, scoped_branch_id, specialty_id)
+    rows = await conn.fetch(query, scoped_branch_id, specialty_id, is_active)
     return [
         DoctorResponse(
             doctor_id=r["doctor_id"],
@@ -239,7 +249,7 @@ async def create_doctor(
         raise AppValidationError([{"field": "specialty_ids", "message": "One or more specialty IDs are invalid."}])
 
     # Get Doctor role_id
-    role_row = await conn.fetchrow("SELECT role_id FROM role WHERE name = 'Doctor';")
+    role_row = await conn.fetchrow("SELECT role_id FROM role WHERE role_name = 'Doctor';")
     if not role_row:
         raise NotFoundError("Doctor role not configured in database.")
     role_id = role_row["role_id"]
@@ -277,6 +287,8 @@ async def create_doctor(
             payload.marital_status,
             payload.email,
         )
+        if not isinstance(user_id, int):
+            raise RuntimeError("Doctor registration did not return a valid user ID.")
 
         # 2. Insert contact numbers
         phones = [(user_id, phone) for phone in set(payload.phone_numbers)]
@@ -423,3 +435,127 @@ async def update_doctor_specialties(
             )
 
     return await get_doctor(id=id, conn=conn, user=user)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Doctor Weekly Schedule / Roster endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/{id}/schedule", response_model=List[DoctorScheduleItem])
+async def get_doctor_schedule(
+    id: int,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor", "Receptionist")),
+):
+    """
+    Get a doctor's weekly recurring shift schedule.
+    - Admin & Receptionist: any doctor
+    - Branch Manager: doctors in own branch
+    - Doctor: own schedule only
+    """
+    doc_row = await conn.fetchrow(
+        "SELECT s.branch_id FROM doctor d JOIN staff s ON d.user_id = s.user_id WHERE d.user_id = $1;",
+        id
+    )
+    if not doc_row:
+        raise NotFoundError("Doctor not found.")
+
+    if user.role == "Doctor" and user.user_id != id:
+        raise ForbiddenError("Doctors can only view their own schedule.")
+
+    if user.role == "Branch Manager" and user.branch_id is not None and doc_row["branch_id"] != user.branch_id:
+        raise NotFoundError("Doctor not found.")
+
+    rows = await conn.fetch(
+        """
+        SELECT
+            schedule_id,
+            doctor_id,
+            day_of_week,
+            start_time::text,
+            end_time::text,
+            slot_duration,
+            is_active
+        FROM doctor_weekly_schedule
+        WHERE doctor_id = $1
+        ORDER BY day_of_week, start_time;
+        """,
+        id
+    )
+    return [DoctorScheduleItem(**dict(r)) for r in rows]
+
+
+@router.put("/{id}/schedule", response_model=List[DoctorScheduleItem])
+async def update_doctor_schedule(
+    id: int,
+    payload: DoctorScheduleUpdate,
+    conn: Connection = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager", "Doctor")),
+):
+    """
+    Update a doctor's weekly recurring shift schedule.
+    - Admin: any doctor
+    - Branch Manager: doctors in own branch
+    - Doctor: own schedule only
+    """
+    doc_row = await conn.fetchrow(
+        "SELECT s.branch_id FROM doctor d JOIN staff s ON d.user_id = s.user_id WHERE d.user_id = $1;",
+        id
+    )
+    if not doc_row:
+        raise NotFoundError("Doctor not found.")
+
+    if user.role == "Doctor" and user.user_id != id:
+        raise ForbiddenError("Doctors can only edit their own schedule.")
+
+    if user.role == "Branch Manager" and user.branch_id is not None and doc_row["branch_id"] != user.branch_id:
+        raise ForbiddenError("Branch Managers can only manage doctors in their own branch.")
+
+    # Validate shifts & check for same-day overlaps
+    day_shifts = {}
+    day_names = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday"}
+    for s in payload.schedules:
+        try:
+            st = parse_time(s.start_time)
+            et = parse_time(s.end_time)
+        except Exception:
+            raise ConflictError(f"Invalid time format: '{s.start_time}' or '{s.end_time}'. Please use HH:MM format.")
+
+        if et <= st:
+            d_name = day_names.get(s.day_of_week, f"Day {s.day_of_week}")
+            raise ConflictError(f"Shift end time ({s.end_time[:5]}) must be after start time ({s.start_time[:5]}) on {d_name}.")
+
+        if s.day_of_week not in day_shifts:
+            day_shifts[s.day_of_week] = []
+        for prev_st, prev_et in day_shifts[s.day_of_week]:
+            if st < prev_et and et > prev_st:
+                d_name = day_names.get(s.day_of_week, f"Day {s.day_of_week}")
+                raise ConflictError(
+                    f"Overlapping shifts found on {d_name} ({s.start_time[:5]} - {s.end_time[:5]}). Please adjust shift hours."
+                )
+        day_shifts[s.day_of_week].append((st, et))
+
+    async with conn.transaction():
+        # Replace existing schedule
+        await conn.execute("DELETE FROM doctor_weekly_schedule WHERE doctor_id = $1;", id)
+        for s in payload.schedules:
+            st = parse_time(s.start_time)
+            et = parse_time(s.end_time)
+            await conn.execute(
+                """
+                INSERT INTO doctor_weekly_schedule (doctor_id, day_of_week, start_time, end_time, slot_duration, is_active)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (doctor_id, day_of_week, start_time)
+                DO UPDATE SET end_time = EXCLUDED.end_time, slot_duration = EXCLUDED.slot_duration, is_active = EXCLUDED.is_active;
+                """,
+                id, s.day_of_week, st, et, s.slot_duration, s.is_active
+            )
+
+        # Remove unbooked 'Open' future slots so deleted/changed shifts do not persist
+        await conn.execute(
+            "DELETE FROM doctor_availability_slots WHERE doctor_id = $1 AND date >= CURRENT_DATE AND status = 'Open';",
+            id
+        )
+
+        # Generate slots only for the doctor whose schedule changed
+        await conn.execute("SELECT fn_generate_slots_from_roster(14, $1);", id)

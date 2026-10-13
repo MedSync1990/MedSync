@@ -18,58 +18,6 @@ const timeAgo = (dateStr: string | null) => {
   return `${Math.round(mins / 1440)} days ago`;
 };
 
-interface StatCardProps {
-  icon: string;
-  label: string;
-  value: string | number;
-  iconBg: string;
-  iconColor: string;
-  valueColor?: string;
-  subtext?: string;
-  watermarkIcon?: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({
-  icon,
-  label,
-  value,
-  iconBg,
-  iconColor,
-  valueColor,
-  subtext,
-  watermarkIcon,
-}) => (
-  <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
-    <div className="flex items-center justify-between mb-space-sm">
-      <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block truncate">
-        {label}
-      </span>
-      <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
-      >
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-      </div>
-    </div>
-    <div className="flex items-baseline gap-2 z-10">
-      <span
-        className={`font-headline-lg text-headline-lg font-bold tracking-tight ${valueColor ?? 'text-on-surface'}`}
-      >
-        {value}
-      </span>
-      {subtext && (
-        <span className="font-body-sm text-body-sm text-on-surface-variant">
-          {subtext}
-        </span>
-      )}
-    </div>
-    {watermarkIcon && (
-      <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center">
-        <span className="material-symbols-outlined !text-[90px] leading-none select-none" style={{ fontSize: '90px' }}>{watermarkIcon}</span>
-      </div>
-    )}
-  </div>
-);
-
 export const ManageStaff: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -304,12 +252,12 @@ export const ManageStaff: React.FC = () => {
   const selectedStaff = selectedStaffId ? staff.find(s => s.user_id === selectedStaffId) : null;
 
   return (
-    <div className="flex flex-col w-full pt-space-lg pb-space-xl">
+    <div className="flex flex-col w-full min-h-screen bg-canvas-bg font-sans text-brand-navy-deep antialiased">
       {selectedStaff ? (
         // DETAIL VIEW
-        <div className="w-full">
+        <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full">
           <div className="space-y-1 mb-space-lg">
-            <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
               <a href="#" onClick={(e) => { e.preventDefault(); window.location.hash=''; }} className="hover:text-primary">Manage Staff</a>
               <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               <span className="text-primary font-bold">{selectedStaff.first_name} {selectedStaff.last_name}</span>
@@ -502,280 +450,146 @@ export const ManageStaff: React.FC = () => {
         </div>
       ) : (
         // LIST VIEW
-        <>
-          {/* Header Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+        <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-outline uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-label-sm text-outline uppercase tracking-wider">
                 <span className="text-primary font-bold">Manage Staff</span>
               </div>
-              <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">
-                Manage Staff
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.
-              </p>
+              <h1 className="text-display-lg tracking-tight">Manage Staff</h1>
+              <p className="text-body-md text-on-surface-variant">Doctors and receptionists with access to the branch. Add accounts, update details, and deactivate leavers.</p>
             </div>
-            <div className="flex flex-wrap items-center gap-space-sm self-start lg:self-auto">
-              <button
-                type="button"
-                onClick={() => navigate('/admin/staff/add')}
-                className="h-[42px] px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg font-bold flex items-center gap-space-xs shadow-sm transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">person_add</span>
-                <span>Add Staff</span>
+            <div className="flex gap-space-sm">
+              <button onClick={() => navigate('/admin/staff/add')} className="h-10 px-space-lg rounded-xl bg-border-focus hover:bg-status-scheduled-text text-on-primary text-label-md shadow-sm flex items-center gap-2 transition-colors">
+                <span className="material-symbols-outlined text-[20px]">person_add</span>Add staff
               </button>
             </div>
           </div>
 
-          {/* ── Stat ribbon (KPI cards with watermarks) ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-sm mb-space-lg">
-            <StatCard
-              icon="badge"
-              label="Total Accounts"
-              value={staff.length}
-              subtext={`${activeCount} active`}
-              iconBg="bg-surface-container-high"
-              iconColor="text-primary"
-              watermarkIcon="badge"
-            />
-            <StatCard
-              icon="stethoscope"
-              label="Doctors"
-              value={staff.filter(s => s.role_name === 'Doctor').length}
-              iconBg="bg-status-scheduled-bg"
-              iconColor="text-status-scheduled-text"
-              watermarkIcon="stethoscope"
-            />
-            <StatCard
-              icon="support_agent"
-              label="Receptionists"
-              value={staff.filter(s => s.role_name === 'Receptionist').length}
-              iconBg="bg-status-pending-bg"
-              iconColor="text-status-pending-text"
-              watermarkIcon="support_agent"
-            />
-            <StatCard
-              icon="person_off"
-              label="Inactive Accounts"
-              value={staff.length - activeCount}
-              iconBg="bg-status-cancelled-bg"
-              iconColor="text-status-cancelled-text"
-              valueColor="text-status-cancelled-text"
-              watermarkIcon="person_off"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+            <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">badge</span></div>
+              <div><p className="text-label-sm uppercase text-outline tracking-wider">Total accounts</p><div className="flex items-baseline gap-2"><span className="text-headline-md">{staff.length}</span><span className="text-body-sm text-on-surface-variant">{activeCount} active</span></div></div>
+            </div>
+            <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-status-scheduled-bg text-status-scheduled-text flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">stethoscope</span></div>
+              <div><p className="text-label-sm uppercase text-outline tracking-wider">Doctors</p><div className="flex items-baseline gap-2"><span className="text-headline-md">{staff.filter(s => s.role_name === 'Doctor').length}</span></div></div>
+            </div>
+            <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-status-pending-bg text-status-pending-text flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">support_agent</span></div>
+              <div><p className="text-label-sm uppercase text-outline tracking-wider">Receptionists</p><div className="flex items-baseline gap-2"><span className="text-headline-md">{staff.filter(s => s.role_name === 'Receptionist').length}</span></div></div>
+            </div>
+            <div className="px-space-md py-space-sm rounded-xl bg-surface-card shadow-sm flex items-center gap-space-md">
+              <div className="w-10 h-10 rounded-xl bg-surface-subtle text-outline flex items-center justify-center"><span className="material-symbols-outlined text-[22px]">person_off</span></div>
+              <div><p className="text-label-sm uppercase text-outline tracking-wider">Inactive</p><div className="flex items-baseline gap-2"><span className="text-headline-md">{staff.length - activeCount}</span></div></div>
+            </div>
           </div>
 
-          {/* ── Main card ── */}
-          <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden">
-            {/* Table Card Subheader with Tabs */}
-            <div className="p-space-lg bg-surface-card border-b border-border-subtle">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-                <div>
-                  <h2 className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold">
-                    Staff Directory
-                  </h2>
-                  <p className="font-body-sm text-body-sm text-outline mt-0.5">
-                    Showing {filteredStaff.length} of {staff.length} accounts
-                  </p>
-                </div>
+          <div className="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="px-space-md py-space-sm bg-surface-subtle flex items-center gap-2 border-b border-border-subtle">
+              <span className="text-headline-sm">Branch staff</span>
+              <span className="text-label-sm text-outline px-2 py-0.5 rounded bg-surface-card">Showing {filteredStaff.length} of {staff.length}</span>
+            </div>
+            
+            <div className="px-space-md border-b border-border-subtle flex gap-space-lg overflow-x-auto">
+              {[
+                { id: 'all', label: 'All', count: staff.length },
+                { id: 'active', label: 'Active', count: activeCount },
+                { id: 'inactive', label: 'Inactive', count: staff.length - activeCount }
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`h-11 -mb-px border-b-2 text-label-md whitespace-nowrap ${activeTab === tab.id ? 'border-border-focus text-brand-navy-deep' : 'border-transparent text-outline hover:text-brand-navy-deep'}`}>
+                  {tab.label} <span className="ml-1 text-label-sm text-outline">{tab.count}</span>
+                </button>
+              ))}
+            </div>
 
-                {/* Segmented Pill Tabs */}
-                <div className="flex items-center gap-space-xs p-1 bg-surface-subtle rounded-xl self-start sm:self-auto">
-                  {[
-                    { id: 'all', label: 'All', count: staff.length, icon: 'group' },
-                    { id: 'active', label: 'Active', count: activeCount, icon: 'check_circle' },
-                    { id: 'inactive', label: 'Inactive', count: staff.length - activeCount, icon: 'person_off' }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-space-xs px-space-md py-2 rounded-lg font-label-lg text-label-lg font-bold transition-all ${
-                        activeTab === tab.id
-                          ? 'bg-surface-card text-primary shadow-sm'
-                          : 'text-on-surface-variant hover:text-on-surface'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                      <span>{tab.label}</span>
-                      <span className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm font-bold ${
-                        activeTab === tab.id
-                          ? 'bg-status-scheduled-bg text-status-scheduled-text'
-                          : 'bg-surface-container text-on-surface-variant'
-                      }`}>
-                        {tab.count}
-                      </span>
-                    </button>
-                  ))}
+            <div className="p-space-md grid grid-cols-1 lg:grid-cols-12 gap-3 items-center border-b border-surface-subtle">
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-5' : 'lg:col-span-6'} relative`}>
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span>
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full h-10 pl-10 pr-4 rounded-xl bg-surface-subtle focus:bg-surface-card placeholder-outline focus:outline-none shadow-inner" placeholder="Search name, NIC, username..." />
+              </div>
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'} relative`}>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">badge</span>
+                <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
+                  <option value="">All roles</option>
+                  {roles.map(r => <option key={r.role_id} value={r.role_name}>{r.role_name}</option>)}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+              </div>
+              {user?.role === 'Administrator' && (
+                <div className="lg:col-span-3 relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">apartment</span>
+                  <select value={branchFilter} onChange={e => setBranchFilter(e.target.value)} className="w-full h-10 pl-9 pr-8 rounded-xl bg-surface-subtle appearance-none cursor-pointer outline-none">
+                    <option value="">All branches</option>
+                    {branches.map(b => <option key={b.branch_id} value={String(b.branch_id)}>{b.name}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
                 </div>
+              )}
+              <div className={`${user?.role === 'Administrator' ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+                <button onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }} className="h-10 px-3 rounded-xl bg-surface-subtle hover:bg-surface-container text-outline hover:text-brand-navy-deep text-label-md flex items-center gap-1.5 transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">restart_alt</span>Clear filters
+                </button>
               </div>
             </div>
 
-            {/* Action Bar (Search & Filters) */}
-            <div className="p-space-lg pt-0">
-              <div className="mb-space-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md bg-surface-subtle p-space-sm rounded-xl">
-                <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-space-sm">
-                  {/* Search */}
-                  <div className="relative flex-1">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">
-                      search
-                    </span>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="Search staff by name, NIC, username or email…"
-                      className="w-full h-[42px] pl-10 pr-4 bg-surface-card rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md shadow-sm focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Role filter */}
-                  <div className="relative min-w-[180px]">
-                    <select
-                      aria-label="Role Filter"
-                      value={roleFilter}
-                      onChange={e => setRoleFilter(e.target.value)}
-                      className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
-                    >
-                      <option value="">All Roles</option>
-                      {roles.map(r => (
-                        <option key={r.role_id} value={r.role_name}>
-                          {r.role_name}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[20px] text-outline pointer-events-none">
-                      expand_more
-                    </span>
-                  </div>
-
-                  {/* Branch filter */}
-                  {user?.role === 'Administrator' ? (
-                    <div className="relative min-w-[220px]">
-                      <select
-                        aria-label="Branch Filter"
-                        value={branchFilter}
-                        onChange={e => setBranchFilter(e.target.value)}
-                        className="w-full h-[42px] pl-3 pr-10 bg-surface-card rounded-lg text-on-surface font-body-md text-body-md shadow-sm focus:outline-none appearance-none cursor-pointer border border-border-subtle"
-                      >
-                        <option value="">All Branches</option>
-                        {branches.map(b => (
-                          <option key={b.branch_id} value={String(b.branch_id)}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[20px] text-outline pointer-events-none">
-                        expand_more
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Reset filters */}
-                {(searchQuery || roleFilter || branchFilter || activeTab !== 'all') && (
-                  <button
-                    type="button"
-                    onClick={() => { setSearchQuery(''); setRoleFilter(''); setBranchFilter(''); setActiveTab('all'); }}
-                    className="h-[42px] px-3 rounded-lg bg-surface-card hover:bg-surface-container text-outline hover:text-brand-navy-deep font-label-md text-label-md flex items-center gap-1.5 transition-colors border border-border-subtle shadow-sm shrink-0"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-                    <span>Reset</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-surface-subtle">
-                    <tr>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Staff Member
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Role
-                      </th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-subtle h-11 text-label-sm text-outline uppercase tracking-wider">
+                    <th className="px-space-md font-semibold">Staff member</th>
+                    <th className="px-space-md font-semibold">Role</th>
+                    {user?.role === 'Administrator' && <th className="px-space-md font-semibold">Branch</th>}
+                    <th className="px-space-md font-semibold">NIC</th>
+                    <th className="px-space-md font-semibold">Contact</th>
+                    <th className="px-space-md font-semibold">Status</th>
+                    <th className="px-space-md font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-surface-subtle">
+                  {filteredStaff.map(s => (
+                    <tr key={s.user_id} className="hover:bg-surface-subtle/70 cursor-pointer" onClick={() => window.location.hash = `staff/${s.user_id}`}>
+                      <td className="px-space-md py-3">
+                        <div className="flex items-center gap-space-sm">
+                          <div className={`w-10 h-10 rounded-xl ${s.is_active ? 'bg-secondary-container text-on-secondary-fixed' : 'bg-surface-subtle text-outline'} text-label-md flex items-center justify-center shrink-0`}>{initials(s.first_name, s.last_name)}</div>
+                          <div className="min-w-0">
+                            <span className="text-label-lg hover:text-border-focus font-medium">{s.first_name} {s.last_name}</span>
+                            <div className="text-body-sm text-outline font-mono">@{s.username}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-space-md py-3 whitespace-nowrap">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
+                          s.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'
+                        }`}>
+                          {s.role_name}
+                        </span>
+                      </td>
                       {user?.role === 'Administrator' && (
-                        <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                          Branch Location
-                        </th>
+                        <td className="px-space-md py-3 whitespace-nowrap text-body-md text-on-surface-variant">
+                          {s.branch_name || `Branch #${s.branch_id}`}
+                        </td>
                       )}
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        NIC Number
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Contact Info
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold">
-                        Account Status
-                      </th>
-                      <th className="h-11 px-space-md font-label-sm text-label-sm text-outline uppercase tracking-wider font-bold text-right">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-surface-subtle">
-                    {filteredStaff.map(s => (
-                      <tr
-                        key={s.user_id}
-                        className="hover:bg-surface-subtle transition-colors group border-t border-border-subtle first:border-t-0 cursor-pointer"
-                        onClick={() => window.location.hash = `staff/${s.user_id}`}
-                      >
-                        <td className="px-space-md py-3">
-                          <div className="flex items-center gap-space-sm">
-                            <div className="relative w-11 h-11 rounded-full bg-surface-container text-primary flex items-center justify-center font-bold text-label-md shrink-0 ring-2 ring-surface-card shadow-xs">
-                              {initials(s.first_name, s.last_name)}
-                              <span
-                                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-surface-card ${
-                                  s.is_active ? 'bg-status-completed-text' : 'bg-outline'
-                                }`}
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <span className="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-primary transition-colors block truncate">
-                                {s.first_name} {s.last_name}
-                              </span>
-                              <div className="font-mono text-body-sm text-outline truncate">
-                                @{s.username}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-space-md py-3 whitespace-nowrap">
-                          <span className={`inline-flex px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
-                            s.is_active ? 'bg-surface-container text-primary' : 'bg-surface-subtle text-outline'
+                      <td className="px-space-md py-3 text-mono-data whitespace-nowrap">{s.id_number}</td>
+                      <td className="px-space-md py-3">
+                        <div className="text-mono-data text-on-surface">{s.phone_number || 'N/A'}</div>
+                        <div className="text-body-sm text-outline truncate max-w-[200px]">{s.email || 'No email'}</div>
+                      </td>
+                      <td className="px-space-md py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
+                            s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'
                           }`}>
-                            {s.role_name}
+                            <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>
+                            {s.is_active ? 'Active' : 'Inactive'}
                           </span>
-                        </td>
-                        {user?.role === 'Administrator' && (
-                          <td className="px-space-md py-3 whitespace-nowrap text-body-md text-on-surface-variant">
-                            {s.branch_name || `Branch #${s.branch_id}`}
-                          </td>
-                        )}
-                        <td className="px-space-md py-3 text-mono-data whitespace-nowrap">
-                          {s.id_number}
-                        </td>
-                        <td className="px-space-md py-3">
-                          <div className="text-mono-data text-on-surface">{s.phone_number || 'N/A'}</div>
-                          <div className="text-body-sm text-outline truncate max-w-[200px]">{s.email || 'No email'}</div>
-                        </td>
-                        <td className="px-space-md py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
-                              s.is_active ? 'bg-status-completed-bg text-status-completed-text' : 'bg-surface-subtle text-outline'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${s.is_active ? 'bg-status-completed-text' : 'bg-outline'}`}></span>
-                              {s.is_active ? 'Active' : 'Inactive'}
+                          {s.locked_until && new Date(s.locked_until) > new Date() && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                              <span className="material-symbols-outlined text-[14px]">lock</span>Locked
                             </span>
-                            {s.locked_until && new Date(s.locked_until) > new Date() && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-amber-50 text-amber-800 border border-amber-200 font-medium">
-                                <span className="material-symbols-outlined text-[14px]">lock</span>Locked
-                              </span>
-                            )}
-                          </div>
-                        </td>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-space-md py-3 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           {s.locked_until && new Date(s.locked_until) > new Date() && (
@@ -810,15 +624,14 @@ export const ManageStaff: React.FC = () => {
                     </tr>
                   )}
                   {loading && (
-                    <tr><td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px] text-primary">hourglass_empty</span></td></tr>
+                    <tr><td colSpan={user?.role === 'Administrator' ? 7 : 6} className="p-space-xl text-center"><span className="material-symbols-outlined text-[32px]  text-primary">hourglass_empty</span></td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </>
-    )}
+      )}
 
       {/* DRAWER FOR ADD/EDIT STAFF */}
       {isDrawerOpen && (

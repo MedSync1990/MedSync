@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 
 from app.db import get_conn
 from app.config import config
-from app.security import verify_password, create_access_token, decode_access_token, generate_csrf_token
+from app.security import verify_password, create_access_token, decode_access_token, generate_csrf_token, require_trusted_origin
 from app.dependencies import require_roles, get_current_user, CurrentUser
 from app.schemas.auth import LoginRequest, LoginResponse, MeResponse
 from app.errors import UnauthorizedError
@@ -13,7 +13,7 @@ router = APIRouter()
 
 LOCKOUT_THRESHOLD = 5 # placeholder per database.md §14 -- confirm before shipping
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, dependencies=[Depends(require_trusted_origin)])
 async def login(payload: LoginRequest, response: Response, db: asyncpg.Connection = Depends(get_conn)):
     row = await db.fetchrow(
         """
@@ -93,7 +93,7 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
     )
 
 
-@router.post("/logout")
+@router.post("/logout", dependencies=[Depends(require_trusted_origin)])
 async def logout(response: Response):
     # Stateless JWT: nothing to invalidate server-side. Frontend just discards
     # the token. Add a token-blocklist table here later if you ever need

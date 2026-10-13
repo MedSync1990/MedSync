@@ -6,7 +6,7 @@ import type { AppointmentResponse } from '../../api/types';
 import { StatusBadge } from '../../components/StatusBadge';
 
 const actions = [
-  { title: 'Emergency Walk-in', description: 'Immediate patient triage & booking', icon: 'emergency', to: '/receptionist/book-appointment', color: 'bg-rose-50 text-rose-600 border border-rose-200' },
+  { title: 'Emergency Walk-in', description: 'Immediate patient triage & booking', icon: 'emergency', to: '/receptionist/book-appointment?type=walk-in', color: 'bg-rose-50 text-rose-600 border border-rose-200' },
   { title: 'Register Patient', description: 'Create new patient profile & MRN', icon: 'person_add', to: '/receptionist/register-patient', color: 'bg-surface-container text-primary' },
   { title: 'Book Appointment', description: 'Schedule appointment with doctor', icon: 'event_available', to: '/receptionist/book-appointment', color: 'bg-surface-container text-primary' },
   { title: 'Collect Payment', description: 'Record invoice & receipt payment', icon: 'payments', to: '/receptionist/collect-payment', color: 'bg-emerald-50 text-emerald-600 border border-emerald-200' },
