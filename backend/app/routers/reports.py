@@ -228,6 +228,7 @@ async def get_outstanding_balances(
             a.patient_id,
             u.first_name || ' ' || u.last_name as patient_name,
             c.phone_number as contact_number,
+            b.name as branch_name,
             i.total_amount,
             (i.insurance_amount + COALESCE(SUM(p.amount_paid), 0)) as paid_amount,
             (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) as due_amount,
@@ -238,6 +239,7 @@ async def get_outstanding_balances(
         JOIN appointments a ON i.appointment_id = a.appointment_id
         JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
         JOIN staff s ON das.doctor_id = s.user_id
+        JOIN branch b ON s.branch_id = b.branch_id
         JOIN app_user u ON a.patient_id = u.user_id
         LEFT JOIN LATERAL (
             SELECT phone_number
@@ -249,7 +251,7 @@ async def get_outstanding_balances(
         LEFT JOIN payments p ON i.invoice_id = p.invoice_id
         WHERE i.status != 'Paid'
           AND ($1::int IS NULL OR s.branch_id = $1)
-        GROUP BY i.invoice_code, a.patient_id, u.first_name, u.last_name, c.phone_number, i.total_amount, i.insurance_amount, i.created_at, i.status
+        GROUP BY i.invoice_code, a.patient_id, u.first_name, u.last_name, c.phone_number, b.name, i.total_amount, i.insurance_amount, i.created_at, i.status
         HAVING (i.total_amount - i.insurance_amount - COALESCE(SUM(p.amount_paid), 0)) > 0
         ORDER BY aging_days DESC
     """
@@ -261,6 +263,7 @@ async def get_outstanding_balances(
             patient_id=r["patient_id"],
             patient_name=r["patient_name"],
             contact_number=r["contact_number"] or "N/A",
+            branch_name=r["branch_name"],
             total_amount=float(r["total_amount"]),
             paid_amount=float(r["paid_amount"]),
             due_amount=float(r["due_amount"]),

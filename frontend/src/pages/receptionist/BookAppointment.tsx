@@ -560,7 +560,7 @@ export const BookAppointment: React.FC = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-space-lg md:p-space-xl max-w-content-max-width mx-auto w-full space-y-space-lg">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div className="space-y-1">
           {/* Breadcrumbs */}

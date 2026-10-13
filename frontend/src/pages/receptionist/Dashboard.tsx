@@ -102,12 +102,40 @@ export function Dashboard() {
   const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
 
   return (
-    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pb-space-lg p-space-lg md:p-space-xl max-w-content-max-width mx-auto">
-      <div className="mb-space-lg">
-        <DashboardWelcome subtitle={`${user?.branchName || 'Assigned Branch'} · Receptionist`} status={error ? 'Connection issue' : counts ? 'Operational live' : 'Connecting'}>
-          <Link to="/receptionist/book-appointment" className={`${dashboardAction} bg-primary text-white hover:bg-tertiary`}><span aria-hidden="true" className="material-symbols-outlined text-xl">calendar_month</span>Book Appointment</Link>
-          <Link to="/receptionist/register-patient" className={`${dashboardAction} bg-surface-container-high text-on-surface hover:bg-surface-variant`}><span aria-hidden="true" className="material-symbols-outlined text-xl">person_add</span>Register Patient</Link>
-        </DashboardWelcome>
+    <div className="flex flex-col w-full min-h-[calc(100vh-theme(spacing.topbar-height))] justify-between pt-space-lg pb-space-xl">
+      {/* Top Level Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md py-space-md mb-space-md">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-space-xs mb-1">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-status-scheduled-bg text-status-scheduled-text font-label-sm text-label-sm font-semibold">
+              Reception Desk
+            </span>
+          </div>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep tracking-tight font-bold">Overview</h1>
+          <p className="font-body-md text-body-md text-secondary mt-0.5">
+            {user?.branchName || 'Assigned Branch'} · Receptionist
+          </p>
+        </div>
+
+        {/* Date & Time pill matching Doctor Dashboard image */}
+        <div className="flex items-center gap-space-sm self-start md:self-auto">
+          <div className="flex items-center bg-surface-card rounded-xl px-4 py-2 shadow-sm border border-border-subtle">
+            <span className="material-symbols-outlined text-[18px] text-primary mr-2">event_available</span>
+            <span className="font-label-lg text-label-lg text-brand-navy-deep font-semibold">{todayLabel}</span>
+            <span className="mx-2 text-secondary opacity-40">|</span>
+            <span className="font-mono-data text-mono-data text-secondary">{liveTime}</span>
+          </div>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => setRefreshVersion((v) => v + 1)}
+            className="w-10 h-10 rounded-xl bg-surface-card border border-border-subtle shadow-sm flex items-center justify-center text-primary hover:bg-surface-subtle transition-colors disabled:opacity-50"
+            title="Refresh dashboard data"
+            aria-label="Refresh dashboard data"
+          >
+            <span className={`material-symbols-outlined text-[20px] ${loading ? 'animate-spin' : ''}`}>refresh</span>
+          </button>
+        </div>
       </div>
 
       {error && (

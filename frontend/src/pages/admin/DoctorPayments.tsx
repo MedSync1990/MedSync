@@ -293,7 +293,7 @@ const DoctorPayments: React.FC = () => {
   const resetFilters = () => { setStatusFilter('Pending'); setSearchQuery(''); };
 
   return (
-    <div className="flex flex-col w-full py-space-xl max-w-content-max-width mx-auto gap-space-xl">
+    <div className="flex flex-col w-full pt-space-lg pb-space-xl gap-space-xl">
 
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
@@ -304,7 +304,7 @@ const DoctorPayments: React.FC = () => {
             <span className="text-outline">/</span>
             <span className="text-secondary font-medium">Doctor Payouts</span>
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">Doctor Payment Approval</h1>
+          <h1 className="font-display-lg text-display-lg text-brand-navy-deep font-bold tracking-tight">Doctor Payment Approval</h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
             Review physician payout requests and approve or reject them before releasing to finance.
           </p>
