@@ -9,7 +9,7 @@ import { LoadingState } from '../components/LoadingState';
 // Auth
 const Login = lazy(() => import('../pages/Login').then(m => ({ default: m.Login })));
 const Logout = lazy(() => import('../pages/logout').then(m => ({ default: m.Logout })));
-const Profile = lazy(() => import('../pages/Profile').then(m => ({ default: m.Profile || m.default })));
+const Profile = lazy(() => import('../pages/Profile'));
 
 // Receptionist
 const ReceptionistDashboard = lazy(() => import('../pages/receptionist/Dashboard'));

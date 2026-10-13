@@ -1,4 +1,3 @@
--- db/modules/shavinda/doctor_payouts.sql
 -- Tracks the actual payouts/disbursements made by the hospital to the doctor
 
 CREATE TABLE IF NOT EXISTS staff_payouts (
