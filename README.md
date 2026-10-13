@@ -101,7 +101,7 @@ The contributions below cover database, application, and integration work. Share
 **Application and integration work**
 
 - Contributed FastAPI scaffolding, environment configuration, connection handling, exception responses, and database migration/verification tooling.
-- Implemented password hashing/verification, JWT handling, authentication flows, role dependencies, and branch scoping.
+- Implemented password hashing/verification, authentication flows, role dependencies, and branch scoping.
 - Built staff administration, profile inspection/editing, password resets, unlocking/reactivation, and the first-login password-change gate.
 - Developed reporting/statistics queries, dashboard metrics, frontend reporting pages, charts, filters, and API integration.
 - Implemented Treatment Category Breakdown PDF generation and report-download integration.

@@ -18,7 +18,7 @@ export const DoctorDashboard: React.FC = () => {
       .finally(() => setLoadingAppointments(false));
   }, []);
 
-  const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
+  const nextAppointment = appointments.find((item) => item.status === 'Scheduled');
   const completedAppointments = appointments.filter((item) => item.status === 'Completed').length;
 
   return (

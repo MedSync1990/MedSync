@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
@@ -9,33 +9,58 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 export const DoctorSchedule: React.FC = () => {
   useDocumentTitle('Doctor Schedule');
   const [activeTab, setActiveTab] = useState<'all' | 'remaining' | 'waiting' | 'upcoming' | 'completed'>('remaining');
-  const [currentDateIndex, setCurrentDateIndex] = useState(1); // 1 = Today (Thursday)
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showRosterModal, setShowRosterModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const { user } = useAuth();
+
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, []);
 
   const dates = useMemo(() => {
     const today = new Date();
-    return [-1, 0, 1].map((offset) => {
+    const offsets = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7];
+    return offsets.map((offset) => {
       const date = new Date(today);
       date.setDate(today.getDate() + offset);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
       return {
-        date: date.toISOString().split('T')[0],
+        date: dateStr,
         label: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }),
         isToday: offset === 0,
       };
     });
   }, []);
 
-  const currentDate = dates[currentDateIndex];
+  const todayIndex = 7;
+  const [currentDateIndex, setCurrentDateIndex] = useState(todayIndex);
+  const currentDate = dates[currentDateIndex] || dates[todayIndex];
 
   useEffect(() => {
     setLoading(true);
     setLoadError(null);
     listAppointments({ date: currentDate.date, limit: 100 })
-      .then((response) => setAppointments(response.data || []))
+      .then((response) => {
+        const allItems = response.data || [];
+        // Strictly filter to the specific date to ensure no leaking of other days
+        const dayOnly = allItems.filter((apt) => {
+          const d = apt.appointment_date?.split('T')[0]?.trim();
+          return !d || d === currentDate.date;
+        });
+        dayOnly.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+        setAppointments(dayOnly);
+      })
       .catch(() => {
         setAppointments([]);
         setLoadError('Unable to load appointments for this date.');
@@ -43,19 +68,88 @@ export const DoctorSchedule: React.FC = () => {
       .finally(() => setLoading(false));
   }, [currentDate.date]);
 
-  const visibleAppointments = appointments.filter((appointment) => {
-    if (activeTab === 'completed') return appointment.status === 'Completed';
-    if (activeTab === 'remaining') return appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
-    if (activeTab === 'waiting') return appointment.status === 'Scheduled';
-    if (activeTab === 'upcoming') return appointment.status === 'Scheduled';
-    return appointment.status !== 'Cancelled';
-  });
+  const isAppointmentWaiting = useCallback((apt: AppointmentResponse): boolean => {
+    if (apt.status !== 'Scheduled') return false;
+    if (!currentDate.isToday) {
+      // Past day uncompleted appointments are considered waiting/overdue; future days are not yet arrived
+      return currentDate.date < todayStr;
+    }
+    // Walk-ins are physically present in the clinic
+    if (apt.is_walkin_patient || (apt.appointment_type || '').toLowerCase().includes('walk')) return true;
+    const now = new Date();
+    const currentH = String(now.getHours()).padStart(2, '0');
+    const currentM = String(now.getMinutes()).padStart(2, '0');
+    const currentTime = `${currentH}:${currentM}`;
+    const slotTime = (apt.start_time || '').slice(0, 5);
+    return slotTime <= currentTime;
+  }, [currentDate.isToday, currentDate.date, todayStr]);
+
+  const isAppointmentUpcoming = useCallback((apt: AppointmentResponse): boolean => {
+    if (apt.status !== 'Scheduled') return false;
+    if (!currentDate.isToday) {
+      return currentDate.date > todayStr;
+    }
+    return !isAppointmentWaiting(apt);
+  }, [currentDate.isToday, currentDate.date, todayStr, isAppointmentWaiting]);
+
+  // Specific day dynamic counts
+  const activeAppointments = useMemo(
+    () => appointments.filter((a) => a.status !== 'Cancelled'),
+    [appointments]
+  );
+  const completedCount = useMemo(
+    () => appointments.filter((a) => a.status === 'Completed').length,
+    [appointments]
+  );
+  const remainingCount = useMemo(
+    () => appointments.filter((a) => a.status !== 'Completed' && a.status !== 'Cancelled').length,
+    [appointments]
+  );
+  const waitingCount = useMemo(
+    () => appointments.filter(isAppointmentWaiting).length,
+    [appointments, isAppointmentWaiting]
+  );
+  const upcomingCount = useMemo(
+    () => appointments.filter(isAppointmentUpcoming).length,
+    [appointments, isAppointmentUpcoming]
+  );
+  const progressPercent = activeAppointments.length > 0
+    ? Math.round((completedCount / activeAppointments.length) * 100)
+    : 0;
+
+  const visibleAppointments = useMemo(() => {
+    return appointments.filter((appointment) => {
+      if (appointment.status === 'Cancelled') return false;
+
+      // Tab filter
+      if (activeTab === 'completed' && appointment.status !== 'Completed') return false;
+      if (activeTab === 'remaining' && appointment.status === 'Completed') return false;
+      if (activeTab === 'waiting' && !isAppointmentWaiting(appointment)) return false;
+      if (activeTab === 'upcoming' && !isAppointmentUpcoming(appointment)) return false;
+
+      // Category filter
+      if (categoryFilter !== 'all') {
+        const typeStr = (appointment.appointment_type || '').toLowerCase();
+        if (categoryFilter === 'consultation' && !typeStr.includes('consultation') && !typeStr.includes('scheduled')) return false;
+        if (categoryFilter === 'followup' && !typeStr.includes('follow')) return false;
+        if (categoryFilter === 'walkin' && !typeStr.includes('walk')) return false;
+      }
+
+      // Search query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesName = (appointment.patient_name || '').toLowerCase().includes(q);
+        const matchesCode = (appointment.appointment_code || '').toLowerCase().includes(q);
+        const matchesNic = (appointment.patient_nic || '').toLowerCase().includes(q);
+        if (!matchesName && !matchesCode && !matchesNic) return false;
+      }
+
+      return true;
+    });
+  }, [appointments, activeTab, categoryFilter, searchQuery, isAppointmentWaiting, isAppointmentUpcoming]);
 
   const formatTime = (value: string) => value ? value.slice(0, 5) : '—';
   const statusLabel = (status: string) => status === 'Scheduled' ? 'Scheduled' : status;
-  const completedCount = appointments.filter((appointment) => appointment.status === 'Completed').length;
-  const remainingCount = appointments.filter((appointment) => appointment.status !== 'Completed' && appointment.status !== 'Cancelled').length;
-  const waitingCount = appointments.filter((appointment) => appointment.status === 'Scheduled').length;
 
   return (
     <div className="flex flex-col w-full pt-space-lg pb-space-xl space-y-space-lg">
@@ -112,7 +206,7 @@ export const DoctorSchedule: React.FC = () => {
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-md bg-surface-subtle text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">
-                    Read-Only
+                    {currentDate.date < todayStr ? 'Past' : 'Upcoming'}
                   </span>
                 )}
               </div>
@@ -131,55 +225,100 @@ export const DoctorSchedule: React.FC = () => {
           <div className="w-full sm:w-72 flex flex-col gap-1">
             <div className="flex justify-between font-label-sm text-label-sm text-secondary">
               <span>Daily Progress</span>
-              <span className="font-bold text-brand-navy-deep">6 / 14 (43%)</span>
+              <span className="font-bold text-brand-navy-deep">
+                {completedCount} / {activeAppointments.length} ({progressPercent}%)
+              </span>
             </div>
             <div className="w-full h-2.5 bg-surface-subtle rounded-full overflow-hidden flex">
-              <div className="bg-status-completed-text h-full rounded-full transition-all" style={{ width: '43%' }}></div>
+              <div
+                className="bg-status-completed-text h-full rounded-full transition-all"
+                style={{ width: `${progressPercent}%` }}
+              ></div>
             </div>
           </div>
         </div>
 
-        {/* 4 Quick Stat Counters */}
+        {/* 4 Quick Stat Counters (Specific Day Counts) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
-            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
+          <button
+            type="button"
+            onClick={() => setActiveTab('completed')}
+            className={`flex items-center gap-space-sm p-space-sm rounded-xl text-left transition-all ${
+              activeTab === 'completed'
+                ? 'bg-surface-card border-2 border-primary shadow-sm'
+                : 'bg-surface-subtle border border-border-subtle hover:bg-surface-subtle/80'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-status-completed-text shadow-xs">
               <span className="material-symbols-outlined text-[20px]">check_circle</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">6</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">
+                {completedCount}
+              </div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Completed</div>
             </div>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
-            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
+          <button
+            type="button"
+            onClick={() => setActiveTab('remaining')}
+            className={`flex items-center gap-space-sm p-space-sm rounded-xl text-left transition-all ${
+              activeTab === 'remaining'
+                ? 'bg-surface-card border-2 border-primary shadow-sm'
+                : 'bg-surface-subtle border border-border-subtle hover:bg-surface-subtle/80'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary shadow-xs">
               <span className="material-symbols-outlined text-[20px]">pending_actions</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">8</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">
+                {remainingCount}
+              </div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Remaining To Do</div>
             </div>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
-            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
+          <button
+            type="button"
+            onClick={() => setActiveTab('waiting')}
+            className={`flex items-center gap-space-sm p-space-sm rounded-xl text-left transition-all ${
+              activeTab === 'waiting'
+                ? 'bg-surface-card border-2 border-primary shadow-sm'
+                : 'bg-surface-subtle border border-border-subtle hover:bg-surface-subtle/80'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-status-pending-text shadow-xs">
               <span className="material-symbols-outlined text-[20px] animate-pulse">hourglass_top</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">2</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">
+                {waitingCount}
+              </div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Waiting / Arrived</div>
             </div>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-subtle border border-border-subtle">
-            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-secondary">
+          <button
+            type="button"
+            onClick={() => setActiveTab('upcoming')}
+            className={`flex items-center gap-space-sm p-space-sm rounded-xl text-left transition-all ${
+              activeTab === 'upcoming'
+                ? 'bg-surface-card border-2 border-primary shadow-sm'
+                : 'bg-surface-subtle border border-border-subtle hover:bg-surface-subtle/80'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center text-primary shadow-xs">
               <span className="material-symbols-outlined text-[20px]">schedule</span>
             </div>
             <div>
-              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">6</div>
+              <div className="font-headline-sm text-headline-sm text-brand-navy-deep font-bold leading-tight">
+                {upcomingCount}
+              </div>
               <div className="font-label-sm text-label-sm text-secondary font-medium">Upcoming Scheduled</div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -190,10 +329,10 @@ export const DoctorSchedule: React.FC = () => {
           <div className="flex flex-wrap items-center gap-space-xs">
             <div className="flex items-center bg-surface-card p-1 rounded-xl shadow-xs border border-border-subtle">
               {[
-                { id: 'all', label: `All (${appointments.length})` },
+                { id: 'all', label: `All (${activeAppointments.length})` },
                 { id: 'remaining', label: `Remaining To Do (${remainingCount})` },
                 { id: 'waiting', label: `Waiting / In Queue (${waitingCount})` },
-                { id: 'upcoming', label: `Upcoming (${waitingCount})` },
+                { id: 'upcoming', label: `Upcoming (${upcomingCount})` },
                 { id: 'completed', label: `Completed (${completedCount})` },
               ].map((tab) => (
                 <button
@@ -218,12 +357,18 @@ export const DoctorSchedule: React.FC = () => {
                 search
               </span>
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-9 pl-9 pr-3 rounded-lg bg-surface-card border border-border-subtle text-body-sm font-body-sm text-brand-navy-deep placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-border-focus w-60 shadow-xs"
                 placeholder="Filter patient name or ID..."
                 type="text"
               />
             </div>
-            <select className="h-9 px-3 rounded-lg bg-surface-card border border-border-subtle text-label-md font-label-md text-secondary focus:outline-none focus:ring-2 focus:ring-border-focus shadow-xs">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-surface-card border border-border-subtle text-label-md font-label-md text-secondary focus:outline-none focus:ring-2 focus:ring-border-focus shadow-xs"
+            >
               <option value="all">All Categories</option>
               <option value="consultation">Consultation</option>
               <option value="followup">Follow-up</option>
@@ -454,9 +599,19 @@ export const DoctorSchedule: React.FC = () => {
             {/* Table Footer / Capacity Summary */}
             <div className="px-space-lg py-space-md bg-canvas-bg border-t border-border-subtle flex flex-wrap items-center justify-between text-secondary font-body-sm text-body-sm">
               <div className="flex items-center gap-space-md flex-wrap">
-                <span>Total Booked Today: <strong className="text-brand-navy-deep">{appointments.length} Patients</strong></span>
+                <span>
+                  {currentDate.isToday ? 'Total Booked Today:' : 'Total Booked:'}{' '}
+                  <strong className="text-brand-navy-deep">{activeAppointments.length} Patients</strong>
+                </span>
                 <span className="text-outline-variant">•</span>
-                <span>Estimated Time Remaining: <strong className="text-brand-navy-deep">3h 45m</strong></span>
+                <span>
+                  Estimated Time Remaining:{' '}
+                  <strong className="text-brand-navy-deep">
+                    {Math.floor((remainingCount * 15) / 60) > 0
+                      ? `${Math.floor((remainingCount * 15) / 60)}h ${(remainingCount * 15) % 60}m`
+                      : `${(remainingCount * 15) % 60}m`}
+                  </strong>
+                </span>
                 <span className="text-outline-variant">•</span>
                 <span className="text-status-completed-text font-medium flex items-center gap-1">
                   <span className="material-symbols-outlined text-[16px]">verified</span>Clinic running on schedule
@@ -482,11 +637,11 @@ export const DoctorSchedule: React.FC = () => {
               </p>
             </div>
             <button
-              onClick={() => setCurrentDateIndex(1)}
+              onClick={() => setCurrentDateIndex(todayIndex)}
               className="h-10 px-space-lg rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm hover:shadow transition-all"
               type="button"
             >
-              Return to Today ({dates[1].label})
+              Return to Today ({dates[todayIndex]?.label})
             </button>
           </div>
         )}
