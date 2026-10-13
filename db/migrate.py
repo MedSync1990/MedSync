@@ -1,7 +1,7 @@
 import asyncio
+import argparse
 import asyncpg
 import os
-import sys
 from dotenv import load_dotenv
 import logging
 import re
@@ -51,26 +51,26 @@ def expand_psql_file(file_path: str, include_stack: tuple[Path, ...] = ()) -> st
     return "\n".join(expanded)
 
 
-async def migrate():
-    database_url = os.getenv("DATABASE_URL")
+async def migrate(seed_only: bool = False):
+    # Schema creation and clinical demo inserts require owner/admin privileges.
+    database_url = os.getenv("DATABASE_ADMIN_URL") or os.getenv("DATABASE_URL")
     if not database_url:
-        logger.error("DATABASE_URL not found in .env")
-        return
+        raise RuntimeError("DATABASE_ADMIN_URL or DATABASE_URL must be configured.")
 
     logger.info("Connecting to the database...")
     try:
         conn = await asyncpg.connect(database_url)
         logger.info("Successfully connected to the database.")
-    except Exception as e:
-        logger.error(f"Failed to connect: {e}")
-        return
+    except Exception:
+        logger.exception("Failed to connect to the migration database.")
+        raise
 
-    files_to_run = ["db/new_seed.sql"] if "--seed-only" in sys.argv else [
+    files_to_run = ["db/new_seed.sql"] if seed_only else [
         "db/schema.sql",
         "db/new_seed.sql",
     ]
 
-    if "--seed-only" in sys.argv:
+    if seed_only:
         logger.info("Seed-only mode enabled; schema file will be skipped.")
 
     try:
@@ -96,4 +96,12 @@ async def migrate():
 
 
 if __name__ == "__main__":
-    asyncio.run(migrate())
+    parser = argparse.ArgumentParser(
+        description="Apply the MedSync schema and the single viva seed to an empty demo database."
+    )
+    parser.add_argument(
+        "--seed-only", action="store_true",
+        help="Skip schema creation; existing schema must have empty data tables.",
+    )
+    args = parser.parse_args()
+    asyncio.run(migrate(seed_only=args.seed_only))
