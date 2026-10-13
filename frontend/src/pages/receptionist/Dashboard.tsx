@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
+import { DashboardWelcome, dashboardAction } from '../../components/DashboardWelcome';
 import { StatusBadge } from '../../components/StatusBadge';
 
 const actions = [
@@ -40,39 +41,6 @@ export function Dashboard() {
   const [counts, setCounts] = useState<{ total: number; scheduled: number; completed: number; cancelled: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Live Time state matching Doctor Dashboard design
-  const [liveTime, setLiveTime] = useState(() => {
-    return (
-      new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Colombo',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }).format(new Date()) + ' IST'
-    );
-  });
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setLiveTime(
-        new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Colombo',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        }).format(new Date()) + ' IST'
-      );
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const todayLabel = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Colombo',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
 
   useEffect(() => {
     const updateDate = () => {
