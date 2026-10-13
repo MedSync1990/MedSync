@@ -528,14 +528,6 @@ export const DoctorConsultation: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px] text-secondary">history</span>
                 <span>Medical History</span>
               </button>
-              <button
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-xl bg-surface-card border border-border-subtle text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs hover:bg-surface-subtle transition-all"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[18px] text-secondary">print</span>
-                <span>Print Summary</span>
-              </button>
             </div>
           </div>
 
