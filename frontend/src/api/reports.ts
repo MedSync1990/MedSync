@@ -131,7 +131,8 @@ export async function downloadTreatmentCategoriesPdf(
 
   const response = await fetch(`${API_BASE_URL}/reports/treatment-categories/pdf?${query.toString()}`, {
     method: 'GET',
-    credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store',
   });
 
   if (!response.ok) {

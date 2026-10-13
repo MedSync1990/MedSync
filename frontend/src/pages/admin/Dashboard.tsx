@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { DashboardWelcome, dashboardAction as headerAction } from '../../components/DashboardWelcome';
 import { getStatsOverview, getRecentActivity, listBranches } from '../../api';
 import { exportToCSV } from '../../api/reports';
 import type { ActivityItem, BranchResponse, StatsOverview } from '../../api/types';
 
 const panel = 'rounded-xl bg-surface-card p-6 shadow-sm md:p-7';
-const headerAction = 'inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm';
 const timezone = 'Asia/Colombo';
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : 'Unable to load dashboard data.';
 const appointmentCount = (stats: StatsOverview) => stats.today_appointments.scheduled + stats.today_appointments.completed + stats.today_appointments.cancelled;
@@ -14,7 +13,6 @@ function Icon({ name, className = 'text-xl' }: { name: string; className?: strin
 interface BranchVolume { branch: BranchResponse; count: number | null }
 
 export default function AdministratorDashboard() {
-  const { user } = useAuth();
   const [stats, setStats] = useState<StatsOverview | null>(null);
   const [volumes, setVolumes] = useState<BranchVolume[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -27,11 +25,9 @@ export default function AdministratorDashboard() {
   const activityRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const inFlight = useRef(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const refresh = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
-    setIsRefreshing(true);
     try {
       const [overview, audit, branches] = await Promise.allSettled([getStatsOverview(), getRecentActivity({ limit: 50 }), listBranches()]);
       if (!mounted.current) return;
@@ -48,7 +44,6 @@ export default function AdministratorDashboard() {
     } finally {
       inFlight.current = false;
       if (mounted.current) {
-        setIsRefreshing(false);
         setLoading(false);
       }
     }

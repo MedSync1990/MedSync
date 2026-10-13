@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { DashboardWelcome, dashboardAction } from '../../components/DashboardWelcome';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
 
 export const DoctorDashboard: React.FC = () => {
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
 
@@ -17,7 +20,6 @@ export const DoctorDashboard: React.FC = () => {
 
   const nextAppointment = appointments.find((item) => item.status === 'Scheduled') || appointments[0];
   const completedAppointments = appointments.filter((item) => item.status === 'Completed').length;
-  const todayLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="flex flex-col w-full pt-space-lg pb-space-xl">
