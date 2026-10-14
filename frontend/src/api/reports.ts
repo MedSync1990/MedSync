@@ -217,8 +217,11 @@ export interface PayoutHistoryItem {
 }
 
 /** Get Doctor Earnings Overview (Total, Paid, Outstanding) */
-export function getDoctorEarningsOverview(doctorId: number): Promise<DoctorEarningsOverviewResponse> {
-  return get<DoctorEarningsOverviewResponse>(`/reports/doctor-earnings/${doctorId}`);
+export function getDoctorEarningsOverview(
+  doctorId: number,
+  params?: { start_date?: string; end_date?: string },
+): Promise<DoctorEarningsOverviewResponse> {
+  return get<DoctorEarningsOverviewResponse>(`/reports/doctor-earnings/${doctorId}`, params);
 }
 
 /** Get Doctor Bank Accounts */
