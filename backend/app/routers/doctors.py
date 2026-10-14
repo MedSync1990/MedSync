@@ -414,9 +414,19 @@ async def update_doctor_schedule(
                 id, s.day_of_week, st, et, s.slot_duration, s.is_active
             )
 
-        # Remove unbooked 'Open' future slots so deleted/changed shifts do not persist
+        # Cancelled appointments reopen their slots but retain the foreign key.
+        # Preserve every referenced slot, including appointment history.
         await conn.execute(
-            "DELETE FROM doctor_availability_slots WHERE doctor_id = $1 AND date >= CURRENT_DATE AND status = 'Open';",
+            """
+            DELETE FROM doctor_availability_slots AS slot
+            WHERE slot.doctor_id = $1
+              AND slot.date >= CURRENT_DATE
+              AND slot.status = 'Open'
+              AND NOT EXISTS (
+                  SELECT 1 FROM appointments AS appointment
+                  WHERE appointment.slot_id = slot.slot_id
+              );
+            """,
             id
         )
 
