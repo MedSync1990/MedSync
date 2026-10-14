@@ -79,6 +79,7 @@ export function InsuranceVsOutOfPocket() {
 
   const prov = (data?.provider_split || []).filter(p => providerFilter === 'all' || p.provider_name.toLowerCase().includes(providerFilter.toLowerCase()));
   const sla = (data?.claim_slas || []).filter(p => providerFilter === 'all' || p.provider_name.toLowerCase().includes(providerFilter.toLowerCase()));
+  const hasClaimTurnaround = sla.length > 0;
   const modes = data?.payment_modes || [];
 
   const totalInvoices = (data?.ledger || []).reduce((acc, curr) => acc + curr.volume, 0) || 0;
@@ -197,7 +198,7 @@ export function InsuranceVsOutOfPocket() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${hasClaimTurnaround ? 'xl:grid-cols-4' : 'xl:grid-cols-3'} gap-space-md`}>
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Insurance Coverage</span>
@@ -222,14 +223,16 @@ export function InsuranceVsOutOfPocket() {
           <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{fmt(totalBilled)}</div>
           <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>receipt</span></div>
         </div>
+        {hasClaimTurnaround && (
         <div className="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between mb-space-sm">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Avg Claim Settlement</span>
             <div className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center"><span className="material-symbols-outlined text-[20px]">timer</span></div>
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{data?.avg_claim_days ? data.avg_claim_days.toFixed(1) : "0.0"} business days</div>
+          <div className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight z-10">{(sla.reduce((total, row) => total + row.avg_days, 0) / sla.length).toFixed(1)} days</div>
           <div className="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.08] pointer-events-none text-brand-navy-deep flex items-center justify-center"><span className="material-symbols-outlined !text-[96px] leading-none select-none" style={{ fontSize: '96px' }}>schedule</span></div>
         </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
@@ -401,7 +404,8 @@ export function InsuranceVsOutOfPocket() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+      <div className={`grid grid-cols-1 ${hasClaimTurnaround ? 'lg:grid-cols-2' : ''} gap-space-lg`}>
+        {hasClaimTurnaround && (
         <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -437,6 +441,7 @@ export function InsuranceVsOutOfPocket() {
             <span className="material-symbols-outlined text-[16px] text-primary">info</span>Claims over 7 days are flagged to the Financial Accounts team.
           </div>
         </div>
+        )}
         <div className="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
