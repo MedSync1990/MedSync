@@ -1,0 +1,92 @@
+MedSync – Additional Viva Demonstration Data
+
+1. Doctor
+
+Name: Jean Grey
+Mobile: 0779000001
+NIC / ID Number: 199012000001
+Specialty: Neurology
+Email: jean.grey@example.com
+Address: 15 Xavier Avenue, Colombo 07, Sri Lanka
+
+2. Branch Manager
+
+Name: Mary Watson
+Mobile: 0779000002
+NIC / ID Number: 199012000002
+Email: mary.watson@example.com
+Address: 24 Watson Lane, Kandy, Sri Lanka
+
+3. Administrator
+
+Name: Mrs. Hudson
+Mobile: 0779000003
+NIC / ID Number: 199012000003
+Email: mrs.hudson@example.com
+Address: 8 Hudson Lane, Galle, Sri Lanka
+
+4. Receptionist
+
+Name: Inspector Lestrade
+Mobile: 0779000004
+NIC / ID Number: 199012000004
+Email: inspector.lestrade@example.com
+Address: 21 Scotland Yard Road, Colombo 03, Sri Lanka
+
+5. Additional Patients – Football Legends
+
+Name: Pelé
+Mobile: 0779000005
+NIC / ID Number: 199012000005
+Email: pele@example.com
+Address: 10 Santos Avenue, Colombo 04, Sri Lanka
+
+Name: Diego Maradona
+Mobile: 0779000006
+NIC / ID Number: 199012000006
+Email: diego.maradona@example.com
+Address: 18 Napoli Road, Kandy, Sri Lanka
+
+Name: Lionel Messi
+Mobile: 0779000007
+NIC / ID Number: 199012000007
+Email: lionel.messi@example.com
+Address: 32 Barcelona Lane, Galle, Sri Lanka
+
+Name: Cristiano Ronaldo
+Mobile: 0779000008
+NIC / ID Number: 199012000008
+Email: cristiano.ronaldo@example.com
+Address: 42 Madrid Avenue, Colombo 05, Sri Lanka
+
+Name: Zinedine Zidane
+Mobile: 0779000009
+NIC / ID Number: 199012000009
+Email: zinedine.zidane@example.com
+Address: 19 Juventus Road, Kandy, Sri Lanka
+
+Name: Ronaldinho
+Mobile: 0779000010
+NIC / ID Number: 199012000010
+Email: ronaldinho@example.com
+Address: 27 Milan Street, Galle, Sri Lanka
+
+Name: Johan Cruyff
+Mobile: 0779000011
+NIC / ID Number: 199012000011
+Email: johan.cruyff@example.com
+Address: 35 Ajax Avenue, Colombo 06, Sri Lanka
+
+Name: David Beckham
+Mobile: 0779000012
+NIC / ID Number: 199012000012
+Email: david.beckham@example.com
+Address: 14 Manchester Lane, Kandy, Sri Lanka
+
+Note: These are fictional demonstration records for the MedSync viva. Email
+addresses use the reserved example.com domain, and the street addresses are
+illustrative rather than verified real-world addresses. These records do not
+represent the actual contact details of the named people.
+
+Mobile numbers and NIC / ID numbers are synthetic demonstration values,
+not the actual identifiers of the named people. Do not use them to contact anyone.

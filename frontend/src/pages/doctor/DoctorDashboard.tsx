@@ -4,11 +4,56 @@ import { useAuth } from '../../context/AuthContext';
 import { DashboardWelcome, dashboardAction } from '../../components/DashboardWelcome';
 import { listAppointments } from '../../api/appointments';
 import type { AppointmentResponse } from '../../api/types';
+import { getDoctorEarningsOverview, getDoctorPayouts } from '../../api/reports';
+import type { DoctorEarningsOverviewResponse, PayoutHistoryItem } from '../../api/reports';
+
+const clinicDate = (value: Date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(value);
+const formatMoney = (amount: number) => `LKR ${amount.toLocaleString('en-LK', {
+  minimumFractionDigits: 2, maximumFractionDigits: 2,
+})}`;
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
+
+  const [monthlyEarnings, setMonthlyEarnings] = useState<DoctorEarningsOverviewResponse | null>(null);
+  const [overallEarnings, setOverallEarnings] = useState<DoctorEarningsOverviewResponse | null>(null);
+  const [lastPayout, setLastPayout] = useState<PayoutHistoryItem | null>(null);
+  const [loadingEarnings, setLoadingEarnings] = useState(true);
+  const [earningsError, setEarningsError] = useState(false);
+  const today = clinicDate(new Date());
+  const monthStart = `${today.slice(0, 7)}-01`;
+  const monthLabel = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Colombo', month: 'short', year: 'numeric',
+  }).format(new Date());
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    setLoadingEarnings(true);
+    setEarningsError(false);
+    Promise.all([
+      getDoctorEarningsOverview(user.id, { start_date: monthStart, end_date: today }),
+      getDoctorEarningsOverview(user.id),
+      getDoctorPayouts(user.id),
+    ]).then(([monthly, overall, payouts]) => {
+      if (!active) return;
+      setMonthlyEarnings(monthly);
+      setOverallEarnings(overall);
+      setLastPayout(payouts.data[0] || null);
+    }).catch(() => {
+      if (active) setEarningsError(true);
+    }).finally(() => {
+      if (active) setLoadingEarnings(false);
+    });
+    return () => { active = false; };
+  }, [user?.id, monthStart, today]);
+
+  const earningsValue = (amount: number | undefined) =>
+    loadingEarnings ? 'Loading...' : earningsError || amount === undefined ? 'Unavailable' : formatMoney(amount);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -171,19 +216,19 @@ export const DoctorDashboard: React.FC = () => {
                   <h2 className="font-headline-md text-headline-md text-brand-navy-deep font-bold">This Month's Earnings</h2>
                 </div>
                 <span className="font-label-sm text-label-sm text-secondary bg-surface-subtle px-space-sm py-1 rounded-lg uppercase font-semibold">
-                  Sep 2026 MTD
+                  {monthLabel} MTD
                 </span>
               </div>
 
               {/* Big Total Tile with Sub-Context */}
               <div className="mb-space-md">
                 <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider block mb-1">
-                  Total Doctor Share Revenue
+                  Completed Treatment Revenue
                 </span>
                 <div className="flex items-baseline gap-space-xs">
-                  <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">LKR 485,000</span>
+                  <span className="font-display-lg text-display-lg text-brand-navy-deep font-headline-lg font-bold">{earningsValue(monthlyEarnings?.total_earned)}</span>
                   <span className="font-label-sm text-label-sm text-status-completed-text flex items-center font-semibold">
-                    <span className="material-symbols-outlined text-[14px]">arrow_upward</span> +14.2% MoM
+                    Month to date
                   </span>
                 </div>
               </div>
@@ -194,22 +239,22 @@ export const DoctorDashboard: React.FC = () => {
               <div className="p-space-md rounded-2xl bg-surface-subtle flex flex-col justify-between border border-border-subtle/50">
                 <div className="flex items-center gap-1.5 text-secondary mb-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-status-completed-text"></span>
-                  <span className="font-label-sm text-label-sm uppercase font-semibold">Disbursed / Collected</span>
+                  <span className="font-label-sm text-label-sm uppercase font-semibold">Paid This Month</span>
                 </div>
                 <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-mono-data font-bold">
-                  LKR 412,000
+                  {earningsValue(monthlyEarnings?.paid_by_hospital)}
                 </span>
-                <span className="font-body-sm text-body-sm text-secondary mt-1">84.9% settled to bank</span>
+                <span className="font-body-sm text-body-sm text-secondary mt-1">Recorded hospital payouts</span>
               </div>
               <div className="p-space-md rounded-2xl bg-surface-subtle flex flex-col justify-between border border-border-subtle/50">
                 <div className="flex items-center gap-1.5 text-secondary mb-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-status-pending-text animate-pulse"></span>
-                  <span className="font-label-sm text-label-sm uppercase font-semibold">Pending Settlement</span>
+                  <span className="font-label-sm text-label-sm uppercase font-semibold">Outstanding Balance</span>
                 </div>
                 <span className="font-headline-sm text-headline-sm text-brand-navy-deep font-mono-data font-bold">
-                  LKR 73,000
+                  {earningsValue(overallEarnings?.outstanding)}
                 </span>
-                <span className="font-body-sm text-body-sm text-secondary mt-1">Clears this Friday</span>
+                <span className="font-body-sm text-body-sm text-secondary mt-1">All-time earnings minus payouts</span>
               </div>
             </div>
 
@@ -217,9 +262,9 @@ export const DoctorDashboard: React.FC = () => {
             <div className="p-space-sm rounded-xl bg-surface-card border border-border-subtle flex items-center justify-between text-secondary font-label-sm text-label-sm">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px] text-status-completed-text">task_alt</span>
-                <span>Last Payout: <strong className="text-brand-navy-deep font-mono-data">LKR 25,000</strong> on Aug 20</span>
+                <span>{loadingEarnings ? 'Loading payouts...' : earningsError ? 'Could not load earnings. Reload to retry.' : lastPayout ? <>Last Payout: <strong className="text-brand-navy-deep font-mono-data">{formatMoney(lastPayout.amount_paid)}</strong> on {new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Colombo', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(lastPayout.payment_date))}</> : 'No payouts recorded yet'}</span>
               </div>
-              <span className="text-status-completed-text font-semibold">Disbursed</span>
+              {!loadingEarnings && !earningsError && lastPayout && <span className="text-status-completed-text font-semibold">Recorded</span>}
             </div>
           </div>
 
@@ -227,7 +272,7 @@ export const DoctorDashboard: React.FC = () => {
           <div className="pt-space-md border-t border-border-subtle/60 mt-space-sm">
             <Link
               className="inline-flex items-center justify-between w-full font-label-md text-label-md text-primary hover:text-border-focus font-semibold transition-colors"
-              to="/my-earnings"
+              to="/doctor/earnings"
             >
               <span>View Full Statement & Request Payout</span>
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

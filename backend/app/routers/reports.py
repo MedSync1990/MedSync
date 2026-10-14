@@ -621,7 +621,9 @@ async def get_insurance_vs_out_of_pocket(
 async def get_doctor_earnings(
     target_doctor_id : int,
     current_user: CurrentUser = Depends(require_roles("Administrator", "Branch Manager","Doctor")),
-    conn: Connection = Depends(get_conn)
+    conn: Connection = Depends(get_conn),
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
 ):
     if current_user.role == "Doctor" and current_user.user_id != target_doctor_id:
         raise ForbiddenError("Doctors can only view their own earnings overview.")
@@ -633,17 +635,21 @@ async def get_doctor_earnings(
     JOIN appointments a ON c.appointment_id = a.appointment_id
     JOIN doctor_availability_slots das ON a.slot_id = das.slot_id
     WHERE das.doctor_id = $1 AND a.status = 'Completed'
+      AND ($2::date IS NULL OR das.date >= $2)
+      AND ($3::date IS NULL OR das.date <= $3)
     """
 
-    total_earned = await conn.fetchval(earned_query, target_doctor_id)
+    total_earned = await conn.fetchval(earned_query, target_doctor_id, start_date, end_date)
 
     paid_query = """
     SELECT COALESCE(SUM(amount_paid), 0) as total_paid
     FROM staff_payouts
     WHERE user_id = $1
+      AND ($2::date IS NULL OR payment_date >= $2::date)
+      AND ($3::date IS NULL OR payment_date < $3::date + INTERVAL '1 day')
     """
     
-    paid_by_hospital = await conn.fetchval(paid_query, target_doctor_id)
+    paid_by_hospital = await conn.fetchval(paid_query, target_doctor_id, start_date, end_date)
 
     outstanding = float(total_earned or 0) - float(paid_by_hospital or 0)   
 

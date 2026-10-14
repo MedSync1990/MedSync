@@ -17,6 +17,18 @@ MedSync is a database-focused academic project for a multi-branch clinic operati
 - Doctor earnings, payout requests, and administrator approval workflows.
 - Management reports with charts, CSV exports, and backend-generated PDF downloads.
 
+## Demo Login Accounts
+
+The following accounts are provided for the MedSync demonstration using fictional data.
+Default password is medsync
+This will be after the demo
+| Role | Username | Password |
+|---|---|---|
+| Administrator | `admin1` | `medsync1` |
+| Branch Manager | `manager1` | `medsync1` |
+| Doctor | `doctor1` | `medsync1` |
+| Receptionist | `receptionist1` | `medsync1` |
+
 ## Team Contributions
 
 The contributions below cover database, application, and integration work. Shared modules were developed and improved collaboratively; a contribution listed here does not imply exclusive authorship of every file in that area.

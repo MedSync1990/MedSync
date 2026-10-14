@@ -1,8 +1,12 @@
 # Pyrefly configuration for MedSync backend
 # Points Pyrefly to the project's virtual environment
 
-python_interpreter = "venv/bin/python"
+python-interpreter-path = "venv/bin/python"
 
-search_path = [
+site-package-path = [
+  "venv/lib/python3.13/site-packages",
+]
+
+search-path = [
   "backend",
 ]
