@@ -191,7 +191,8 @@ backend/
 frontend/
   src/            React pages, components, API modules, and contexts
   public/         Branding and browser icons
-docs/             Requirements, architecture, database, API, and UI references
+docs/
+  requirements.txt Assignment requirements
 .github/workflows/ Azure deployment workflow
 ```
 
@@ -261,11 +262,10 @@ Tests cover selected workflows and helper behavior. For the demonstration, also 
 
 ## Documentation
 
-- [Assignment requirements](docs/requirements.txt)
-- [Architecture](docs/architecture.md)
-- [Database design](docs/database.md)
-- [API reference](docs/api-routes.md)
-- [UI guidelines](docs/medsync-ui-guidelines.md)
+The `docs/` directory contains the [assignment requirements](docs/requirements.txt).
+Database definitions are in `db/modules/`, with `db/schema.sql` as the integrated entry point.
+The backend's interactive API reference is available at `/docs` while the API is running
+(locally, `http://localhost:8000/docs`); its OpenAPI schema is available at `/openapi.json`.
 
 ---
 
