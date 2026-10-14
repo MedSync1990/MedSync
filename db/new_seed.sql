@@ -251,7 +251,7 @@ BEGIN
             RAISE EXCEPTION 'No roster slot for doctor % at +% days', visit.doctor_id, visit.day_offset;
         END IF;
         appointment_id := fn_book_appointment(visit.patient_id, chosen_slot,
-            CASE WHEN visit.day_offset = 7 THEN 'Follow-up' ELSE 'Scheduled Visit' END::appointment_type_enum);
+            'Scheduled Visit'::appointment_type_enum);
 
         IF visit.day_offset = 0 AND visit.patient_id BETWEEN 16 AND 20 THEN
             treatment_code := CASE visit.doctor_id

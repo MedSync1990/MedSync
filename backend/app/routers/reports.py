@@ -20,6 +20,7 @@ from app.schemas.common import PaginationParams
 
 router = APIRouter()
 
+# === Branch Appointment Summary Report - Data ===
 @router.get("/appointments-summary", response_model=AppointmentsSummaryResponse)
 async def get_appointments_summary(
     start_date: Optional[date] = None,
@@ -83,6 +84,7 @@ async def get_appointments_summary(
         total_walkins=int(totals["total_walkins"]) if totals and totals["total_walkins"] else 0
     )
 
+# === Doctor Revenue Report - Data ===
 @router.get("/doctor-revenue", response_model=DoctorRevenueResponse)
 async def get_doctor_revenue(
     start_date: Optional[date] = None,
@@ -139,6 +141,7 @@ async def get_doctor_revenue(
     ]
     return DoctorRevenueResponse(data=data, total=len(data))
 
+# === Doctor Revenue Report - Itemized Payments ===
 @router.get("/doctor-revenue/{target_doctor_id}/payments", response_model=ItemizedPaymentResponse)
 async def get_doctor_itemized_payments(
     target_doctor_id: int,
@@ -214,6 +217,7 @@ async def get_doctor_itemized_payments(
     ]
     return ItemizedPaymentResponse(data=data, total=total)
 
+# === Outstanding Balances Report - Data ===
 @router.get("/outstanding-balances", response_model=OutstandingBalancesResponse)
 async def get_outstanding_balances(
     branch_id: Optional[int] = None,
@@ -274,6 +278,7 @@ async def get_outstanding_balances(
     ]
     return OutstandingBalancesResponse(data=data, total=len(data))
 
+# === Treatment Category Breakdown Report - Data ===
 @router.get("/treatment-categories", response_model=TreatmentCategoriesResponse)
 async def get_treatment_categories(
     start_date: Optional[date] = None,
@@ -329,6 +334,7 @@ async def get_treatment_categories(
         active_catalog_items=int(catalog_stats["active_items"]) if catalog_stats and catalog_stats["active_items"] is not None else 0
     )
 
+# === Treatment Category Breakdown Report - PDF Export ===
 @router.get("/treatment-categories/pdf")
 async def get_treatment_categories_pdf(
     start_date: Optional[date] = None,
@@ -481,6 +487,7 @@ async def get_treatment_categories_pdf(
     )
 
 
+# === Insurance vs. Out-of-Pocket Report - Data ===
 @router.get("/insurance-vs-out-of-pocket", response_model=InsuranceVsOutOfPocketResponse)
 async def get_insurance_vs_out_of_pocket(
     start_date: Optional[date] = None,
@@ -617,6 +624,7 @@ async def get_insurance_vs_out_of_pocket(
         payment_modes=payment_modes,
         avg_claim_days=avg_claim_days
     )
+# === Doctor Earnings Report - Overview ===
 @router.get("/doctor-earnings/{target_doctor_id}", response_model=DoctorEarningsOverviewResponse)
 async def get_doctor_earnings(
     target_doctor_id : int,
@@ -659,6 +667,7 @@ async def get_doctor_earnings(
         outstanding=outstanding
     )
 
+# === Doctor Earnings - Bank Accounts ===
 @router.get("/doctor-earnings/{target_doctor_id}/bank-accounts", response_model=BankAccountsResponse)
 async def get_doctor_bank_accounts(
     target_doctor_id: int,
@@ -679,6 +688,7 @@ async def get_doctor_bank_accounts(
     data = [BankAccountItem(**dict(r)) for r in records]
     return BankAccountsResponse(data=data)  
 
+# === Doctor Earnings - Payout Requests ===
 @router.get("/doctor-earnings/{target_doctor_id}/payout-requests", response_model=PayoutRequestsResponse)
 async def  get_doctor_payout_requests(
     target_doctor_id: int,
@@ -705,6 +715,7 @@ async def  get_doctor_payout_requests(
     data = [PayoutRequestItem(**dict(r)) for r in records]
     return PayoutRequestsResponse(data=data)
 
+# === Doctor Earnings Report - Payout History ===
 @router.get("/doctor-earnings/{target_doctor_id}/payouts", response_model=PayoutHistoryResponse)
 async def get_doctor_payouts(
     target_doctor_id: int,
@@ -730,6 +741,7 @@ async def get_doctor_payouts(
     data = [PayoutHistoryItem(**dict(r)) for r in records]
     return PayoutHistoryResponse(data=data)
 
+# === Doctor Payment Slip - PDF Export ===
 @router.get("/doctor-earnings/{target_doctor_id}/payouts/{payout_id}/pdf")
 @router.get("/doctor-payouts/{payout_id}/pdf")
 async def download_doctor_payout_slip(
@@ -835,6 +847,7 @@ async def download_doctor_payout_slip(
         }
     )
 
+# === Doctor Earnings - Submit Payout Request ===
 @router.post("/doctor-earnings/{target_doctor_id}/payout-requests")
 async def create_doctor_payout_request(
     target_doctor_id: int,
@@ -904,6 +917,7 @@ async def create_doctor_payout_request(
     return {"message": "Payout request created successfully", "request_id": request_id}
     
 
+# === Doctor Payment Management - Payout Request Listing ===
 @router.get("/doctor-payments", response_model=AdminPayoutRequestsResponse)
 async def get_all_payout_requests(
     branch_id: Optional[int] = None,
@@ -950,6 +964,7 @@ async def get_all_payout_requests(
     data = [AdminPayoutRequestItem(**dict(r)) for r in records]
     return AdminPayoutRequestsResponse(data=data, total=len(data))
 
+# === Doctor Payment Management - Pay Payout Request ===
 @router.patch("/doctor-payments/{request_id}/pay")
 async def pay_payout_request(
     request_id: int,
@@ -991,6 +1006,7 @@ async def pay_payout_request(
 
     return {"message": "Payout request marked as Paid.", "request_id": request_id}
 
+# === Doctor Payment Management - Reject Payout Request ===
 @router.patch("/doctor-payments/{request_id}/reject")
 async def reject_payout_request(
     request_id: int,
@@ -1012,6 +1028,7 @@ async def reject_payout_request(
     if row["status"] != "Pending":
         raise ConflictError(f"Cannot reject — request is already '{row['status']}'.")
 
+# === Shared Management Report Helper - PDF Rendering ===
 # PDF exports reuse the JSON report handlers so data and branch rules stay identical.
 async def _management_pdf(title, sections, conn, current_user, branch_id, filters):
     from pathlib import Path
@@ -1046,17 +1063,20 @@ async def _management_pdf(title, sections, conn, current_user, branch_id, filter
     })
 
 
+# === Shared Report Helper - Table Sections ===
 def _report_section(title, items, columns):
     return {"title": title, "headers": [label for key, label in columns],
             "rows": [[getattr(item, key) for key, label in columns] for item in items]}
 
 
+# === Shared Report Helper - Date Validation and Period Label ===
 def _report_period(start_date, end_date):
     if start_date and end_date and start_date > end_date:
         raise HTTPException(status_code=422, detail="Start date must be before end date.")
     return f"Period: {start_date or 'Beginning'} to {end_date or 'Present'}"
 
 
+# === Branch Appointment Summary Report - PDF Export ===
 @router.get("/appointments-summary/pdf")
 async def appointments_summary_pdf(
     start_date: Optional[date] = None, end_date: Optional[date] = None,
@@ -1072,6 +1092,7 @@ async def appointments_summary_pdf(
     return await _management_pdf("Branch Appointments", sections, conn, current_user, branch_id, [period, f"Appointment type: {appointment_type or 'All'}"])
 
 
+# === Doctor Revenue Report - PDF Export ===
 @router.get("/doctor-revenue/pdf")
 async def doctor_revenue_pdf(
     start_date: Optional[date] = None, end_date: Optional[date] = None,
@@ -1087,6 +1108,7 @@ async def doctor_revenue_pdf(
     return await _management_pdf("Doctor Revenue", sections, conn, current_user, branch_id, [period, f"Specialty: {specialty or 'All'}", f"Doctor search: {search or 'All'}"])
 
 
+# === Outstanding Balances Report - PDF Export ===
 @router.get("/outstanding-balances/pdf")
 async def outstanding_balances_pdf(
     branch_id: Optional[int] = None, search: str = "", aging: str = "all",
@@ -1106,6 +1128,7 @@ async def outstanding_balances_pdf(
     return await _management_pdf("Outstanding Balances", sections, conn, current_user, branch_id, [f"Aging: {aging}", f"Search: {search or 'All'}"])
 
 
+# === Insurance vs. Out-of-Pocket Report - PDF Export ===
 @router.get("/insurance-vs-out-of-pocket/pdf")
 async def insurance_cash_pdf(
     start_date: Optional[date] = None, end_date: Optional[date] = None,

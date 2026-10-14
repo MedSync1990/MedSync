@@ -64,10 +64,11 @@ The contributions below cover database, application, and integration work. Share
 
 **Database work**
 
-- Doctor, specialty, doctor-specialty association, availability-slot, and appointment tables.
+- Doctor, specialty, doctor-specialty association, availability-slot, doctor-weekly-schedule and appointment tables.
 - Doctor/specialty seed data and initial availability records.
-- Overlap-prevention design using PostgreSQL range/exclusion constraints, coordinated with Dilantha, and slot-booking consistency.
-- Booking, walk-in, rescheduling, and cancellation functions and doctor-record protection triggers.
+- Overlap-prevention design using PostgreSQL range/exclusion constraints, and slot-booking consistency.
+- Booking, walk-in, rescheduling, cancellation, create-default-doctor-schedule and generate-slots-from-roster functions
+- doctor-record protection, default-doctor-schedule triggers.
 
 **Application and integration work**
 
@@ -112,7 +113,7 @@ The contributions below cover database, application, and integration work. Share
 **Application and integration work**
 
 - Contributed FastAPI scaffolding, environment configuration, connection handling, exception responses, and database migration/verification tooling.
-- Implemented password hashing/verification, JWT handling, authentication flows, role dependencies, and branch scoping.
+- Implemented password hashing/verification, authentication flows, role dependencies, and branch scoping.
 - Built staff administration, profile inspection/editing, password resets, unlocking/reactivation, and the first-login password-change gate.
 - Developed reporting/statistics queries, dashboard metrics, frontend reporting pages, charts, filters, and API integration.
 - Implemented Treatment Category Breakdown PDF generation and report-download integration.
