@@ -1,355 +1,253 @@
 # MedSync CATMS — API Routes
 
-> Updated 2026-10-13 against repository route declarations. The corrected flows below reflect current source. Remaining field/role/business-rule descriptions are design contracts, not proof that every handler enforces them; consult schemas, router dependencies, and runtime OpenAPI for exact behavior. Live deployment and database enforcement were not checked.
-
-Base path: `/api/v1`. Browser authentication uses the HttpOnly `access_token` cookie with `credentials: 'include'`; protected handlers also accept bearer JWTs. Login/logout require an exact trusted Origin, including without an existing session. Cookie-authenticated mutations using `get_current_user` require that same check; Referer paths never bypass it. GET downloads do not require an Origin. Some handlers have different dependencies, so universal protection must not be assumed.
-
-**Role column** — A = Admin, BM = Branch Manager, D = Doctor, R = Receptionist.
-
-> **Resolved discrepancy (see `architecture.md` §13):** `page-content.md` explicitly states there
-> is **no patient login and no patient-facing portal (Patient identity records still exist in the data model)** (§5 of that doc) — patients
-> never authenticate. This version removes the `P (self)` role and any `/patients/{id}/...` "self"
-> semantics from the previous draft. Everywhere a patient needs to see something (balance, invoice,
-> appointment), a staff member (R, or BM/A for oversight) looks it up on their behalf and relays it
-> in person, by phone, or via download/print. Any email is manual outside the app; automatic email/SMS delivery is not implemented. If a self-service portal is added later it is a separate,
-> explicitly-scoped feature (own auth, own role, own routes) — not assumed here.
-
----
+> Updated 2026-10-14 against repository source. This describes declared routes and current handler behavior, not the live Azure deployment or deployed database grants/policies. Request schemas and SQL modules supply detailed validation and database rules.
 
 ## 0. Conventions
 
-### 0.1 Response shapes
-Responses vary by schema/handler: lists can be arrays or paginated objects; mutations can return resources or confirmation messages. Do not assume one universal envelope. The schemas and runtime OpenAPI document each route.
+Inventory paths include the `/api/v1` prefix; workflow examples omit it for readability. A = Administrator, BM = Branch Manager, D = Doctor, R = Receptionist. “Authenticated” means the current-user dependency without a narrower role allowlist. “No auth dependency” means no authentication dependency is declared by the handler/router; it does not certify public database access.
 
-### 0.2 Error shapes
-Missing/invalid/expired authentication generally returns 401; role or Origin rejection returns 403. Custom application errors return `message` or `errors` objects, while HTTPException and FastAPI validation return `detail`. Schema failures generally return 422. Conflict/not-found handlers return 409/404. The current generic handler may expose exception text; sanitization is a remaining security concern rather than a guaranteed property.
+Browser requests send `credentials: 'include'` and an HttpOnly `access_token` cookie. Protected routes also accept bearer JWTs. Login/logout require a trusted Origin. Cookie-authenticated mutations through `get_current_user` require an exact Origin in `CORS_ALLOWED_ORIGINS`; bearer-only requests use a separate path. GET downloads do not require an Origin.
 
-### 0.3 ID formats (page-content.md §6)
-- Patient: `PT-xxxxxx`, Invoice: `INV-xxxxxx`, Appointment: `APT-xxxxxx` — zero-padded 6-digit,
-  generated server-side (DB sequence or `nextval` wrapped in the insert transaction), never
-  client-supplied.
-- Internal numeric surrogate PKs (per `architecture.md` ER diagram) back every public ID; the
-  public ID is a formatted display column, not the PK, so it's cheap to keep stable if a record
-  is ever renumbered.
+Role columns describe dependencies, not complete ownership or branch enforcement. BM filters are overridden in handlers that use the branch helpers; some target-record handlers reject another branch instead. Do not assume all routes enforce identical scoping. Database RLS behavior needs separate verification.
 
-### 0.4 Global validation rules (FR-DMI-10, FR-DMI-11, FR-PM-07)
-Applied to every route that accepts these fields, not just Patients:
-- **NIC**: `^\d{9}[VvXx]$` or `^\d{12}$` → error copy *"Enter a valid NIC (9 digits + letter, or
-  12 digits)."*
-- **Phone**: exactly 10 digits, numeric only → error copy *"Enter a 10-digit phone number."*
-- **Email** (only when provided): standard email format → *"Enter a valid email address."*
-- Any required field left blank → *"This field is required."*
-- Currency fields: `decimal(10,2)`, formatted in responses as `LKR {amount}` with thousands
-  separators on the frontend (backend returns the raw decimal).
+Lists may be arrays, paginated objects, or report-specific objects. There is no universal response envelope. Application errors use `message` or `errors`; HTTPException and FastAPI validation use `detail`. Authentication commonly returns 401, role/Origin rejection 403, missing resources 404, conflicts 409, and schema validation 422. Individual handlers also use 400, 423, and 503. The generic error handler may expose exception text.
 
-### 0.5 Authorization enforcement
-Role columns describe the access contract. Several handlers use `require_roles`/`get_current_user`, but verify each route dependency before claiming every endpoint enforces this contract. Branch-scoped roles
-(BM) are additionally filtered by their own `branch_id` from the JWT claim, not a query param the
-client controls — a BM passing `?branch=<other>` gets that param ignored/overridden server-side,
-not a 403, so the UI doesn't need special-case error handling for it.
+Numeric identifiers are internal keys. Patient, appointment, and invoice display codes are generated server-side. Validation varies by schema/handler: there is no universal NIC/phone/email validator or uniform currency serialization. Use the schemas rather than UI labels as request field names.
 
----
+## 1. Route inventory
 
-## 1. Auth
+The following tables are extracted from `main.py` router registration, router decorators, dependency declarations, and handler signatures. Path parameter names match the source. Query columns list declared non-dependency inputs other than body/path parameters; consult OpenAPI for types and defaults. Response columns name declared response models; “Handler-defined” includes confirmation JSON and file responses.
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| POST | `/auth/login` | any | body `{username, password}`. See 1.1. |
-| POST | `/auth/logout` | all | clears access/CSRF cookies; does not revoke an already issued JWT before expiry. Requires trusted Origin. |
-| GET | `/auth/me` | all | returns `{user_id, role, branch_id, first_name, last_name}` for top-bar greeting + role/branch subtitle (`page-content.md` §0). |
+### Auth
 
-### 1.1 Current login behavior
-1. Look up staff by username or email and verify the bcrypt password hash.
-2. Call `fn_register_login_attempt` with the supplied login string and password result. The application threshold is 5 and SQL lock duration is 15 minutes; email-counter and active-lockout behavior still need verification.
-3. Issue an HS256 JWT with `user_id`, `role`, `branch_id`, and `username`; set HttpOnly access and readable CSRF cookies. Configured JWT lifetime defaults to 60 minutes.
-4. Invalid credentials return 401; the lockout result can return 423. There is no refresh-token endpoint, server-side token blocklist, or independent idle-timeout implementation.
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| POST | `/api/v1/auth/login` | No auth dependency | LoginRequest | — | `LoginResponse` |
+| POST | `/api/v1/auth/logout` | No auth dependency | — | — | `Handler-defined` |
+| GET | `/api/v1/auth/me` | Authenticated | — | — | `MeResponse` |
+| GET | `/api/v1/auth/admin-only-dashboard` | A, BM | — | — | `Handler-defined` |
+| GET | `/api/v1/auth/roles` | No auth dependency | — | — | `Handler-defined` |
 
----
+### Branches
 
-## 2. Branches
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/branches` | A, BM, R | — | is_active | `List[BranchResponse]` |
+| GET | `/api/v1/branches/` | A, BM, R | — | is_active | `List[BranchResponse]` |
+| GET | `/api/v1/branches/{branch_id}` | A, BM | — | — | `BranchResponse` |
+| POST | `/api/v1/branches` | A | BranchCreate | — | `BranchResponse` |
+| POST | `/api/v1/branches/` | A | BranchCreate | — | `BranchResponse` |
+| PUT | `/api/v1/branches/{branch_id}` | A | BranchUpdate | — | `BranchResponse` |
+| PUT | `/api/v1/branches/{branch_id}/deactivate` | A | — | — | `BranchResponse` |
+| PUT | `/api/v1/branches/{branch_id}/reactivate` | A | — | — | `BranchResponse` |
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/branches` | A, BM | A sees all; BM sees only their own (single-row list). |
-| GET | `/branches/{id}` | A, BM(own) | includes staff count, branch manager, status. |
-| POST | `/branches` | A | create. Body: `name*`, `address*`, `phone_number*`, `branch_manager_id` (optional, dropdown of eligible staff per `page-content.md` §3.3). |
-| PUT | `/branches/{id}` | A | update any field above. |
-| PUT | `/branches/{id}/deactivate` | A | soft-deactivate — see 2.1. Replaces the old `DELETE` verb: branches are never hard-deleted (FR-DMI-09 extends to branches by the same "preserve history" principle applied everywhere else in the SRS). |
+### Staff
 
-### 2.1 Deactivation business logic (FR-DMI-08, FR-BSM-01)
-- Server checks for any `STAFF` row with `branch_id = {id}` and `is_active = true`.
-- If any exist → `409` with copy *"This branch has staff assigned and can't be deactivated.
-  Reassign staff first."* (`page-content.md` §3.3).
-- If none → set `status = Inactive`; branch and its historical appointments/invoices remain
-  queryable (reports must still be able to reference a deactivated branch's past data).
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/staff/` | A, BM | — | branch_id, role_id, is_active | `Dict[str, Any]` |
+| POST | `/api/v1/staff/` | A, BM | StaffCreate | — | `Dict[str, Any]` |
+| PUT | `/api/v1/staff/{id}/deactivate` | A, BM | — | — | `Handler-defined` |
+| PUT | `/api/v1/staff/{id}/activate` | A, BM | — | — | `Handler-defined` |
+| PUT | `/api/v1/staff/{id}/unlock` | A, BM | — | — | `Handler-defined` |
+| PUT | `/api/v1/staff/{id}/reset-password` | A, BM | StaffResetPassword | — | `Handler-defined` |
+| PUT | `/api/v1/staff/{id}` | A, BM | StaffUpdate | — | `Handler-defined` |
 
----
+### Doctors
 
-## 3. Staff & Doctors
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/doctors` | A, BM, D, R | — | specialty_id, branch_id, is_active | `List[DoctorResponse]` |
+| GET | `/api/v1/doctors/{id}` | A, BM, D, R | — | — | `DoctorResponse` |
+| GET | `/api/v1/doctors/{id}/availability` | A, BM, D, R | — | date, include_booked | `List[DoctorSlotResponse]` |
+| PUT | `/api/v1/doctors/{id}` | A, BM | DoctorUpdate | — | `DoctorResponse` |
+| PUT | `/api/v1/doctors/{id}/specialties` | A, BM | DoctorSpecialtiesUpdate | — | `DoctorResponse` |
+| GET | `/api/v1/doctors/{id}/schedule` | A, BM, D, R | — | — | `List[DoctorScheduleItem]` |
+| PUT | `/api/v1/doctors/{id}/schedule` | A, BM, D | DoctorScheduleUpdate | — | `List[DoctorScheduleItem]` |
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/staff` | A, BM | filter `?branch=&role=&status=`. **BM is branch-locked per 0.5** — the `branch` filter is forced to their own branch server-side, same pattern as Reports; A can see/filter any branch. |
-| POST | `/staff` | A, BM(own branch) | register — see 3.1. **BM may only register Doctor/Receptionist staff, and only into their own branch** — `branch` is forced server-side to the caller's branch for a BM, and `role = Administrator` or `role = Branch Manager` is rejected (`403`) when the caller is a BM. Creating another Branch Manager or an Admin account stays Admin-only, as a governance boundary (assumption — not stated in the source documents, flagged here since it wasn't explicit either way). |
-| PUT | `/staff/{id}` | A, BM(own branch) | update name/contact/branch/role — same BM restrictions as POST (own branch only, can't touch Admin/BM-role accounts or reassign a staff member to a different branch than their own). |
-| PUT | `/staff/{id}/deactivate` | A, BM(own branch) | soft-deactivate (FR-BSM-06, FR-DMI-09) — never hard-deleted; historical appointment/audit records referencing this staff member are preserved. |
-| GET | `/doctors` | A, BM, R, D | filter `?specialty=&branch=`; used by Book Appointment step 4. |
-| GET | `/doctors/{id}` | A, BM, R, D | profile + specialties + branch. |
-| POST | `/doctors` | A, BM(own branch) | register doctor — body includes `license_number*` in addition to staff fields; creates `USER`→`STAFF`→`DOCTOR` rows in one transaction. Same branch-lock as `POST /staff`. |
-| PUT | `/doctors/{id}` | A, BM(own branch) | update doctor-only fields (license number). |
-| PUT | `/doctors/{id}/specialties` | A, BM(own branch) | body `{add: [speciality_id...], remove: [speciality_id...]}` — upserts/deletes `DOCTOR_SPECIALITY` rows; a doctor must retain at least one specialty (reject a remove that would leave zero). |
-| GET | `/specialties` | all | list, includes doctor count per specialty (`page-content.md` §3.5). |
-| POST | `/specialties` | A | body `{name*}`; unique constraint on name — kept Admin-only since a specialty is a clinic-wide reference value, not branch-specific. |
+### Specialties
 
-### 3.0 Branch Manager staff-management scope (new)
-A Branch Manager gets the same staff/doctor CRUD Admin has, narrowed to their own branch:
-- Every route above that lists `BM(own branch)` is enforced the same way branch-scoped reports
-  already work (§10) — the server ignores/overrides any `branch` the client supplies and uses the
-  BM's own `branch_id` from the JWT claim.
-- A BM cannot create or edit an `Administrator` or `Branch Manager` account, anywhere — that
-  privilege stays Admin-only regardless of branch, so a Branch Manager can't grant themselves or
-  a colleague elevated access.
-- A BM cannot move a staff member to a different branch than the BM's own (no cross-branch
-  reassignment from this role) — Admin remains the only role that can transfer staff between
-  branches.
-- Deactivating a Doctor still respects `DOCTOR_SPECIALITY`'s existing constraints (§3.1) and
-  `fn_deactivate_staff()` (`database.md` §7.9) — no special-casing needed for who called it.
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/specialties` | A, BM, D, R | — | — | `List[SpecialtyResponse]` |
+| POST | `/api/v1/specialties` | A | SpecialtyCreate | — | `SpecialtyResponse` |
+| PUT | `/api/v1/specialties/{specialty_id}` | A | SpecialtyUpdate | — | `SpecialtyResponse` |
+| DELETE | `/api/v1/specialties/{specialty_id}` | A | — | — | `Handler-defined` |
 
-### 3.1 Staff registration business logic (FR-BSM-02/03/04/05)
-1. Validate NIC (0.4), phone (0.4), email (0.4), required `name*`, `role*`
-   (Admin/Branch Manager/Doctor/Receptionist), `branch*`.
-2. `role = Doctor` → `specialty` field becomes required (at least one) and the route also creates
-   the `DOCTOR` extension row.
-3. Reject if NIC already exists for any user (FR-BSM-05 uniqueness) → `409`.
-4. Generate a temporary password server-side (shown once in the response, per
-   `page-content.md` §3.4 — never emailed in plaintext, never retrievable again after this call).
-5. Create `USER` → `STAFF` (→ `DOCTOR` if applicable) as one transaction; on any failure, roll
-   back the whole chain (no orphaned `USER` row without a `STAFF` row).
+### Appointments
 
----
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/appointments/{id}/consultation` | D, R, A, BM | — | — | `ConsultationResponse` |
+| GET | `/api/v1/appointments/doctors/{id}/availability` | A, BM, D, R | — | date, include_booked | `List[DoctorSlotResponse]` |
+| GET | `/api/v1/appointments` | A, BM, R, D | — | branch, date, status, doctor, patient_id, search, page, limit | `AppointmentListResponse` |
+| GET | `/api/v1/appointments/{id}` | A, BM, R, D | — | — | `AppointmentResponse` |
+| POST | `/api/v1/appointments` | R | AppointmentBookRequest | — | `AppointmentResponse` |
+| POST | `/api/v1/appointments/walk-in` | R | WalkInAppointmentRequest | — | `AppointmentResponse` |
+| PUT | `/api/v1/appointments/{id}/reschedule` | R | AppointmentRescheduleRequest | — | `AppointmentResponse` |
+| PUT | `/api/v1/appointments/{id}/cancel` | R | — | — | `AppointmentResponse` |
+| PUT | `/api/v1/appointments/{id}/complete` | D | AppointmentCompleteRequest | — | `AppointmentCompleteResponse` |
 
-## 4. Patients
+### Patients
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/patients?search=` | A, BM, R, D | search by NIC, name, or phone (FR-PM-04); returns matches regardless of registering branch (FR-PM-06). |
-| POST | `/patients` | R | register — see 4.1. |
-| GET | `/patients/{id}` | A, BM, R, D | full profile incl. appointment/treatment/insurance history (FR-PM-05 preserves history across edits). |
-| PUT | `/patients/{id}` | R | update personal/emergency-contact details; never overwrites historical appointment/treatment/billing rows tied to the old values. |
-| GET | `/invoices/patient/{patient_id}/balance` | R, BM | outstanding total across all active invoices (§9). |
-| GET | `/invoices/patient/{patient_id}` | R | invoice history for that patient (§9). |
-| GET | `/patients/{id}/allergies` | A, BM, R, D | returns `[{allergy_id, allergy_code, name}]` — backs the red "Allergy: {name}" pills on the Doctor's Consultation screen (`page-content.md` §2.3) and the `PATIENT_ALLERGY` join table (`architecture.md` ER diagram). |
-| PUT | `/patients/{id}/allergies` | R | body `{allergy_ids: [int...]}` — replaces the patient's allergy set (add/remove in one call); editable from Register Patient and from the patient's profile (`page-content.md` §1.2/§1.3 don't show a dedicated field for this, so treat it as part of the same profile-edit surface as emergency contact/insurance until a dedicated form is specified). |
-| GET | `/allergies` | all | reference list of known allergies (`allergy_code`, `name`) for the picker used by the route above — same pattern as `GET /specialties`. |
-| POST | `/allergies` | A | add a new allergy to the reference list; body `{allergy_code*, name*}`, unique on `allergy_code`. Not explicitly assigned to a role in the source documents — grouped with other reference-data management (treatments, specialties), which are all Admin-only. |
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| POST | `/api/v1/patients` | R, A | PatientCreateRequest | — | `PatientResponse` |
+| POST | `/api/v1/patients/quick` | R, A | QuickPatientCreateRequest | — | `PatientResponse` |
+| GET | `/api/v1/patients` | A, BM, R, D | — | search, branch, insurance, page, limit | `PatientListResponse` |
+| GET | `/api/v1/patients/{identifier}` | A, BM, R, D | — | — | `PatientResponse` |
+| PUT | `/api/v1/patients/{identifier}` | R, A, BM | PatientUpdateRequest | — | `PatientResponse` |
+| GET | `/api/v1/patients/{identifier}/allergies` | A, BM, R, D | — | — | `List[PatientAllergyItem]` |
+| PUT | `/api/v1/patients/{identifier}/allergies` | R, A, BM, D | PatientAllergiesUpdateRequest | — | `List[PatientAllergyItem]` |
 
-### 4.1 Registration business logic (FR-PM-01/02/03/07, `page-content.md` §1.2)
-1. Section 1 — Personal: `full_name*`, `dob*`, `gender*` (Male/Female/Other), `address*`,
-   `phone*`, `email` (optional), `nic*`.
-2. Section 2 — Emergency contact: `contact_name*`, `relationship*`, `phone*`.
-3. Section 3 — Insurance (optional at registration time, toggle-gated): if the "Add insurance
-   details now" toggle is on, `provider*`, `policy_number*`, `start_date*`, `end_date*` become
-   required; if off, none of these fields are sent and insurance can be added later via
-   `POST /patients/{id}/insurance`.
-4. Server validates NIC/phone/email formats (0.4); reject duplicates on NIC → `422` with
-   *"A patient with this NIC already exists."*
-5. On success: generate `PT-xxxxxx`, set `registered_date = now()`, `registered_branch = <caller's branch>`
-   (but the record itself carries no branch-restriction on later access — FR-PM-06).
+### Allergies
 
----
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/allergies` | No auth dependency | — | — | `List[AllergyResponse]` |
+| POST | `/api/v1/allergies` | A | AllergyCreateRequest | — | `AllergyResponse` |
 
-## 5. Appointments
+### Treatments
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/doctors/{id}/availability?date=` | R, D | returns open slots for that doctor/date (FR-AM-04) — drives Book Appointment step 4's time chips. |
-| POST | `/appointments` | R | book — see 5.1. |
-| POST | `/appointments/walk-in` | R | emergency walk-in — see 5.2. |
-| PUT | `/appointments/{id}/reschedule` | R | body `{new_slot_id}` — see 5.3. |
-| PUT | `/appointments/{id}/cancel` | R | sets status `Cancelled`; requires the client to have shown a confirmation dialog first (`ui-guidelines.md` §2), server does not re-prompt but does log the cancellation (FR-AM-08). |
-| GET | `/appointments?branch=&date=&status=&doctor=` | A, BM, R | powers Manage Appointments table + the daily-summary widgets; BM is branch-locked per 0.5. |
-| GET | `/appointments/{id}` | A, BM, R, D | full detail (patient, doctor, slot, status, linked consultation/invoice if any). |
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/treatments` | A, BM, D, R | — | include_inactive | `List[TreatmentResponse]` |
+| GET | `/api/v1/treatments/{code}` | A, BM, D, R | — | — | `TreatmentResponse` |
+| POST | `/api/v1/treatments` | A, BM | TreatmentCreateRequest | — | `TreatmentResponse` |
+| PUT | `/api/v1/treatments/{code}` | A, BM | TreatmentUpdateRequest | — | `TreatmentResponse` |
+| PUT | `/api/v1/treatments/{code}/deactivate` | A, BM | — | — | `Handler-defined` |
 
-### 5.1 Booking business logic (FR-AM-01/02/03/09, FR-DMI-04)
-1. Body: `{patient_id, doctor_id, slot_id, appointment_type}` (`appointment_type` ∈
-   Doctor Consultation / Walk-in / Follow-up per `page-content.md` §1.4 step 2).
-2. **Overlap check, inside a single transaction**: `SELECT ... FOR UPDATE` the target
-   `DOCTOR_AVAILABILITY_SLOTS` row (or call a stored procedure that does the same) to lock it,
-   confirm it's still `status = Open`, then insert the `APPOINTMENTS` row with `status =
-   Scheduled` and flip the slot to `Booked` — all-or-nothing (`architecture.md` §7).
-3. If the slot was taken between the availability fetch and this call → `409` with copy
-   *"This doctor is no longer available at the selected time. Please choose another slot."*
-   (`page-content.md` §1.4) — this is the concrete manifestation of the non-overlap constraint
-   (FR-AM-03/FR-DMI-04); it must be enforced by the DB layer (unique constraint on
-   `(doctor_id, slot_id)` plus the row lock), not application logic alone, since two
-   receptionists can submit concurrently from different branches.
-4. On success: generate `APT-xxxxxx`, return the created appointment.
+### Consultations
 
-### 5.2 Walk-in business logic (FR-AM-07)
-- Same validation and transaction as 5.1, minus a pre-existing `slot_id` — instead the server
-  creates an ad-hoc slot for "now" (or the given time) against the chosen doctor, subject to the
-  same overlap check, then books it in the same transaction. `appointment_type = Walk-in` is
-  set automatically.
+Router registered with no endpoints. Consultation reads are under appointments.
 
-### 5.3 Reschedule business logic (FR-AM-05)
-1. Re-run the availability/overlap check (5.1 step 2) against `new_slot_id`.
-2. On success, within one transaction: free the old slot (`status = Open`), book the new slot,
-   update the `APPOINTMENTS` row's `slot_id` — status remains `Scheduled` throughout
-   (`architecture.md` §8 "Reschedule" flow); nothing is deleted, so the audit trail of the old
-   slot's booking history stays intact (FR-AM-08).
-3. Reject reschedule of an appointment that is `Completed` or `Cancelled` → `409`.
+### Invoices
 
----
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/invoices/recent` | A, BM, R | — | status, limit | `RecentInvoicesResponse` |
+| GET | `/api/v1/invoices/{identifier}` | A, BM, R | — | type | `InvoiceDetailResponse` |
+| GET | `/api/v1/invoices/patient/{patient_id}` | A, BM, R | — | — | `PatientInvoicesResponse` |
+| GET | `/api/v1/invoices/patient/{patient_id}/balance` | A, BM, R | — | — | `PatientBalanceResponse` |
+| GET | `/api/v1/invoices/{invoice_code}/pdf` | No auth dependency | — | — | `Handler-defined` |
 
-## 6. Consultations & Treatments
+### Payments
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| PUT | `/appointments/{id}/complete` | D | see 6.2. |
-| GET | `/appointments/{id}/consultation` | A, BM, R, D | read-back (consultation + attached treatments) for the invoice detail view and patient history. |
-| GET | `/treatments` | all | catalogue (also used read-only by Doctor's "Treatment Catalogue" page). |
-| POST | `/treatments` | A | add — see §7. |
-| PUT | `/treatments/{code}` | A | update. |
-| PUT | `/treatments/{code}/deactivate` | A | soft-deactivate — see §7. |
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| POST | `/api/v1/payments/{invoice_code}` | R | RecordPaymentRequest | — | `RecordPaymentResponse` |
 
-### 6.1 Consultation input
-Diagnosis, consultation notes, and selected treatment quantities are held in frontend state until completion. There are no separate consultation/treatment POST writes while Scheduled. Treatment request items use `treatment_id` and `quantity`; the route maps `treatment_id` to database `treatment_code`.
+### Insurance
 
-### 6.2 Complete appointment and generate invoice
-`PUT /appointments/{id}/complete` accepts diagnosis, consultation notes, and the treatment list together. The route verifies the appointment belongs to the authenticated Doctor and calls `fn_complete_appointment($1, $2, $3, $4::jsonb)`. SQL performs the status transition, consultation/treatment insertion, price snapshots, and invoice generation as one operation. The route returns appointment/invoice identifiers and a confirmation message. Consult request schemas and SQL modules for validation and transaction details. Already-invoiced treatment correction is not implemented as a separate workflow.
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/insurance/policies` | A, BM, R, D | — | — | `InsurancePolicyListResponse` |
+| GET | `/api/v1/insurance/patient/{patient_id}` | A, BM, R, D | — | — | `PatientInsuranceResponse` |
+| POST | `/api/v1/insurance/verify` | A, BM, R | VerifyInsuranceRequest | — | `VerifyInsuranceResponse` |
 
----
+### Reports
 
-## 7. Treatment Catalogue
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/reports/appointments-summary` | A, BM | — | start_date, end_date, branch_id, appointment_type | `AppointmentsSummaryResponse` |
+| GET | `/api/v1/reports/doctor-revenue` | A, BM, D | — | start_date, end_date, branch_id, doctor_id | `DoctorRevenueResponse` |
+| GET | `/api/v1/reports/doctor-revenue/{target_doctor_id}/payments` | A, BM, D | — | start_date, end_date | `ItemizedPaymentResponse` |
+| GET | `/api/v1/reports/outstanding-balances` | A, BM | — | branch_id | `OutstandingBalancesResponse` |
+| GET | `/api/v1/reports/treatment-categories` | A, BM | — | start_date, end_date, branch_id | `TreatmentCategoriesResponse` |
+| GET | `/api/v1/reports/treatment-categories/pdf` | A, BM | — | start_date, end_date, branch_id | `Handler-defined` |
+| GET | `/api/v1/reports/insurance-vs-out-of-pocket` | A, BM | — | start_date, end_date, branch_id | `InsuranceVsOutOfPocketResponse` |
+| GET | `/api/v1/reports/doctor-earnings/{target_doctor_id}` | A, BM, D | — | — | `DoctorEarningsOverviewResponse` |
+| GET | `/api/v1/reports/doctor-earnings/{target_doctor_id}/bank-accounts` | A, BM, D | — | — | `BankAccountsResponse` |
+| GET | `/api/v1/reports/doctor-earnings/{target_doctor_id}/payout-requests` | A, BM, D | — | — | `PayoutRequestsResponse` |
+| GET | `/api/v1/reports/doctor-earnings/{target_doctor_id}/payouts` | A, BM, D | — | — | `PayoutHistoryResponse` |
+| GET | `/api/v1/reports/doctor-earnings/{target_doctor_id}/payouts/{payout_id}/pdf` | A, BM, D | — | — | `Handler-defined` |
+| GET | `/api/v1/reports/doctor-payouts/{payout_id}/pdf` | A, BM, D | — | target_doctor_id | `Handler-defined` |
+| POST | `/api/v1/reports/doctor-earnings/{target_doctor_id}/payout-requests` | A, BM, D | PayoutRequestCreate | — | `Handler-defined` |
+| GET | `/api/v1/reports/doctor-payments` | A, BM | — | branch_id, status | `AdminPayoutRequestsResponse` |
+| PATCH | `/api/v1/reports/doctor-payments/{request_id}/pay` | A, BM | PayoutDecisionRequest | — | `Handler-defined` |
+| PATCH | `/api/v1/reports/doctor-payments/{request_id}/reject` | A, BM | PayoutDecisionRequest | — | `Handler-defined` |
+| GET | `/api/v1/reports/appointments-summary/pdf` | A, BM | — | start_date, end_date, branch_id, appointment_type | `Handler-defined` |
+| GET | `/api/v1/reports/doctor-revenue/pdf` | A, BM, D | — | start_date, end_date, branch_id, doctor_id, specialty, search | `Handler-defined` |
+| GET | `/api/v1/reports/outstanding-balances/pdf` | A, BM | — | branch_id, search, aging | `Handler-defined` |
+| GET | `/api/v1/reports/insurance-vs-out-of-pocket/pdf` | A, BM | — | start_date, end_date, branch_id, provider, search | `Handler-defined` |
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/treatments` | all | table: Code, Name, Category, Price, Insurance-Eligible, Status. |
-| GET | `/treatments/{code}` | all | single entry. |
-| POST | `/treatments` | A | body `{service_code*, name*, category*, price*, is_insurance_eligible}` (FR-TCM-01/06). |
-| PUT | `/treatments/{code}` | A | update name/category/price/eligibility (FR-TCM-03). |
-| PUT | `/treatments/{code}/deactivate` | A | soft-deactivate — see 7.1. |
+### Stats
 
-### 7.1 Business logic (FR-TCM-02/05/07/08)
-- `service_code` unique — duplicate on create/update → `409`, copy referencing an existing code
-  in use (`page-content.md` §3.6 / FR-TCM-07).
-- Required fields enforced before save (FR-TCM-06); `price` must be `> 0`.
-- Deactivate: check for any `CONSULTATION_TREATMENTS` row referencing this `treatment_code`. If
-  none exist, it *may* be hard-deleted; if any exist, it is **always** soft-deactivated instead
-  (`status = Inactive`) so historical invoices still resolve the treatment's name/category
-  (FR-TCM-05). Deactivated treatments are excluded from the picker in `POST
-  /appointments/{id}/treatments` (6.1) but remain visible (with an Inactive pill) in `GET
-  /treatments` for reporting/history.
-- Success toast: confirmation message on create/update/deactivate (FR-TCM-08).
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/stats/overview` | Authenticated | — | branch | `StatsOverview` |
+| GET | `/api/v1/stats/activity` | Authenticated | — | limit, branch | `List[ActivityItem]` |
 
----
+### Profile
 
-## 8. Billing & Payments
+| Method | Path | Access dependency | Body model | Query inputs | Response model |
+|---|---|---|---|---|---|
+| GET | `/api/v1/profile/me` | Authenticated | — | — | `ProfileResponse` |
+| PUT | `/api/v1/profile/me` | Authenticated | ProfileUpdateRequest | — | `ProfileResponse` |
+| POST | `/api/v1/profile/change-password` | Authenticated | ChangePasswordRequest | — | `Handler-defined` |
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/invoices/{id}` | A, BM, R | totals, itemised treatment lines, insurance split, payment history, status. |
-| GET | `/invoices/patient/{patient_id}` | R | patient's invoice history (FR-BPM-05). |
-| POST | `/payments/{invoice_code}` | R | record a payment — see 8.1. |
-| GET | `/invoices/patient/{patient_id}/balance` | R, BM | outstanding total, derived (not stored) — see 8.2. |
+## 2. Authentication, profile, and staff registration
 
-### 8.1 Recording a payment (FR-BPM-03/04/06/07/08, `page-content.md` §1.7)
-1. Body: `{amount*, payment_type*, reference?}`. Accepted labels are `Cash`, `Card / POS`, and `LankaPay / QR`; the latter two map to the database Card type. This records a payment, without calling an online payment gateway.
-2. Server recomputes current outstanding balance from source rows (8.2) — **never** trusts a
-   client-supplied "balance" value.
-3. Validate `amount > 0` and `amount <= outstanding_balance`; if it exceeds → `409`/`422` with
-   copy *"Amount cannot exceed the outstanding balance of {amount}."* (FR-BPM-06).
-4. Single transaction: insert `PAYMENTS` row, recompute outstanding balance, and set
-   `INVOICES.status`:
-   - `outstanding == 0` → `Paid` (FR-BPM-07), toast *"Invoice fully paid."*
-   - `0 < outstanding < total` → `Partially Paid`, toast *"Payment recorded. Remaining balance:
-     {amount}."*
-   - No partial write is left if the transaction fails partway (FR-BPM-08/FR-DMI-06).
-5. Client is expected to show a confirmation dialog before calling this route
-   (`ui-guidelines.md` §2) — the route itself doesn't require a second "confirm" call, but does
-   not skip validation just because the UI already confirmed.
+`POST /auth/login` takes `{username, password}`, looks up username/email, verifies bcrypt, records the login attempt, and sets access/CSRF cookies. JWTs use HS256 and contain user ID, role, branch ID, and username. Lifetime defaults to 60 minutes. Login responses contain `message` and `must_change_password`; `/auth/me` returns identity, role, branch, and password-change information. The application threshold is five failed attempts; SQL defines a 15-minute lock. Lockout edge cases require runtime verification.
 
-### 8.2 Balance calculation (derived, not stored)
-```
-outstanding = invoice.total_amount - invoice.insurance_amount - SUM(payments.amount_paid)
-```
-Computed at read time (or refreshed transactionally on every payment/invoice-generation event,
-per implementation choice) — `GET /invoices/patient/{patient_id}/balance` sums this across all of a patient's
-non-Paid invoices.
+Logout clears cookies without revoking an issued JWT. Profile routes are `/profile/me` and `/profile/change-password`. There is no refresh-token endpoint, independent idle timeout, or patient login/self-service portal.
 
----
+Doctors are registered through `POST /staff/`, not a separate `POST /doctors`. `StaffCreate` uses `role_id`, `first_name`, optional `middle_name`, `last_name`, `id_number`, optional `address`, `birthdate`, `gender`, optional `email`, `phone_number`, and `branch_id`. Doctor registration additionally requires `specialty` and `license_number`; optional `bank_accounts` entries use `bank_name`, `account_number`, and `bank_branch`.
 
-## 9. Insurance
+Registration inserts `app_user`, contact, staff, and doctor/specialty records as applicable inside an explicit transaction. The handler currently sets the temporary password to the fixed value `medsync`, hashes it, sets `must_change_password = TRUE`, and returns the username/temporary password. The unused random-password helper does not describe registration behavior. Duplicate NIC registration currently raises HTTP 400.
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/insurance/patient/{patient_id}` | A, BM, R, D | policy details, `is_active`, coverage terms. |
-| POST | `/insurance/verify` | A, BM, R | body `{patient_id, policy_id, insurance_card_number, start_date, end_date}` — verifies references/dates and inserts a patient-policy link; see 9.1. |
+BM staff registration requires the submitted branch to equal their own and permits only Doctor/Receptionist roles. Other staff mutations have their own record checks; see the handler rather than assuming one global policy. `StaffUpdate` supports personal/contact fields, branch, and active status; it does not expose a role-change field.
 
-### 9.1 Current insurance linking behavior
-`GET /insurance/policies` supplies available catalogue policies. `GET /insurance/patient/{patient_id}` returns linked policies. `POST /insurance/verify` checks the selected policy and patient exist, rejects an end date that is not after the start date, and inserts the patient-policy link. This is an internal catalogue operation, not verification with an external insurer. Patient registration also accepts embedded insurance data through its request schema. No standalone `POST /patients/{id}/insurance` route exists.
+## 3. Doctor roster and availability
 
----
+`PUT /doctors/{id}/schedule` takes `{schedules: [...]}`. Each item has `day_of_week` (0 Sunday through 6 Saturday), `start_time`, `end_time`, `slot_duration` (5–120 minutes, default 30), and `is_active` (default true). Optional IDs are accepted by the schema. Times are parsed as HH:MM or HH:MM:SS; the handler rejects reversed times and overlapping same-day shifts.
 
-## 10. Reports
+Administrators can edit any doctor; BM can edit doctors in their assigned branch; Doctors can edit their own roster. In one transaction the handler replaces weekly templates, deletes future/today Open slots only when no appointment references them, then calls `fn_generate_slots_from_roster(14, doctor_id)`. Existing referenced slots survive even when their appointment is cancelled. Existing appointments are not automatically cancelled or rescheduled when the roster changes.
 
-| Method | Path | Role | Notes |
-|---|---|---|---|
-| GET | `/reports/appointments-summary?branch_id=&start_date=&end_date=` | A, BM | FR-RA-01. BM: `branch` is forced to their own branch server-side, no selector shown (`page-content.md` §4). |
-| GET | `/reports/doctor-revenue?start_date=&end_date=&branch_id=&doctor_id=` | A, BM, D | FR-RA-02. **Doctor** role: `doctor` is forced to `current_user_id` regardless of query param — this is the same endpoint that powers the Doctor's "My Earnings" page (`page-content.md` §2.5, "no separate calculation, just a filtered view"). Returns aggregate totals (revenue by period/category). |
-| GET | `/reports/doctor-revenue/{doctor_id}/payments?start_date=&end_date=` | A, BM(own branch), D(self) | **New — itemized payment report.** Line-by-line list of `PAYMENTS` rows tied to this doctor's completed, invoiced appointments in the date range: date, patient, invoice code, amount, payment type, running total. Complements the aggregate `doctor-revenue` report above with the underlying detail a doctor would want to generate/export/print as their own payment report. `D` may only request `doctor_id = current_user_id` (`403` otherwise, same self-scoping pattern as `doctor-revenue`); `BM` is branch-locked to doctors at their own branch; `A` unrestricted. |
-| GET | `/reports/outstanding-balances?branch=` | A, BM | FR-RA-03. |
-| GET | `/reports/treatment-categories?start_date=&end_date=&branch=` | A, BM | FR-RA-04. |
-| GET | `/reports/insurance-vs-out-of-pocket?start_date=&end_date=&branch=` | A, BM | FR-RA-05. |
+The generator creates non-overlapping slots from active templates for active staff, skipping existing overlapping slots. Its `generate_series(0, p_days_ahead)` includes today and the final offset day. Startup and a background midnight task also generate rolling slots. The task uses the API host's local clock, not an explicitly configured clinic timezone.
 
-### 10.1 Shared report behavior (FR-RA-06)
-- Every report route returns `{data: [], total: 0, ...}` (empty, not an error) when nothing
-  matches the given criteria — the frontend renders *"No data available for the selected
-  criteria."*, never a blank table (`page-content.md` §3.2).
-- All five are read-only, computed from the same underlying tables the operational routes write
-  to — no separate denormalized reporting store described in the source documents, so figures
-  are always current as of the query.
-- Backed by indexes on the join/filter columns actually used here — `appointments(branch_id,
-  slot_id→date)`, `invoices(status)`, `consultation_treatments(treatment_code)`,
-  `payments(invoice_id)` at minimum (SRS 5.1.5 / `architecture.md` §11 indexing directive).
+## 4. Patients and allergies
 
----
+Full registration uses `PatientCreateRequest`: separate name fields, `id_number`, address, birthdate/date-of-birth aliases, phone aliases, and optional emergency, insurance, and allergy fields. NIC validation accepts nine digits plus V/X or twelve digits. Phone resolution normalizes digits and selected Sri Lankan prefixes; the schema does not enforce all UI-required fields. Birthdate falls back to 1990-01-01 when omitted. `POST /patients/quick` uses `QuickPatientCreateRequest`, requires first name, and supports temporary identities/defaults for walk-ins.
 
-## 11. Cross-cutting rules
+Patient edit permissions are A/BM/R; allergy replacement additionally permits D and takes `{allergy_ids: [...]}`. Patient information is available to staff across branches through the patient handlers. Embedded registration insurance uses `provider_name`, `insurance_card_number`, optional dates, and optional `corporate_affiliation`. Later policy linking uses `/insurance/verify`; there is no `POST /patients/{id}/insurance` route.
 
-### 11.1 Transaction boundaries (must be atomic — FR-DMI-05/06, `architecture.md` §7)
-| Operation | Scope |
-|---|---|
-| Book / reschedule appointment | Row-lock the slot, check-then-insert/update, all in one transaction (5.1, 5.3). |
-| Complete appointment → generate invoice | Status update + treatment read + insurance calc + invoice insert, all-or-nothing (6.2). |
-| Record payment | Payment insert + balance recalculation + status flip, one transaction (8.1). |
-| Staff/doctor registration | `USER` + `STAFF` (+ `DOCTOR`) insert chain, one transaction (3.1). |
+## 5. Appointments and consultation completion
 
-### 11.2 Soft-delete-only entities (FR-DMI-09 and its extensions above)
-Branches, staff (incl. doctors), patients, and treatments are **never** hard-deleted once they
-have any historical reference (appointments, treatments, invoices). Every "remove" action in
-this API is a `PUT .../deactivate` route, not `DELETE`, and every deactivation confirmation
-dialog names the specific record (`page-content.md` §6) — the client is expected to have already
-shown *"This action can't be undone. Are you sure?"* or the record-specific variant before
-calling these routes.
+Booking takes `{patient_id, doctor_id, slot_id, appointment_type}`. The supported type values are `Scheduled Visit`, `Walk-in`, and `Follow-up`, with Scheduled Visit as the default. Status values are `Scheduled`, `Completed`, and `Cancelled`.
 
-### 11.3 Unimplemented or requiring verification
-Carried over from `architecture.md` §9/§14, still open at the API-design level:
-- JWT lifetime defaults to 60 minutes; threshold/duration are 5 attempts/15 minutes. Validate lockout edge cases. Refresh tokens and independent idle timeout are not implemented.
-- Whether hard-delete is ever permitted for a record with zero historical references (vs.
-  always soft-deleting for consistency) — not specified either way.
-- Treatment-line correction/adjustment flow for an invoice that's already been generated.
-- Audit-log read endpoints (FR-AM-08/FR-UAC-06/5.2.5 require logging, but no `GET /audit-log`
-  route is described anywhere in the source documents).
+Booking, walk-in creation, rescheduling, and cancellation call SQL functions. Walk-in bodies require patient/doctor IDs, `date`, `start_time`, and `end_time`. Rescheduling takes `{new_slot_id}`. SQL functions implement transaction rules and slot locking; exact constraints are in `db/modules/kalana`, including the unique appointment `slot_id` reference and the availability overlap exclusion constraint.
 
-### Management PDF exports
-Authenticated GET `/api/v1/reports/{report}/pdf` is available for `appointments-summary`,
-`doctor-revenue`, `outstanding-balances`, and `insurance-vs-out-of-pocket`.
-Administrator and Branch Manager roles are supported; doctor-revenue also permits Doctors
-with their existing self-only scope. Branch managers always use their assigned branch.
-PDFs reuse the JSON report queries and return `application/pdf` attachments with `Cache-Control: no-store`.
-Date reports accept `start_date`, `end_date`, `branch_id`; appointments also accept `appointment_type`.
-Doctor revenue accepts `doctor_id`, `specialty`, `search`; balances accept `branch_id`, `search`,
-`aging` (`all`, `0-30`, `31-60`, `60+`); insurance accepts `provider`, `search` (period).
-Frontend PDF exports use the last successfully applied branch/date/type filters and current local display filters.
-CSV exports remain available. Backend PDFs use printable tables rather than browser chart screenshots.
+The doctor keeps consultation inputs in frontend state, then submits one completion body with `diagnosis`, `consultation_notes`, and `treatments: [{treatment_id, quantity}]`. The route checks doctor ownership and calls `fn_complete_appointment`, which writes consultation/treatment data and generates the invoice. The response has `appointment_id`, `invoice_id`, and `message`. There are no separate pre-completion consultation or appointment-treatment POST routes. Consultation read-back is `/appointments/{id}/consultation`.
+
+Cancellation reopens the slot while retaining the appointment row and its foreign key. A slot marked Open can therefore still be referenced by appointment history; Open status alone does not establish that it can be deleted or rebooked under the unique constraint.
+
+## 6. Treatment catalogue, billing, and insurance
+
+Treatment creation/update takes `{treatment_name, category, price, is_eligible_for_insurance}`. Name/category must contain text, price must be positive, and insurance eligibility defaults to false. `treatment_code` is the numeric database identifier returned in responses, not a client-supplied `service_code`. A and BM can manage the shared catalogue. Deactivation calls `fn_deactivate_treatment`; historical price snapshots are stored on consultation treatment lines.
+
+Invoice detail accepts a numeric ID or display code through `{identifier}`. Invoice history/balance reads permit A/BM/R. `POST /payments/{invoice_code}` is R-only and takes `{amount, payment_type, reference?}`. Labels are Cash, Card / POS, and LankaPay / QR; both non-cash labels map to database Card. The optional reference is accepted by the request model but is not passed to `fn_record_payment` by the current handler.
+
+The payment handler locks the invoice in an explicit transaction, calculates `max(0, total_amount - insurance_amount - SUM(amount_paid))`, rejects overpayment or an already-paid invoice, calls `fn_record_payment`, and returns updated balance/status. These are internal payment records; no payment gateway is called.
+
+Insurance policy listing and patient links use internal catalogue data. `/insurance/verify` takes `{patient_id, policy_id, insurance_card_number, start_date, end_date}`, checks references/date ordering, and inserts a link. It does not contact an insurer.
+
+## 7. Reports, earnings, and payouts
+
+Management reports use the query names in the inventory, especially `branch_id`, `start_date`, and `end_date`. Responses differ: appointment summary returns `daily_data` and count totals; revenue/balance/category reports use `data` with totals; insurance reporting returns ledger/provider/payment-mode collections. Do not assume all reports return `{data, total}`.
+
+PDF routes exist for all five management reports, including treatment categories. They render backend templates with WeasyPrint. Frontend CSV generation is separate from these API PDF routes. Doctor revenue permits Doctors with self scope; management report handlers apply their branch filters. Itemized doctor payments accept date filters and declare a paginated response model.
+
+Doctor earnings sum snapshotted treatment charges for completed appointments, subtract recorded staff payouts, and return `total_earned`, `paid_by_hospital`, and `outstanding`. This is distinct from money collected from patients. Bank accounts, request history, payout history, and payout PDF slips have dedicated routes.
+
+Payout creation takes `{account_id, request_amount}` and checks positive amount against earnings minus paid payouts and Pending/Approved requests. It inserts a Pending request. The handler does not wrap its balance check/insert in an explicit transaction or explicitly verify the bank account belongs to the target doctor. Doctor-specific earnings/request/history handlers enforce Doctor self scope, but do not all explicitly check BM target branch; database enforcement must be verified separately.
+
+`GET /reports/doctor-payments` applies BM branch scoping. Pay takes `{remarks?}`, requires Pending status, and transactionally marks the request Paid and inserts a Bank Transfer payout with a generated reference. It records a payout; it does not initiate a bank transfer. The pay handler does not explicitly check BM target branch or lock the initial request lookup.
+
+**Current incomplete handler:** `/reports/doctor-payments/{request_id}/reject` checks that remarks are nonblank and that the request exists and is Pending, then ends without an UPDATE or success return. It currently does not persist a rejection. The route declaration is included above to reflect the source, not to claim the workflow works.
+
+## 8. Implementation boundaries
+
+`GET /auth/roles`, `GET /allergies`, and `GET /invoices/{invoice_code}/pdf` have no declared authentication dependency. This is a current source limitation; other protected endpoints do not make these routes authenticated automatically. The stats activity endpoint supplies recent activity, not a general audit-log browsing API.
+
+SMS/email dispatch, patient self-service, JWT refresh/revocation, general rate limiting, insurer verification, and payment/bank gateway integrations are not implemented. SQL audit/RLS declarations and repository tests do not establish deployed enforcement or full passing coverage. Compare the running `/openapi.json` with these declarations when validating a deployment.
