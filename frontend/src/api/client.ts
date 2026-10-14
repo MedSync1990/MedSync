@@ -58,13 +58,13 @@ export class ApiError extends Error {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /**
- * Read a named cookie value.  The backend sets `csrf_token` as a
- * non-httpOnly cookie so the frontend can read it and echo it back
- * via the X-CSRF-Token header.
+ * Keep the session token delivered by login/auth-me in memory. API cookies
+ * cannot be read by JavaScript hosted on a different frontend domain.
  */
-function getCookie(name: string): string | undefined {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
+let sessionCsrfToken: string | null = null;
+
+export function setSessionCsrfToken(token: string | null): void {
+  sessionCsrfToken = token;
 }
 
 /**
@@ -107,7 +107,7 @@ async function request<T>(
   // Attach CSRF token on mutating methods (POST, PUT, PATCH, DELETE)
   const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'];
   if (mutating.includes(method.toUpperCase())) {
-    const csrf = getCookie('csrf_token');
+    const csrf = sessionCsrfToken;
     if (csrf) {
       headers['X-CSRF-Token'] = csrf;
     }
@@ -156,6 +156,7 @@ async function request<T>(
 
   // Dispatch a global event if the token is expired or missing so the app can log the user out
   if (response.status === 401) {
+    setSessionCsrfToken(null);
     window.dispatchEvent(new CustomEvent('auth:unauthorized'));
   }
 

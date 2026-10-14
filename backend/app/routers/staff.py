@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 from app.db import get_conn
 from app.dependencies import require_roles, get_current_user, CurrentUser
-from app.schemas.staff import StaffCreate, StaffUpdate, StaffResponse, StaffResetPassword
+from app.schemas.staff import StaffCreate, StaffUpdate, StaffResponse
 from app.security import hash_password
 import secrets
 import string
@@ -296,7 +296,6 @@ async def unlock_staff(
 @router.put("/{id}/reset-password")
 async def reset_staff_password(
     id: int,
-    payload: StaffResetPassword,
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn)
 ):
@@ -305,13 +304,14 @@ async def reset_staff_password(
         if staff_branch != current_user.branch_id:
             raise HTTPException(status_code=403, detail="You can only reset passwords for staff in your own branch.")
     
-    hashed_pw = hash_password(payload.password)
+    temporary_password = "medsync"
+    hashed_pw = hash_password(temporary_password)
     await db.execute(
         "UPDATE staff SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2", 
         hashed_pw, id
     )
     
-    return {"message": "Password reset successfully", "temporary_password": payload.password}
+    return {"message": "Password changed to medsync. The staff member must change it at next sign-in.", "temporary_password": temporary_password}
 
 @router.put("/{id}")
 async def update_staff(

@@ -64,7 +64,7 @@ export const ManageStaff: React.FC = () => {
   const [reactivatingStaff, setReactivatingStaff] = useState<StaffResponse | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [resettingStaff, setResettingStaff] = useState<StaffResponse | null>(null);
-  const [customPassword, setCustomPassword] = useState('');
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -189,16 +189,17 @@ export const ManageStaff: React.FC = () => {
 
   const handleResetPassword = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!resettingStaff) return;
-    if (!customPassword.trim()) { showToast('Password cannot be empty', 'error'); return; }
+    if (!resettingStaff || resettingPassword) return;
+    setResettingPassword(true);
     try {
-      const res = await resetStaffPassword(resettingStaff.user_id, customPassword.trim());
-      showToast('Password reset successfully', 'success');
+      const res = await resetStaffPassword(resettingStaff.user_id);
+      showToast('Password changed to medsync', 'success');
       setCredsModal({ username: resettingStaff.username, tempPw: res.temporary_password, name: `${resettingStaff.first_name} ${resettingStaff.last_name}` });
       setResettingStaff(null);
-      setCustomPassword('');
     } catch(err: any) {
       showToast(err.message || 'Failed to reset password', 'error');
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -741,29 +742,20 @@ export const ManageStaff: React.FC = () => {
       {/* CONFIRM DEACTIVATE */}
       <Modal 
         isOpen={!!resettingStaff} 
-        onClose={() => { setResettingStaff(null); setCustomPassword(''); }} 
+        onClose={() => { if (!resettingPassword) setResettingStaff(null); }}
         title="Reset Password"
         footer={
           <>
-            <button type="button" onClick={() => { setResettingStaff(null); setCustomPassword(''); }} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all">Cancel</button>
-            <button type="button" onClick={handleResetPassword} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary">Reset Password</button>
+            <button type="button" onClick={() => { if (!resettingPassword) setResettingStaff(null); }} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold text-on-surface-variant bg-surface-card hover:bg-surface-subtle border border-border-subtle rounded-lg shadow-sm transition-all">Cancel</button>
+            <button type="button" disabled={resettingPassword} onClick={handleResetPassword} className="px-space-md h-[42px] font-label-lg text-label-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary">{resettingPassword ? 'Resetting...' : 'Reset to medsync'}</button>
           </>
         }
       >
         <div className="space-y-space-md pt-2">
           <p className="font-body-md text-body-md text-on-surface-variant">
-            Set a new custom password for <strong>{resettingStaff?.first_name} {resettingStaff?.last_name}</strong>. Their current sessions may not be affected until next login.
+            Reset the password for <strong>{resettingStaff?.first_name} {resettingStaff?.last_name}</strong> to <strong>medsync</strong>. They must change it at their next sign-in.
           </p>
-          <div className="space-y-1.5">
-            <label className="font-label-md text-label-md font-semibold">New Password</label>
-            <input 
-              type="text" 
-              value={customPassword} 
-              onChange={e => setCustomPassword(e.target.value)} 
-              placeholder="Enter custom password..." 
-              className="w-full h-10 px-3.5 rounded-xl bg-surface-subtle focus:bg-surface-card shadow-inner focus:outline-none focus:ring-2 focus:ring-border-focus font-mono-data"
-            />
-          </div>
+
         </div>
       </Modal>
       <ConfirmDialog 

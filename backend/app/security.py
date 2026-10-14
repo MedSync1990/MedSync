@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import jwt
 import bcrypt
+import hmac
 from fastapi import Request
 from app.config import config
 from app.errors import UnauthorizedError, ForbiddenError
@@ -15,6 +16,18 @@ def require_trusted_origin(request: Request) -> None:
     origin = request.headers.get("origin")
     if not origin or origin == "null" or origin not in config.CORS_ALLOWED_ORIGINS:
         raise ForbiddenError("Untrusted or missing request origin.")
+
+def require_csrf_token(request: Request, expected_token: str | None) -> None:
+    """Match the browser header against the token in the verified JWT."""
+    supplied_token = request.headers.get("x-csrf-token")
+    if (
+        not isinstance(expected_token, str)
+        or not expected_token
+        or not supplied_token
+        or not hmac.compare_digest(supplied_token.encode("utf-8"), expected_token.encode("utf-8"))
+    ):
+        raise ForbiddenError("Missing or invalid CSRF token. Please sign in again.")
+
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
