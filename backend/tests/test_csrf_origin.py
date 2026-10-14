@@ -31,7 +31,6 @@ def client(monkeypatch):
     monkeypatch.setattr(config, "CORS_ALLOWED_ORIGINS", [TRUSTED_ORIGIN])
     monkeypatch.setattr(dependencies, "decode_access_token", lambda token: {
         "user_id": 42, "role": "Administrator", "branch_id": None, "username": "test",
-        "csrf_token": "matching-token",
     })
     app = FastAPI()
     app.state.pool = FakePool()
@@ -70,34 +69,9 @@ def test_cookie_mutations_reject_untrusted_origins(client, method, origin, refer
 
 
 @pytest.mark.parametrize("method", ["POST", "PUT", "PATCH", "DELETE"])
-def test_cookie_mutations_allow_exact_trusted_origin_with_csrf_token(client, method):
+def test_cookie_mutations_allow_exact_trusted_origin_without_csrf_token(client, method):
     client.cookies.set("access_token", "fixture")
-    # No readable CSRF cookie is needed when frontend and API have different hosts.
-    assert client.request(method, "/staff", headers={
-        "Origin": TRUSTED_ORIGIN, "X-CSRF-Token": "matching-token",
-    }).status_code == 200
-
-
-@pytest.mark.parametrize("method", ["POST", "PUT", "PATCH", "DELETE"])
-@pytest.mark.parametrize("token", [None, "", "another-session-token"])
-def test_cookie_mutations_reject_missing_or_wrong_csrf_token(client, method, token):
-    client.cookies.set("access_token", "fixture")
-    # Even a matching cookie cannot replace session-bound header validation.
-    client.cookies.set("csrf_token", token or "matching-token")
-    headers = {"Origin": TRUSTED_ORIGIN}
-    if token is not None:
-        headers["X-CSRF-Token"] = token
-    assert client.request(method, "/staff", headers=headers).status_code == 403
-
-
-def test_legacy_jwt_cannot_mutate_without_session_csrf_claim(client, monkeypatch):
-    monkeypatch.setattr(dependencies, "decode_access_token", lambda token: {
-        "user_id": 42, "role": "Doctor", "branch_id": None, "username": "test",
-    })
-    client.cookies.set("access_token", "fixture")
-    assert client.post("/staff", headers={
-        "Origin": TRUSTED_ORIGIN, "X-CSRF-Token": "matching-token",
-    }).status_code == 403
+    assert client.request(method, "/staff", headers={"Origin": TRUSTED_ORIGIN}).status_code == 200
 
 
 def test_bearer_only_client_needs_no_browser_origin(client):

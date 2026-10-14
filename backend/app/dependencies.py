@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.errors import UnauthorizedError, ForbiddenError
-from app.security import decode_access_token, require_trusted_origin, require_csrf_token
+from app.security import decode_access_token, require_trusted_origin
 from app.db import get_conn, get_admin_conn  # adjust path if db.py lives elsewhere
 
 security = HTTPBearer(auto_error=False)
@@ -14,7 +14,6 @@ class CurrentUser:
     role: str
     branch_id: Optional[int]
     username: str
-    csrf_token: Optional[str] = None
 
 async def get_current_user(
     request: Request,
@@ -36,7 +35,6 @@ async def get_current_user(
 
     if cookie_authenticated and request.method in ["POST", "PUT", "PATCH", "DELETE"]:
         require_trusted_origin(request)
-        require_csrf_token(request, payload.get("csrf_token"))
 
     # Only accept accounts whose active status can be confirmed.
     user_id = payload.get("user_id")
@@ -68,8 +66,7 @@ async def get_current_user(
         user_id=payload["user_id"],
         role=payload["role"],
         branch_id=payload.get("branch_id"),
-        username=payload["username"],
-        csrf_token=payload.get("csrf_token"),
+        username=payload["username"]
     )
     request.state.user = user
     return user

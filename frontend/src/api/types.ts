@@ -32,7 +32,6 @@ export interface LoginResponse {
   message: string;
   user: MeResponse;
   must_change_password?: boolean;
-  csrf_token: string;
 }
 
 export interface MeResponse {
@@ -44,7 +43,6 @@ export interface MeResponse {
   branch_id: number | null;
   branch_name: string | null;
   must_change_password?: boolean;
-  csrf_token?: string | null;
 }
 
 // ─── Appointments (schemas/appointments.py) ─────────────────────────────────

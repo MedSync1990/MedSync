@@ -56,18 +56,16 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
             detail="Incorrect username or password",
         )
 
-    csrf_token = generate_csrf_token()
     token = create_access_token(
         {
             "user_id": row["user_id"],
             "role": row["role_name"],
             "branch_id": row["branch_id"],
             "username": payload.username,
-            "csrf_token": csrf_token,
         }
     )
 
-    response.headers["Cache-Control"] = "no-store"
+    csrf_token = generate_csrf_token()
     max_age = config.JWT_EXPIRY_MINUTES * 60
     samesite_policy: Literal["none", "lax"] = "none" if config.COOKIE_SECURE else "lax"
 
@@ -92,7 +90,6 @@ async def login(payload: LoginRequest, response: Response, db: asyncpg.Connectio
     return LoginResponse(
         message="Login successful",
         must_change_password=bool(row["must_change_password"]),
-        csrf_token=csrf_token,
     )
 
 
@@ -111,7 +108,6 @@ async def logout(response: Response):
 
 @router.get("/me", response_model=MeResponse)
 async def get_me(
-    response: Response,
     current_user: CurrentUser = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_conn),
 ):
@@ -141,7 +137,6 @@ async def get_me(
         current_user.user_id
     )
 
-    response.headers["Cache-Control"] = "no-store"
     return MeResponse(
         user_id=current_user.user_id,
         username=current_user.username,
@@ -151,7 +146,6 @@ async def get_me(
         branch_id=current_user.branch_id,
         branch_name=branch_name,
         must_change_password=bool(must_change),
-        csrf_token=current_user.csrf_token,
     )
 
 @router.get("/admin-only-dashboard", dependencies=[Depends(require_roles("Administrator", "Branch Manager"))])

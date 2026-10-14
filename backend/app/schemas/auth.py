@@ -7,7 +7,6 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     message: str
     must_change_password: bool = False
-    csrf_token: str
 
 class MeResponse(BaseModel):
     user_id: int
@@ -18,4 +17,3 @@ class MeResponse(BaseModel):
     branch_id: int | None = None
     branch_name: str | None = None
     must_change_password: bool = False
-    csrf_token: str | None = None
