@@ -29,7 +29,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-	CREATE TYPE appointment_type_enum AS ENUM ('Scheduled Visit', 'Walk-in', 'Follow-up');
+	CREATE TYPE appointment_type_enum AS ENUM ('Scheduled Visit', 'Walk-in');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
