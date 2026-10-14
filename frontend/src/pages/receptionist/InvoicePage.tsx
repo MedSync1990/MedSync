@@ -81,6 +81,16 @@ export default function InvoicePage() {
     }
   };
 
+  const handleSearchQueryChange = (value: string) => {
+    setSearchQuery(value);
+    if (!value.trim()) {
+      setInvoiceData(null);
+      setError(null);
+      setStatusFilter('unpaid');
+      navigate('/receptionist/invoices');
+    }
+  };
+
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const identifier = searchQuery.trim();
@@ -126,7 +136,7 @@ export default function InvoicePage() {
       <InvoiceSearch
         searchQuery={searchQuery}
         invoiceId={invoiceId}
-        onSearchQueryChange={setSearchQuery}
+        onSearchQueryChange={handleSearchQueryChange}
         onSubmit={handleSearchSubmit}
         onQuickLookup={() => navigate('/receptionist/invoices/2')}
       />
