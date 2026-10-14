@@ -2,9 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth, type UserProfile, type UserRole } from '../context/AuthContext';
 
-const rawBase = import.meta.env.VITE_API_BASE_URL || '/api/v1';
-const cleanedBase = rawBase.replace(/\/+$/, '');
-const API_BASE_URL = cleanedBase.endsWith('/api/v1') ? cleanedBase : `${cleanedBase}/api/v1`;
+import { login, getMe } from '../api/auth';
+import { ApiError } from '../api/client';
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   'Administrator': '/admin/dashboard',
@@ -32,56 +31,28 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status >= 500) {
-          throw new Error('The login service is temporarily unavailable. Please try again shortly.');
-        }
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Invalid username or password.');
-      }
-
-      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-        credentials: 'include',
-      });
-
-      if (!meResponse.ok) {
-        throw new Error('Unable to load your account. Please try logging in again.');
-      }
-
-      let role = 'Receptionist';
-      if (meResponse.ok) {
-        const userData = await meResponse.json();
-        const userProfile: UserProfile = {
-          id: userData.user_id,
-          username: userData.username,
-          firstName: userData.first_name || '',
-          lastName: userData.last_name || '',
-          role: userData.role as UserRole,
-          roleTitle: `${userData.role} Portal`,
-          branchId: userData.branch_id,
-          branchName: userData.branch_name || (userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch'),
-          mustChangePassword: Boolean(userData.must_change_password),
-        };
-        setUser(userProfile);
-        role = userData.role;
-      }
+      await login({ username: email, password });
+      const userData = await getMe();
+      const userProfile: UserProfile = {
+        id: userData.user_id,
+        username: userData.username,
+        firstName: userData.first_name || '',
+        lastName: userData.last_name || '',
+        role: userData.role as UserRole,
+        roleTitle: `${userData.role} Portal`,
+        branchId: userData.branch_id ?? undefined,
+        branchName: userData.branch_name || (userData.branch_id ? `Branch #${userData.branch_id}` : 'Central Branch'),
+        mustChangePassword: Boolean(userData.must_change_password),
+      };
+      setUser(userProfile);
+      const role = userData.role;
 
       const targetPath = ROLE_DASHBOARD_MAP[role] || '/receptionist/dashboard';
       navigate(targetPath, { replace: true });
     } catch (loginError) {
-      const message = loginError instanceof TypeError
+      const message = loginError instanceof ApiError && loginError.status >= 500
+        ? 'The login service is temporarily unavailable. Please try again shortly.'
+        : loginError instanceof TypeError
         ? 'Unable to connect to the login service. Please try again shortly.'
         : loginError instanceof Error
         ? loginError.message
