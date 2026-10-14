@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 import logging
 from app.routers import (
     auth, branches, staff, doctors, specialties, appointments,
-    patients, allergies, treatments, consultations, invoices,
+    patients, allergies, treatments, invoices,
     payments, insurance, reports, stats, profile
 )
 
@@ -110,7 +110,6 @@ app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Ap
 app.include_router(patients.router, prefix="/api/v1/patients", tags=["Patients"])
 app.include_router(allergies.router, prefix="/api/v1/allergies", tags=["Allergies"])
 app.include_router(treatments.router, prefix="/api/v1/treatments", tags=["Treatments"])
-app.include_router(consultations.router, prefix="/api/v1/consultations", tags=["Consultations"])
 app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"])
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(insurance.router, prefix="/api/v1/insurance", tags=["Insurance"])

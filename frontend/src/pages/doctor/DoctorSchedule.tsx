@@ -131,7 +131,6 @@ export const DoctorSchedule: React.FC = () => {
       if (categoryFilter !== 'all') {
         const typeStr = (appointment.appointment_type || '').toLowerCase();
         if (categoryFilter === 'consultation' && !typeStr.includes('consultation') && !typeStr.includes('scheduled')) return false;
-        if (categoryFilter === 'followup' && !typeStr.includes('follow')) return false;
         if (categoryFilter === 'walkin' && !typeStr.includes('walk')) return false;
       }
 
@@ -371,7 +370,6 @@ export const DoctorSchedule: React.FC = () => {
             >
               <option value="all">All Categories</option>
               <option value="consultation">Consultation</option>
-              <option value="followup">Follow-up</option>
               <option value="walkin">Walk-in</option>
             </select>
           </div>
@@ -473,7 +471,7 @@ export const DoctorSchedule: React.FC = () => {
                   </td>
                   <td className="px-space-md py-space-sm">
                     <span className="px-2.5 py-1 rounded-full bg-surface-card text-brand-navy-deep font-label-md text-label-md font-semibold shadow-xs border border-border-subtle">
-                      Follow-up
+                      Scheduled Visit
                     </span>
                   </td>
                   <td className="px-space-md py-space-sm">

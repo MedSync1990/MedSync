@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, field_validator
 class AppointmentTypeEnum(str, Enum):
     scheduled = "Scheduled Visit"
     walk_in = "Walk-in"
-    follow_up = "Follow-up"
 
 
 class AppointmentStatusEnum(str, Enum):

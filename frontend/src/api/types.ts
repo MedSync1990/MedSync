@@ -47,7 +47,7 @@ export interface MeResponse {
 
 // ─── Appointments (schemas/appointments.py) ─────────────────────────────────
 
-export type AppointmentType = 'Scheduled Visit' | 'Walk-in' | 'Follow-up';
+export type AppointmentType = 'Scheduled Visit' | 'Walk-in';
 export type AppointmentStatus = 'Scheduled' | 'Completed' | 'Cancelled';
 export type SlotStatus = 'Open' | 'Booked' | 'Blocked';
 
